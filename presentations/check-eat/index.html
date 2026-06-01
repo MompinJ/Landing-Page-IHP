@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check-Eat — Presentación ejecutiva</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="assets/checkeat-icon.png" type="image/png">
+</head>
+<body>
+  <div class="progress-bar" aria-hidden="true">
+    <div class="progress-bar__fill"></div>
+  </div>
+
+  <header class="top-nav">
+    <div class="top-nav__brand">UCC NUTRICION</div>
+    <div class="top-nav__meta">CHECK-EAT — Presentación ejecutiva</div>
+  </header>
+
+  <nav class="slide-nav" aria-label="Navegación de diapositivas" id="slide-nav-dots"></nav>
+
+  <p class="nav-hint" aria-hidden="true">Flechas / RePag / AvPag para navegar</p>
+  <div class="slide-counter" aria-live="polite">01 / 10</div>
+
+  <main id="deck">
+    <!-- Slide 1: Portada (PDF p.1) -->
+    <section class="slide slide--cover" data-slide="1" id="slide-1">
+      <div class="slide__grid" aria-hidden="true"></div>
+      <div class="slide__hero" aria-hidden="true">
+        <span class="slide__hero-word slide__hero-word--large">SALUD</span>
+        <span class="slide__hero-word slide__hero-word--mono">CONTROL</span>
+        <span class="slide__hero-word slide__hero-word--large">NUTRICION</span>
+      </div>
+      <div class="slide__content">
+        <img src="assets/checkeat-icon.png" alt="Check-Eat" class="cover-logo" width="80" height="80">
+        <h1 class="cover-title">Check-Eat</h1>
+        <p class="cover-title-sub">Nutrición Estudiantil</p>
+        <p class="cover-tagline">EXPERIENCIA CLINICO DIGITAL V1.0</p>
+        <div class="cover-meta">
+          La transformación tecnológica definitiva para el taller
+          <strong>Nutrición a tu medida</strong> de la Universidad Cristóbal Colón.
+        </div>
+        <p class="cover-footer">Equipo: Mompin, Maximiliano, Gibran, Genesis y Aleman</p>
+      </div>
+    </section>
+
+    <!-- Slide 2: Qué es (PDF p.2) -->
+    <section class="slide" data-slide="2" id="slide-2">
+      <div class="slide__grid" aria-hidden="true"></div>
+      <div class="slide__content">
+        <p class="badge-mono">Vision del producto</p>
+        <h2 class="slide-title">¿Qué es verdaderamente Check-Eat?</h2>
+        <div class="four-col">
+          <div class="card card--pillar">
+            <p class="card__label">Ecosistema conectado</p>
+            <p>El puente definitivo entre el rigor médico de la nutrióloga y la experiencia diaria del paciente.</p>
+          </div>
+          <div class="card card--pillar">
+            <p class="card__label">No es solo una web</p>
+            <p>Herramienta de transformación digital para el departamento de nutrición escolar.</p>
+          </div>
+          <div class="card card--pillar">
+            <p class="card__label">Notas de salud estudiantil</p>
+            <p>Propósito firme: mejorar el bienestar físico a través de tecnología escalable.</p>
+          </div>
+          <div class="card card--pillar card--highlight">
+            <p class="card__label">Centro de control clínico</p>
+            <p>Centralización absoluta de historiales, citas y cálculos antropométricos.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 3: Paradigma (PDF p.3) -->
+    <section class="slide" data-slide="3" id="slide-3">
+      <div class="slide__grid" aria-hidden="true"></div>
+      <div class="slide__content">
+        <p class="badge-mono">Transformacion</p>
+        <h2 class="slide-title">Del cuello de botella a la automatización</h2>
+        <div class="compare-grid">
+          <div class="compare-col compare-col--old">
+            <h3 class="compare-col__title">El paradigma actual</h3>
+            <div class="compare-block">
+              <p class="compare-block__head">Problema</p>
+              <p>Carga administrativa crítica.</p>
+            </div>
+            <div class="compare-block">
+              <p class="compare-block__head">Flujo</p>
+              <p>PDFs estáticos compartidos por WhatsApp y transcripción manual en Excel.</p>
+            </div>
+            <div class="compare-block compare-block--risk">
+              <p class="compare-block__head">Riesgo</p>
+              <p>Desconexión clínica, historiales dispersos, alta tasa de abandono estudiantil.</p>
+            </div>
+          </div>
+          <div class="compare-col compare-col--new">
+            <h3 class="compare-col__title">El estándar Check-Eat</h3>
+            <div class="compare-block">
+              <p class="compare-block__head">Solución</p>
+              <p>Automatización de procesos de alto impacto.</p>
+            </div>
+            <div class="compare-block">
+              <p class="compare-block__head">Flujo</p>
+              <p>Base de datos relacional centralizada y seguimiento interactivo.</p>
+            </div>
+            <div class="compare-block compare-block--impact">
+              <p class="compare-block__head">Impacto</p>
+              <p>Devolución de tiempo a la nutrióloga para atención clínica; seguimiento proactivo de objetivos para el alumno.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 4: Diseño (PDF p.4) -->
+    <section class="slide" data-slide="4" id="slide-4">
+      <div class="slide__grid" aria-hidden="true"></div>
+      <div class="slide__content">
+        <p class="badge-mono">UX clinica</p>
+        <h2 class="slide-title">El diseño como herramienta de productividad</h2>
+        <p class="slide-subtitle">Interfaz orientada al flujo continuo de la nutrióloga: diagnóstico, mediciones antropométricas y plan nutricional en un mismo contexto.</p>
+        <div class="three-col">
+          <div class="card">
+            <strong>Reducción de fatiga visual</strong>
+            <p style="margin-top: 0.5rem; line-height: 1.5;">Controles modulares sin cajas tradicionales, priorizando el flujo de trabajo continuo de la nutrióloga.</p>
+          </div>
+          <div class="card">
+            <strong>Neo-grotesco médico</strong>
+            <p style="margin-top: 0.5rem; line-height: 1.5;">Fondo azul limpio y bordes duros de 2px para delimitar datos clínicos con cero distracciones.</p>
+          </div>
+          <div class="card">
+            <strong>Jerarquía cognitiva</strong>
+            <p style="margin-top: 0.5rem; line-height: 1.5;">Títulos sólidos; datos duros y etiquetas en fuente monoespaciada para precisión técnica absoluta.</p>
+          </div>
+        </div>
+        <div class="mock-panel" aria-hidden="true">
+          <span class="mock-panel__tag">PACIENTE</span>
+          <span class="mock-panel__tag">DIAGNOSTICO</span>
+          <span class="mock-panel__tag">MEDICIONES ANTROPOMETRICAS</span>
+          <span class="mock-panel__tag mock-panel__tag--active">PLAN NUTRICIONAL</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 5: Motor antropométrico (PDF p.5) -->
+    <section class="slide" data-slide="5" id="slide-5">
+      <div class="slide__grid" aria-hidden="true"></div>
+      <div class="slide__content">
+        <p class="badge-mono">Logica medica</p>
+        <h2 class="slide-title">El motor de procedimientos antropométrico</h2>
+        <div class="motor-levels">
+          <div class="motor-level">
+            <p class="motor-level__badge">Nivel 1</p>
+            <h3 class="motor-level__title">Entrada de datos</h3>
+            <p class="motor-level__desc">Variables en crudo ingresadas al sistema: peso, talla, perímetro de muñeca, pliegues cutáneos PCB/PCT, actividad física.</p>
+          </div>
+          <span class="motor-arrow" aria-hidden="true">→</span>
+          <div class="motor-level motor-level--accent">
+            <p class="motor-level__badge">Nivel 2</p>
+            <h3 class="motor-level__title">Motor backend</h3>
+            <p class="motor-level__desc">Automatización instantánea de fórmulas complejas: Harris-Benedict, IOM, Metropolitan Life Insurance, pliegues.</p>
+          </div>
+          <span class="motor-arrow" aria-hidden="true">→</span>
+          <div class="motor-level">
+            <p class="motor-level__badge">Nivel 3</p>
+            <h3 class="motor-level__title">Salida diagnóstica</h3>
+            <p class="motor-level__desc">Diagnósticos en tiempo real, precisos y listos para la intervención: gasto energético total, % de grasa corporal, complexión, diagnóstico IMC.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 6: Motor de datos (PDF p.6) -->
+    <section class="slide" data-slide="6" id="slide-6">
+      <div class="slide__grid" aria-hidden="true"></div>
+      <div class="slide__content">
+        <p class="badge-mono">Datos</p>
+        <h2 class="slide-title">Centralización absoluta: el motor de datos</h2>
+        <p class="slide-subtitle">Ecosistema relacional diseñado para preservar el historial completo de cada estudiante bajo el estándar PAN y PES.</p>
+        <div class="four-col">
+          <div class="card">
+            <strong>Pacientes</strong>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; line-height: 1.5;">Información fija: expedientes consolidados, antecedentes patológicos, alergias y matrícula universitaria.</p>
+          </div>
+          <div class="card">
+            <strong>Evaluaciones antropométricas</strong>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; line-height: 1.5;">Evolución temporal de medidas físicas.</p>
+          </div>
+          <div class="card">
+            <strong>Catálogo de alimentos (FCDB)</strong>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; line-height: 1.5;">Base para la asignación dietética digital, 100% libre de PDFs estáticos.</p>
+          </div>
+          <div class="card">
+            <strong>Resultados calculados</strong>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; line-height: 1.5;">Almacenamiento de diagnósticos para análisis de tendencias.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 7: Stack (PDF p.7) -->
+    <section class="slide" data-slide="7" id="slide-7">
+      <div class="slide__grid" aria-hidden="true"></div>
+      <div class="slide__content">
+        <p class="badge-mono">Infraestructura</p>
+        <h2 class="slide-title">Stack tecnológico de grado empresarial</h2>
+        <p class="slide-subtitle">Ecosistema unificado bajo Full Stack TypeScript para reducir errores y asegurar coherencia total.</p>
+        <div class="arch-grid">
+          <div class="arch-box">
+            <p class="arch-box__title">EL CLIENTE</p>
+            <p class="arch-box__tech"><strong>Azure Static Web Apps</strong> ejecutando React + Vite.</p>
+            <p class="arch-box__benefit">Tiempos de carga ultrarrápidos, alta disponibilidad global y estabilidad ante picos de uso.</p>
+          </div>
+          <div class="arch-box">
+            <p class="arch-box__title">EL SERVIDOR</p>
+            <p class="arch-box__tech">API REST escalable con <strong>Node.js y NestJS</strong>.</p>
+            <p class="arch-box__benefit">Arquitectura modular, seguridad robusta y validación estricta mediante DTOs.</p>
+          </div>
+          <div class="arch-box">
+            <p class="arch-box__title">PERSISTENCIA</p>
+            <p class="arch-box__tech"><strong>PostgreSQL</strong></p>
+            <p class="arch-box__benefit">Integridad relacional inquebrantable para historiales médicos sensibles.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 8: Ciclo UCC (PDF p.8) -->
+    <section class="slide" data-slide="8" id="slide-8">
+      <div class="slide__grid" aria-hidden="true"></div>
+      <div class="slide__content">
+        <p class="badge-mono">Operacion UCC</p>
+        <h2 class="slide-title">Sincronización operativa con el ciclo UCC</h2>
+        <p class="slide-subtitle">Diseñado nativamente para fluir en sincronía con el calendario de la universidad.</p>
+        <div class="calendar-phases">
+          <div class="calendar-phase">
+            <p class="calendar-phase__period">Enero — Mayo</p>
+            <h3 class="calendar-phase__title">Fase de adopción clínica (Primavera)</h3>
+            <p>Integración de nuevos estudiantes, captación de datos de primera cita y establecimiento de metas metabólicas.</p>
+          </div>
+          <div class="calendar-phase">
+            <p class="calendar-phase__period">Agosto — Diciembre</p>
+            <h3 class="calendar-phase__title">Fase de monitoreo y escalabilidad (Otoño)</h3>
+            <p>Reevaluación de pacientes, análisis de adherencia e iteraciones en la plataforma.</p>
+          </div>
+        </div>
+        <div class="phase-pills">
+          <span class="phase-pill">Adopción</span>
+          <span class="phase-pill phase-pill--arrow" aria-hidden="true">→</span>
+          <span class="phase-pill">Seguimiento</span>
+          <span class="phase-pill phase-pill--arrow" aria-hidden="true">→</span>
+          <span class="phase-pill">Resultados</span>
+        </div>
+        <p class="calendar-note">La iteración continua del software acompaña cada ciclo académico.</p>
+      </div>
+    </section>
+
+    <!-- Slide 9: Roadmap (PDF p.9) -->
+    <section class="slide" data-slide="9" id="slide-9">
+      <div class="slide__grid" aria-hidden="true"></div>
+      <div class="slide__content">
+        <p class="badge-mono">Roadmap</p>
+        <h2 class="slide-title">Desarrollo iterativo inteligente</h2>
+        <div class="two-col">
+          <div class="card card--roadmap">
+            <span class="priority-badge">Prioridad absoluta actual</span>
+            <h3 class="roadmap-phase">Fase 1: Back-Office clínico</h3>
+            <ul class="bullet-list">
+              <li>Panel centralizado para la nutrióloga</li>
+              <li>Automatización de lógica médica y creación de planes dietéticos</li>
+            </ul>
+            <p class="roadmap-goal"><strong>Objetivo:</strong> erradicar la carga administrativa excesiva.</p>
+          </div>
+          <div class="card card--roadmap card--roadmap-future">
+            <span class="priority-badge priority-badge--future">Siguiente fase</span>
+            <h3 class="roadmap-phase">Fase 2: Portal del paciente</h3>
+            <ul class="bullet-list">
+              <li>Aplicación interactiva nativa para el estudiante</li>
+              <li>Visualización de progreso, checklist diario y chat clínico</li>
+            </ul>
+            <p class="roadmap-goal"><strong>Objetivo:</strong> la plataforma consumirá la API ya cimentada en la Fase 1 para escalar orgánicamente.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 10: Cierre (PDF p.10) -->
+    <section class="slide slide--closing" data-slide="10" id="slide-10">
+      <div class="slide__grid" aria-hidden="true"></div>
+      <div class="slide__hero" aria-hidden="true">
+        <span class="slide__hero-word slide__hero-word--mono">CHECK-EAT</span>
+      </div>
+      <div class="slide__content">
+        <p class="badge-mono">Cierre ejecutivo</p>
+        <h2 class="slide-title">La solución definitiva</h2>
+        <div class="closing-grid">
+          <div class="card">
+            <strong>Precisión clínica</strong>
+            <p style="margin-top: 0.5rem; line-height: 1.5;">Flujo clínico PAN/PES integrado nativamente al software.</p>
+          </div>
+          <div class="card">
+            <strong>Infraestructura impecable</strong>
+            <p style="margin-top: 0.5rem; line-height: 1.5;">Despliegue en Azure Static Web Apps: sistema siempre veloz y estable.</p>
+          </div>
+          <div class="card">
+            <strong>Eficiencia absoluta</strong>
+            <p style="margin-top: 0.5rem; line-height: 1.5;">Automatización que devuelve horas de trabajo valioso al profesional de la salud.</p>
+          </div>
+          <div class="card">
+            <strong>Impacto estudiantil</strong>
+            <p style="margin-top: 0.5rem; line-height: 1.5;">Seguimiento de objetivos claros y profesional, aumentando la retención y el éxito en el taller.</p>
+          </div>
+        </div>
+        <blockquote class="closing-quote">
+          No estamos digitalizando archivos; estamos revolucionando la atención nutricional estudiantil.
+        </blockquote>
+        <div class="card closing-footer">
+          <p style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.1em;">UCC NUTRICION — Check-Eat</p>
+          <p style="margin-top: 0.5rem; font-size: 0.85rem;">Universidad Cristóbal Colón &copy; 2026</p>
+          <p style="margin-top: 0.75rem; font-size: 0.75rem; color: var(--primary-dark);">Equipo: <code>Mompin, Maximiliano, Gibran, Gensis y Aleman</code></p>
+        </div>
+      </div>
+    </section> 
+  </main>
+
+  <script src="js/presentation.js"></script>
+</body>
+</html>

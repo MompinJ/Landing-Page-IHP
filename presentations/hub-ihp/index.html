@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HUB Hutchison Ports - Infraestructura Azure</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="progress-bar" aria-hidden="true">
+    <div class="progress-bar__fill"></div>
+  </div>
+
+  <header class="top-nav">
+    <div class="top-nav__brand">HUTCHISON PORTS</div>
+    <div class="top-nav__meta">HUB / INFRA AZURE - MEXICO CENTRAL</div>
+  </header>
+
+  <nav class="slide-nav" aria-label="Navegacion de diapositivas" id="slide-nav-dots"></nav>
+
+  <p class="nav-hint" aria-hidden="true">Flechas / RePag / AvPag para navegar</p>
+  <div class="slide-counter" aria-live="polite">01 / 11</div>
+
+  <main id="deck">
+
+    <!-- ============================================
+         SLIDE 1: PORTADA
+         ============================================ -->
+    <section class="slide slide--cover" data-slide="1" id="slide-1">
+      <div class="slide__content">
+        <span class="cover-eyebrow">Plataforma HUB - v1.0</span>
+        <h1 class="hp-verlag-title display-xl cover-title">Infraestructura<br>Azure</h1>
+        <p class="cover-sub">Arquitectura cloud-native sobre Azure Mexico Central para la plataforma HUB Hutchison Ports: 4 microservicios contenedorizados, datos privados y edge global.</p>
+
+        <div class="cover-stats">
+          <div class="cover-stat">
+            <div class="cover-stat__num">14</div>
+            <div class="cover-stat__label">Servicios Azure</div>
+          </div>
+          <div class="cover-stat">
+            <div class="cover-stat__num">4</div>
+            <div class="cover-stat__label">Microservicios</div>
+          </div>
+          <div class="cover-stat">
+            <div class="cover-stat__num">4</div>
+            <div class="cover-stat__label">Subnets privadas</div>
+          </div>
+          <div class="cover-stat">
+            <div class="cover-stat__num">2</div>
+            <div class="cover-stat__label">Ambientes</div>
+          </div>
+        </div>
+
+        <div class="cover-footer">
+          <span>QUERETARO - mexicocentral</span>
+          <span>main.bicep - 565 LOC</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 2: ARQUITECTURA (vista general)
+         ============================================ -->
+    <section class="slide slide--dark" data-slide="2" id="slide-2">
+      <div class="slide__content">
+        <div class="section-head">
+          <p class="overline overline--light">Topologia general</p>
+          <h2 class="hp-verlag-title display-lg">Stack en cinco capas</h2>
+          <p class="body-lg">Capas separadas por responsabilidad: edge publico, computo aislado en VNet, datos accesibles solo via Private Endpoint, soporte para secretos e imagenes, y observabilidad transversal.</p>
+        </div>
+
+        <div class="arch-stack">
+          <div class="arch-layer arch-layer--edge">
+            <div class="arch-layer__label">CAPA 01<strong>Edge / Acceso</strong></div>
+            <div class="arch-layer__items">
+              <span class="arch-pill"><span class="arch-pill__dot"></span>Azure Front Door</span>
+              <span class="arch-pill"><span class="arch-pill__dot"></span>Application Gateway v2</span>
+              <span class="arch-pill"><span class="arch-pill__dot"></span>Public IP estatica</span>
+            </div>
+          </div>
+
+          <div class="arch-layer arch-layer--compute">
+            <div class="arch-layer__label">CAPA 02<strong>Computo</strong></div>
+            <div class="arch-layer__items">
+              <span class="arch-pill"><span class="arch-pill__dot"></span>App Service Plan Linux</span>
+              <span class="arch-pill"><span class="arch-pill__dot"></span>api-gateway</span>
+              <span class="arch-pill"><span class="arch-pill__dot"></span>comunidad-hp</span>
+              <span class="arch-pill"><span class="arch-pill__dot"></span>reportes-lms</span>
+              <span class="arch-pill"><span class="arch-pill__dot"></span>e-learning</span>
+              <span class="arch-pill"><span class="arch-pill__dot"></span>Static Web App</span>
+              <span class="arch-pill"><span class="arch-pill__dot"></span>Azure Functions</span>
+            </div>
+          </div>
+
+          <div class="arch-layer arch-layer--data">
+            <div class="arch-layer__label">CAPA 03<strong>Datos</strong></div>
+            <div class="arch-layer__items">
+              <span class="arch-pill"><span class="arch-pill__dot"></span>PostgreSQL Flexible Server</span>
+              <span class="arch-pill"><span class="arch-pill__dot"></span>Redis Cache</span>
+              <span class="arch-pill"><span class="arch-pill__dot"></span>Blob Storage (videos / imagenes / docs)</span>
+            </div>
+          </div>
+
+          <div class="arch-layer arch-layer--support">
+            <div class="arch-layer__label">CAPA 04<strong>Soporte</strong></div>
+            <div class="arch-layer__items">
+              <span class="arch-pill"><span class="arch-pill__dot"></span>Key Vault</span>
+              <span class="arch-pill"><span class="arch-pill__dot"></span>Container Registry</span>
+              <span class="arch-pill"><span class="arch-pill__dot"></span>Private Endpoints</span>
+            </div>
+          </div>
+
+          <div class="arch-layer arch-layer--observ">
+            <div class="arch-layer__label">CAPA 05<strong>Observabilidad</strong></div>
+            <div class="arch-layer__items">
+              <span class="arch-pill"><span class="arch-pill__dot"></span>Log Analytics Workspace</span>
+              <span class="arch-pill"><span class="arch-pill__dot"></span>Application Insights</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 3: NETWORKING
+         ============================================ -->
+    <section class="slide slide--neutral" data-slide="3" id="slide-3">
+      <div class="slide__content">
+        <div class="section-head">
+          <p class="overline">Networking - segmentacion</p>
+          <h2 class="hp-verlag-title display-lg">VNet con cuatro subnets</h2>
+          <p class="body-lg">Una sola VNet (<code>10.0.0.0/16</code>) dividida por funcion. Cada capa vive en su subnet y los datos quedan completamente fuera de la red publica.</p>
+        </div>
+
+        <div class="vnet-box">
+          <span class="vnet-box__label">vnet-hubhph - 10.0.0.0/16</span>
+          <div class="subnet-grid">
+            <div class="subnet subnet--acceso">
+              <span class="subnet__cidr">10.0.1.0/24</span>
+              <span class="subnet__name">subnet-acceso</span>
+              <p class="subnet__hosts">Application Gateway v2 (entrada HTTPS publica)</p>
+            </div>
+            <div class="subnet subnet--computo">
+              <span class="subnet__cidr">10.0.2.0/24</span>
+              <span class="subnet__name">subnet-computo</span>
+              <p class="subnet__hosts">App Services con VNet Integration delegada a <code>Microsoft.Web/serverFarms</code></p>
+            </div>
+            <div class="subnet subnet--datos">
+              <span class="subnet__cidr">10.0.3.0/24</span>
+              <span class="subnet__name">subnet-datos</span>
+              <p class="subnet__hosts">PostgreSQL delegado + Private Endpoints (Redis en prod)</p>
+            </div>
+            <div class="subnet subnet--soporte">
+              <span class="subnet__cidr">10.0.4.0/24</span>
+              <span class="subnet__name">subnet-soporte</span>
+              <p class="subnet__hosts">Private Endpoints de Key Vault y ACR</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="features">
+          <div class="feature">
+            <span class="feature__head">Trafico saliente</span>
+            <span class="feature__body">App Services salen a datos por la VNet, nunca por internet.</span>
+          </div>
+          <div class="feature">
+            <span class="feature__head">PE policies</span>
+            <span class="feature__body">privateEndpointNetworkPolicies = Disabled en datos y soporte.</span>
+          </div>
+          <div class="feature">
+            <span class="feature__head">Entrada</span>
+            <span class="feature__body">Front Door -> Application Gateway -> Backend pools (HTTPS 443).</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 4: COMPUTO
+         ============================================ -->
+    <section class="slide slide--horizon" data-slide="4" id="slide-4">
+      <div class="slide__content">
+        <div class="section-head">
+          <p class="overline">Capa de computo</p>
+          <h2 class="hp-verlag-title display-lg">Cuatro microservicios + funciones</h2>
+          <p class="body-lg">App Service Plan Linux ejecuta cuatro contenedores Docker independientes. Procesos asincronos en Functions Consumption y frontend servido desde Static Web Apps.</p>
+        </div>
+
+        <div class="cards-grid cards-grid--4">
+          <div class="card card--accent-sky">
+            <div class="card__icon">API</div>
+            <p class="card__sub">App Service</p>
+            <h3 class="card__title">api-gateway</h3>
+            <p class="card__desc">Entrada unica para clientes. Enruta a los demas microservicios via VNet interna.</p>
+            <div class="card__meta">
+              <span class="chip chip--sky">Linux</span>
+              <span class="chip chip--sky">Docker</span>
+            </div>
+          </div>
+
+          <div class="card card--accent-sky">
+            <div class="card__icon">COM</div>
+            <p class="card__sub">App Service</p>
+            <h3 class="card__title">comunidad-hp</h3>
+            <p class="card__desc">Modulo social interno para empleados Hutchison Ports.</p>
+            <div class="card__meta">
+              <span class="chip chip--sky">Linux</span>
+              <span class="chip chip--sky">HTTPS</span>
+            </div>
+          </div>
+
+          <div class="card card--accent-sky">
+            <div class="card__icon">LMS</div>
+            <p class="card__sub">App Service</p>
+            <h3 class="card__title">reportes-lms</h3>
+            <p class="card__desc">Reporteria del LMS: progreso, KPIs, exportes.</p>
+            <div class="card__meta">
+              <span class="chip chip--sky">Linux</span>
+              <span class="chip chip--sky">Identity</span>
+            </div>
+          </div>
+
+          <div class="card card--accent-sky">
+            <div class="card__icon">EDU</div>
+            <p class="card__sub">App Service</p>
+            <h3 class="card__title">e-learning</h3>
+            <p class="card__desc">Plataforma de cursos, modulos y dinamicas gamificadas.</p>
+            <div class="card__meta">
+              <span class="chip chip--sky">Linux</span>
+              <span class="chip chip--sky">TLS 1.2</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="features">
+          <div class="feature">
+            <span class="feature__head">App Service Plan</span>
+            <span class="feature__body">PremiumV3 Linux, autoscale 2-4 (MVP) / 2-6 (Prod). alwaysOn, ftps deshabilitado.</span>
+          </div>
+          <div class="feature">
+            <span class="feature__head">Static Web App</span>
+            <span class="feature__body">Frontend Standard en eastus2, build desde GitHub branch main.</span>
+          </div>
+          <div class="feature">
+            <span class="feature__head">Azure Functions</span>
+            <span class="feature__body">Plan Y1 (Consumption), Python 3.11, encoding de medios disparado por Blob.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 5: DATOS
+         ============================================ -->
+    <section class="slide slide--neutral" data-slide="5" id="slide-5">
+      <div class="slide__content">
+        <div class="section-head">
+          <p class="overline">Capa de datos</p>
+          <h2 class="hp-verlag-title display-lg">Persistencia privada</h2>
+          <p class="body-lg">Tres motores complementarios: relacional para negocio, cache en memoria para latencia y blob para activos. Ninguno expone IP publica.</p>
+        </div>
+
+        <div class="cards-grid cards-grid--3">
+          <div class="card card--accent-aqua">
+            <div class="card__icon">PG</div>
+            <p class="card__sub">PostgreSQL Flexible Server</p>
+            <h3 class="card__title">pg-hubhph</h3>
+            <p class="card__desc">Version 16. Storage 128 GB con auto-grow, tier P10. Backup 7 dias, sin geo-replicacion. Acceso unico via Private Endpoint en subnet-datos.</p>
+            <div class="card__meta">
+              <span class="chip chip--aqua">D2ds_v5 / D4ds_v5</span>
+              <span class="chip chip--aqua">Private Endpoint</span>
+            </div>
+          </div>
+
+          <div class="card card--accent-aqua">
+            <div class="card__icon">RD</div>
+            <p class="card__sub">Redis Cache</p>
+            <h3 class="card__title">redis-hubhph</h3>
+            <p class="card__desc">Cache de sesiones y respuestas calientes. TLS 1.2 minimo, puerto no-SSL deshabilitado, sin acceso publico.</p>
+            <div class="card__meta">
+              <span class="chip chip--aqua">Basic C1 / Standard C1</span>
+              <span class="chip chip--aqua">PE en prod</span>
+            </div>
+          </div>
+
+          <div class="card card--accent-aqua">
+            <div class="card__icon">BL</div>
+            <p class="card__sub">Blob Storage</p>
+            <h3 class="card__title">st-hubhph</h3>
+            <p class="card__desc">StorageV2, LRS, Hot tier. Tres contenedores: videos, imagenes y documentos. Acceso publico de blobs bloqueado, ACLs default Deny.</p>
+            <div class="card__meta">
+              <span class="chip chip--aqua">Standard LRS</span>
+              <span class="chip chip--aqua">TLS 1.2</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 6: SEGURIDAD
+         ============================================ -->
+    <section class="slide slide--dark" data-slide="6" id="slide-6">
+      <div class="slide__content">
+        <div class="section-head">
+          <p class="overline overline--light">Seguridad e identidad</p>
+          <h2 class="hp-verlag-title display-lg">Cero secretos en codigo</h2>
+          <p class="body-lg">Cada App Service y Function corre con Managed Identity. Las credenciales se resuelven contra Key Vault, las imagenes vienen de un ACR sin admin user.</p>
+        </div>
+
+        <div class="cards-grid cards-grid--2">
+          <div class="card card--accent-horizon">
+            <div class="card__icon">KV</div>
+            <p class="card__sub">Key Vault</p>
+            <h3 class="card__title">kv-hubhph</h3>
+            <p class="card__desc">Standard, RBAC habilitado. publicNetworkAccess = Disabled. Las apps acceden solo via Private Endpoint desde subnet-soporte. Aqui vive el password de PostgreSQL.</p>
+            <div class="card__meta">
+              <span class="chip chip--sky">RBAC</span>
+              <span class="chip chip--sky">Private Endpoint</span>
+              <span class="chip chip--sky">Deny default</span>
+            </div>
+          </div>
+
+          <div class="card card--accent-horizon">
+            <div class="card__icon">CR</div>
+            <p class="card__sub">Container Registry</p>
+            <h3 class="card__title">acr-hubhph</h3>
+            <p class="card__desc">Basic en MVP, Standard en produccion. adminUserEnabled = false: pull autenticado via Managed Identity. En produccion el endpoint publico queda apagado.</p>
+            <div class="card__meta">
+              <span class="chip chip--sky">Managed Identity</span>
+              <span class="chip chip--sky">PE en prod</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="features">
+          <div class="feature">
+            <span class="feature__head">PE PostgreSQL</span>
+            <span class="feature__body">groupId postgresqlServer en subnet-datos.</span>
+          </div>
+          <div class="feature">
+            <span class="feature__head">PE Key Vault</span>
+            <span class="feature__body">groupId vault en subnet-soporte.</span>
+          </div>
+          <div class="feature">
+            <span class="feature__head">PE condicionales</span>
+            <span class="feature__body">Redis y ACR solo crean PE en ambiente produccion.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 7: EDGE / ACCESO
+         ============================================ -->
+    <section class="slide slide--neutral" data-slide="7" id="slide-7">
+      <div class="slide__content">
+        <div class="section-head">
+          <p class="overline">Edge - acceso publico</p>
+          <h2 class="hp-verlag-title display-lg">Dos capas frente al cliente</h2>
+          <p class="body-lg">Front Door termina TLS a nivel global y reparte trafico al Application Gateway regional, que enruta hacia los App Services dentro de la VNet.</p>
+        </div>
+
+        <div class="cards-grid cards-grid--3">
+          <div class="card card--accent-yellow">
+            <div class="card__icon">FD</div>
+            <p class="card__sub">Azure Front Door</p>
+            <h3 class="card__title">fd-hubhph</h3>
+            <p class="card__desc">SKU Standard_AzureFrontDoor. Region global. Timeout de origen 60s. Capa de CDN + WAF + balanceo geografico.</p>
+            <div class="card__meta">
+              <span class="chip chip--yellow">Global</span>
+              <span class="chip chip--yellow">Standard</span>
+            </div>
+          </div>
+
+          <div class="card card--accent-yellow">
+            <div class="card__icon">AG</div>
+            <p class="card__sub">Application Gateway</p>
+            <h3 class="card__title">agw-hubhph</h3>
+            <p class="card__desc">Basic_v2, capacidad 2 en MVP / 3 en produccion. Listener 443. Backend pools, listeners y reglas se completan tras adjuntar dominio y certificado.</p>
+            <div class="card__meta">
+              <span class="chip chip--yellow">Basic_v2</span>
+              <span class="chip chip--yellow">subnet-acceso</span>
+            </div>
+          </div>
+
+          <div class="card card--accent-yellow">
+            <div class="card__icon">IP</div>
+            <p class="card__sub">Public IP</p>
+            <h3 class="card__title">pip-hubhph</h3>
+            <p class="card__desc">IP publica estatica SKU Standard. Asignacion estatica, usada como frontend del Application Gateway.</p>
+            <div class="card__meta">
+              <span class="chip chip--yellow">Static</span>
+              <span class="chip chip--yellow">Standard</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 8: OBSERVABILIDAD
+         ============================================ -->
+    <section class="slide slide--horizon" data-slide="8" id="slide-8">
+      <div class="slide__content">
+        <div class="section-head">
+          <p class="overline">Observabilidad</p>
+          <h2 class="hp-verlag-title display-lg">Logs y telemetria unificados</h2>
+          <p class="body-lg">Un solo Workspace concentra todos los logs de la plataforma. Application Insights se conecta a el para correlacionar metricas, trazas y excepciones de los microservicios.</p>
+        </div>
+
+        <div class="cards-grid cards-grid--2">
+          <div class="card card--accent-orange">
+            <div class="card__icon">LA</div>
+            <p class="card__sub">Log Analytics Workspace</p>
+            <h3 class="card__title">log-hubhph</h3>
+            <p class="card__desc">SKU PerGB2018. Retencion 30 dias. Acceso por resource permissions habilitado, sin acceso global por defecto.</p>
+            <div class="card__meta">
+              <span class="chip chip--orange">30 dias</span>
+              <span class="chip chip--orange">PerGB2018</span>
+            </div>
+          </div>
+
+          <div class="card card--accent-orange">
+            <div class="card__icon">AI</div>
+            <p class="card__sub">Application Insights</p>
+            <h3 class="card__title">appi-hubhph</h3>
+            <p class="card__desc">Kind web, Application_Type web. Conectado al Workspace para query unificado de logs y traces de los cuatro microservicios.</p>
+            <div class="card__meta">
+              <span class="chip chip--orange">Workspace-based</span>
+              <span class="chip chip--orange">Traces</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 9: FRONTEND + ASINCRONOS
+         ============================================ -->
+    <section class="slide slide--neutral" data-slide="9" id="slide-9">
+      <div class="slide__content">
+        <div class="section-head">
+          <p class="overline">Frontend y procesos asincronos</p>
+          <h2 class="hp-verlag-title display-lg">Static Web App + Functions</h2>
+          <p class="body-lg">El cliente se entrega como SPA estatica desde Static Web Apps. Las tareas pesadas (encoding de videos) se desacoplan en Functions con Managed Identity y disparadores sobre Blob.</p>
+        </div>
+
+        <div class="cards-grid cards-grid--2">
+          <div class="card card--accent-sea">
+            <div class="card__icon">SW</div>
+            <p class="card__sub">Static Web App</p>
+            <h3 class="card__title">swa-hubhph</h3>
+            <p class="card__desc">SKU Standard. Region eastus2 (limitacion de Static Web Apps). Build automatico desde repo GitHub <code>hub-frontend</code>, branch main, salida en <code>/build</code>.</p>
+            <div class="card__meta">
+              <span class="chip chip--sky">Standard</span>
+              <span class="chip chip--sky">CI desde GitHub</span>
+            </div>
+          </div>
+
+          <div class="card card--accent-sea">
+            <div class="card__icon">FN</div>
+            <p class="card__sub">Azure Functions</p>
+            <h3 class="card__title">fa-encoding-hubhph</h3>
+            <p class="card__desc">Plan Y1 Dynamic (Consumption). Runtime Python 3.11. Managed Identity activa. AzureWebJobsStorage apunta al Storage compartido para triggers de Blob.</p>
+            <div class="card__meta">
+              <span class="chip chip--sky">Y1 Consumption</span>
+              <span class="chip chip--sky">Python 3.11</span>
+              <span class="chip chip--sky">Identity</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 10: MVP vs PRODUCCION
+         ============================================ -->
+    <section class="slide slide--dark" data-slide="10" id="slide-10">
+      <div class="slide__content">
+        <div class="section-head">
+          <p class="overline overline--light">Configuracion por ambiente</p>
+          <h2 class="hp-verlag-title display-lg">MVP vs Produccion</h2>
+          <p class="body-lg">Misma topologia, distintos SKUs. El parametro <code>ambiente</code> selecciona la configuracion - mismo Bicep, mismo grupo de recursos, distinto perfil de costo y resiliencia.</p>
+        </div>
+
+        <table class="compare-table" aria-label="MVP vs Produccion">
+          <thead>
+            <tr>
+              <th>Servicio</th>
+              <th>MVP</th>
+              <th>Produccion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="col-service">App Service Plan</td>
+              <td class="col-mvp">P0V3 - autoscale 2-4</td>
+              <td class="col-prod">P1V3 - autoscale 2-6</td>
+            </tr>
+            <tr>
+              <td class="col-service">PostgreSQL</td>
+              <td class="col-mvp">D2ds_v5 - 128 GB - HA off</td>
+              <td class="col-prod">D4ds_v5 - 128 GB - HA off</td>
+            </tr>
+            <tr>
+              <td class="col-service">Redis</td>
+              <td class="col-mvp">Basic C1</td>
+              <td class="col-prod">Standard C1 + PE</td>
+            </tr>
+            <tr>
+              <td class="col-service">Container Registry</td>
+              <td class="col-mvp">Basic - publico</td>
+              <td class="col-prod">Standard - PE, publico off</td>
+            </tr>
+            <tr>
+              <td class="col-service">Application Gateway</td>
+              <td class="col-mvp">Basic_v2 - capacidad 2</td>
+              <td class="col-prod">Basic_v2 - capacidad 3</td>
+            </tr>
+            <tr>
+              <td class="col-service">Private Endpoints extra</td>
+              <td class="col-mvp">PostgreSQL + Key Vault</td>
+              <td class="col-prod">+ Redis + ACR</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SLIDE 11: PROXIMOS PASOS (costos)
+         ============================================ -->
+    <section class="slide slide--neutral" data-slide="11" id="slide-11">
+      <div class="slide__content">
+        <div class="section-head">
+          <p class="overline">Siguiente bloque</p>
+          <h2 class="hp-verlag-title display-lg">Lo que sigue: costos</h2>
+          <p class="body-lg">Con el inventario de servicios cerrado, el siguiente paso es asignar costos por SKU y region. Esta es la lista de items a calcular antes de presentar el TCO.</p>
+        </div>
+
+        <div class="callout">
+          <p class="callout__label">Pendiente - sesion de costos</p>
+          <h3 class="callout__title">Items a presupuestar</h3>
+          <ul class="callout__list">
+            <li class="callout__item">App Service Plan PremiumV3 (P0V3 / P1V3) - costo por instancia/hora x autoscale promedio.</li>
+            <li class="callout__item">PostgreSQL Flexible Server (D2ds_v5 / D4ds_v5) + storage P10 128 GB + backup 7 dias.</li>
+            <li class="callout__item">Redis Cache Basic C1 / Standard C1.</li>
+            <li class="callout__item">Application Gateway Basic_v2 (capacidad fija) + Public IP estatica Standard.</li>
+            <li class="callout__item">Azure Front Door Standard - costo base + trafico saliente estimado.</li>
+            <li class="callout__item">Blob Storage LRS Hot - GB almacenados + operaciones + egreso por contenedor.</li>
+            <li class="callout__item">Container Registry Basic / Standard + transferencia de imagenes.</li>
+            <li class="callout__item">Key Vault Standard - operaciones de secret/key.</li>
+            <li class="callout__item">Private Endpoints - costo fijo por endpoint + procesamiento de datos.</li>
+            <li class="callout__item">Log Analytics PerGB2018 - GB ingestados 30 dias retencion + Application Insights.</li>
+            <li class="callout__item">Static Web Apps Standard - costo fijo mensual.</li>
+            <li class="callout__item">Azure Functions Consumption Y1 - ejecuciones + GB-s + storage asociado.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="js/presentation.js"></script>
+</body>
+</html>

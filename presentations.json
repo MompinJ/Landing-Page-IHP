@@ -1,0 +1,24 @@
+{
+  "presentations": [
+    {
+      "slug": "check-eat",
+      "title": "Check-Eat",
+      "subtitle": "Nutricion Estudiantil - UCC",
+      "description": "Presentacion ejecutiva del producto Check-Eat para autoridades academicas de la Universidad Cristobal Colon. 10 diapositivas que cubren vision, paradigma, diseno, motor antropometrico, stack y roadmap.",
+      "date": "2026-05",
+      "tags": ["UCC", "Salud", "Ejecutiva"],
+      "accent": "#0f4c2d",
+      "path": "presentations/check-eat/index.html"
+    },
+    {
+      "slug": "hub-ihp",
+      "title": "HUB Hutchison Ports",
+      "subtitle": "Infraestructura Azure - Mexico Central",
+      "description": "Inventario y arquitectura de la plataforma HUB sobre Azure: VNet con 4 subnets, 4 microservicios en App Service Linux, PostgreSQL Flexible, Redis, Blob, Key Vault, ACR, Application Gateway, Front Door, Static Web App, Functions y observabilidad. Diferencias MVP vs Produccion. Costos pendientes.",
+      "date": "2026-05",
+      "tags": ["Hutchison Ports", "Azure", "Infraestructura", "Bicep"],
+      "accent": "#009BDE",
+      "path": "presentations/hub-ihp/index.html"
+    }
+  ]
+}

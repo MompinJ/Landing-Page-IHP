@@ -1,53 +1,63 @@
-# Presentación Check-Eat
+# Repositorio de Presentaciones
 
-Presentación estática en HTML/CSS alineada con **`Check-Eat.pdf`** (presentación ejecutiva para autoridades académicas UCC). Usa el mismo sistema de diseño que el frontend (colores, tipografía, bordes 2px, fondo azul claro).
+Hub estatico para navegar entre presentaciones independientes. Cada presentacion vive en su propia carpeta bajo `presentations/<slug>/` con sus propios estilos, scripts y assets — **no hay acoplamiento entre ellas**.
 
-## Contenido (10 diapositivas = PDF)
+## Estructura
 
-| # | Tema (PDF) |
-|---|------------|
-| 1 | Portada — Nutrición Estudiantil, Experiencia Clínico Digital v1.0 |
-| 2 | ¿Qué es verdaderamente Check-Eat? (ecosistema, transformación digital, centro de control) |
-| 3 | Del cuello de botella a la automatización (paradigma actual vs estándar Check-Eat) |
-| 4 | El diseño como herramienta de productividad |
-| 5 | Lógica médica: motor de procedimientos antropométrico (3 niveles) |
-| 6 | Centralización absoluta: motor de datos (PAN/PES, FCDB, pacientes) |
-| 7 | Stack tecnológico de grado empresarial (Azure, NestJS, PostgreSQL, TypeScript) |
-| 8 | Sincronización operativa con el ciclo UCC |
-| 9 | Desarrollo iterativo (Fase 1 Back-Office / Fase 2 Portal paciente) |
-| 10 | La solución definitiva — cierre ejecutivo |
-
-## Cómo abrir
-
-```bash
-cd presentacion
-xdg-open index.html
+```
+/
+  index.html              # Hub (indice navegable)
+  hub.css                 # Estilos del hub
+  hub.js                  # Render dinamico de tarjetas
+  presentations.json      # Manifest de presentaciones
+  presentations/
+    check-eat/
+      index.html
+      Check-Eat.pdf
+      css/styles.css
+      js/presentation.js
+      assets/checkeat-icon.png
 ```
 
-O con servidor HTTP:
+## Como abrir
+
+El hub usa `fetch()` para leer el manifest, asi que necesita un servidor HTTP (no funciona via `file://`).
 
 ```bash
 python -m http.server 8080
 # http://localhost:8080
 ```
 
-El PDF de referencia está en `presentacion/Check-Eat.pdf`.
+## Como agregar una presentacion nueva
 
-## Navegación
+1. Crear carpeta `presentations/<slug>/` con su propio `index.html` y assets (CSS/JS/imagenes que necesite). Total libertad de stack y estilos.
+2. Agregar entrada en `presentations.json`:
 
-- Flechas, RePag/AvPag, espacio (siguiente)
-- Inicio / Fin (primera / última)
-- Clic en indicador lateral
-- Contador y barra de progreso
+```json
+{
+  "slug": "mi-presentacion",
+  "title": "Mi Presentacion",
+  "subtitle": "Subtitulo corto",
+  "description": "Descripcion mas larga visible en la tarjeta.",
+  "date": "2026-06",
+  "tags": ["Tag1", "Tag2"],
+  "accent": "#2563eb",
+  "path": "presentations/mi-presentacion/index.html"
+}
+```
 
-## Archivos
+3. Recargar el hub. La tarjeta aparece automaticamente.
 
-| Archivo | Descripción |
-|---------|-------------|
-| `index.html` | 10 diapositivas (homólogas al PDF) |
-| `css/styles.css` | Tokens y componentes UCC |
-| `js/presentation.js` | Navegación dinámica |
-| `Check-Eat.pdf` | Fuente ejecutiva de contenido |
-| `assets/checkeat-icon.png` | Icono |
+Campos `subtitle`, `description`, `date`, `tags`, `accent` son opcionales. Solo `title` y `path` obligatorios. El campo `accent` colorea la barra superior y el hover de la tarjeta.
 
-Sin build ni dependencias npm (solo Google Fonts por CDN).
+## Presentaciones actuales
+
+| Slug | Titulo |
+|---|---|
+| `check-eat` | Check-Eat — Nutricion Estudiantil UCC (10 slides) |
+
+## Notas
+
+- Sin build, sin npm. HTML/CSS/JS vanilla.
+- El hub ordena por `date` descendente (mas reciente primero).
+- Cada presentacion implementa lo que quiera (slides custom, scroll, video, etc).
