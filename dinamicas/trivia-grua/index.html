@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Trivia Grua</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: TRIVIA GRUA (verdadero / falso)
+       Un camion trae un contenedor con una PREGUNTA rotulada.
+       El participante opera la grua para colocar el contenedor
+       en la plataforma VERDADERO o en la FALSO. Si acierta, suma;
+       si falla, se marca y llega la siguiente pregunta.
+
+       CONTROLES
+       - Flechas o WASD: trolley izquierda/derecha, spreader sube/baja
+       - ESPACIO o boton GANCHO: enganchar / soltar
+       - Consola de botones en pantalla (tactil y mouse)
+       - R: reiniciar la ronda
+
+       PERSONALIZAR: preguntas en el arreglo QUESTIONS de
+       js/trivia.js ({ q: "enunciado", answer: true|false }).
+       ============================================================ -->
+
+  <div class="scene" id="scene">
+    <div class="bg" aria-hidden="true"><div class="bg__skyline"></div></div>
+
+    <!-- grua -->
+    <div class="beam"></div>
+    <div class="leg leg--l"></div>
+    <div class="leg leg--r"></div>
+    <div class="trolley" id="trolley"></div>
+    <i class="cable" id="cable-l"></i>
+    <i class="cable" id="cable-r"></i>
+    <div class="spreader" id="spreader"><i></i><i></i></div>
+
+    <!-- plataformas de respuesta -->
+    <div class="platform platform--true" id="plat-true">
+      <span class="platform__big">V</span>
+      <span class="platform__label">VERDADERO</span>
+    </div>
+    <div class="platform platform--false" id="plat-false">
+      <span class="platform__big">F</span>
+      <span class="platform__label">FALSO</span>
+    </div>
+
+    <!-- camion -->
+    <div class="truck" id="truck">
+      <i class="truck__cab"></i>
+      <i class="truck__bed"></i>
+      <i class="truck__wheel truck__wheel--1"></i>
+      <i class="truck__wheel truck__wheel--2"></i>
+      <i class="truck__wheel truck__wheel--3"></i>
+    </div>
+
+    <!-- contenedor con la pregunta -->
+    <div class="cargo" id="cargo">
+      <span class="cargo__code" id="cargo-code">Q-01</span>
+      <div class="qcard">
+        <p class="qcard__kicker" id="q-kicker">PREGUNTA 01</p>
+        <p class="qcard__text" id="q-text">--</p>
+        <p class="qcard__ask">VERDADERO O FALSO?</p>
+      </div>
+    </div>
+
+    <div class="floor" aria-hidden="true"></div>
+  </div>
+
+  <!-- veredicto flotante -->
+  <div class="verdict" id="verdict" hidden></div>
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>TRIVIA GRUA</span></div>
+    <span class="hud__score" id="hud-score">ACIERTOS 00 · PREGUNTA 01/--</span>
+  </header>
+
+  <!-- consola de la grua -->
+  <div class="console" aria-label="Controles de la grua">
+    <div class="console__group">
+      <button type="button" class="cbtn" data-k="left">&#9664;</button>
+      <button type="button" class="cbtn" data-k="right">&#9654;</button>
+    </div>
+    <button type="button" class="cbtn cbtn--hook" id="hook-btn" data-k="hook">GANCHO</button>
+    <div class="console__group">
+      <button type="button" class="cbtn" data-k="up">&#9650;</button>
+      <button type="button" class="cbtn" data-k="down">&#9660;</button>
+    </div>
+  </div>
+
+  <!-- resultados -->
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker">RONDA TERMINADA</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__sub" id="finale-sub">--</p>
+    <button type="button" id="restart">OTRA RONDA [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">ESPERANDO CONTENEDOR...</span>
+    <span class="hud__keys">flechas o WASD mueven la grua · ESPACIO = gancho · R = reiniciar</span>
+  </footer>
+
+  <script src="js/trivia.js"></script>
+</body>
+</html>

@@ -1012,6 +1012,50 @@ code {
 }
 
 /* ============================================================
+   TEMA: dyn-trivia-grua — V/F EN EL PATIO
+   dia de terminal, plataformas aqua y sunset
+   ============================================================ */
+.hub-card[data-theme="dyn-trivia-grua"] {
+  --card-accent: #54BBAB;
+  background:
+    linear-gradient(0deg, #a3b8c8 0 14%, transparent 14%),
+    linear-gradient(180deg, #bfe0f5, #e2f2fc);
+  border: 2px solid #16304f;
+  box-shadow: 9px 9px 0 rgba(84, 187, 171, 0.5);
+  color: #12263c;
+}
+.hub-card[data-theme="dyn-trivia-grua"]:hover { box-shadow: 16px 16px 0 #EE7523; }
+.hub-card[data-theme="dyn-trivia-grua"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-trivia-grua"] .hub-card__date,
+.hub-card[data-theme="dyn-trivia-grua"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #0b78c2; }
+.hub-card[data-theme="dyn-trivia-grua"] .hub-card__kind::before { content: "DINAMICA // V-O-F · GANCHO"; }
+.hub-card[data-theme="dyn-trivia-grua"] .hub-card__subtitle { color: #EE7523; }
+.hub-card[data-theme="dyn-trivia-grua"] .hub-card__desc { color: #41566c; }
+.hub-card[data-theme="dyn-trivia-grua"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #002E6D;
+  background: #fff;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-trivia-grua"] .hub-card__arrow { color: #EE7523; }
+/* dos plataformas V/F con contenedor cayendo */
+.hub-card[data-theme="dyn-trivia-grua"] .hub-card__deco {
+  bottom: calc(14% + 4px); right: 1.2rem;
+  width: 96px; height: 56px;
+  background:
+    linear-gradient(#54BBAB, #54BBAB) 0 100% / 40px 16px no-repeat,
+    linear-gradient(#EE7523, #EE7523) 56px 100% / 40px 16px no-repeat,
+    linear-gradient(#002E6D, #002E6D) 12px 0 / 2px 22px no-repeat,
+    linear-gradient(#FFC627, #FFC627) 4px 22px / 18px 4px no-repeat,
+    linear-gradient(#009BDE, #009BDE) 1px 28px / 24px 14px no-repeat;
+}
+
+/* ============================================================
    STEPS / FOOTER
    ============================================================ */
 .hub-section--add .hub-steps {

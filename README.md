@@ -34,6 +34,7 @@ Hub estatico para navegar entre presentaciones independientes. Cada presentacion
     grua-sim-3d/
   dinamicas/              # Juegos interactivos para la audiencia
     mexico-hp/
+    trivia-grua/
 ```
 
 ## Como abrir
@@ -74,6 +75,7 @@ Juegos interactivos para la audiencia, en `dinamicas/<slug>/` (clave `dinamicas`
 | Dinamica | Que hace el participante |
 |---|---|
 | `mexico-hp` | Navega un buque por un mapa de Mexico que al tocar tierra se convierte en grua movil. Hay que llegar a las 5 sedes de Hutchison Ports (Ensenada, Manzanillo, Lazaro Cardenas, Veracruz, Hidalgo); cada llegada abre la ficha de la sede en pantalla completa con sus unidades de negocio (ICAVE/TNG/HPMX, LCT/LCMT, etc.) y un boton ACEPTAR para continuar. Tren intermodal Veracruz-Hidalgo con la tecla T |
+| `trivia-grua` | Llega un contenedor con una pregunta rotulada; hay que operarlo con la grua (teclado o consola de botones en pantalla) y soltarlo en la plataforma VERDADERO o FALSO. Balanceo de pendulo, caida con gravedad, veredicto en grande y marcador de aciertos. Preguntas editables en `js/trivia.js` |
 
 ## Como agregar una presentacion nueva
 

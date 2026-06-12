@@ -165,6 +165,16 @@
       "accent": "#FFC627",
       "theme": "dyn-mexico-hp",
       "path": "dinamicas/mexico-hp/index.html"
+    },
+    {
+      "slug": "trivia-grua",
+      "title": "Trivia Grua",
+      "subtitle": "Verdadero o falso... con contenedor",
+      "description": "El camion trae un contenedor rotulado con una pregunta. El participante opera la grua (teclado o la consola de botones en pantalla) para engancharlo, llevarlo con su balanceo de pendulo y soltarlo sobre la plataforma VERDADERO o FALSO. Caida con gravedad real, veredicto en grande, marcador de aciertos y ronda de preguntas editable.",
+      "tags": ["Dinamica", "Trivia", "Grua"],
+      "accent": "#54BBAB",
+      "theme": "dyn-trivia-grua",
+      "path": "dinamicas/trivia-grua/index.html"
     }
   ]
 }
