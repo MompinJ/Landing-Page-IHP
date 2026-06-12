@@ -1,0 +1,274 @@
+/* ============================================================
+   PLANTILLA CUBO 3D — "OBSIDIANA"
+   Cambia las variables de :root y tienes otra presentacion.
+   ============================================================ */
+
+:root {
+  --bg: #07090d;            /* fondo de la sala */
+  --bg-glow: #0e1622;       /* brillo radial detras del cubo */
+  --face: #0c1018;          /* cara del cubo */
+  --face-edge: #1d2939;     /* borde de la cara */
+  --ink: #e8edf4;           /* texto principal */
+  --ink-soft: #8d99ab;      /* texto secundario */
+  --accent: #22d3ee;        /* acento electrico */
+  --accent-dim: rgba(34, 211, 238, 0.16);
+  --f-display: 'Sora', sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+
+  /* geometria del cubo (la mitad del ancho se calcula en JS) */
+  --slide-w: min(1080px, 92vw);
+  --slide-h: min(640px, 80vh);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-display);
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 42%, var(--bg-glow), transparent 70%),
+    var(--bg);
+  display: grid;
+  place-items: center;
+}
+
+/* piso reflejante sutil */
+body::after {
+  content: "";
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 28vh;
+  background:
+    linear-gradient(transparent, rgba(34, 211, 238, 0.04)),
+    repeating-linear-gradient(90deg, rgba(141, 153, 171, 0.05) 0 1px, transparent 1px 80px);
+  pointer-events: none;
+}
+
+/* ============================================================
+   ESCENA 3D
+   ============================================================ */
+.scene {
+  width: var(--slide-w);
+  height: var(--slide-h);
+  perspective: 1900px;
+  perspective-origin: 50% 45%;
+}
+
+.cube {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  /* la transicion se activa/desactiva desde JS para poder resetear sin animar */
+}
+
+.cube.is-spinning {
+  transition: transform var(--spin-ms, 900ms) cubic-bezier(0.76, 0, 0.18, 1);
+}
+
+/* ============================================================
+   SLIDES (caras del cubo)
+   JS coloca solo la cara actual y la entrante; el resto se oculta.
+   ============================================================ */
+.slide {
+  position: absolute;
+  inset: 0;
+  display: none;
+  backface-visibility: hidden;
+  background:
+    linear-gradient(160deg, rgba(34, 211, 238, 0.06), transparent 40%),
+    var(--face);
+  border: 1px solid var(--face-edge);
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 40px 90px -30px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(232, 237, 244, 0.05);
+}
+
+.slide.is-active { display: block; }
+
+.slide__inner {
+  height: 100%;
+  padding: clamp(2rem, 5vw, 4.5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.1rem;
+  overflow: hidden;
+}
+
+/* ============================================================
+   TIPOGRAFIA / COMPONENTES
+   ============================================================ */
+.kicker {
+  font-family: var(--f-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+}
+
+h1 {
+  font-size: clamp(2.4rem, 6vw, 4.6rem);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+}
+h1 em {
+  font-style: normal;
+  color: var(--accent);
+  text-shadow: 0 0 28px var(--accent-dim);
+}
+
+h2 {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.lead {
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  color: var(--ink-soft);
+  max-width: 38ch;
+  line-height: 1.55;
+}
+
+.meta {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: var(--ink-soft);
+  margin-top: 1.2rem;
+}
+
+.slide--cover .slide__inner { gap: 1.4rem; }
+
+.agenda {
+  list-style: none;
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 0.8rem;
+}
+.agenda li {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  font-weight: 600;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--face-edge);
+}
+.agenda li span {
+  font-family: var(--f-mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  margin-top: 0.8rem;
+}
+.cols p { color: var(--ink-soft); line-height: 1.6; font-size: 0.98rem; }
+
+.slide--big .slide__inner { align-items: flex-start; }
+.bignum {
+  font-size: clamp(5rem, 16vw, 12rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  color: var(--accent);
+  text-shadow: 0 0 60px var(--accent-dim);
+}
+
+.slide--quote .slide__inner { align-items: center; text-align: center; }
+blockquote {
+  font-size: clamp(1.5rem, 3.5vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  max-width: 24ch;
+}
+
+.checklist {
+  list-style: none;
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+}
+.checklist li {
+  position: relative;
+  padding-left: 1.6rem;
+  font-size: 1rem;
+  color: var(--ink-soft);
+}
+.checklist li::before {
+  content: ">";
+  position: absolute;
+  left: 0;
+  font-family: var(--f-mono);
+  font-weight: 700;
+  color: var(--accent);
+}
+
+code {
+  font-family: var(--f-mono);
+  font-size: 0.85em;
+  color: var(--accent);
+  background: var(--accent-dim);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   HUD
+   ============================================================ */
+.hud {
+  position: fixed;
+  left: 50%;
+  bottom: 1.4rem;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  font-family: var(--f-mono);
+  z-index: 10;
+}
+.hud__bar {
+  width: 140px;
+  height: 2px;
+  background: var(--face-edge);
+  overflow: hidden;
+}
+.hud__bar span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+.hud__counter { font-size: 0.72rem; color: var(--ink); letter-spacing: 0.15em; }
+.hud__hint { font-size: 0.66rem; color: var(--ink-soft); letter-spacing: 0.1em; }
+
+/* ============================================================
+   RESPONSIVE / MOTION
+   ============================================================ */
+@media (max-width: 700px) {
+  .cols { grid-template-columns: 1fr; }
+  .hud__hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cube.is-spinning { transition-duration: 0.01ms; }
+}

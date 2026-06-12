@@ -1,6 +1,23 @@
 (() => {
   const grid = document.getElementById('hub-grid');
   const count = document.getElementById('hub-count');
+  const tplGrid = document.getElementById('tpl-grid');
+  const tplCount = document.getElementById('tpl-count');
+  const dynGrid = document.getElementById('dyn-grid');
+  const dynCount = document.getElementById('dyn-count');
+  const tickerTrack = document.getElementById('ticker-track');
+
+  const buildTicker = (list) => {
+    if (!tickerTrack) return;
+    const titles = list
+      .map((p) => String(p.title ?? '').toUpperCase().trim())
+      .filter(Boolean);
+    if (titles.length === 0) return;
+    const sep = '  //  ';
+    const run = titles.join(sep) + sep;
+    // se duplica el contenido para que el loop del marquee sea continuo
+    tickerTrack.innerHTML = `<span>${escape(run)}</span><span>${escape(run)}</span>`;
+  };
 
   const escape = (str) => String(str ?? '').replace(/[&<>"']/g, (c) => ({
     '&': '&amp;',
@@ -11,7 +28,8 @@
   }[c]));
 
   const renderCard = (p) => {
-    const accent = p.accent ? `style="--card-accent: ${escape(p.accent)};"` : '';
+    const accent = p.accent ? `--card-accent: ${escape(p.accent)};` : '';
+    const theme = p.theme ? escape(p.theme) : 'default';
     const tags = Array.isArray(p.tags)
       ? p.tags.map((t) => `<span class="hub-card__tag">${escape(t)}</span>`).join('')
       : '';
@@ -19,9 +37,13 @@
     const subtitle = p.subtitle ? `<p class="hub-card__subtitle">${escape(p.subtitle)}</p>` : '';
     const desc = p.description ? `<p class="hub-card__desc">${escape(p.description)}</p>` : '';
 
+    // chrome + deco: capas puramente decorativas que cada tema estiliza en hub.css
     return `
-      <article class="hub-card" ${accent}>
+      <article class="hub-card" data-theme="${theme}" style="${accent}">
+        <span class="hub-card__chrome" aria-hidden="true"></span>
+        <span class="hub-card__deco" aria-hidden="true"></span>
         <span class="hub-card__arrow" aria-hidden="true">&#8599;</span>
+        <span class="hub-card__kind" aria-hidden="true"></span>
         ${date}
         <h3 class="hub-card__title">
           <a href="${escape(p.path)}">${escape(p.title)}</a>
@@ -42,6 +64,14 @@
       </div>
     `;
     count.textContent = 'error';
+    if (tplGrid) {
+      tplGrid.innerHTML = '<p class="hub-empty">Sin manifest no hay plantillas.</p>';
+      tplCount.textContent = 'error';
+    }
+    if (dynGrid) {
+      dynGrid.innerHTML = '<p class="hub-empty">Sin manifest no hay dinamicas.</p>';
+      dynCount.textContent = 'error';
+    }
   };
 
   const sortByDateDesc = (a, b) => String(b.date ?? '').localeCompare(String(a.date ?? ''));
@@ -58,11 +88,35 @@
       if (list.length === 0) {
         grid.innerHTML = '<p class="hub-empty">Aun no hay presentaciones registradas en <code>presentations.json</code>.</p>';
         count.textContent = '0';
-        return;
+      } else {
+        grid.innerHTML = list.map(renderCard).join('');
+        buildTicker(list);
+        count.textContent = `${String(list.length).padStart(2, '0')} // ${list.length === 1 ? 'item' : 'items'}`;
       }
 
-      grid.innerHTML = list.map(renderCard).join('');
-      count.textContent = `${list.length} ${list.length === 1 ? 'item' : 'items'}`;
+      // ---- plantillas (segunda seccion, mismo manifest) ----
+      if (tplGrid) {
+        const tpls = Array.isArray(data?.templates) ? data.templates : [];
+        if (tpls.length === 0) {
+          tplGrid.innerHTML = '<p class="hub-empty">Sin plantillas registradas.</p>';
+          tplCount.textContent = '0';
+        } else {
+          tplGrid.innerHTML = tpls.map(renderCard).join('');
+          tplCount.textContent = `${String(tpls.length).padStart(2, '0')} // ${tpls.length === 1 ? 'base' : 'bases'}`;
+        }
+      }
+
+      // ---- dinamicas (tercera seccion) ----
+      if (dynGrid) {
+        const dyns = Array.isArray(data?.dinamicas) ? data.dinamicas : [];
+        if (dyns.length === 0) {
+          dynGrid.innerHTML = '<p class="hub-empty">Sin dinamicas registradas.</p>';
+          dynCount.textContent = '0';
+        } else {
+          dynGrid.innerHTML = dyns.map(renderCard).join('');
+          dynCount.textContent = `${String(dyns.length).padStart(2, '0')} // ${dyns.length === 1 ? 'juego' : 'juegos'}`;
+        }
+      }
     })
     .catch((err) => {
       const isFileProto = location.protocol === 'file:';

@@ -1,0 +1,395 @@
+/* ============================================================
+   PLANTILLA HP CORPORATIVO 3D
+   Paleta y reglas tomadas del manual Hutchison Ports v4.1:
+   angulo dinamico 30.3, formas planas, Montserrat, aire blanco.
+   ============================================================ */
+
+:root {
+  /* paleta oficial */
+  --sky: #009BDE;        /* Ports Sky Blue (PMS 2925) */
+  --sea: #002E6D;        /* Ports Sea Blue (PMS 294) */
+  --horizon: #9ACAEB;    /* Ports Horizon Blue (PMS 291) */
+  --aqua: #54BBAB;       /* Ports Aqua Green (PMS 3258) */
+  --sunray: #FFC627;     /* Ports Sunray Yellow (PMS 123) */
+  --sunset: #EE7523;     /* Ports Sunset Orange (PMS 158) */
+
+  --paper: #ffffff;
+  --mist: #eef1f4;       /* gris frio de paginas interiores */
+  --f-sans: 'Montserrat', Arial, sans-serif;
+
+  /* el angulo de la marca: no tocar */
+  --angle: -30.3deg;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-sans);
+  background: var(--paper);
+  color: var(--sea);
+}
+
+/* ============================================================
+   BARRIDO DIAGONAL (transicion a 30.3 grados)
+   ============================================================ */
+.wipe {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 320vmax;
+  height: 320vmax;
+  margin: -160vmax 0 0 -160vmax;
+  background: var(--wipe-color, var(--sky));
+  transform: rotate(var(--angle)) translateX(-300vmax);
+  z-index: 50;
+  pointer-events: none;
+}
+.wipe.run {
+  animation: wipe-sweep var(--wipe-ms, 1100ms) cubic-bezier(0.74, 0.02, 0.16, 1) both;
+}
+@keyframes wipe-sweep {
+  from { transform: rotate(var(--angle)) translateX(-300vmax); }
+  to   { transform: rotate(var(--angle)) translateX(300vmax); }
+}
+
+/* ============================================================
+   DECK / SLIDES
+   ============================================================ */
+.deck {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  perspective: 1500px;
+}
+
+.slide {
+  grid-area: 1 / 1;
+  position: relative;
+  overflow: hidden;
+  background: var(--paper);
+  visibility: hidden;
+}
+.slide.is-active { visibility: visible; }
+
+.slide__body {
+  position: relative;
+  z-index: 5;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.3rem;
+  padding: clamp(2rem, 7vw, 7rem);
+  max-width: 980px;
+}
+.slide__body--center {
+  max-width: none;
+  align-items: center;
+  text-align: center;
+}
+
+/* entrada del contenido (solo al navegar; el primer paint es solido) */
+.slide.is-active.enter .slide__body > * {
+  animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.slide.is-active.enter .slide__body > *:nth-child(2) { animation-delay: 0.08s; }
+.slide.is-active.enter .slide__body > *:nth-child(3) { animation-delay: 0.16s; }
+.slide.is-active.enter .slide__body > *:nth-child(4) { animation-delay: 0.24s; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(34px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   FORMAS DE MARCA (rectangulos girados a 30.3: el borde visible
+   queda exactamente al angulo dinamico). Planas, sin sombras.
+   El parallax se aplica con --px/--py desde JS (data-depth).
+   ============================================================ */
+.shape, .sline {
+  position: absolute;
+  pointer-events: none;
+  transform: translate3d(var(--px, 0), var(--py, 0), 0) rotate(var(--angle));
+}
+
+/* super graficos: lineas finas al angulo */
+.sline {
+  height: 2px;
+  width: 120vmax;
+  background: var(--sky);
+  z-index: 4;
+}
+.sline--1 { top: 4%; left: 58%; }
+.sline--2 { top: 99%; left: 30%; background: var(--aqua); }
+.sline--3 { top: 26%; left: 32%; background: var(--horizon); }
+.sline--4 { top: 64%; left: 36%; background: var(--sky); }
+.sline--5 { top: 70%; left: -40%; background: var(--horizon); }
+
+/* portada: forma Sky en la esquina superior derecha (como las
+   portadas del manual); el texto queda abajo-izquierda en blanco */
+.shape--a {
+  width: 150vmax; height: 70vmax;
+  left: 24%; bottom: 62%;
+  transform-origin: 0% 100%;
+  background: var(--sky);
+  z-index: 1;
+}
+.shape--b {
+  width: 30vw; height: 12vw;
+  right: -5vw; top: 44%;
+  background: var(--aqua);
+  z-index: 2;
+}
+
+/* en la portada el bloque baja a la izquierda, sobre blanco */
+.slide--sky .slide__body { justify-content: flex-end; padding-bottom: clamp(4rem, 12vh, 8rem); }
+
+/* agenda: forma Sea (bloque inferior izquierdo) en Sea Blue */
+.shape--c {
+  width: 180vmax; height: 80vmax;
+  left: -70vmax; top: 86%;
+  background: var(--sea);
+}
+
+/* divisoria: bloque Sunray que cubre la mitad derecha */
+.slide--divider { background: var(--mist); }
+.shape--d {
+  width: 160vmax; height: 120vmax;
+  left: 46%; top: -16vmax;
+  background: var(--sunray);
+}
+
+/* horizon: banda al angulo cruzando la derecha */
+.shape--e {
+  width: 70vw; height: 15vw;
+  right: -18vw; top: 30%;
+  background: var(--horizon);
+}
+
+/* stat: acento aqua abajo derecha */
+.shape--f {
+  width: 60vw; height: 22vw;
+  right: -26vw; top: 92%;
+  background: var(--aqua);
+}
+
+/* endframe: dos formas como en el manual (sky + aqua) */
+.shape--g {
+  width: 170vmax; height: 70vmax;
+  left: -80vmax; bottom: 72%;
+  background: var(--sky);
+}
+.shape--h {
+  width: 26vw; height: 11vw;
+  left: 8vw; top: 34%;
+  background: var(--aqua);
+}
+
+/* ============================================================
+   TIPOGRAFIA (Montserrat segun jerarquia del manual)
+   ============================================================ */
+.eyebrow {
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--sky);
+}
+.eyebrow--onshape { color: var(--sea); }
+
+h1 {
+  font-size: clamp(2.6rem, 6.5vw, 5.2rem);
+  font-weight: 900;
+  line-height: 1.0;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  color: var(--sea);
+}
+
+h2 {
+  font-size: clamp(1.9rem, 4.4vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--sea);
+}
+
+.sub {
+  font-size: clamp(0.85rem, 1.4vw, 1.05rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sky);
+}
+
+.copy {
+  font-size: clamp(0.95rem, 1.5vw, 1.12rem);
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--sea);
+  max-width: 52ch;
+}
+
+.slide__foot {
+  position: absolute;
+  left: clamp(2rem, 7vw, 7rem);
+  bottom: 2.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--sea);
+  z-index: 5;
+}
+.markline { width: 44px; height: 3px; background: var(--sunray); }
+
+.agenda {
+  list-style: none;
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.6rem;
+}
+.agenda li {
+  display: flex;
+  align-items: baseline;
+  gap: 1.2rem;
+  font-size: clamp(1.05rem, 2.1vw, 1.45rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  padding-bottom: 0.9rem;
+  border-bottom: 2px solid var(--mist);
+}
+.agenda li span { font-weight: 900; color: var(--sky); font-size: 0.85em; }
+
+.cols {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+  margin-top: 0.4rem;
+}
+
+.list {
+  list-style: none;
+  display: grid;
+  gap: 0.75rem;
+}
+.list li {
+  position: relative;
+  padding-left: 1.6rem;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.list li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.42em;
+  width: 10px; height: 10px;
+  background: var(--sunray);
+  /* flechita al angulo de la marca */
+  clip-path: polygon(0 100%, 100% 0, 100% 100%);
+}
+.list--center { justify-items: start; }
+
+/* divisoria */
+.bignum {
+  font-size: clamp(8rem, 26vw, 21rem);
+  font-weight: 900;
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  color: var(--sea);
+}
+.divider-title {
+  font-size: clamp(2rem, 4.6vw, 3.6rem);
+}
+
+/* dato */
+.statnum {
+  font-weight: 900;
+  font-size: clamp(5.5rem, 17vw, 13rem);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  color: var(--sky);
+}
+.statnum small { font-size: 0.36em; font-weight: 800; }
+.stat-caption { font-size: clamp(1.4rem, 3vw, 2.3rem); }
+
+/* cita */
+.slide--quote { background: var(--mist); }
+.quotemark {
+  font-size: clamp(4rem, 9vw, 7rem);
+  font-weight: 900;
+  line-height: 0.6;
+  color: var(--sky);
+  letter-spacing: -0.08em;
+}
+blockquote {
+  font-size: clamp(1.9rem, 4.6vw, 3.6rem);
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  color: var(--sky);
+  max-width: 22ch;
+}
+
+/* endframe */
+.endline { font-size: clamp(2.4rem, 6vw, 4.6rem); }
+
+code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85em;
+  font-weight: 700;
+  color: var(--sky);
+  background: var(--mist);
+  padding: 0.1em 0.4em;
+}
+
+/* ============================================================
+   HUD
+   ============================================================ */
+.hud {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.6rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--sea);
+  z-index: 40;
+  pointer-events: none;
+}
+.hud__brand { display: flex; align-items: center; gap: 0.55rem; }
+/* marca de posicion: cuadrado partido por la diagonal ascendente */
+.hud__brand i {
+  width: 16px; height: 16px;
+  background: linear-gradient(
+    -30.3deg,
+    var(--sea) 0 44%,
+    #fff 44% 56%,
+    var(--sky) 56% 100%
+  );
+}
+.hud__counter { color: var(--sky); }
+
+/* ============================================================
+   RESPONSIVE / MOTION
+   ============================================================ */
+@media (max-width: 760px) {
+  .cols { grid-template-columns: 1fr; }
+  .hud__hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wipe.run { animation-duration: 0.01ms; }
+  .slide.is-active .slide__body > * { animation: none; }
+}

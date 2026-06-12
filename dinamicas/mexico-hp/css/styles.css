@@ -1,0 +1,503 @@
+/* ============================================================
+   DINAMICA RUTA HUTCHISON MEXICO
+   Tablero estilo maqueta: mar con grid, Mexico en papel claro,
+   marca Hutchison Ports (paleta oficial, Montserrat).
+   ============================================================ */
+
+:root {
+  --sky: #009BDE;
+  --sea-blue: #002E6D;
+  --horizon: #9ACAEB;
+  --aqua: #54BBAB;
+  --sunray: #FFC627;
+  --sunset: #EE7523;
+  --water: #cde7f8;
+  --water-deep: #b3d9f1;
+  --land: #fdfaf2;
+  --land-edge: #0f3e7c;
+  --f-sans: 'Montserrat', Arial, sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* los display de .card/.finale no deben anular el atributo hidden */
+[hidden] { display: none !important; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-sans);
+  color: var(--sea-blue);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 20%, rgba(255, 255, 255, 0.5), transparent 65%),
+    linear-gradient(180deg, var(--water) 0%, var(--water-deep) 100%);
+}
+
+/* ============================================================
+   TABLERO (mapa con tilt 3D leve)
+   ============================================================ */
+.stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  perspective: 1600px;
+}
+
+.board {
+  position: relative;
+  width: min(1240px, 96vw);
+  aspect-ratio: 1000 / 690;
+  transform: rotateX(26deg);
+  transform-style: preserve-3d;
+}
+
+#map { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+/* mar: grid de cartas nauticas dentro del svg via CSS */
+.sea-grid { fill: none; stroke: rgba(0, 155, 222, 0.16); stroke-width: 1; }
+.land {
+  fill: var(--land);
+  stroke: var(--land-edge);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 14px 0 rgba(0, 46, 109, 0.18));
+}
+.rail {
+  fill: none;
+  stroke: var(--sea-blue);
+  stroke-width: 2.5;
+  stroke-dasharray: 7 6;
+  opacity: 0.55;
+}
+
+/* ---------- puertos (pines parados sobre el tablero) ---------- */
+.port {
+  position: absolute;
+  transform-style: preserve-3d;
+  z-index: 5;
+}
+.port__pin {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) rotateX(-26deg);
+  transform-origin: 50% 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.port__diamond {
+  width: 17px; height: 17px;
+  background: var(--sunray);
+  border: 2.5px solid var(--sea-blue);
+  transform: rotate(45deg);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.port__code {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--sea-blue);
+  background: rgba(253, 250, 242, 0.92);
+  border: 1.5px solid var(--sea-blue);
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+.port.is-visited .port__diamond {
+  background: var(--aqua);
+  box-shadow: 0 0 12px rgba(84, 187, 171, 0.9);
+}
+.port.is-near .port__diamond { animation: pin-pulse 1s ease-in-out infinite; }
+@keyframes pin-pulse { 50% { transform: rotate(45deg) scale(1.35); } }
+
+/* zona de atraque (plana sobre el tablero) */
+.dockzone {
+  position: absolute;
+  border: 2.5px dashed rgba(0, 155, 222, 0.65);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  animation: zone-spin 14s linear infinite;
+}
+@keyframes zone-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+/* ---------- vehiculo: barco en el mar, grua en tierra ----------
+   Ambos son sprites SVG (vista cenital, proa a la derecha)
+   definidos en js/mexico.js. Aqui solo tamano y sombras. */
+.ship {
+  position: absolute;
+  width: 86px; height: 36px;
+  margin: -18px 0 0 -43px;
+  z-index: 6;
+  /* la rotacion (rumbo) la escribe JS */
+}
+.skin { position: absolute; inset: 0; }
+.skin svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(2px 4px 3px rgba(0, 22, 56, 0.35));
+}
+.skin--crane { display: none; }
+.ship.is-crane .skin--ship { display: none; }
+.ship.is-crane .skin--crane { display: block; }
+/* huellas en tierra (reutiliza la estela con otro color) */
+.ship.is-crane ~ .wake { background: rgba(0, 46, 109, 0.3); }
+
+/* estela */
+.wake {
+  position: absolute;
+  width: 5px; height: 5px;
+  margin: -2.5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  z-index: 4;
+  animation: wake-fade 1.6s linear forwards;
+}
+@keyframes wake-fade { to { opacity: 0; transform: scale(2.4); } }
+
+/* ---------- tren ---------- */
+.train {
+  position: absolute;
+  width: 54px; height: 14px;
+  margin: -7px 0 0 -27px;
+  z-index: 6;
+  display: none;
+}
+.train.is-running { display: block; }
+.train i {
+  position: absolute;
+  top: 0;
+  width: 15px; height: 14px;
+  background: var(--sea-blue);
+  border: 1.5px solid #0a1f3f;
+}
+.train i:nth-child(1) { left: 0; background: var(--sunset); }
+.train i:nth-child(2) { left: 19px; background: var(--sky); }
+.train i:nth-child(3) { left: 38px; background: var(--sunray); }
+
+/* ============================================================
+   HUD
+   ============================================================ */
+.hud {
+  position: fixed;
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.4rem;
+  z-index: 20;
+  pointer-events: none;
+}
+.hud--top { top: 0; }
+.hud--bottom {
+  bottom: 0;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: rgba(0, 46, 109, 0.75);
+}
+#hud-status { color: var(--sea-blue); }
+
+.hud__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+.hud__brand i {
+  width: 17px; height: 17px;
+  background: linear-gradient(-30.3deg, var(--sea-blue) 0 44%, #fff 44% 56%, var(--sky) 56% 100%);
+}
+
+.chips { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+.chip {
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0.3rem 0.65rem;
+  border: 2px solid var(--sea-blue);
+  background: #fff;
+  color: var(--sea-blue);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+.chip.is-done { background: var(--aqua); border-color: var(--aqua); color: #fff; }
+
+/* ============================================================
+   MODAL DE SEDE (pantalla completa, requiere ACEPTAR)
+   ============================================================ */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background:
+    linear-gradient(-30.3deg, rgba(0, 155, 222, 0.25) 0 14%, transparent 14%),
+    rgba(0, 46, 109, 0.92);
+  animation: modal-in 0.35s ease;
+}
+@keyframes modal-in { from { opacity: 0; } }
+
+.modal__sheet {
+  width: min(880px, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: #fff;
+  border-top: 10px solid var(--sky);
+  box-shadow: 0 50px 120px -30px rgba(0, 0, 0, 0.7);
+  padding: clamp(1.6rem, 4vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  animation: sheet-in 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateY(36px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+.modal__kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.26em;
+  color: var(--sunset);
+}
+.modal__title {
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  font-weight: 900;
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
+}
+.modal__state {
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--sky);
+  margin-top: 0.4rem;
+}
+.modal__intro { font-size: 1rem; font-weight: 500; line-height: 1.55; color: #41557a; max-width: 60ch; }
+
+.modal__units {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.9rem;
+}
+.unit {
+  border: 2px solid #e3e9f0;
+  border-top: 5px solid var(--sunray);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.unit__code {
+  align-self: flex-start;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #fff;
+  background: var(--sea-blue);
+  padding: 0.2rem 0.55rem;
+}
+.unit__name { font-size: 0.98rem; font-weight: 800; line-height: 1.2; }
+.unit__desc { font-size: 0.84rem; font-weight: 500; line-height: 1.45; color: #5d7191; }
+
+.modal__ok {
+  align-self: flex-end;
+  font-family: var(--f-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--sea-blue);
+  background: var(--sunray);
+  border: 2.5px solid var(--sea-blue);
+  padding: 0.8rem 1.8rem;
+  cursor: pointer;
+  box-shadow: 5px 5px 0 var(--sea-blue);
+}
+.modal__ok:hover { background: #ffd45c; }
+.modal__ok:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--sea-blue); }
+
+/* ============================================================
+   TARJETA DE UNIDAD (en desuso: el modal la reemplaza)
+   ============================================================ */
+.card {
+  position: fixed;
+  right: clamp(0.8rem, 2.5vw, 2.4rem);
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(390px, calc(100vw - 2rem));
+  background: #fff;
+  border-top: 8px solid var(--sky);
+  box-shadow: 0 30px 70px -28px rgba(0, 46, 109, 0.55);
+  padding: 1.6rem 1.7rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  z-index: 25;
+  animation: card-in 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(calc(-50% + 26px)); }
+  to   { opacity: 1; transform: translateY(-50%); }
+}
+.card__kicker {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: var(--sky);
+}
+.card__title {
+  font-size: 1.7rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.card__where {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--sunset);
+}
+.card__desc { font-size: 0.92rem; font-weight: 500; line-height: 1.5; color: #41557a; }
+.card__list { list-style: none; display: grid; gap: 0.45rem; }
+.card__list li {
+  position: relative;
+  padding-left: 1.4rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.card__list li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.38em;
+  width: 9px; height: 9px;
+  background: var(--sunray);
+  clip-path: polygon(0 100%, 100% 0, 100% 100%);
+}
+.card__hint {
+  margin-top: 0.3rem;
+  font-family: var(--f-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(0, 46, 109, 0.55);
+  border-top: 1px solid #e7ecf2;
+  padding-top: 0.7rem;
+}
+
+/* ============================================================
+   AVISOS
+   ============================================================ */
+.toast {
+  position: fixed;
+  top: 4.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--f-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  background: var(--sea-blue);
+  color: #fff;
+  padding: 0.55rem 1.1rem;
+  z-index: 30;
+  animation: toast-in 0.3s ease;
+}
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, -8px); } }
+
+.finale {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 1rem;
+  background: rgba(0, 46, 109, 0.88);
+  color: #fff;
+  z-index: 40;
+  padding: 2rem;
+}
+.finale__kicker {
+  font-family: var(--f-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--sunray);
+}
+.finale h2 {
+  font-size: clamp(1.8rem, 4.5vw, 3.2rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 1.05;
+}
+.finale__sub {
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  color: var(--horizon);
+}
+.finale button {
+  margin-top: 0.8rem;
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--sea-blue);
+  background: var(--sunray);
+  border: 0;
+  padding: 0.8rem 1.6rem;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.35);
+}
+.finale button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(0,0,0,0.35); }
+
+/* ============================================================
+   TACTIL
+   ============================================================ */
+.touchpad {
+  position: fixed;
+  right: 1rem;
+  bottom: 3.4rem;
+  display: none;
+  gap: 0.6rem;
+  z-index: 25;
+}
+.touchpad button {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  border: 3px solid var(--sea-blue);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--sea-blue);
+  font-size: 1.3rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+.touchpad button:active { background: var(--sunray); }
+@media (pointer: coarse) { .touchpad { display: flex; } }
+
+@media (max-width: 760px) {
+  .hud__keys { display: none; }
+  .card { top: auto; bottom: 6.4rem; transform: none; animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dockzone, .port.is-near .port__diamond { animation: none; }
+}

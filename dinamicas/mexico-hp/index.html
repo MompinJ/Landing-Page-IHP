@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Ruta Hutchison Mexico</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: RUTA HUTCHISON MEXICO
+       Mapa interactivo con las SEDES de Hutchison Ports en Mexico.
+       El participante navega un buque; al tocar tierra mexicana el
+       buque se convierte en GRUA MOVIL y puede recorrer el pais.
+       Al llegar a una sede salta su informacion EN GRANDE (modal de
+       pantalla completa) con todas las unidades de negocio de esa
+       ubicacion; hay que dar ACEPTAR para volver al juego.
+
+       SEDES Y UNIDADES (editables en js/mexico.js):
+       - ENSENADA: EIT
+       - MANZANILLO: TIMSA
+       - LAZARO CARDENAS: LCT y LCMT
+       - VERACRUZ: ICAVE, TNG y HPMX
+       - HIDALGO: TILH (tierra adentro: en grua, o en tren desde
+         Veracruz con la tecla T)
+
+       CONTROLES
+       - Flechas o WASD: virar / avanzar (barco en mar, grua en tierra)
+       - T: tren intermodal a Hidalgo (cerca de Veracruz)
+       - ENTER o click en ACEPTAR: cerrar la ficha y seguir
+       - R: reiniciar · tactil: botones en pantalla
+       ============================================================ -->
+
+  <div class="stage" id="stage">
+    <div class="board" id="board">
+      <svg id="map" preserveAspectRatio="xMidYMid meet"></svg>
+      <!-- sedes, vehiculo (barco/grua), tren y estela: js/mexico.js -->
+    </div>
+  </div>
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>RUTA HUTCHISON MEXICO</span></div>
+    <div class="chips" id="chips"></div>
+  </header>
+
+  <!-- ============ MODAL DE SEDE (pantalla completa) ============ -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal__sheet">
+      <div class="modal__head">
+        <p class="modal__kicker" id="modal-kicker">LLEGASTE A</p>
+        <h1 class="modal__title" id="modal-title">--</h1>
+        <p class="modal__state" id="modal-state">--</p>
+      </div>
+      <p class="modal__intro" id="modal-intro">--</p>
+      <div class="modal__units" id="modal-units"></div>
+      <button type="button" class="modal__ok" id="modal-ok">ACEPTAR [ENTER]</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker">DINAMICA COMPLETADA</p>
+    <h2>Recorriste las 5 sedes de<br>Hutchison Ports en Mexico.</h2>
+    <p class="finale__sub">ENSENADA · MANZANILLO · LAZARO CARDENAS · VERACRUZ · HIDALGO</p>
+    <button type="button" id="restart">REINICIAR RUTA [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">EN ALTAMAR</span>
+    <span class="hud__keys">flechas o WASD · tierra mexicana = grua movil · T = tren a Hidalgo · R = reiniciar</span>
+  </footer>
+
+  <div class="touchpad" aria-hidden="true">
+    <button type="button" data-k="a">&#8634;</button>
+    <button type="button" data-k="w">&#9650;</button>
+    <button type="button" data-k="d">&#8635;</button>
+  </div>
+
+  <script src="js/mexico.js"></script>
+</body>
+</html>

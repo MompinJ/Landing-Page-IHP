@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLANTILLA // Puerto 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PLANTILLA: PUERTO 3D (interactiva)
+       Un diorama de puerto construido en CSS 3D: buque atracado,
+       gruas STS trabajando (trolley y gancho se mueven solos),
+       patio de contenedores, gate y mar animado.
+
+       Cada slide es una ESTACION del puerto: la camara orbita
+       hasta ella. El usuario puede ARRASTRAR para orbitar el
+       diorama libremente en cualquier momento.
+
+       COMO USARLA
+       1. Duplica esta carpeta a presentations/<tu-slug>/
+       2. Edita las <section class="panel"> y, si quieres, las
+          vistas de camara (VIEWS) en js/puerto.js
+       3. Registra tu presentacion en presentations.json
+       ============================================================ -->
+
+  <div class="viewport" id="viewport">
+    <div class="world" id="world">
+      <!-- el diorama completo lo genera js/puerto.js -->
+    </div>
+  </div>
+
+  <main class="panels">
+
+    <!-- ESTACION 01 : el buque (portada) -->
+    <section class="panel is-active">
+      <p class="kicker">PLANTILLA / PUERTO 3D · EST. BUQUE</p>
+      <h1>Tu proyecto,<br>visto desde el muelle.</h1>
+      <p class="copy">Cada slide es una estacion del puerto y la camara orbita hasta ella. Arrastra con el mouse: el diorama es tuyo.</p>
+    </section>
+
+    <!-- ESTACION 02 : muelle -->
+    <section class="panel">
+      <p class="kicker">EST. MUELLE / CONTEXTO</p>
+      <h2>Donde atraca el problema.</h2>
+      <p class="copy">El contexto de tu proyecto. Mientras hablas, las gruas del fondo siguen trabajando: el puerto nunca se detiene.</p>
+      <ul class="list">
+        <li>Hecho uno del contexto</li>
+        <li>Hecho dos del contexto</li>
+      </ul>
+    </section>
+
+    <!-- ESTACION 03 : grua -->
+    <section class="panel">
+      <p class="kicker">EST. GRUA / PROPUESTA</p>
+      <h2>La maniobra principal.</h2>
+      <p class="copy">Tu propuesta vista de cerca. La camara esta pegada a la grua: mira el trolley ir y venir sobre el buque.</p>
+      <ul class="list">
+        <li>Movimiento uno del plan</li>
+        <li>Movimiento dos del plan</li>
+      </ul>
+    </section>
+
+    <!-- ESTACION 04 : patio -->
+    <section class="panel">
+      <p class="kicker">EST. PATIO / DATO</p>
+      <p class="bignum">96.4%</p>
+      <p class="copy">Vista cenital del patio para el dato fuerte. Una cifra sobre miles de contenedores.</p>
+    </section>
+
+    <!-- ESTACION 05 : gate -->
+    <section class="panel">
+      <p class="kicker">EST. GATE / PERSONALIZAR</p>
+      <h2>Hazla tuya.</h2>
+      <ul class="list">
+        <li>Vistas de camara por slide: arreglo <code>VIEWS</code> en <code>js/puerto.js</code></li>
+        <li>Paneles de contenido: <code>&lt;section class="panel"&gt;</code></li>
+        <li>Colores del diorama: constantes al inicio del JS</li>
+        <li>Arrastra para orbitar; la camara vuelve sola a la estacion</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <header class="hud hud--top">
+    <span class="hud__brand">PUERTO_3D</span>
+    <span id="hud-station">EST. 01 — BUQUE</span>
+  </header>
+  <footer class="hud hud--bottom">
+    <span id="hud-counter">01 / --</span>
+    <span class="hud__hint">arrastra para orbitar · flechas para cambiar de estacion</span>
+  </footer>
+
+  <script src="js/puerto.js"></script>
+</body>
+</html>

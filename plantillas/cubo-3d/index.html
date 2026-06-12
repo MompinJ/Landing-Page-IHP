@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLANTILLA // Cubo 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PLANTILLA: CUBO 3D
+       Cada transicion rota un cubo en el espacio. Soporta N slides.
+
+       COMO USARLA
+       1. Duplica esta carpeta a presentations/<tu-slug>/
+       2. Edita las <section class="slide"> de abajo (agrega o quita las que quieras)
+       3. Cambia los colores en css/styles.css (variables :root)
+       4. Registra tu presentacion en presentations.json
+
+       NAVEGACION
+       Flechas / espacio / PgUp-PgDn · swipe en tactil · Home/End
+       ============================================================ -->
+
+  <div class="scene" id="scene">
+    <div class="cube" id="cube">
+
+      <!-- SLIDE 01 : portada -->
+      <section class="slide">
+        <div class="slide__inner slide--cover">
+          <p class="kicker">[ PLANTILLA / CUBO 3D ]</p>
+          <h1>Titulo de tu<br><em>presentacion</em></h1>
+          <p class="lead">Subtitulo o frase de apertura. Cada cambio de slide rota un cubo real en CSS 3D.</p>
+          <p class="meta">AUTOR · FECHA · CONTEXTO</p>
+        </div>
+      </section>
+
+      <!-- SLIDE 02 : agenda -->
+      <section class="slide">
+        <div class="slide__inner">
+          <p class="kicker">[ 02 / AGENDA ]</p>
+          <h2>De que va esto</h2>
+          <ol class="agenda">
+            <li><span>01</span> Primer punto del recorrido</li>
+            <li><span>02</span> Segundo punto, el problema</li>
+            <li><span>03</span> Tercer punto, la propuesta</li>
+            <li><span>04</span> Cierre y siguientes pasos</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- SLIDE 03 : contenido a dos columnas -->
+      <section class="slide">
+        <div class="slide__inner">
+          <p class="kicker">[ 03 / CONTEXTO ]</p>
+          <h2>Slide a dos columnas</h2>
+          <div class="cols">
+            <div>
+              <h3>Columna A</h3>
+              <p>Reemplaza este texto. Manten una idea por slide: el cubo le da peso fisico a cada cambio, no lo desperdicies con parrafos largos.</p>
+            </div>
+            <div>
+              <h3>Columna B</h3>
+              <p>Puedes meter imagenes, codigo o diagramas. El layout es flexbox simple, sin dependencias.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 04 : cifra grande -->
+      <section class="slide">
+        <div class="slide__inner slide--big">
+          <p class="kicker">[ 04 / DATO ]</p>
+          <p class="bignum">87%</p>
+          <p class="lead">Una sola cifra enorme comunica mas que tres graficas. Usa este layout para el dato que sostiene tu argumento.</p>
+        </div>
+      </section>
+
+      <!-- SLIDE 05 : cita -->
+      <section class="slide">
+        <div class="slide__inner slide--quote">
+          <blockquote>
+            "Una cita potente, corta y atribuida vale por diez bullets."
+          </blockquote>
+          <p class="meta">— NOMBRE, CARGO</p>
+        </div>
+      </section>
+
+      <!-- SLIDE 06 : cierre / instrucciones -->
+      <section class="slide">
+        <div class="slide__inner">
+          <p class="kicker">[ 06 / COMO PERSONALIZAR ]</p>
+          <h2>Hazla tuya</h2>
+          <ul class="checklist">
+            <li>Colores: variables <code>--bg</code>, <code>--accent</code> en <code>css/styles.css</code></li>
+            <li>Slides: agrega o borra <code>&lt;section class="slide"&gt;</code> en este archivo</li>
+            <li>Fuentes: cambia el <code>&lt;link&gt;</code> de Google Fonts</li>
+            <li>Velocidad del giro: <code>SPIN_MS</code> en <code>js/cubo.js</code></li>
+          </ul>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- HUD: progreso + contador + ayuda -->
+  <div class="hud">
+    <div class="hud__bar"><span id="hud-fill"></span></div>
+    <p class="hud__counter"><span id="hud-now">01</span> / <span id="hud-total">--</span></p>
+    <p class="hud__hint">flechas o swipe para girar el cubo</p>
+  </div>
+
+  <script src="js/cubo.js"></script>
+</body>
+</html>

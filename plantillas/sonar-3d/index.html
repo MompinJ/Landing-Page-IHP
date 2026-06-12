@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLANTILLA // Sonar 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PLANTILLA: SONAR 3D
+       Inmersion en submarino: cada slide es una profundidad mayor.
+       El medidor de metros se anima en cada cambio, el sonar barre
+       en tiempo real y la transicion es un descenso fisico
+       (la slide vieja pasa sobre la camara, la nueva sube del fondo).
+
+       CADA SLIDE DECLARA SU PROFUNDIDAD Y ZONA:
+         data-depth="450"            metros (anima el contador del HUD)
+         data-zone="ZONA BATIAL"     etiqueta de zona en el HUD
+
+       COMO USARLA
+       1. Duplica esta carpeta a presentations/<tu-slug>/
+       2. Edita las <section class="slide"> y sus data-depth
+       3. Colores en css/styles.css (:root)
+       4. Registra tu presentacion en presentations.json
+       ============================================================ -->
+
+  <!-- nieve marina (particulas), la genera js/sonar.js -->
+  <div class="snow" id="snow" aria-hidden="true"></div>
+
+  <!-- anillo de ping que se dispara en cada transicion -->
+  <div class="ping" id="ping" aria-hidden="true"></div>
+
+  <main class="deck" id="deck">
+
+    <!-- SLIDE 01 : superficie -->
+    <section class="slide is-active" data-depth="0" data-zone="SUPERFICIE">
+      <p class="kicker">[ PLANTILLA / SONAR 3D ]</p>
+      <h1>Titulo de tu<br><em>inmersion</em></h1>
+      <p class="lead">Cada slide desciende a una profundidad mayor. Mira el medidor de la izquierda: no es decoracion, responde a cada cambio.</p>
+      <p class="meta">AUTOR · FECHA · MISION</p>
+    </section>
+
+    <!-- SLIDE 02 -->
+    <section class="slide" data-depth="200" data-zone="ZONA FOTICA">
+      <p class="kicker">[ -200 M / CONTEXTO ]</p>
+      <h2>El problema en la superficie</h2>
+      <p>Plantea el problema. A esta profundidad todavia llega la luz: usa esta seccion para lo que tu audiencia ya conoce.</p>
+      <ul class="readout">
+        <li><span>CONTACTO 01</span> primer sintoma del problema</li>
+        <li><span>CONTACTO 02</span> segundo sintoma del problema</li>
+        <li><span>CONTACTO 03</span> tercer sintoma del problema</li>
+      </ul>
+    </section>
+
+    <!-- SLIDE 03 -->
+    <section class="slide" data-depth="800" data-zone="ZONA BATIAL">
+      <p class="kicker">[ -800 M / DIAGNOSTICO ]</p>
+      <h2>La causa real esta mas abajo</h2>
+      <p>Aqui ya no llega la luz: este es el insight que tu audiencia no habia visto. La estructura de inmersion construye sola la sensacion de ir al fondo del asunto.</p>
+      <div class="panel">
+        <p class="panel__label">LECTURA DEL SONAR</p>
+        <p>Reemplaza este panel con tu dato o diagrama central.</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 04 : dato -->
+    <section class="slide" data-depth="2400" data-zone="ZONA ABISAL">
+      <p class="kicker">[ -2400 M / HALLAZGO ]</p>
+      <p class="bignum">-94%</p>
+      <p class="lead">El dato que encontraste en el fondo. Una cifra, sin adornos: la presion de la profundidad ya hizo el trabajo dramatico.</p>
+    </section>
+
+    <!-- SLIDE 05 : cierre -->
+    <section class="slide" data-depth="3650" data-zone="FOSA / FONDO">
+      <p class="kicker">[ -3650 M / PERSONALIZAR ]</p>
+      <h2>Hazla tuya</h2>
+      <ul class="readout">
+        <li><span>DEPTH</span> cambia <code>data-depth</code> y <code>data-zone</code> en cada slide</li>
+        <li><span>COLOR</span> verde sonar y ambar en <code>css/styles.css</code> (:root)</li>
+        <li><span>RITMO</span> velocidad del descenso: <code>DIVE_MS</code> en <code>js/sonar.js</code></li>
+        <li><span>EXTRA</span> la nieve marina y el barrido del sonar son automaticos</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- HUD lateral: medidor de profundidad -->
+  <aside class="gauge" aria-hidden="true">
+    <div class="gauge__track"><span id="gauge-fill"></span></div>
+    <p class="gauge__depth"><span id="gauge-num">0</span><small>M</small></p>
+    <p class="gauge__zone" id="gauge-zone">SUPERFICIE</p>
+  </aside>
+
+  <!-- HUD esquina: pantalla de sonar con barrido y blips -->
+  <aside class="sonar" aria-hidden="true">
+    <div class="sonar__sweep"></div>
+    <div class="sonar__blips" id="sonar-blips"></div>
+  </aside>
+
+  <footer class="hud">
+    <span id="hud-counter">01 / --</span>
+    <span class="hud__hint">flechas o swipe para descender</span>
+    <span class="hud__status">SONAR ACTIVO<i></i></span>
+  </footer>
+
+  <script src="js/sonar.js"></script>
+</body>
+</html>

@@ -8,17 +8,163 @@
       "date": "2026-05",
       "tags": ["UCC", "Salud", "Ejecutiva"],
       "accent": "#0f4c2d",
+      "theme": "check-eat",
       "path": "presentations/check-eat/index.html"
     },
     {
-      "slug": "hub-ihp",
-      "title": "HUB Hutchison Ports",
-      "subtitle": "Infraestructura Azure - Mexico Central",
-      "description": "Inventario y arquitectura de la plataforma HUB sobre Azure: VNet con 4 subnets, 4 microservicios en App Service Linux, PostgreSQL Flexible, Redis, Blob, Key Vault, ACR, Application Gateway, Front Door, Static Web App, Functions y observabilidad. Diferencias MVP vs Produccion. Costos pendientes.",
-      "date": "2026-05",
+      "slug": "infra-azure-hub",
+      "title": "Infraestructura Azure",
+      "subtitle": "HUB Hutchison Ports · Ultra-MVP — Mexico Central",
+      "description": "Arquitectura Ultra-MVP de la infraestructura Azure que soporta al HUB: VNet con 2 subnets, App Service Plan P0V3 con 4 microservicios, PostgreSQL Flexible B1ms, Redis Basic, Blob Storage, Key Vault, ACR, Static Web Apps y observabilidad (Log Analytics + App Insights). 10 slides interactivas (React) con costo optimizado de ~$144.25 USD/mes.",
+      "date": "2026-06",
       "tags": ["Hutchison Ports", "Azure", "Infraestructura", "Bicep"],
       "accent": "#009BDE",
-      "path": "presentations/hub-ihp/index.html"
+      "theme": "infra-azure-hub",
+      "path": "presentations/infra-azure-hub/index.html"
+    }
+  ],
+  "templates": [
+    {
+      "slug": "cubo-3d",
+      "title": "Cubo 3D",
+      "subtitle": "Cada transicion rota un cubo real",
+      "description": "Plantilla oscura con acento cian electrico. Las slides son caras de un cubo CSS 3D que gira en cada cambio; soporta cualquier numero de slides. Navegacion con teclado, swipe y rueda.",
+      "tags": ["Plantilla", "CSS 3D", "Oscura"],
+      "accent": "#22d3ee",
+      "theme": "tpl-cubo-3d",
+      "path": "plantillas/cubo-3d/index.html"
+    },
+    {
+      "slug": "orbita-3d",
+      "title": "Orbita 3D",
+      "subtitle": "Carrusel cilindrico con inercia",
+      "description": "Las slides flotan en un anillo 3D sobre un cielo aurora. Se gira con flechas o arrastrando con inercia; click en una slide lateral la trae al frente. Glassmorphism violeta y cian.",
+      "tags": ["Plantilla", "CSS 3D", "Glassmorphism"],
+      "accent": "#c084fc",
+      "theme": "tpl-orbita-3d",
+      "path": "plantillas/orbita-3d/index.html"
+    },
+    {
+      "slug": "profundidad-3d",
+      "title": "Profundidad 3D",
+      "subtitle": "Lienzo infinito estilo impress.js",
+      "description": "Las slides viven en un espacio 3D con coordenadas propias y la camara vuela entre ellas: pan, zoom profundo y rotaciones en 3 ejes. Esc muestra el mapa completo. Estetica editorial: papel, serif y tinta.",
+      "tags": ["Plantilla", "Impress", "Editorial"],
+      "accent": "#c2410c",
+      "theme": "tpl-profundidad-3d",
+      "path": "plantillas/profundidad-3d/index.html"
+    },
+    {
+      "slug": "galaxia-3d",
+      "title": "Galaxia 3D",
+      "subtitle": "Campo de estrellas WebGL con warp",
+      "description": "Miles de estrellas renderizadas con Three.js detras de slides de vidrio. Cada cambio de slide dispara un salto a warp y el fondo sigue al mouse con parallax. Si no hay internet, cae a un fondo estatico.",
+      "tags": ["Plantilla", "WebGL", "Three.js"],
+      "accent": "#8b9cff",
+      "theme": "tpl-galaxia-3d",
+      "path": "plantillas/galaxia-3d/index.html"
+    },
+    {
+      "slug": "sonar-3d",
+      "title": "Sonar 3D",
+      "subtitle": "Inmersion en submarino, CRT verde",
+      "description": "Cada slide desciende a una profundidad mayor: el medidor de metros se anima en cada cambio, el sonar barre en tiempo real con blips por slide, hay nieve marina flotando y la transicion es un descenso fisico en Z con ping incluido.",
+      "tags": ["Plantilla", "Naval", "Submarino"],
+      "accent": "#34d399",
+      "theme": "tpl-sonar-3d",
+      "path": "plantillas/sonar-3d/index.html"
+    },
+    {
+      "slug": "altamar-3d",
+      "title": "Altamar 3D",
+      "subtitle": "Travesia con oleaje vivo en canvas",
+      "description": "Oleaje real dibujado en canvas que se embravece en cada transicion, slides que se mecen como veleros y un cielo que viaja del amanecer a la noche conforme avanzas. La bitacora del HUD actualiza lat/lon en cada singladura.",
+      "tags": ["Plantilla", "Naval", "Canvas"],
+      "accent": "#c8401a",
+      "theme": "tpl-altamar-3d",
+      "path": "plantillas/altamar-3d/index.html"
+    },
+    {
+      "slug": "carta-nautica-3d",
+      "title": "Carta Nautica 3D",
+      "subtitle": "Mesa de derrota con ruta trazada en vivo",
+      "description": "Las slides son waypoints clavados sobre una carta nautica inclinada en 3D. La camara navega entre ellos, la derrota se traza en rojo conforme avanzas y un barco recorre la ruta. Esc levanta la vista a toda la carta.",
+      "tags": ["Plantilla", "Naval", "Impress"],
+      "accent": "#b3261e",
+      "theme": "tpl-carta-nautica-3d",
+      "path": "plantillas/carta-nautica-3d/index.html"
+    },
+    {
+      "slug": "hp-corporativo-3d",
+      "title": "HP Corporativo 3D",
+      "subtitle": "Sistema de marca al angulo 30.3",
+      "description": "Plantilla fiel al manual Hutchison Ports v4.1: formas Sky/Sea/Horizon planas, Montserrat con titulares Black en mayusculas, paleta oficial completa y transicion de barrido diagonal a 30.3 grados con parallax por capas. Incluye slide divisoria con numeral gigante y contador de dato animado.",
+      "tags": ["Plantilla", "Hutchison Ports", "Brand"],
+      "accent": "#009BDE",
+      "theme": "tpl-hp-corporativo-3d",
+      "path": "plantillas/hp-corporativo-3d/index.html"
+    },
+    {
+      "slug": "hp-terminal-3d",
+      "title": "HP Terminal 3D",
+      "subtitle": "La grua baja cada slide en contenedor",
+      "description": "Patio de contenedores: cada slide es un contenedor 3D real (frente corrugado, costado y techo) colgado del spreader. La grua iza el actual y baja el siguiente con balanceo fisico. Contenedores en la paleta oficial, patio de fondo con pilas, grua lejana y AGV cruzando.",
+      "tags": ["Plantilla", "Hutchison Ports", "Contenedores"],
+      "accent": "#FFC627",
+      "theme": "tpl-hp-terminal-3d",
+      "path": "plantillas/hp-terminal-3d/index.html"
+    },
+    {
+      "slug": "hp-red-global-3d",
+      "title": "HP Red Global 3D",
+      "subtitle": "El globo gira hasta cada puerto",
+      "description": "The World's Leading Port Network: globo de puntos WebGL que gira hasta el puerto de cada slide, con arcos entre escalas y pulsos de carga viajando en tiempo real. Puertos reales de la red (HIT, ICAVE, BEST, Felixstowe) editables con lat/lon. Fallback estatico sin internet.",
+      "tags": ["Plantilla", "Hutchison Ports", "WebGL"],
+      "accent": "#002E6D",
+      "theme": "tpl-hp-red-global-3d",
+      "path": "plantillas/hp-red-global-3d/index.html"
+    },
+    {
+      "slug": "ciudad-3d",
+      "title": "Ciudad 3D",
+      "subtitle": "Arrastra para mirar la avenida",
+      "description": "Una ciudad nocturna generada en CSS 3D: torres con ventanas encendidas, neones y luna. Cada slide es un espectacular LED y la camara vuela por la avenida entre uno y otro. Interactiva: arrastra en cualquier momento para mirar alrededor; al soltar, la vista regresa sola al rumbo.",
+      "tags": ["Plantilla", "Interactiva", "CSS 3D"],
+      "accent": "#22d3ee",
+      "theme": "tpl-ciudad-3d",
+      "path": "plantillas/ciudad-3d/index.html"
+    },
+    {
+      "slug": "puerto-3d",
+      "title": "Puerto 3D",
+      "subtitle": "Orbita el diorama del puerto",
+      "description": "Diorama completo en CSS 3D: buque atracado que se mece, dos gruas STS trabajando solas (trolley y gancho en movimiento), patio de contenedores, gate y mar animado. Cada slide es una estacion y la camara orbita hasta ella; arrastra para orbitar libremente cuando quieras.",
+      "tags": ["Plantilla", "Interactiva", "Diorama"],
+      "accent": "#0b78c2",
+      "theme": "tpl-puerto-3d",
+      "path": "plantillas/puerto-3d/index.html"
+    },
+    {
+      "slug": "grua-sim-3d",
+      "title": "Grua Sim 3D",
+      "subtitle": "Opera la grua tu mismo",
+      "description": "Cada slide viaja en un contenedor que mueve una grua portico con fisica de pendulo real. Modo AUTO: las flechas ejecutan la maniobra completa (archivar en la pila, camion trae la siguiente). Modo CABINA (tecla M): tu controlas trolley, izaje y enganche con A/D, W/S y ESPACIO.",
+      "tags": ["Plantilla", "Interactiva", "Simulador"],
+      "accent": "#ffc115",
+      "theme": "tpl-grua-sim-3d",
+      "path": "plantillas/grua-sim-3d/index.html"
+    }
+  ],
+  "dinamicas": [
+    {
+      "slug": "mexico-hp",
+      "title": "Ruta Hutchison Mexico",
+      "subtitle": "Navega y desembarca en las 5 sedes",
+      "description": "Mapa interactivo de Mexico con las sedes de Hutchison Ports: Ensenada, Manzanillo, Lazaro Cardenas, Veracruz e Hidalgo. El participante navega un buque que al tocar tierra mexicana se convierte en grua movil para recorrer el pais. Al llegar a cada sede salta su ficha en pantalla completa con todas sus unidades (ICAVE, TNG y HPMX en Veracruz; LCT y LCMT en Lazaro...) y hay que dar ACEPTAR para seguir. Tren intermodal a Hidalgo incluido.",
+      "tags": ["Dinamica", "Hutchison Ports", "Juego"],
+      "accent": "#FFC627",
+      "theme": "dyn-mexico-hp",
+      "path": "dinamicas/mexico-hp/index.html"
     }
   ]
 }

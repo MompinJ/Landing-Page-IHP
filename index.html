@@ -3,25 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Presentaciones</title>
+  <title>PRESENTACIONES // repositorio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Fuentes del hub + de cada tema de presentacion -->
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=Space+Mono:wght@400;700&family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="hub.css">
 </head>
 <body>
+  <!-- Marquee superior (titulos, poblado por hub.js desde el manifest) -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track" id="ticker-track"></div>
+  </div>
+
   <header class="hub-header">
-    <div class="hub-header__inner">
-      <p class="hub-header__eyebrow">REPOSITORIO</p>
-      <h1 class="hub-header__title">Presentaciones</h1>
-      <p class="hub-header__subtitle">Indice navegable de presentaciones independientes. Cada una con su propio estilo, contenido y logica.</p>
-    </div>
+    <span class="hub-header__eyebrow">[ ARCHIVO_VISUAL · v2.0 ]</span>
+    <h1 class="hub-header__title">PRESENTACIONES</h1>
+    <p class="hub-header__subtitle">
+      Indice de presentaciones independientes. Cada tarjeta abajo
+      <strong>roba el estilo de su propia presentacion</strong> — asi que esto se ve,
+      a proposito, como un choque de mundos.
+    </p>
+    <span class="sticker sticker--1" aria-hidden="true">★ MULTI-ESTILO</span>
+    <span class="sticker sticker--2" aria-hidden="true">NO_FILTER</span>
   </header>
 
   <main class="hub-main">
     <section class="hub-section">
       <div class="hub-section__head">
-        <h2 class="hub-section__title">Disponibles</h2>
+        <h2 class="hub-section__title">DISPONIBLES</h2>
         <p class="hub-section__count" id="hub-count">--</p>
       </div>
 
@@ -30,18 +40,50 @@
       </div>
     </section>
 
+    <section class="hub-section">
+      <div class="hub-section__head">
+        <h2 class="hub-section__title hub-section__title--tpl">PLANTILLAS 3D</h2>
+        <p class="hub-section__count" id="tpl-count">--</p>
+      </div>
+      <p class="hub-section__note">
+        Bases listas para duplicar: copia <code>plantillas/&lt;slug&gt;/</code> a
+        <code>presentations/&lt;tu-slug&gt;/</code>, edita las slides y registrala en el manifest.
+      </p>
+
+      <div id="tpl-grid" class="hub-grid" aria-live="polite">
+        <p class="hub-loading">Cargando plantillas...</p>
+      </div>
+    </section>
+
+    <section class="hub-section">
+      <div class="hub-section__head">
+        <h2 class="hub-section__title hub-section__title--dyn">DINAMICAS</h2>
+        <p class="hub-section__count" id="dyn-count">--</p>
+      </div>
+      <p class="hub-section__note">
+        Juegos interactivos para la audiencia: navegar, operar, ordenar.
+        Viven en <code>dinamicas/&lt;slug&gt;/</code> y se registran bajo la clave <code>dinamicas</code> del manifest.
+      </p>
+
+      <div id="dyn-grid" class="hub-grid" aria-live="polite">
+        <p class="hub-loading">Cargando dinamicas...</p>
+      </div>
+    </section>
+
     <section class="hub-section hub-section--add">
-      <h2 class="hub-section__title">Agregar una presentacion</h2>
+      <h2 class="hub-section__title">AGREGAR UNA PRESENTACION</h2>
       <ol class="hub-steps">
         <li>Crear carpeta en <code>presentations/&lt;slug&gt;/</code> con su propio <code>index.html</code>, CSS, JS y assets.</li>
-        <li>Agregar entrada en <code>presentations.json</code> con titulo, descripcion, fecha, tags y <code>path</code>.</li>
-        <li>Recargar este hub.</li>
+        <li>Agregar entrada en <code>presentations.json</code> (incluye <code>theme</code> para que su tarjeta adopte su estilo).</li>
+        <li>Definir el bloque de tema en <code>hub.css</code> bajo <code>[data-theme="&lt;slug&gt;"]</code> y recargar.</li>
       </ol>
     </section>
   </main>
 
   <footer class="hub-footer">
-    <p>Hub estatico - HTML/CSS/JS vanilla, sin build.</p>
+    <span>HUB ESTATICO</span>
+    <span>HTML/CSS/JS VANILLA · SIN BUILD</span>
+    <span>// FIN //</span>
   </footer>
 
   <script src="hub.js"></script>

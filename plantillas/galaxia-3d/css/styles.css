@@ -1,0 +1,224 @@
+/* ============================================================
+   PLANTILLA GALAXIA 3D — "VOID"
+   Texto flotando sobre un campo de estrellas WebGL.
+   ============================================================ */
+
+:root {
+  --void: #030308;
+  --ink: #eef1f8;
+  --ink-soft: #9aa3b8;
+  --accent: #8b9cff;          /* azul estelar */
+  --accent-hot: #ffc46b;      /* dorado de estrella vieja */
+  --glass: rgba(10, 12, 24, 0.42);
+  --glass-edge: rgba(139, 156, 255, 0.18);
+  --f-display: 'Space Grotesk', sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-display);
+  color: var(--ink);
+  /* fallback si WebGL/CDN no estan disponibles */
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 20%, rgba(139, 156, 255, 0.12), transparent 60%),
+    radial-gradient(ellipse 50% 60% at 20% 85%, rgba(255, 196, 107, 0.07), transparent 60%),
+    var(--void);
+}
+
+#space {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ============================================================
+   DECK (overlay DOM encima del canvas)
+   ============================================================ */
+.deck {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.5rem, 5vw, 4rem);
+}
+
+.slide {
+  grid-area: 1 / 1;
+  width: min(900px, 100%);
+  padding: clamp(2rem, 4.5vw, 3.8rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  border-radius: 20px;
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.9);
+
+  /* estado oculto: las transiciones las orquesta JS con .is-active */
+  opacity: 0;
+  transform: scale(0.92) translateY(26px);
+  pointer-events: none;
+  transition:
+    opacity 0.55s ease,
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide.is-active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+/* la saliente se va hacia el espectador (sensacion de warp) */
+.slide.is-leaving {
+  opacity: 0;
+  transform: scale(1.12) translateY(-10px);
+}
+
+/* ============================================================
+   TIPOGRAFIA / COMPONENTES
+   ============================================================ */
+.kicker {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: var(--accent);
+}
+
+h1 {
+  font-size: clamp(2.6rem, 6.5vw, 5rem);
+  font-weight: 700;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+}
+h1 em {
+  font-style: normal;
+  color: var(--accent-hot);
+  text-shadow: 0 0 40px rgba(255, 196, 107, 0.4);
+}
+
+h2 {
+  font-size: clamp(1.7rem, 4vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+p { color: var(--ink-soft); line-height: 1.6; max-width: 52ch; }
+.lead { font-size: clamp(1rem, 1.8vw, 1.2rem); }
+
+.meta {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  margin-top: 0.8rem;
+}
+
+.points {
+  list-style: none;
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.4rem;
+}
+.points li {
+  position: relative;
+  padding-left: 1.7rem;
+  color: var(--ink);
+  font-weight: 500;
+  line-height: 1.5;
+}
+.points li::before {
+  content: "*";
+  position: absolute;
+  left: 0; top: 0.05em;
+  font-family: var(--f-mono);
+  font-weight: 700;
+  color: var(--accent-hot);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.6rem;
+}
+.cell {
+  padding: 1.1rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid var(--glass-edge);
+  background: rgba(139, 156, 255, 0.05);
+  display: grid;
+  gap: 0.3rem;
+}
+.cell strong { font-size: 1.05rem; color: var(--accent); }
+.cell span { font-size: 0.88rem; color: var(--ink-soft); }
+
+.slide--big .bignum {
+  font-size: clamp(5rem, 15vw, 11rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  text-shadow: 0 0 80px rgba(139, 156, 255, 0.5);
+}
+.bignum sup { font-size: 0.4em; color: var(--accent); }
+
+code {
+  font-family: var(--f-mono);
+  font-size: 0.85em;
+  color: var(--accent);
+  background: rgba(139, 156, 255, 0.12);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   HUD
+   ============================================================ */
+.hud {
+  position: fixed;
+  left: 50%;
+  bottom: 1.3rem;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  font-family: var(--f-mono);
+  z-index: 10;
+}
+.hud__bar {
+  width: 150px;
+  height: 2px;
+  background: rgba(139, 156, 255, 0.2);
+  overflow: hidden;
+}
+.hud__bar span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  transition: width 0.5s ease;
+}
+.hud__counter { font-size: 0.7rem; letter-spacing: 0.15em; color: var(--ink); }
+.hud__hint { font-size: 0.64rem; letter-spacing: 0.1em; color: var(--ink-soft); }
+
+/* ============================================================
+   RESPONSIVE / MOTION
+   ============================================================ */
+@media (max-width: 700px) {
+  .grid2 { grid-template-columns: 1fr; }
+  .hud__hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide { transition-duration: 0.01ms; }
+}

@@ -1,0 +1,532 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.43.8.12551",
+      "templateHash": "2238274099653395650"
+    }
+  },
+  "parameters": {
+    "ubicacion": {
+      "type": "string",
+      "defaultValue": "mexicocentral",
+      "metadata": {
+        "description": "Region de Azure"
+      }
+    },
+    "prefijo": {
+      "type": "string",
+      "defaultValue": "hubihp",
+      "metadata": {
+        "description": "Prefijo para nombrar recursos"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password del administrador de PostgreSQL. Pasar via linea de comandos, NO hardcodear."
+      }
+    },
+    "jwtRefreshPepper": {
+      "type": "securestring",
+      "defaultValue": "[format('{0}{1}{2}', uniqueString(resourceGroup().id, 'pepper'), uniqueString(subscription().id, 'pepper'), uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Pepper para hash de refresh tokens del Gateway. Debe medir >= 32 chars (el @PostConstruct revienta si no)."
+      }
+    },
+    "internalSharedSecret": {
+      "type": "securestring",
+      "defaultValue": "[format('{0}{1}', uniqueString(resourceGroup().id, 'internal'), uniqueString(subscription().id, 'internal'))]",
+      "metadata": {
+        "description": "Secreto compartido para la comunicacion interna Gateway <-> Comunidad (InternalSecretFilter)."
+      }
+    },
+    "imagenGateway": {
+      "type": "string",
+      "defaultValue": "mcr.microsoft.com/azuredocs/aci-helloworld",
+      "metadata": {
+        "description": "Imagen Docker del API Gateway. Reemplazar por la imagen del ACR cuando exista."
+      }
+    },
+    "imagenComunidad": {
+      "type": "string",
+      "defaultValue": "mcr.microsoft.com/azuredocs/aci-helloworld",
+      "metadata": {
+        "description": "Imagen Docker de Comunidad-HP. Reemplazar por la imagen del ACR cuando exista."
+      }
+    },
+    "imagenReportes": {
+      "type": "string",
+      "defaultValue": "mcr.microsoft.com/azuredocs/aci-helloworld",
+      "metadata": {
+        "description": "Imagen Docker de Reportes-LMS (Python/FastAPI). Reemplazar por la imagen del ACR cuando se readapte."
+      }
+    },
+    "imagenElearning": {
+      "type": "string",
+      "defaultValue": "mcr.microsoft.com/azuredocs/aci-helloworld",
+      "metadata": {
+        "description": "Imagen Docker de E-Learning. Reemplazar por la imagen del ACR cuando exista."
+      }
+    }
+  },
+  "variables": {
+    "planSkuNombre": "B3",
+    "planSkuTier": "Basic",
+    "sufijo": "[format('{0}-mvp', parameters('prefijo'))]",
+    "servicios": [
+      {
+        "nombre": "api-gateway",
+        "imagen": "[parameters('imagenGateway')]"
+      },
+      {
+        "nombre": "comunidad-hp",
+        "imagen": "[parameters('imagenComunidad')]"
+      },
+      {
+        "nombre": "reportes-lms",
+        "imagen": "[parameters('imagenReportes')]"
+      },
+      {
+        "nombre": "e-learning",
+        "imagen": "[parameters('imagenElearning')]"
+      }
+    ],
+    "rolKeyVaultSecretsUser": "4633458b-17de-408a-b874-0445c86b69e6"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2023-04-01",
+      "name": "[format('vnet-{0}', variables('sufijo'))]",
+      "location": "[parameters('ubicacion')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "subnet-computo",
+            "properties": {
+              "addressPrefix": "10.0.1.0/24",
+              "delegations": [
+                {
+                  "name": "appservice",
+                  "properties": {
+                    "serviceName": "Microsoft.Web/serverFarms"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "subnet-datos",
+            "properties": {
+              "addressPrefix": "10.0.2.0/24",
+              "delegations": [
+                {
+                  "name": "postgresql",
+                  "properties": {
+                    "serviceName": "Microsoft.DBforPostgreSQL/flexibleServers"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2022-10-01",
+      "name": "[format('law-{0}', variables('sufijo'))]",
+      "location": "[parameters('ubicacion')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[format('ai-{0}', variables('sufijo'))]",
+      "location": "[parameters('ubicacion')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', format('law-{0}', variables('sufijo')))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', format('law-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2020-06-01",
+      "name": "[format('{0}.postgres.database.azure.com', parameters('prefijo'))]",
+      "location": "global"
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2020-06-01",
+      "name": "[format('{0}/{1}', format('{0}.postgres.database.azure.com', parameters('prefijo')), format('{0}-link', parameters('prefijo')))]",
+      "location": "global",
+      "properties": {
+        "virtualNetwork": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', variables('sufijo')))]"
+        },
+        "registrationEnabled": false
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', format('{0}.postgres.database.azure.com', parameters('prefijo')))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+      "apiVersion": "2023-03-01-preview",
+      "name": "[format('pg-{0}', variables('sufijo'))]",
+      "location": "[parameters('ubicacion')]",
+      "sku": {
+        "name": "Standard_B1ms",
+        "tier": "Burstable"
+      },
+      "properties": {
+        "version": "16",
+        "administratorLogin": "pgadmin",
+        "administratorLoginPassword": "[parameters('adminPassword')]",
+        "storage": {
+          "storageSizeGB": 32
+        },
+        "highAvailability": {
+          "mode": "Disabled"
+        },
+        "network": {
+          "delegatedSubnetResourceId": "[format('{0}/subnets/subnet-datos', resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', variables('sufijo'))))]",
+          "privateDnsZoneArmResourceId": "[resourceId('Microsoft.Network/privateDnsZones', format('{0}.postgres.database.azure.com', parameters('prefijo')))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', format('{0}.postgres.database.azure.com', parameters('prefijo')))]",
+        "[resourceId('Microsoft.Network/privateDnsZones/virtualNetworkLinks', format('{0}.postgres.database.azure.com', parameters('prefijo')), format('{0}-link', parameters('prefijo')))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases",
+      "apiVersion": "2023-03-01-preview",
+      "name": "[format('{0}/{1}', format('pg-{0}', variables('sufijo')), 'gateway')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('pg-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases",
+      "apiVersion": "2023-03-01-preview",
+      "name": "[format('{0}/{1}', format('pg-{0}', variables('sufijo')), 'comunidad')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('pg-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases",
+      "apiVersion": "2023-03-01-preview",
+      "name": "[format('{0}/{1}', format('pg-{0}', variables('sufijo')), 'reportes')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('pg-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases",
+      "apiVersion": "2023-03-01-preview",
+      "name": "[format('{0}/{1}', format('pg-{0}', variables('sufijo')), 'elearning')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('pg-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Cache/redis",
+      "apiVersion": "2023-08-01",
+      "name": "[format('redis-{0}', variables('sufijo'))]",
+      "location": "[parameters('ubicacion')]",
+      "properties": {
+        "sku": {
+          "name": "Basic",
+          "family": "C",
+          "capacity": 1
+        },
+        "enableNonSslPort": false,
+        "minimumTlsVersion": "1.2",
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-01-01",
+      "name": "[replace(format('st{0}', variables('sufijo')), '-', '')]",
+      "location": "[parameters('ubicacion')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "accessTier": "Hot",
+        "allowBlobPublicAccess": false,
+        "minimumTlsVersion": "TLS1_2"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2023-01-01",
+      "name": "[format('{0}/{1}', replace(format('st{0}', variables('sufijo')), '-', ''), 'default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', replace(format('st{0}', variables('sufijo')), '-', ''))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2023-01-01",
+      "name": "[format('{0}/{1}/{2}', replace(format('st{0}', variables('sufijo')), '-', ''), 'default', 'imagenes')]",
+      "properties": {
+        "publicAccess": "None"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', replace(format('st{0}', variables('sufijo')), '-', ''), 'default')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2023-01-01",
+      "name": "[format('{0}/{1}/{2}', replace(format('st{0}', variables('sufijo')), '-', ''), 'default', 'videos')]",
+      "properties": {
+        "publicAccess": "None"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', replace(format('st{0}', variables('sufijo')), '-', ''), 'default')]"
+      ]
+    },
+    {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "apiVersion": "2023-07-01",
+      "name": "[replace(format('acr{0}', variables('sufijo')), '-', '')]",
+      "location": "[parameters('ubicacion')]",
+      "sku": {
+        "name": "Basic"
+      },
+      "properties": {
+        "adminUserEnabled": true,
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2023-07-01",
+      "name": "[format('kv-{0}', variables('sufijo'))]",
+      "location": "[parameters('ubicacion')]",
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantId]",
+        "enableRbacAuthorization": true,
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2023-07-01",
+      "name": "[format('{0}/{1}', format('kv-{0}', variables('sufijo')), 'pg-admin-password')]",
+      "properties": {
+        "value": "[parameters('adminPassword')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', format('kv-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2023-07-01",
+      "name": "[format('{0}/{1}', format('kv-{0}', variables('sufijo')), 'redis-primary-key')]",
+      "properties": {
+        "value": "[listKeys(resourceId('Microsoft.Cache/redis', format('redis-{0}', variables('sufijo'))), '2023-08-01').primaryKey]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', format('kv-{0}', variables('sufijo')))]",
+        "[resourceId('Microsoft.Cache/redis', format('redis-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2023-07-01",
+      "name": "[format('{0}/{1}', format('kv-{0}', variables('sufijo')), 'storage-connection-string')]",
+      "properties": {
+        "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix={2}', replace(format('st{0}', variables('sufijo')), '-', ''), listKeys(resourceId('Microsoft.Storage/storageAccounts', replace(format('st{0}', variables('sufijo')), '-', '')), '2023-01-01').keys[0].value, environment().suffixes.storage)]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', format('kv-{0}', variables('sufijo')))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', replace(format('st{0}', variables('sufijo')), '-', ''))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2023-07-01",
+      "name": "[format('{0}/{1}', format('kv-{0}', variables('sufijo')), 'jwt-refresh-pepper')]",
+      "properties": {
+        "value": "[parameters('jwtRefreshPepper')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', format('kv-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2023-07-01",
+      "name": "[format('{0}/{1}', format('kv-{0}', variables('sufijo')), 'internal-shared-secret')]",
+      "properties": {
+        "value": "[parameters('internalSharedSecret')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', format('kv-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2023-07-01",
+      "name": "[format('{0}/{1}', format('kv-{0}', variables('sufijo')), 'reportes-database-url')]",
+      "properties": {
+        "value": "[format('postgresql://pgadmin:{0}@{1}:5432/reportes?sslmode=require', parameters('adminPassword'), reference(resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('pg-{0}', variables('sufijo'))), '2023-03-01-preview').fullyQualifiedDomainName)]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', format('kv-{0}', variables('sufijo')))]",
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('pg-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2023-01-01",
+      "name": "[format('asp-{0}', variables('sufijo'))]",
+      "location": "[parameters('ubicacion')]",
+      "sku": {
+        "name": "[variables('planSkuNombre')]",
+        "tier": "[variables('planSkuTier')]"
+      },
+      "kind": "linux",
+      "properties": {
+        "reserved": true
+      }
+    },
+    {
+      "copy": {
+        "name": "appServices",
+        "count": "[length(variables('servicios'))]"
+      },
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2023-01-01",
+      "name": "[format('{0}-{1}', variables('servicios')[copyIndex()].nombre, variables('sufijo'))]",
+      "location": "[parameters('ubicacion')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', format('asp-{0}', variables('sufijo')))]",
+        "httpsOnly": true,
+        "virtualNetworkSubnetId": "[format('{0}/subnets/subnet-computo', resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', variables('sufijo'))))]",
+        "siteConfig": {
+          "linuxFxVersion": "[format('DOCKER|{0}', variables('servicios')[copyIndex()].imagen)]",
+          "alwaysOn": true,
+          "healthCheckPath": "/actuator/health",
+          "appSettings": "[if(equals(variables('servicios')[copyIndex()].nombre, 'api-gateway'), concat(createArray(createObject('name', 'DOCKER_REGISTRY_SERVER_URL', 'value', format('https://{0}', reference(resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', '')), '2023-07-01').loginServer)), createObject('name', 'DOCKER_REGISTRY_SERVER_USERNAME', 'value', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', '')), '2023-07-01').username), createObject('name', 'DOCKER_REGISTRY_SERVER_PASSWORD', 'value', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', '')), '2023-07-01').passwords[0].value), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', reference(resourceId('Microsoft.Insights/components', format('ai-{0}', variables('sufijo'))), '2020-02-02').ConnectionString), createObject('name', 'ApplicationInsightsAgent_EXTENSION_VERSION', 'value', '~3'), createObject('name', 'INTERNAL_SHARED_SECRET', 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'internal-shared-secret'), '2023-07-01').secretUri))), createArray(createObject('name', 'SPRING_DATA_REDIS_HOST', 'value', reference(resourceId('Microsoft.Cache/redis', format('redis-{0}', variables('sufijo'))), '2023-08-01').hostName), createObject('name', 'SPRING_DATA_REDIS_PORT', 'value', '6380'), createObject('name', 'SPRING_DATA_REDIS_SSL_ENABLED', 'value', 'true'), createObject('name', 'SPRING_DATA_REDIS_PASSWORD', 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'redis-primary-key'), '2023-07-01').secretUri))), createArray(createObject('name', 'SPRING_R2DBC_URL', 'value', format('r2dbc:postgresql://{0}:5432/gateway?sslMode=require', reference(resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('pg-{0}', variables('sufijo'))), '2023-03-01-preview').fullyQualifiedDomainName)), createObject('name', 'SPRING_R2DBC_USERNAME', 'value', 'pgadmin'), createObject('name', 'SPRING_R2DBC_PASSWORD', 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'pg-admin-password'), '2023-07-01').secretUri)), createObject('name', 'SPRING_FLYWAY_URL', 'value', format('jdbc:postgresql://{0}:5432/gateway?sslmode=require', reference(resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('pg-{0}', variables('sufijo'))), '2023-03-01-preview').fullyQualifiedDomainName)), createObject('name', 'SPRING_FLYWAY_USER', 'value', 'pgadmin'), createObject('name', 'SPRING_FLYWAY_PASSWORD', 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'pg-admin-password'), '2023-07-01').secretUri)), createObject('name', 'JWT_REFRESH_PEPPER', 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'jwt-refresh-pepper'), '2023-07-01').secretUri)))), if(equals(variables('servicios')[copyIndex()].nombre, 'comunidad-hp'), concat(createArray(createObject('name', 'DOCKER_REGISTRY_SERVER_URL', 'value', format('https://{0}', reference(resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', '')), '2023-07-01').loginServer)), createObject('name', 'DOCKER_REGISTRY_SERVER_USERNAME', 'value', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', '')), '2023-07-01').username), createObject('name', 'DOCKER_REGISTRY_SERVER_PASSWORD', 'value', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', '')), '2023-07-01').passwords[0].value), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', reference(resourceId('Microsoft.Insights/components', format('ai-{0}', variables('sufijo'))), '2020-02-02').ConnectionString), createObject('name', 'ApplicationInsightsAgent_EXTENSION_VERSION', 'value', '~3'), createObject('name', 'INTERNAL_SHARED_SECRET', 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'internal-shared-secret'), '2023-07-01').secretUri))), createArray(createObject('name', 'SPRING_DATA_REDIS_HOST', 'value', reference(resourceId('Microsoft.Cache/redis', format('redis-{0}', variables('sufijo'))), '2023-08-01').hostName), createObject('name', 'SPRING_DATA_REDIS_PORT', 'value', '6380'), createObject('name', 'SPRING_DATA_REDIS_SSL_ENABLED', 'value', 'true'), createObject('name', 'SPRING_DATA_REDIS_PASSWORD', 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'redis-primary-key'), '2023-07-01').secretUri))), createArray(createObject('name', 'SPRING_DATASOURCE_URL', 'value', format('jdbc:postgresql://{0}:5432/comunidad?sslmode=require', reference(resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('pg-{0}', variables('sufijo'))), '2023-03-01-preview').fullyQualifiedDomainName)), createObject('name', 'SPRING_DATASOURCE_USERNAME', 'value', 'pgadmin'), createObject('name', 'SPRING_DATASOURCE_PASSWORD', 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'pg-admin-password'), '2023-07-01').secretUri)), createObject('name', 'AZURE_STORAGE_CONNECTION_STRING', 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'storage-connection-string'), '2023-07-01').secretUri)))), if(equals(variables('servicios')[copyIndex()].nombre, 'reportes-lms'), concat(createArray(createObject('name', 'DOCKER_REGISTRY_SERVER_URL', 'value', format('https://{0}', reference(resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', '')), '2023-07-01').loginServer)), createObject('name', 'DOCKER_REGISTRY_SERVER_USERNAME', 'value', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', '')), '2023-07-01').username), createObject('name', 'DOCKER_REGISTRY_SERVER_PASSWORD', 'value', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', '')), '2023-07-01').passwords[0].value), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', reference(resourceId('Microsoft.Insights/components', format('ai-{0}', variables('sufijo'))), '2020-02-02').ConnectionString), createObject('name', 'ApplicationInsightsAgent_EXTENSION_VERSION', 'value', '~3'), createObject('name', 'INTERNAL_SHARED_SECRET', 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'internal-shared-secret'), '2023-07-01').secretUri))), createArray(createObject('name', 'DATABASE_URL', 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'reportes-database-url'), '2023-07-01').secretUri)))), createArray(createObject('name', 'DOCKER_REGISTRY_SERVER_URL', 'value', format('https://{0}', reference(resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', '')), '2023-07-01').loginServer)), createObject('name', 'DOCKER_REGISTRY_SERVER_USERNAME', 'value', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', '')), '2023-07-01').username), createObject('name', 'DOCKER_REGISTRY_SERVER_PASSWORD', 'value', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', '')), '2023-07-01').passwords[0].value), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', reference(resourceId('Microsoft.Insights/components', format('ai-{0}', variables('sufijo'))), '2020-02-02').ConnectionString), createObject('name', 'ApplicationInsightsAgent_EXTENSION_VERSION', 'value', '~3'), createObject('name', 'INTERNAL_SHARED_SECRET', 'value', format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'internal-shared-secret'), '2023-07-01').secretUri))))))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', ''))]",
+        "[resourceId('Microsoft.Insights/components', format('ai-{0}', variables('sufijo')))]",
+        "[resourceId('Microsoft.Web/serverfarms', format('asp-{0}', variables('sufijo')))]",
+        "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('pg-{0}', variables('sufijo')))]",
+        "[resourceId('Microsoft.Cache/redis', format('redis-{0}', variables('sufijo')))]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'internal-shared-secret')]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'jwt-refresh-pepper')]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'pg-admin-password')]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'redis-primary-key')]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'reportes-database-url')]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', format('kv-{0}', variables('sufijo')), 'storage-connection-string')]",
+        "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "kvRoleAssignments",
+        "count": "[length(variables('servicios'))]"
+      },
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.KeyVault/vaults', format('kv-{0}', variables('sufijo')))]",
+      "name": "[guid(resourceId('Microsoft.KeyVault/vaults', format('kv-{0}', variables('sufijo'))), variables('servicios')[copyIndex()].nombre, variables('rolKeyVaultSecretsUser'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('rolKeyVaultSecretsUser'))]",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', format('{0}-{1}', variables('servicios')[copyIndex()].nombre, variables('sufijo'))), '2023-01-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', format('{0}-{1}', variables('servicios')[copyIndex()].nombre, variables('sufijo')))]",
+        "[resourceId('Microsoft.KeyVault/vaults', format('kv-{0}', variables('sufijo')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/staticSites",
+      "apiVersion": "2023-01-01",
+      "name": "[format('swa-{0}', variables('sufijo'))]",
+      "location": "eastus2",
+      "sku": {
+        "name": "Free",
+        "tier": "Free"
+      },
+      "properties": {}
+    }
+  ],
+  "outputs": {
+    "postgresEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('pg-{0}', variables('sufijo'))), '2023-03-01-preview').fullyQualifiedDomainName]"
+    },
+    "redisEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Cache/redis', format('redis-{0}', variables('sufijo'))), '2023-08-01').hostName]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "value": "[replace(format('st{0}', variables('sufijo')), '-', '')]"
+    },
+    "acrLoginServer": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', replace(format('acr{0}', variables('sufijo')), '-', '')), '2023-07-01').loginServer]"
+    },
+    "gatewayUrl": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/sites', format('{0}-{1}', variables('servicios')[0].nombre, variables('sufijo'))), '2023-01-01').defaultHostName]"
+    },
+    "comunidadUrl": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/sites', format('{0}-{1}', variables('servicios')[1].nombre, variables('sufijo'))), '2023-01-01').defaultHostName]"
+    },
+    "reportesUrl": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/sites', format('{0}-{1}', variables('servicios')[2].nombre, variables('sufijo'))), '2023-01-01').defaultHostName]"
+    },
+    "elearningUrl": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/sites', format('{0}-{1}', variables('servicios')[3].nombre, variables('sufijo'))), '2023-01-01').defaultHostName]"
+    },
+    "frontendUrl": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/staticSites', format('swa-{0}', variables('sufijo'))), '2023-01-01').defaultHostname]"
+    }
+  }
+}

@@ -1,0 +1,239 @@
+/* ============================================================
+   PLANTILLA PUERTO 3D — "DIORAMA"
+   Dia claro de operacion: mar animado, concreto, acero.
+   La geometria del diorama la genera js/puerto.js.
+   ============================================================ */
+
+:root {
+  --sky-a: #bfe0f5;
+  --sky-b: #eaf6fd;
+  --sea: #1f6da8;
+  --sea-light: #3f8fc7;
+  --concrete: #b9c2c9;
+  --ink: #12263c;
+  --ink-soft: #5d7187;
+  --accent: #0b78c2;
+  --warn: #f0a221;
+  --panel: rgba(255, 255, 255, 0.88);
+  --f-sans: 'Plus Jakarta Sans', sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-sans);
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse 70% 40% at 70% 28%, rgba(255, 252, 240, 0.8), transparent 60%),
+    linear-gradient(180deg, var(--sky-a) 0%, var(--sky-b) 60%, #dceefb 100%);
+  cursor: grab;
+}
+body.is-orbiting { cursor: grabbing; }
+
+/* ============================================================
+   CAMARA
+   ============================================================ */
+.viewport {
+  position: fixed;
+  inset: 0;
+  perspective: 1500px;
+  perspective-origin: 50% 42%;
+  overflow: hidden;
+}
+.world {
+  position: absolute;
+  top: 56%;
+  left: 50%;
+  transform-style: preserve-3d;
+}
+
+/* todo hijo del mundo conserva 3D */
+.world div { transform-style: preserve-3d; }
+.world i { position: absolute; backface-visibility: hidden; }
+
+/* ============================================================
+   MAR Y MUELLE (placas generadas, estilos base aqui)
+   ============================================================ */
+.sea-plane {
+  position: absolute;
+  width: 9000px;
+  height: 7000px;
+  left: -4500px;
+  top: -7000px;
+  transform: rotateX(90deg);
+  transform-origin: 50% 100%;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.07) 0 3px, transparent 3px 90px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.10) 0 2px, transparent 2px 70px),
+    linear-gradient(180deg, var(--sea-light), var(--sea) 55%);
+  animation: sea-roll 9s linear infinite;
+}
+@keyframes sea-roll {
+  from { background-position: 0 0, 0 0, 0 0; }
+  to   { background-position: 90px 0, 0 70px, 0 0; }
+}
+
+.dock-plane {
+  position: absolute;
+  width: 4200px;
+  height: 900px;
+  left: -2100px;
+  top: -900px;
+  /* -90: el muelle se extiende hacia tierra (z positivo), no hacia el mar */
+  transform: rotateX(-90deg);
+  transform-origin: 50% 100%;
+  background:
+    repeating-linear-gradient(90deg, rgba(18, 38, 60, 0.12) 0 4px, transparent 4px 240px),
+    linear-gradient(0deg, #f0c52a 0 26px, transparent 26px),
+    linear-gradient(180deg, #c3ccd3, var(--concrete));
+}
+
+/* ============================================================
+   ANIMACIONES DEL DIORAMA (las aplican clases del JS)
+   ============================================================ */
+.ship-bob { animation: bob 6s ease-in-out infinite; }
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotateZ(0.001deg); }
+  50%      { transform: translateY(-7px) rotateZ(0.3deg); }
+}
+
+.trolley-run { animation: trolley 11s ease-in-out infinite alternate; }
+@keyframes trolley {
+  from { transform: translateZ(160px); }
+  to   { transform: translateZ(-620px); }
+}
+
+.hook-work { animation: hook 5.5s ease-in-out infinite alternate; }
+@keyframes hook {
+  from { transform: translateY(0); }
+  to   { transform: translateY(290px); }
+}
+
+/* ============================================================
+   PANELES DE CONTENIDO
+   ============================================================ */
+.panels {
+  position: fixed;
+  left: clamp(1rem, 4vw, 4rem);
+  bottom: clamp(3.6rem, 9vh, 6rem);
+  width: min(520px, calc(100vw - 2rem));
+  display: grid;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.panel {
+  grid-area: 1 / 1;
+  padding: clamp(1.4rem, 3vw, 2.4rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  background: var(--panel);
+  border: 1px solid rgba(18, 38, 60, 0.12);
+  border-left: 6px solid var(--accent);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 24px 60px -24px rgba(18, 38, 60, 0.4);
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.panel.is-active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition-delay: 0.4s;
+}
+
+.kicker {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+
+h1 {
+  font-size: clamp(1.7rem, 3.6vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+}
+h2 {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.01em;
+}
+
+.copy { color: var(--ink-soft); line-height: 1.55; font-size: 0.97rem; }
+
+.list { list-style: none; display: grid; gap: 0.55rem; }
+.list li {
+  position: relative;
+  padding-left: 1.5rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.list li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.4em;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--warn);
+}
+
+.bignum {
+  font-size: clamp(3.4rem, 9vw, 6rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+}
+
+code {
+  font-family: var(--f-mono);
+  font-size: 0.85em;
+  color: var(--accent);
+  background: rgba(11, 120, 194, 0.09);
+  padding: 0.08em 0.35em;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   HUD
+   ============================================================ */
+.hud {
+  position: fixed;
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.95rem 1.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--ink-soft);
+  z-index: 20;
+  pointer-events: none;
+}
+.hud--top { top: 0; }
+.hud--bottom { bottom: 0; }
+.hud__brand { color: var(--ink); }
+#hud-station, #hud-counter { color: var(--accent); }
+
+@media (max-width: 760px) {
+  .hud__hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sea-plane, .ship-bob, .trolley-run, .hook-work { animation: none; }
+  .panel { transition: none; }
+}

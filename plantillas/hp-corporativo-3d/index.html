@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLANTILLA // HP Corporativo 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PLANTILLA: HP CORPORATIVO 3D
+       Sistema de marca Hutchison Ports (Brand Guidelines v4.1):
+       - Angulo dinamico 30.3 (siempre ascendente)
+       - Formas Sky / Horizon / Sea planas, una familia por slide
+       - Montserrat: titulares Black MAYUSCULAS terminados en punto
+       - Body copy en Ports Sea Blue, alineado a la izquierda
+       - Transicion: barrido diagonal a 30.3 + capas con parallax
+
+       COMO USARLA
+       1. Duplica esta carpeta a presentations/<tu-slug>/
+       2. Edita las <section class="slide"> (cada una elige su forma
+          con las clases slide--sky / slide--sea / slide--divider...)
+       3. Los contadores animados usan data-count
+       4. Registra tu presentacion en presentations.json
+       ============================================================ -->
+
+  <!-- barrido diagonal de transicion (30.3 grados) -->
+  <div class="wipe" id="wipe" aria-hidden="true"></div>
+
+  <main class="deck" id="deck">
+
+    <!-- SLIDE 01 : portada (forma Sky en Sky Blue, como manda el manual) -->
+    <section class="slide slide--sky is-active">
+      <div class="shape shape--a" data-depth="14"></div>
+      <div class="shape shape--b" data-depth="26"></div>
+      <i class="sline sline--1" data-depth="40"></i>
+      <i class="sline sline--2" data-depth="34"></i>
+      <div class="slide__body">
+        <p class="eyebrow">PLANTILLA / HP CORPORATIVO 3D</p>
+        <h1>El titulo de tu<br>presentacion.</h1>
+        <p class="sub">SUBTITULO EN CAPS CON COLOR DE ACENTO</p>
+        <p class="copy">Bajada en Montserrat con el cuerpo siempre en Ports Sea Blue. Mueve el mouse: las formas flotan en capas con profundidad real.</p>
+      </div>
+      <footer class="slide__foot"><span class="markline"></span>NOMBRE · AREA · FECHA</footer>
+    </section>
+
+    <!-- SLIDE 02 : agenda -->
+    <section class="slide slide--sea">
+      <div class="shape shape--c" data-depth="18"></div>
+      <i class="sline sline--3" data-depth="36"></i>
+      <div class="slide__body">
+        <p class="eyebrow">CONTENIDO</p>
+        <h2>De que va esto.</h2>
+        <ol class="agenda">
+          <li><span>01</span>Primer bloque del recorrido</li>
+          <li><span>02</span>Segundo bloque, el problema</li>
+          <li><span>03</span>Tercer bloque, la propuesta</li>
+          <li><span>04</span>Cierre y siguientes pasos</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- SLIDE 03 : divisoria con numeral gigante (forma Sunray) -->
+    <section class="slide slide--divider">
+      <div class="shape shape--d" data-depth="16"></div>
+      <div class="slide__body">
+        <p class="eyebrow eyebrow--onshape">SECCION</p>
+        <p class="bignum">01</p>
+        <h2 class="divider-title">Perform<br>together.</h2>
+      </div>
+    </section>
+
+    <!-- SLIDE 04 : contenido con forma Horizon -->
+    <section class="slide slide--horizon">
+      <div class="shape shape--e" data-depth="20"></div>
+      <i class="sline sline--4" data-depth="38"></i>
+      <div class="slide__body">
+        <p class="eyebrow">EL PROBLEMA</p>
+        <h2>Una idea por slide.<br>Sin excepciones.</h2>
+        <div class="cols">
+          <p class="copy">El manual de marca pide layouts simples con mucho aire. Plantea aqui el contexto con dos o tres frases cortas y confiadas.</p>
+          <ul class="list">
+            <li>Punto de apoyo uno</li>
+            <li>Punto de apoyo dos</li>
+            <li>Punto de apoyo tres</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 05 : dato gigante con contador animado -->
+    <section class="slide slide--stat">
+      <div class="shape shape--f" data-depth="15"></div>
+      <div class="slide__body">
+        <p class="eyebrow">EL DATO</p>
+        <p class="statnum"><span data-count="85.3" data-decimals="1">0</span><small>%</small></p>
+        <h2 class="stat-caption">De los bienes manufacturados<br>se transportan por mar.</h2>
+        <p class="copy">El contador se anima cada vez que esta slide entra. Cambia el valor con <code>data-count</code> y los decimales con <code>data-decimals</code>.</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 06 : cita pull-out (Sky Blue, como el manual) -->
+    <section class="slide slide--quote">
+      <i class="sline sline--5" data-depth="30"></i>
+      <div class="slide__body">
+        <p class="quotemark">&#8220;&#8221;</p>
+        <blockquote>El color puede usarse para citas destacadas.</blockquote>
+        <p class="sub">— NOMBRE, CARGO</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 07 : endframe / cierre -->
+    <section class="slide slide--end">
+      <div class="shape shape--g" data-depth="14"></div>
+      <div class="shape shape--h" data-depth="24"></div>
+      <div class="slide__body slide__body--center">
+        <h2 class="endline">Hazla tuya.</h2>
+        <ul class="list list--center">
+          <li>Formas y colores por slide: clases <code>slide--sky / sea / divider / stat</code></li>
+          <li>Paleta oficial completa en <code>css/styles.css</code> (:root)</li>
+          <li>Velocidad del barrido: <code>WIPE_MS</code> en <code>js/corporativo.js</code></li>
+          <li>El angulo es 30.3 grados: no lo cambies, es la marca</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="hud">
+    <span class="hud__brand"><i></i>PLANTILLA HP</span>
+    <span class="hud__counter" id="hud-counter">01 / --</span>
+    <span class="hud__hint">flechas o swipe</span>
+  </footer>
+
+  <script src="js/corporativo.js"></script>
+</body>
+</html>

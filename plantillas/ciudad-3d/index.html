@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLANTILLA // Ciudad 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PLANTILLA: CIUDAD 3D (interactiva)
+       Una avenida nocturna construida en CSS 3D. Cada slide es un
+       espectacular LED montado en un edificio; la camara VUELA por
+       la avenida entre uno y otro.
+
+       INTERACCION
+       - Arrastra (mouse o dedo) para MIRAR alrededor en cualquier
+         momento; al soltar, la vista regresa sola al rumbo.
+       - Flechas / espacio / rueda: volar al siguiente espectacular.
+
+       COMO USARLA
+       1. Duplica esta carpeta a presentations/<tu-slug>/
+       2. Edita las <section class="bb"> (los espectaculares);
+          la ciudad se genera sola alrededor de ellas
+       3. Densidad y colores de la ciudad: constantes en js/ciudad.js
+       4. Registra tu presentacion en presentations.json
+       ============================================================ -->
+
+  <div class="sky" aria-hidden="true"><i class="moon"></i></div>
+
+  <div class="viewport" id="viewport">
+    <div class="world" id="world">
+
+      <!-- los edificios y el suelo los genera js/ciudad.js -->
+
+      <!-- ESPECTACULAR 01 : portada -->
+      <section class="bb">
+        <p class="kicker">[ PLANTILLA / CIUDAD 3D ]</p>
+        <h1>Tu marca en<br><em>la avenida</em></h1>
+        <p class="copy">Cada slide es un espectacular en una ciudad nocturna. Arrastra con el mouse para mirar alrededor: la ciudad es real.</p>
+        <p class="meta">AUTOR · FECHA</p>
+      </section>
+
+      <!-- ESPECTACULAR 02 -->
+      <section class="bb">
+        <p class="kicker">[ 02 / CONTEXTO ]</p>
+        <h2>La cuadra del problema</h2>
+        <p class="copy">Plantea el contexto en pocas lineas: en una pantalla LED nadie lee parrafos. Una idea fuerte por cuadra.</p>
+        <ul class="list">
+          <li>Senal uno del problema</li>
+          <li>Senal dos del problema</li>
+        </ul>
+      </section>
+
+      <!-- ESPECTACULAR 03 -->
+      <section class="bb">
+        <p class="kicker">[ 03 / PROPUESTA ]</p>
+        <h2>La esquina del plan</h2>
+        <p class="copy">Tu propuesta, anunciada en luces. Tres movimientos para cruzar la ciudad:</p>
+        <ul class="list">
+          <li>Movimiento uno</li>
+          <li>Movimiento dos</li>
+          <li>Movimiento tres</li>
+        </ul>
+      </section>
+
+      <!-- ESPECTACULAR 04 : dato -->
+      <section class="bb bb--big">
+        <p class="kicker">[ 04 / DATO ]</p>
+        <p class="bignum">2.4M</p>
+        <p class="copy">El numero que ilumina la cuadra entera. Una cifra, cero competencia visual.</p>
+      </section>
+
+      <!-- ESPECTACULAR 05 : cierre -->
+      <section class="bb">
+        <p class="kicker">[ 05 / PERSONALIZAR ]</p>
+        <h2>Hazla tuya</h2>
+        <ul class="list">
+          <li>Espectaculares: <code>&lt;section class="bb"&gt;</code> en este archivo</li>
+          <li>Ciudad (densidad, luces, neones): constantes en <code>js/ciudad.js</code></li>
+          <li>Distancia entre cuadras: <code>SPACING</code></li>
+          <li>El arrastre para mirar funciona en cualquier momento</li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+  <footer class="hud">
+    <span class="hud__brand">CIUDAD_3D</span>
+    <span id="hud-counter">CUADRA 01 / --</span>
+    <span class="hud__hint">arrastra para mirar · flechas para avanzar</span>
+  </footer>
+
+  <script src="js/ciudad.js"></script>
+</body>
+</html>

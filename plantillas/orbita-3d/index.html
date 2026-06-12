@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLANTILLA // Orbita 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PLANTILLA: ORBITA 3D
+       Las slides flotan en un anillo cilindrico. Se navega girando
+       la orbita: flechas, arrastre con mouse/tactil (con inercia)
+       o click directo en una slide lateral.
+
+       COMO USARLA
+       1. Duplica esta carpeta a presentations/<tu-slug>/
+       2. Edita las <section class="slide"> (el anillo se recalcula
+          solo segun cuantas haya; entre 5 y 10 funciona mejor)
+       3. Cambia el degradado y acento en css/styles.css (:root)
+       4. Registra tu presentacion en presentations.json
+       ============================================================ -->
+
+  <header class="frame frame--top">
+    <span>[ PLANTILLA / ORBITA 3D ]</span>
+    <span id="hud-counter">-- / --</span>
+  </header>
+
+  <div class="stage" id="stage">
+    <div class="ring" id="ring">
+
+      <!-- SLIDE 01 : portada -->
+      <section class="slide slide--cover">
+        <p class="kicker">PROYECTO / EQUIPO</p>
+        <h1>Tu titulo<br>en orbita</h1>
+        <p class="lead">Subtitulo o promesa central. Arrastra a los lados o usa las flechas: todas tus slides estan flotando alrededor.</p>
+      </section>
+
+      <!-- SLIDE 02 -->
+      <section class="slide">
+        <p class="kicker">01 / PROBLEMA</p>
+        <h2>El problema</h2>
+        <p>Describe el dolor en dos o tres lineas. En esta plantilla las slides vecinas se ven de reojo, asi que cada titulo debe sostenerse solo.</p>
+        <ul class="points">
+          <li>Punto de dolor uno</li>
+          <li>Punto de dolor dos</li>
+          <li>Punto de dolor tres</li>
+        </ul>
+      </section>
+
+      <!-- SLIDE 03 -->
+      <section class="slide">
+        <p class="kicker">02 / PROPUESTA</p>
+        <h2>La propuesta</h2>
+        <p>Tu solucion en una frase. Despues, los tres pilares que la sostienen.</p>
+        <ul class="points">
+          <li>Pilar uno de la solucion</li>
+          <li>Pilar dos de la solucion</li>
+          <li>Pilar tres de la solucion</li>
+        </ul>
+      </section>
+
+      <!-- SLIDE 04 : metricas -->
+      <section class="slide">
+        <p class="kicker">03 / NUMEROS</p>
+        <h2>En cifras</h2>
+        <div class="stats">
+          <div class="stat"><strong>3.2x</strong><span>metrica uno</span></div>
+          <div class="stat"><strong>-40%</strong><span>metrica dos</span></div>
+          <div class="stat"><strong>12k</strong><span>metrica tres</span></div>
+        </div>
+      </section>
+
+      <!-- SLIDE 05 : cita -->
+      <section class="slide slide--quote">
+        <blockquote>"Las orbitas no se empujan: se eligen bien y todo lo demas cae por gravedad."</blockquote>
+        <p class="kicker">— NOMBRE, CARGO</p>
+      </section>
+
+      <!-- SLIDE 06 : roadmap -->
+      <section class="slide">
+        <p class="kicker">04 / RUTA</p>
+        <h2>Siguientes pasos</h2>
+        <ul class="points">
+          <li><strong>Fase 1</strong> — que pasa primero</li>
+          <li><strong>Fase 2</strong> — que pasa despues</li>
+          <li><strong>Fase 3</strong> — donde termina esto</li>
+        </ul>
+      </section>
+
+      <!-- SLIDE 07 : personalizacion -->
+      <section class="slide">
+        <p class="kicker">05 / PERSONALIZAR</p>
+        <h2>Hazla tuya</h2>
+        <ul class="points">
+          <li>Colores: <code>--accent</code> y <code>--bg-a/--bg-b</code> en <code>css/styles.css</code></li>
+          <li>Slides: agrega <code>&lt;section class="slide"&gt;</code>, el anillo se recalcula</li>
+          <li>Friccion del giro: <code>FRICTION</code> en <code>js/orbita.js</code></li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+  <footer class="frame frame--bottom">
+    <span>arrastra, gira la rueda o usa flechas</span>
+    <div class="dots" id="dots"></div>
+  </footer>
+
+  <script src="js/orbita.js"></script>
+</body>
+</html>

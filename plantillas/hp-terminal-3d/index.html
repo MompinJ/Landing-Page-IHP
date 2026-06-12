@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLANTILLA // HP Terminal 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PLANTILLA: HP TERMINAL 3D
+       Patio de contenedores: cada slide es un contenedor 3D real
+       (caja CSS con frente, costado y techo) colgado del spreader
+       de una grua portico. Al avanzar, la grua iza el contenedor
+       actual y baja el siguiente con balanceo fisico.
+
+       Los contenedores rotan los colores de la paleta Hutchison
+       Ports (Sea, Sky, Sunray, Aqua, Sunset) automaticamente.
+
+       COMO USARLA
+       1. Duplica esta carpeta a presentations/<tu-slug>/
+       2. Edita las <section class="slide"> (el placard blanco es
+          la zona de contenido; el resto es el contenedor)
+       3. Colores en css/styles.css (:root, paleta oficial)
+       4. Registra tu presentacion en presentations.json
+       ============================================================ -->
+
+  <!-- patio de fondo: pilas de contenedores y grua lejana -->
+  <div class="yard" aria-hidden="true">
+    <div class="yard__stacks">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+    <div class="yard__crane"></div>
+    <div class="yard__floor"></div>
+    <div class="yard__agv"><i></i></div>
+  </div>
+
+  <!-- grua portico (viga + trolley fijos arriba) -->
+  <div class="gantry" aria-hidden="true">
+    <div class="gantry__beam"></div>
+    <div class="gantry__trolley" id="trolley"></div>
+  </div>
+
+  <main class="deck" id="deck">
+
+    <!-- SLIDE 01 -->
+    <section class="slide is-active">
+      <div class="lift">
+        <i class="cable cable--l"></i><i class="cable cable--r"></i>
+        <div class="spreader"></div>
+        <div class="box">
+          <div class="face face--top"></div>
+          <div class="face face--side">
+            <span class="side-code">HPMX<br>001</span>
+          </div>
+          <div class="face face--front">
+            <span class="box-code">HPMX 001-1</span>
+            <span class="box-weight">MAX GROSS 30,480 KG</span>
+            <div class="placard">
+              <p class="eyebrow">PLANTILLA / HP TERMINAL 3D</p>
+              <h1>El titulo de tu operacion.</h1>
+              <p class="copy">Cada slide llega colgada de la grua. Esta caja es un contenedor 3D de verdad: gira un poco la cabeza y mira el costado.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 02 -->
+    <section class="slide">
+      <div class="lift">
+        <i class="cable cable--l"></i><i class="cable cable--r"></i>
+        <div class="spreader"></div>
+        <div class="box">
+          <div class="face face--top"></div>
+          <div class="face face--side"><span class="side-code">HPMX<br>002</span></div>
+          <div class="face face--front">
+            <span class="box-code">HPMX 002-8</span>
+            <span class="box-weight">MAX GROSS 30,480 KG</span>
+            <div class="placard">
+              <p class="eyebrow">01 / CONTEXTO</p>
+              <h2>La carga que traemos.</h2>
+              <ul class="list">
+                <li>Hecho relevante uno del contexto</li>
+                <li>Hecho relevante dos del contexto</li>
+                <li>Hecho relevante tres del contexto</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 03 -->
+    <section class="slide">
+      <div class="lift">
+        <i class="cable cable--l"></i><i class="cable cable--r"></i>
+        <div class="spreader"></div>
+        <div class="box">
+          <div class="face face--top"></div>
+          <div class="face face--side"><span class="side-code">HPMX<br>003</span></div>
+          <div class="face face--front">
+            <span class="box-code">HPMX 003-5</span>
+            <span class="box-weight">MAX GROSS 30,480 KG</span>
+            <div class="placard">
+              <p class="eyebrow">02 / PROPUESTA</p>
+              <h2>La maniobra.</h2>
+              <p class="copy">Tu propuesta en una frase clara y confiada, como pide el tono de voz de la marca.</p>
+              <ul class="list">
+                <li>Movimiento uno del plan</li>
+                <li>Movimiento dos del plan</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 04 : dato -->
+    <section class="slide">
+      <div class="lift">
+        <i class="cable cable--l"></i><i class="cable cable--r"></i>
+        <div class="spreader"></div>
+        <div class="box">
+          <div class="face face--top"></div>
+          <div class="face face--side"><span class="side-code">HPMX<br>004</span></div>
+          <div class="face face--front">
+            <span class="box-code">HPMX 004-2</span>
+            <span class="box-weight">MAX GROSS 30,480 KG</span>
+            <div class="placard">
+              <p class="eyebrow">03 / EL DATO</p>
+              <p class="statnum">14.5<small>M TEU</small></p>
+              <p class="copy">La cifra que sostiene el caso. Una sola, bien grande, sin competencia visual.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 05 : cierre -->
+    <section class="slide">
+      <div class="lift">
+        <i class="cable cable--l"></i><i class="cable cable--r"></i>
+        <div class="spreader"></div>
+        <div class="box">
+          <div class="face face--top"></div>
+          <div class="face face--side"><span class="side-code">HPMX<br>005</span></div>
+          <div class="face face--front">
+            <span class="box-code">HPMX 005-9</span>
+            <span class="box-weight">MAX GROSS 30,480 KG</span>
+            <div class="placard">
+              <p class="eyebrow">04 / PERSONALIZAR</p>
+              <h2>Hazla tuya.</h2>
+              <ul class="list">
+                <li>Slides: cada <code>&lt;section class="slide"&gt;</code> es un contenedor</li>
+                <li>Los colores rotan solos la paleta oficial (orden en <code>js/terminal.js</code>)</li>
+                <li>Balanceo y velocidad de izaje: keyframes en <code>css/styles.css</code></li>
+                <li>El placard blanco es tu lienzo; el contenedor, el teatro</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <header class="hud hud--top">
+    <span class="hud__brand"><i></i>TERMINAL HP</span>
+    <span>GRUA STS-04 · PATIO B</span>
+  </header>
+  <footer class="hud hud--bottom">
+    <span id="hud-counter">MOV 01 / --</span>
+    <span class="hud__hint">flechas o swipe para mover la grua</span>
+  </footer>
+
+  <script src="js/terminal.js"></script>
+</body>
+</html>

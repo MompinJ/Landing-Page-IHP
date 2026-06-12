@@ -1,0 +1,436 @@
+/* ============================================================
+   PLANTILLA HP TERMINAL 3D
+   Patio de contenedores con paleta oficial Hutchison Ports.
+   El contenedor es una caja CSS 3D (frente + costado + techo)
+   colgada de una grua portico.
+   ============================================================ */
+
+:root {
+  --sky: #009BDE;
+  --sea: #002E6D;
+  --horizon: #9ACAEB;
+  --aqua: #54BBAB;
+  --sunray: #FFC627;
+  --sunset: #EE7523;
+  --paper: #ffffff;
+  --steel: #16233a;        /* acero de la grua */
+  --f-sans: 'Montserrat', Arial, sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+
+  /* geometria del contenedor */
+  --bw: min(920px, 88vw);  /* ancho */
+  --bh: min(500px, 58vh);  /* alto */
+  --bd: 96px;              /* profundidad */
+  /* mitades en px (las recalcula JS al cargar/redimensionar) */
+  --half-w: 460px;
+  --half-h: 250px;
+  --half-d: 48px;
+
+  /* color del contenedor activo (lo rota JS con la paleta) */
+  --c: var(--sea);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-sans);
+  color: var(--sea);
+  background:
+    linear-gradient(180deg, #f2f8fd 0%, #dceefb 52%, #cfe6f7 100%);
+}
+
+/* ============================================================
+   PATIO DE FONDO
+   ============================================================ */
+.yard { position: fixed; inset: 0; pointer-events: none; }
+
+.yard__floor {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 17vh;
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 46, 109, 0.16) 0 3px, transparent 3px 16vw),
+    linear-gradient(180deg, #b9cfdd, #a7bfcf);
+}
+.yard__floor::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: rgba(0, 46, 109, 0.25);
+}
+
+/* pilas de contenedores lejanas (silueta plana, colores de marca) */
+.yard__stacks {
+  position: absolute;
+  left: -2vw; right: -2vw; bottom: 17vh;
+  height: 13vh;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6vw;
+  opacity: 0.5;
+}
+.yard__stacks i { flex: 1; }
+.yard__stacks i:nth-child(6n+1) { height: 52%; background: var(--sea); }
+.yard__stacks i:nth-child(6n+2) { height: 86%; background: var(--sky); }
+.yard__stacks i:nth-child(6n+3) { height: 38%; background: var(--sunray); }
+.yard__stacks i:nth-child(6n+4) { height: 70%; background: var(--aqua); }
+.yard__stacks i:nth-child(6n+5) { height: 56%; background: var(--sunset); }
+.yard__stacks i:nth-child(6n+6) { height: 92%; background: var(--horizon); }
+
+/* grua lejana en silueta */
+.yard__crane {
+  position: absolute;
+  right: 6vw; bottom: calc(17vh - 2px);
+  width: 220px; height: 30vh;
+  opacity: 0.35;
+  background:
+    linear-gradient(var(--sea), var(--sea)) 0 0 / 100% 7% no-repeat,
+    linear-gradient(var(--sea), var(--sea)) 12% 0 / 5% 100% no-repeat,
+    linear-gradient(var(--sea), var(--sea)) 78% 0 / 5% 100% no-repeat,
+    linear-gradient(var(--sea), var(--sea)) 30% 7% / 3% 42% no-repeat;
+}
+
+/* AGV que cruza el patio cada tanto */
+.yard__agv {
+  position: absolute;
+  bottom: 12vh;
+  left: -220px;
+  width: 170px; height: 34px;
+  background: var(--steel);
+  border-radius: 4px;
+  animation: agv-run 26s linear infinite;
+}
+.yard__agv i {
+  position: absolute;
+  left: 8px; right: 8px; top: -26px;
+  height: 26px;
+  background: var(--sunset);
+}
+.yard__agv::before, .yard__agv::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #0b1322;
+}
+.yard__agv::before { left: 18px; }
+.yard__agv::after { right: 18px; }
+@keyframes agv-run {
+  0% { transform: translateX(0); }
+  60% { transform: translateX(calc(100vw + 440px)); }
+  100% { transform: translateX(calc(100vw + 440px)); }
+}
+
+/* ============================================================
+   GRUA PORTICO (arriba, fija)
+   ============================================================ */
+.gantry { position: fixed; left: 0; right: 0; top: 0; z-index: 20; pointer-events: none; }
+.gantry__beam {
+  height: 30px;
+  background:
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.12) 0 14px, transparent 14px 28px),
+    var(--steel);
+  border-bottom: 6px solid var(--sunray);
+}
+.gantry__trolley {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  width: 130px; height: 26px;
+  margin-left: -65px;
+  background: var(--sunset);
+  border-radius: 0 0 6px 6px;
+  transition: transform 0.6s cubic-bezier(0.45, 0, 0.2, 1);
+}
+.gantry__trolley.shift { transform: translateX(26px); }
+
+/* ============================================================
+   DECK / IZAJE
+   ============================================================ */
+.deck {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: end center;
+  padding-bottom: 13vh;
+  perspective: 1900px;
+  perspective-origin: 50% 30%;
+}
+
+.slide { grid-area: 1 / 1; visibility: hidden; }
+.slide.is-active, .slide.is-leaving { visibility: visible; }
+
+/* el conjunto que sube y baja: cables + spreader + caja.
+   El viaje vertical vive AQUI; el balanceo vive en .box.
+   Nunca compiten por el mismo transform (eso causaba brincos). */
+.lift {
+  position: relative;
+  will-change: transform;
+}
+.slide.is-active .lift {
+  animation: drop-in 1.4s cubic-bezier(0.3, 0, 0.24, 1.16) both;
+}
+.slide.is-leaving .lift {
+  animation: lift-up 1.05s cubic-bezier(0.55, -0.08, 0.8, 0.4) both;
+}
+
+@keyframes drop-in {
+  0%   { transform: translateY(-125vh); }
+  74%  { transform: translateY(0); }
+  87%  { transform: translateY(-1.6vh); }
+  100% { transform: translateY(0); }
+}
+@keyframes lift-up {
+  0%   { transform: translateY(0); }
+  16%  { transform: translateY(1vh); }
+  100% { transform: translateY(-128vh); }
+}
+
+/* cables y spreader */
+.cable {
+  position: absolute;
+  bottom: calc(var(--bh) + 26px);
+  width: 3px;
+  height: 160vh;
+  background: linear-gradient(180deg, transparent, #3c4658 12%, #3c4658);
+}
+.cable--l { left: 16%; }
+.cable--r { right: 16%; }
+
+.spreader {
+  position: absolute;
+  bottom: var(--bh);
+  left: 8%;
+  right: 8%;
+  height: 26px;
+  background: var(--sunray);
+  border-top: 5px solid var(--steel);
+  z-index: 6;
+}
+.spreader::before, .spreader::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  width: 14px; height: 12px;
+  background: var(--steel);
+}
+.spreader::before { left: 10px; }
+.spreader::after { right: 10px; }
+
+/* ============================================================
+   EL CONTENEDOR (caja 3D)
+   ============================================================ */
+.box {
+  position: relative;
+  width: var(--bw);
+  height: var(--bh);
+  transform-style: preserve-3d;
+  transform: rotateX(4deg) rotateY(-13deg);
+  will-change: transform;
+}
+
+/* balanceo suave del contenedor activo (pivote alto = pendulo) */
+.slide.is-active .box {
+  transform-origin: 50% -120vh;
+  animation: sway3d 7s ease-in-out 1.7s infinite;
+}
+@keyframes sway3d {
+  0%, 100% { transform: rotateX(4deg) rotateY(-13deg) rotateZ(0deg); }
+  30%      { transform: rotateX(4deg) rotateY(-13deg) rotateZ(0.28deg); }
+  70%      { transform: rotateX(4deg) rotateY(-13deg) rotateZ(-0.28deg); }
+}
+
+.face { position: absolute; backface-visibility: hidden; }
+
+/* frente: chapa corrugada del color de la slide */
+.face--front {
+  inset: 0;
+  transform: translateZ(var(--half-d));
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(0, 0, 0, 0.14) 0 10px,
+      rgba(255, 255, 255, 0.07) 10px 26px,
+      transparent 26px 52px),
+    var(--c);
+  border: 3px solid rgba(0, 0, 0, 0.22);
+  display: grid;
+  place-items: center;
+  padding: clamp(1.2rem, 3vw, 2.6rem);
+}
+
+/* costado derecho */
+.face--side {
+  width: var(--bd);
+  height: 100%;
+  left: 100%;
+  top: 0;
+  margin-left: calc(var(--bd) / -2);
+  transform: rotateY(90deg) translateZ(var(--half-w));
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0 8px, transparent 8px 20px),
+    color-mix(in srgb, var(--c) 64%, #001230);
+  border: 3px solid rgba(0, 0, 0, 0.3);
+}
+.side-code {
+  position: absolute;
+  top: 14px; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* techo */
+.face--top {
+  width: 100%;
+  height: var(--bd);
+  top: 0;
+  margin-top: calc(var(--bd) / -2);
+  transform: rotateX(90deg) translateZ(var(--half-h));
+  background: color-mix(in srgb, var(--c) 82%, #ffffff);
+  border: 3px solid rgba(0, 0, 0, 0.18);
+}
+
+/* rotulos del contenedor */
+.box-code {
+  position: absolute;
+  top: 1rem; right: 1.2rem;
+  font-family: var(--f-mono);
+  font-size: clamp(0.7rem, 1.2vw, 0.95rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.92);
+}
+.box-weight {
+  position: absolute;
+  bottom: 0.9rem; right: 1.2rem;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ============================================================
+   PLACARD (zona de contenido)
+   ============================================================ */
+.placard {
+  width: min(680px, 86%);
+  background: var(--paper);
+  padding: clamp(1.4rem, 3vw, 2.6rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  border-bottom: 8px solid var(--sunray);
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--sky);
+}
+
+h1 {
+  font-size: clamp(1.7rem, 3.6vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.02;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+h2 {
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.copy {
+  font-size: clamp(0.9rem, 1.4vw, 1.02rem);
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--sea);
+}
+
+.list { list-style: none; display: grid; gap: 0.55rem; }
+.list li {
+  position: relative;
+  padding-left: 1.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+.list li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.38em;
+  width: 9px; height: 9px;
+  background: var(--sky);
+  clip-path: polygon(0 100%, 100% 0, 100% 100%);
+}
+
+.statnum {
+  font-weight: 900;
+  font-size: clamp(3.4rem, 9vw, 6.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--sky);
+}
+.statnum small { font-size: 0.3em; font-weight: 800; letter-spacing: 0.06em; }
+
+code {
+  font-family: var(--f-mono);
+  font-size: 0.85em;
+  font-weight: 700;
+  color: var(--sky);
+  background: #eef1f4;
+  padding: 0.08em 0.35em;
+}
+
+/* ============================================================
+   HUD
+   ============================================================ */
+.hud {
+  position: fixed;
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--sea);
+  z-index: 30;
+  pointer-events: none;
+}
+.hud--top { top: 30px; }
+.hud--bottom { bottom: 0; }
+.hud__brand { display: flex; align-items: center; gap: 0.55rem; }
+.hud__brand i {
+  width: 15px; height: 15px;
+  background: linear-gradient(-30.3deg, var(--sea) 0 44%, #fff 44% 56%, var(--sky) 56% 100%);
+}
+#hud-counter { color: var(--sky); }
+
+/* ============================================================
+   RESPONSIVE / MOTION
+   ============================================================ */
+@media (max-width: 760px) {
+  :root { --bd: 56px; }
+  .box { transform: rotateX(3deg) rotateY(-9deg); }
+  .hud__hint { display: none; }
+  .yard__crane { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide.is-active .lift, .slide.is-leaving .lift { animation-duration: 0.01ms; }
+  .yard__agv { animation: none; left: 20vw; }
+}

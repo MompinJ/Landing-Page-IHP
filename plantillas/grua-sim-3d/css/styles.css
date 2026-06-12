@@ -1,0 +1,357 @@
+/* ============================================================
+   PLANTILLA GRUA SIM 3D — "CABINA"
+   Amanecer industrial: cielo naranja a azul, acero, amarillo
+   de seguridad. Las posiciones las escribe js/grua.js.
+   ============================================================ */
+
+:root {
+  --dawn-a: #1d2a4a;
+  --dawn-b: #5a4f86;
+  --dawn-c: #e98a4e;
+  --steel: #232c3a;
+  --steel-light: #38465c;
+  --safety: #ffc115;
+  --ink: #f3f5fa;
+  --ink-soft: #9aa6bd;
+  --f-cond: 'Barlow Condensed', sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+
+  --cargo-w: min(580px, 56vw);
+  --cargo-h: 300px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-cond);
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--dawn-a) 0%, var(--dawn-b) 48%, var(--dawn-c) 100%);
+}
+
+.scene { position: fixed; inset: 0; }
+
+/* ---------- fondo ---------- */
+.bg { position: absolute; inset: 0; pointer-events: none; }
+.bg__sun {
+  position: absolute;
+  left: 50%; bottom: 16vh;
+  width: 130px; height: 130px;
+  margin-left: -65px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #ffe9b0, #ff9d4d 70%);
+  box-shadow: 0 0 90px rgba(255, 157, 77, 0.7);
+}
+.bg__skyline {
+  position: absolute;
+  left: 0; right: 0; bottom: 14vh;
+  height: 22vh;
+  opacity: 0.5;
+  background:
+    linear-gradient(#0e1526, #0e1526) 4% 100% / 7% 52% no-repeat,
+    linear-gradient(#0e1526, #0e1526) 13% 100% / 5% 78% no-repeat,
+    linear-gradient(#0e1526, #0e1526) 24% 100% / 9% 40% no-repeat,
+    linear-gradient(#0e1526, #0e1526) 67% 100% / 6% 64% no-repeat,
+    linear-gradient(#0e1526, #0e1526) 78% 100% / 10% 46% no-repeat,
+    linear-gradient(#0e1526, #0e1526) 92% 100% / 6% 70% no-repeat;
+}
+
+.floor {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 14vh;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 193, 21, 0.12) 0 4px, transparent 4px 18vw),
+    linear-gradient(180deg, #131a29, #0b101c);
+  border-top: 4px solid #0a0e18;
+}
+
+/* ---------- grua ---------- */
+.beam {
+  position: absolute;
+  left: 0; right: 0; top: 64px;
+  height: 34px;
+  background:
+    repeating-linear-gradient(-58deg, rgba(255,255,255,0.10) 0 16px, transparent 16px 32px),
+    var(--steel);
+  border-bottom: 6px solid var(--safety);
+  z-index: 5;
+}
+.leg {
+  position: absolute;
+  top: 98px; bottom: 14vh;
+  width: 30px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 90px, rgba(255,255,255,0.08) 90px 96px),
+    var(--steel);
+  z-index: 4;
+}
+.leg--l { left: 5vw; }
+.leg--r { right: 5vw; }
+
+.trolley {
+  position: absolute;
+  top: 88px;
+  width: 150px; height: 34px;
+  margin-left: -75px;
+  background: #e07b20;
+  border-radius: 0 0 8px 8px;
+  z-index: 6;
+}
+.trolley .cab {
+  position: absolute;
+  right: -8px; top: 26px;
+  width: 52px; height: 42px;
+  background: var(--steel-light);
+  border: 2px solid #0e1526;
+  border-radius: 4px;
+}
+.trolley .cab::before {
+  content: "";
+  position: absolute;
+  inset: 6px 6px 14px;
+  background: linear-gradient(135deg, #9fd8ff, #2c5a86);
+}
+
+.cable {
+  position: absolute;
+  width: 3px;
+  background: #131a29;
+  z-index: 5;
+}
+
+.spreader {
+  position: absolute;
+  width: calc(var(--cargo-w) + 24px);
+  height: 24px;
+  background: var(--safety);
+  border-top: 5px solid var(--steel);
+  z-index: 7;
+}
+.spreader i {
+  position: absolute;
+  top: 100%;
+  width: 14px; height: 12px;
+  background: var(--steel);
+}
+.spreader i:first-child { left: 8px; }
+.spreader i:last-child { right: 8px; }
+.spreader.is-locked { box-shadow: 0 0 18px rgba(255, 193, 21, 0.8); }
+
+/* ---------- zonas ---------- */
+.pad {
+  position: absolute;
+  bottom: 14vh;
+  height: 14px;
+  background: repeating-linear-gradient(-45deg, var(--safety) 0 16px, var(--steel) 16px 32px);
+  z-index: 2;
+}
+.pad span {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.pad--read { height: 56px; background: var(--steel-light); border-top: 6px solid var(--safety); }
+.pad--read span { top: auto; bottom: 8px; color: rgba(243, 245, 250, 0.5); }
+
+.stack { position: absolute; bottom: 14vh; z-index: 2; }
+.stack__label {
+  position: absolute;
+  bottom: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--ink-soft);
+}
+.stack .mini {
+  position: absolute;
+  left: 50%;
+  width: 170px;
+  height: 56px;
+  margin-left: -85px;
+  border: 2px solid rgba(0, 0, 0, 0.35);
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.18) 0 7px, transparent 7px 16px),
+    var(--mini-c, #1f6da8);
+  animation: mini-pop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+@keyframes mini-pop {
+  from { transform: scale(1.06) translateY(-8px); }
+  to   { transform: scale(1) translateY(0); }
+}
+
+/* ---------- camion ---------- */
+.truck { position: absolute; width: 300px; height: 80px; z-index: 3; }
+.truck i { position: absolute; }
+.truck__cab {
+  left: 0; bottom: 18px;
+  width: 70px; height: 56px;
+  background: #b3422c;
+  border-radius: 10px 4px 0 0;
+}
+.truck__cab::before {
+  content: "";
+  position: absolute;
+  top: 8px; left: 10px;
+  width: 30px; height: 18px;
+  background: #9fd8ff;
+}
+.truck__bed {
+  left: 76px; right: 0; bottom: 18px;
+  height: 16px;
+  background: var(--steel-light);
+}
+.truck__wheel {
+  bottom: 0;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #5d6b80 7px, #10151f 8px);
+}
+.truck__wheel--1 { left: 14px; }
+.truck__wheel--2 { left: 110px; }
+.truck__wheel--3 { right: 16px; }
+
+/* ---------- contenedor de la slide ---------- */
+.cargo {
+  position: absolute;
+  width: var(--cargo-w);
+  height: var(--cargo-h);
+  margin-left: calc(var(--cargo-w) / -2);
+  transform-origin: 50% -26px; /* pendulo: cuelga del spreader */
+  border: 3px solid rgba(0, 0, 0, 0.3);
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.16) 0 9px, rgba(255,255,255,0.05) 9px 22px, transparent 22px 44px),
+    var(--cargo-c, #1f6da8);
+  display: grid;
+  place-items: center;
+  padding: 1.2rem;
+  z-index: 6;
+}
+/* costado 2.5D */
+.cargo::after {
+  content: "";
+  position: absolute;
+  left: 100%; top: 0;
+  width: 26px; height: 100%;
+  background: rgba(0, 0, 0, 0.38);
+  transform: skewY(-42deg);
+  transform-origin: 0 0;
+}
+/* techo 2.5D */
+.cargo::before {
+  content: "";
+  position: absolute;
+  bottom: 100%; left: 0;
+  width: 100%; height: 18px;
+  background: rgba(255, 255, 255, 0.16);
+  transform: skewX(-48deg);
+  transform-origin: 0 100%;
+}
+.cargo__code {
+  position: absolute;
+  top: 0.6rem; right: 0.8rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.placard {
+  width: 100%;
+  max-width: 480px;
+  background: #f6f4ee;
+  color: #1a2233;
+  padding: 1.3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-bottom: 6px solid var(--safety);
+}
+.placard .kicker {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #b3422c;
+}
+.placard h1 { font-size: 2.6rem; font-weight: 800; line-height: 0.95; text-transform: uppercase; }
+.placard h2 { font-size: 2rem; font-weight: 800; line-height: 0.98; text-transform: uppercase; }
+.placard .copy { font-family: 'Barlow Condensed', sans-serif; font-size: 1.05rem; font-weight: 500; line-height: 1.4; color: #4a5570; }
+
+/* ---------- letrero de objetivo (modo cabina) ---------- */
+.goal {
+  position: fixed;
+  top: 130px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem 1.2rem;
+  font-family: var(--f-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #10151f;
+  background: var(--safety);
+  border: 2px solid #10151f;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  z-index: 30;
+  animation: goal-blink 1.6s ease-in-out infinite;
+}
+@keyframes goal-blink { 50% { opacity: 0.75; } }
+
+/* ---------- HUD ---------- */
+.hud {
+  position: fixed;
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--ink-soft);
+  z-index: 25;
+}
+.hud--top { top: 0; }
+.hud--bottom { bottom: 0; }
+.hud__brand { color: var(--ink); }
+#hud-counter { color: var(--safety); }
+
+.mode-btn {
+  pointer-events: auto;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #10151f;
+  background: var(--safety);
+  border: 2px solid #10151f;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+}
+.mode-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(0,0,0,0.4); }
+body.manual .mode-btn { background: #e07b20; }
+
+@media (max-width: 760px) {
+  :root { --cargo-h: 250px; }
+  .placard h1 { font-size: 2rem; }
+  .hud__keys { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goal { animation: none; }
+}

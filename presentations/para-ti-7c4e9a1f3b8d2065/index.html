@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Para ti</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Una carta.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Fondo: nebulosa + estrellas/cometas (poblado por JS) -->
+  <div class="bg-aurora" aria-hidden="true"></div>
+  <div class="sky" id="sky" aria-hidden="true"></div>
+
+  <!-- ════════════════ HERO (sistema orbital) ════════════════ -->
+  <header class="hero">
+    <div class="hero__system" aria-hidden="true">
+      <span class="orbit-ring orbit-ring--1"></span>
+      <span class="orbit-ring orbit-ring--2"></span>
+      <span class="orbit-ring orbit-ring--3"></span>
+    </div>
+    <div class="hero__content">
+      <p class="hero__eyebrow reveal">Hay algo que llevo tiempo queriendo decirte...</p>
+      <h1 class="hero__name reveal d1">[NOMBRE]</h1>
+      <p class="hero__line reveal d2">
+        No es facil ponerlo en palabras, asi que lo escribi.
+        Baja sin prisa: las cosas van flotando, cada una a su tiempo.
+      </p>
+      <span class="hero__cue reveal d3">
+        Bajar <span class="chev" aria-hidden="true">&#8595;</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- ════════════════ CAMPO ESPARCIDO (la carta) ════════════════ -->
+  <!--
+    COMO JUGAR:
+    - Cada bloque es un .drop (aparece al bajar). Dentro va un .tile (flota e inclina).
+    - POSICION horizontal: cambia la clase del .drop -> x-ll / x-l / x-c / x-r / x-rr
+    - INCLINACION: en el .tile -> tilt-l2/l4/l6 (izq) o tilt-r2/r4/r6 (der)
+    - VELOCIDAD de flote: en el .tile -> spd-1 (rapida) / spd-2 / spd-3 (lenta)
+    - FOTOS: .photo--port (vertical 3:4) o .photo--land (horizontal 4:3)
+    - Reordena, duplica o borra bloques libremente; nada los une.
+  -->
+  <main class="field">
+
+    <!-- Saludo -->
+    <div class="drop x-c reveal">
+      <div class="tile note note--greeting note--glow tilt-r2 spd-2">
+        <span class="greet">Para ti, [NOMBRE]</span>
+        <p>Tomate tu tiempo. Esto es solo para ti.</p>
+      </div>
+    </div>
+
+    <!-- perdon -->
+    <div class="drop x-l reveal from-left">
+      <div class="tile note tilt-l4 spd-1">
+        <p>
+          Empiezo por lo mas honesto que tengo: <strong>perdon</strong>. No para
+          quedar bien, ni para cerrar un capitulo a la fuerza, sino porque de verdad
+          lo siento. Hubo cosas que pude hacer mejor, palabras que debi cuidar y
+          momentos en los que no estuve a la altura de lo que tu merecias.
+        </p>
+      </div>
+    </div>
+
+    <!-- foto 1 escondida (vertical) -->
+    <div class="drop x-rr reveal">
+      <button class="secret" type="button" aria-label="Un recuerdo escondido"
+              data-img="assets/img/foto1.jpeg" data-kind="port" data-cap="una de mis favoritas">
+        <span class="secret__dot" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    <!-- miedo a callar -->
+    <div class="drop x-r reveal from-right">
+      <div class="tile note tilt-r2 spd-3">
+        <p>
+          Pase mucho tiempo dandole vueltas a como decirte esto. Y entendi que si me
+          quedaba callado por miedo, iba a cometer el mismo error de siempre: dejar
+          lo importante sin decir. Asi que aqui estoy, eligiendo la verdad aunque me
+          ponga nervioso.
+        </p>
+      </div>
+    </div>
+
+    <!-- lo que veo en ti -->
+    <div class="drop x-ll reveal from-left">
+      <div class="tile note tilt-l2 spd-2">
+        <p>
+          Si me detengo a pensarlo, son demasiadas cosas. Tu forma de
+          <em>[algo que admiras de ella]</em>, esa manera tan tuya de
+          <em>[un gesto o detalle suyo]</em>, y como, sin proponertelo, haces que
+          los dias normales se sientan menos grises.
+        </p>
+      </div>
+    </div>
+
+    <!-- foto 3 escondida (horizontal) -->
+    <div class="drop x-c reveal">
+      <button class="secret" type="button" aria-label="Un recuerdo escondido"
+              data-img="assets/img/foto3.jpeg" data-kind="land" data-cap="[nota de esta foto]">
+        <span class="secret__dot" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    <!-- mejor version -->
+    <div class="drop x-r reveal from-right">
+      <div class="tile note tilt-r4 spd-2">
+        <p>
+          Me hiciste querer ser una mejor version de mi. No por impresionarte, sino
+          porque a tu lado me di cuenta de la persona que quiero llegar a ser. Eso
+          tambien es algo que te debo, y que pocas veces se dice en voz alta.
+        </p>
+      </div>
+    </div>
+
+    <!-- foto 2 escondida (vertical) -->
+    <div class="drop x-l reveal">
+      <button class="secret" type="button" aria-label="Un recuerdo escondido"
+              data-img="assets/img/foto2.jpeg" data-kind="port" data-cap="[nota de esta foto]">
+        <span class="secret__dot" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    <!-- me gustas (destacado) -->
+    <div class="drop x-c reveal">
+      <div class="tile note note--glow tilt-l2 spd-2">
+        <p>
+          Voy a decirlo claro, sin rodeos: <strong>me gustas</strong>. Me gustas de
+          esas que no se explican con logica, de las que se quedan rondando en la
+          cabeza en los momentos mas tranquilos del dia. No es un capricho ni una
+          idea pasajera; es algo que fui sintiendo con el tiempo y que ya no tiene
+          sentido seguir guardando.
+        </p>
+      </div>
+    </div>
+
+    <!-- foto 5 escondida (horizontal) -->
+    <div class="drop x-rr reveal">
+      <button class="secret" type="button" aria-label="Un recuerdo escondido"
+              data-img="assets/img/foto5.jpeg" data-kind="land" data-cap="[nota de esta foto]">
+        <span class="secret__dot" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    <!-- sin pedir nada -->
+    <div class="drop x-l reveal from-left">
+      <div class="tile note tilt-l4 spd-1">
+        <p>
+          No te escribo esto para pedirte nada, ni para ponerte en un aprieto.
+          Te lo escribo porque <em>mereces saberlo</em>, y porque ser sincero contigo
+          es la unica forma en que se me ocurre empezar a hacer las cosas bien.
+        </p>
+      </div>
+    </div>
+
+    <!-- foto 4 escondida (vertical) -->
+    <div class="drop x-r reveal">
+      <button class="secret" type="button" aria-label="Un recuerdo escondido"
+              data-img="assets/img/foto4.jpeg" data-kind="port" data-cap="[nota de esta foto]">
+        <span class="secret__dot" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    <!-- pase lo que pase -->
+    <div class="drop x-r reveal from-right">
+      <div class="tile note tilt-r2 spd-2">
+        <p>
+          Sea cual sea tu respuesta, quiero que sepas que no esperaba nada a cambio
+          de esta carta. Si sientes algo parecido, no sabes la ilusion que me haria
+          descubrirlo contigo, sin prisa. Y si no, lo voy a entender y lo voy a
+          respetar, de verdad.
+        </p>
+      </div>
+    </div>
+
+    <!-- gracias / perdon -->
+    <div class="drop x-ll reveal from-left">
+      <div class="tile note tilt-l2 spd-3">
+        <p>
+          Gracias por leer hasta aqui. Gracias por ser quien eres. Y perdon, otra
+          vez, por lo que haya que pedir perdon. <strong>Tu vales muchisimo</strong>,
+          con o sin mi en la historia.
+        </p>
+      </div>
+    </div>
+
+    <!-- firma -->
+    <div class="drop sign reveal">
+      <small>Con todo lo que no supe decir antes,</small>
+      <span class="name">[TU NOMBRE]</span>
+    </div>
+  </main>
+
+  <!-- ════════════════ CIERRE ════════════════ -->
+  <section class="closing">
+    <h2 class="closing__big reveal">Gracias por dejarme decirtelo</h2>
+    <p class="closing__small reveal d1">
+      No habia forma "correcta" de escribir esto. Solo habia una forma honesta.
+      Espero haberla encontrado.
+    </p>
+  </section>
+
+  <footer class="foot">
+    <p>Hecho con <span class="pulse" aria-hidden="true">&#9829;</span> solo para ti</p>
+    <p>tu rincon, lejos de todos &middot; [FECHA]</p>
+    <!-- Pista del easter egg (borrala si la quieres 100% secreta) -->
+    <p class="hint">&#10022; algunas estrellas guardan un recuerdo &middot; tocalas</p>
+  </footer>
+
+  <!-- Lightbox: revela la foto escondida -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Recuerdo">
+    <button class="lightbox__close" id="lb-close" type="button" aria-label="Cerrar">&times;</button>
+    <figure class="lightbox__inner">
+      <span class="photo"><img id="lb-img" src="" alt=""></span>
+      <figcaption class="lightbox__cap" id="lb-cap"></figcaption>
+    </figure>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>

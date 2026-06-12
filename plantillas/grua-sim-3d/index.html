@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLANTILLA // Grua Sim 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PLANTILLA: GRUA SIM 3D (interactiva de verdad)
+       Cada slide viaja dentro de un contenedor que mueve una grua
+       portico. Hay DOS modos:
+
+       MODO AUTO (default): flechas/espacio ejecutan la maniobra
+       completa solos (enganchar, izar, archivar en la pila, traer
+       el siguiente en camion y colocarlo en la plataforma).
+
+       MODO CABINA (tecla M o boton): TU operas la grua.
+         A / D ........ mover trolley (el contenedor se balancea)
+         W / S ........ subir / bajar el spreader
+         ESPACIO ...... enganchar / soltar (alineado y a la altura)
+       El objetivo de cada maniobra aparece en el letrero.
+
+       COMO USARLA
+       1. Duplica esta carpeta a presentations/<tu-slug>/
+       2. Edita las <template class="slide-src"> de abajo: ese HTML
+          se inyecta en el placard del contenedor
+       3. Fisica (gravedad, velocidad de la grua): js/grua.js
+       4. Registra tu presentacion en presentations.json
+       ============================================================ -->
+
+  <!-- contenido de las slides (se inyecta en el contenedor) -->
+  <template class="slide-src">
+    <p class="kicker">PLANTILLA / GRUA SIM 3D</p>
+    <h1>Opera la grua.</h1>
+    <p class="copy">Avanza con flechas y la grua hace la maniobra sola. O pulsa M y tomas los controles: A/D trolley, W/S izar, ESPACIO enganchar.</p>
+  </template>
+
+  <template class="slide-src">
+    <p class="kicker">01 / CONTEXTO</p>
+    <h2>La carga pendiente.</h2>
+    <p class="copy">Tu contexto en pocas lineas. Cada slide que terminas queda archivada en la pila de la derecha: tu avance se ve.</p>
+  </template>
+
+  <template class="slide-src">
+    <p class="kicker">02 / PROPUESTA</p>
+    <h2>La maniobra.</h2>
+    <p class="copy">Que propones y por que. En modo cabina, el contenedor se balancea de verdad: frena el trolley con tiento.</p>
+  </template>
+
+  <template class="slide-src">
+    <p class="kicker">03 / DATO</p>
+    <h2>28 mov/hora.</h2>
+    <p class="copy">El dato que cierra el caso. Un buen gruero presume su productividad; presume la tuya aqui.</p>
+  </template>
+
+  <template class="slide-src">
+    <p class="kicker">04 / PERSONALIZAR</p>
+    <h2>Hazla tuya.</h2>
+    <p class="copy">Edita los template.slide-src del HTML. Fisica y velocidades al inicio de js/grua.js. La pila, el camion y los letreros se manejan solos.</p>
+  </template>
+
+  <!-- ============ ESCENA ============ -->
+  <div class="scene" id="scene">
+    <div class="bg" aria-hidden="true">
+      <div class="bg__sun"></div>
+      <div class="bg__skyline"></div>
+    </div>
+
+    <!-- grua -->
+    <div class="beam"></div>
+    <div class="leg leg--l"></div>
+    <div class="leg leg--r"></div>
+    <div class="trolley" id="trolley"><i class="cab"></i></div>
+    <i class="cable" id="cable-l"></i>
+    <i class="cable" id="cable-r"></i>
+    <div class="spreader" id="spreader"><i></i><i></i></div>
+
+    <!-- zonas -->
+    <div class="pad pad--pick" id="pad-pick"><span>CAMION</span></div>
+    <div class="pad pad--read" id="pad-read"><span>PLATAFORMA DE LECTURA</span></div>
+    <div class="stack" id="stack"><span class="stack__label">ARCHIVO</span></div>
+
+    <!-- camion -->
+    <div class="truck" id="truck">
+      <i class="truck__cab"></i>
+      <i class="truck__bed"></i>
+      <i class="truck__wheel truck__wheel--1"></i>
+      <i class="truck__wheel truck__wheel--2"></i>
+      <i class="truck__wheel truck__wheel--3"></i>
+    </div>
+
+    <!-- el contenedor que carga las slides -->
+    <div class="cargo" id="cargo">
+      <span class="cargo__code" id="cargo-code">GS-001</span>
+      <div class="placard" id="placard"></div>
+    </div>
+
+    <div class="floor" aria-hidden="true"></div>
+  </div>
+
+  <!-- letrero de objetivo (modo cabina) -->
+  <div class="goal" id="goal" hidden></div>
+
+  <header class="hud hud--top">
+    <span class="hud__brand">GRUA_SIM_3D</span>
+    <button class="mode-btn" id="mode-btn" type="button">MODO CABINA [M]</button>
+  </header>
+  <footer class="hud hud--bottom">
+    <span id="hud-counter">SLIDE 01 / --</span>
+    <span class="hud__keys" id="hud-keys">flechas = maniobra automatica · M = tomar los controles</span>
+  </footer>
+
+  <script src="js/grua.js"></script>
+</body>
+</html>

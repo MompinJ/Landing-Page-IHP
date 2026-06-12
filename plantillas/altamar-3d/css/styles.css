@@ -1,0 +1,274 @@
+/* ============================================================
+   PLANTILLA ALTAMAR 3D — "TRAVESIA"
+   Cielo cambiante, oleaje canvas, slides que se mecen.
+   El cielo lo pintan dos capas .sky que JS va crossfadeando.
+   ============================================================ */
+
+:root {
+  --ink: #10243a;            /* tinta marina sobre papel claro */
+  --ink-soft: #51677d;
+  --paper: rgba(252, 251, 246, 0.92);   /* vela / papel del slide */
+  --paper-edge: rgba(16, 36, 58, 0.18);
+  --brass: #b98a2f;          /* laton de instrumentos */
+  --signal: #c8401a;         /* rojo de senal maritima */
+  --f-serif: 'Playfair Display', serif;
+  --f-body: 'Inter', sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-body);
+  color: var(--ink);
+  background: #0a1626; /* fallback bajo las capas de cielo */
+}
+
+/* ============================================================
+   CIELO (dos capas, JS hace el crossfade) + SOL/LUNA
+   ============================================================ */
+.sky {
+  position: fixed;
+  inset: 0;
+  transition: opacity 1.6s ease;
+}
+
+.orb {
+  position: fixed;
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  /* color y posicion los escribe JS segun la fase del dia */
+  transition: top 1.6s ease, left 1.6s ease, background 1.6s ease, box-shadow 1.6s ease;
+  pointer-events: none;
+}
+
+#sea {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  width: 100%;
+  height: 46vh;
+  display: block;
+  pointer-events: none;
+}
+
+/* ============================================================
+   DECK
+   ============================================================ */
+.deck {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.5rem, 5vw, 4rem) clamp(1.5rem, 5vw, 4rem) 18vh;
+  perspective: 1400px;
+}
+
+.slide {
+  grid-area: 1 / 1;
+  width: min(860px, 100%);
+  padding: clamp(2rem, 4.5vw, 3.6rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.05rem;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-radius: 6px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 35px 70px -25px rgba(4, 16, 32, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(70vw) rotateY(-24deg) rotateZ(2.5deg);
+  transition:
+    transform 1s cubic-bezier(0.22, 1, 0.32, 1),
+    opacity 0.7s ease;
+}
+
+/* franja de proa: banda de senal en el borde izquierdo */
+.slide::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 7px;
+  border-radius: 6px 0 0 6px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--signal) 0 14px,
+    var(--paper) 14px 28px
+  );
+}
+
+.slide.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0) rotateY(0) rotateZ(0);
+  /* vaiven perpetuo de fondeo */
+  animation: moor 7s ease-in-out infinite;
+}
+
+/* la saliente se va a sotavento */
+.slide.is-leaving {
+  opacity: 0;
+  transform: translateX(-70vw) rotateY(24deg) rotateZ(-3deg);
+  animation: none;
+}
+/* si se navega hacia atras, los papeles se invierten */
+.slide.is-entering-back { transform: translateX(-70vw) rotateY(24deg) rotateZ(-3deg); }
+.slide.is-leaving-back {
+  opacity: 0;
+  transform: translateX(70vw) rotateY(-24deg) rotateZ(2.5deg);
+  animation: none;
+}
+
+@keyframes moor {
+  0%, 100% { transform: translateX(0) rotateZ(-0.7deg) translateY(0); }
+  25%      { transform: translateX(0) rotateZ(0.4deg) translateY(-7px); }
+  50%      { transform: translateX(0) rotateZ(0.8deg) translateY(2px); }
+  75%      { transform: translateX(0) rotateZ(-0.3deg) translateY(-5px); }
+}
+
+/* ============================================================
+   TIPOGRAFIA / COMPONENTES
+   ============================================================ */
+.kicker {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: var(--signal);
+}
+
+h1 {
+  font-family: var(--f-serif);
+  font-size: clamp(2.6rem, 6.5vw, 4.8rem);
+  font-weight: 900;
+  line-height: 1.0;
+  letter-spacing: -0.015em;
+}
+h1 em { font-style: italic; font-weight: 500; color: var(--brass); }
+
+h2 {
+  font-family: var(--f-serif);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.08;
+}
+
+p { color: var(--ink-soft); line-height: 1.65; max-width: 52ch; }
+.lead { font-size: clamp(1rem, 1.7vw, 1.2rem); }
+
+.meta {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--ink-soft);
+  margin-top: 0.8rem;
+  text-transform: uppercase;
+}
+
+.log { display: grid; gap: 0; margin-top: 0.5rem; }
+.log__row {
+  display: flex;
+  align-items: baseline;
+  gap: 1.2rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(16, 36, 58, 0.12);
+}
+.log__row span {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--brass);
+  min-width: 7.5rem;
+}
+.log__row strong { font-weight: 600; color: var(--ink); }
+
+.course {
+  list-style: none;
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+}
+.course li {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  color: var(--ink);
+  font-weight: 500;
+  line-height: 1.5;
+}
+.course li span {
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-weight: 700;
+  color: var(--signal);
+  min-width: 1.4rem;
+  text-align: center;
+}
+
+.bignum {
+  font-family: var(--f-serif);
+  font-size: clamp(4.5rem, 14vw, 10rem);
+  font-weight: 900;
+  line-height: 0.95;
+  color: var(--ink);
+}
+.bignum small {
+  font-family: var(--f-mono);
+  font-size: 0.16em;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  color: var(--brass);
+  text-transform: uppercase;
+  margin-left: 0.6rem;
+}
+
+code {
+  font-family: var(--f-mono);
+  font-size: 0.85em;
+  color: var(--signal);
+  background: rgba(200, 64, 26, 0.08);
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+}
+
+/* ============================================================
+   HUD / BITACORA
+   ============================================================ */
+.hud {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: rgba(252, 251, 246, 0.85);
+  text-shadow: 0 1px 8px rgba(4, 16, 32, 0.8);
+  z-index: 20;
+}
+.hud__counter { color: #ffd98a; }
+
+/* ============================================================
+   RESPONSIVE / MOTION
+   ============================================================ */
+@media (max-width: 760px) {
+  .hud__hint { display: none; }
+  .deck { padding-bottom: 22vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide { transition-duration: 0.01ms; }
+  .slide.is-active { animation: none; }
+  .sky, .orb { transition: none; }
+}

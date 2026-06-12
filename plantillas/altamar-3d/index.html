@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLANTILLA // Altamar 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PLANTILLA: ALTAMAR 3D
+       Travesia en superficie: oleaje vivo dibujado en canvas que
+       se embravece en cada transicion, slides que se mecen como
+       veleros y un cielo que viaja del amanecer a la noche
+       conforme avanzas (el progreso ES la hora del dia).
+
+       COMO USARLA
+       1. Duplica esta carpeta a presentations/<tu-slug>/
+       2. Edita las <section class="slide">
+       3. Paleta del cielo: arreglo SKY en js/altamar.js
+       4. Registra tu presentacion en presentations.json
+       ============================================================ -->
+
+  <!-- cielo en dos capas (crossfade entre fases del dia) -->
+  <div class="sky" id="sky-a"></div>
+  <div class="sky" id="sky-b"></div>
+
+  <!-- sol / luna -->
+  <div class="orb" id="orb" aria-hidden="true"></div>
+
+  <!-- oleaje -->
+  <canvas id="sea"></canvas>
+
+  <main class="deck" id="deck">
+
+    <!-- SLIDE 01 : zarpe (amanecer) -->
+    <section class="slide is-active">
+      <p class="kicker">[ PLANTILLA / ALTAMAR 3D · ZARPE ]</p>
+      <h1>El nombre de<br><em>tu travesia</em></h1>
+      <p class="lead">Cada slide es una hora de navegacion: el cielo de fondo viaja del amanecer a la noche conforme avanzas. Llega a tu conclusion con las estrellas afuera.</p>
+      <p class="meta">CAPITAN · DERROTERO · FECHA</p>
+    </section>
+
+    <!-- SLIDE 02 -->
+    <section class="slide">
+      <p class="kicker">[ MANANA / CONTEXTO ]</p>
+      <h2>Las condiciones del mar</h2>
+      <p>Plantea el escenario: mercado, equipo, situacion actual. Las slides se mecen con el oleaje real del fondo; el contenido sobrio equilibra el movimiento.</p>
+      <div class="log">
+        <div class="log__row"><span>VIENTO</span><strong>condicion uno del entorno</strong></div>
+        <div class="log__row"><span>CORRIENTE</span><strong>condicion dos del entorno</strong></div>
+        <div class="log__row"><span>VISIBILIDAD</span><strong>condicion tres del entorno</strong></div>
+      </div>
+    </section>
+
+    <!-- SLIDE 03 -->
+    <section class="slide">
+      <p class="kicker">[ MEDIODIA / RUMBO ]</p>
+      <h2>El rumbo elegido</h2>
+      <p>Tu propuesta, con el sol en lo alto. Tres maniobras para llegar a puerto:</p>
+      <ul class="course">
+        <li><span>I</span> primera maniobra del plan</li>
+        <li><span>II</span> segunda maniobra del plan</li>
+        <li><span>III</span> tercera maniobra del plan</li>
+      </ul>
+    </section>
+
+    <!-- SLIDE 04 : el dato (atardecer) -->
+    <section class="slide">
+      <p class="kicker">[ ATARDECER / MAREA ]</p>
+      <p class="bignum">12<small>nudos</small></p>
+      <p class="lead">El numero que demuestra que el rumbo funciona. Mira el cielo: ya esta cayendo la tarde.</p>
+    </section>
+
+    <!-- SLIDE 05 : cierre (noche) -->
+    <section class="slide">
+      <p class="kicker">[ NOCHE / PUERTO ]</p>
+      <h2>Hazla tuya</h2>
+      <ul class="course">
+        <li><span>I</span> Fases del cielo: arreglo <code>SKY</code> en <code>js/altamar.js</code></li>
+        <li><span>II</span> Bravura del oleaje: <code>SWELL</code> y <code>SURGE</code> en el mismo archivo</li>
+        <li><span>III</span> Slides: <code>&lt;section class="slide"&gt;</code>; el cielo se reparte solo entre las que haya</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- HUD: bitacora de navegacion -->
+  <footer class="hud">
+    <span class="hud__pos" id="hud-pos">LAT 19°12'N · LON 96°08'W</span>
+    <span class="hud__counter" id="hud-counter">SINGLADURA 01 / --</span>
+    <span class="hud__hint">flechas o swipe para navegar</span>
+  </footer>
+
+  <script src="js/altamar.js"></script>
+</body>
+</html>

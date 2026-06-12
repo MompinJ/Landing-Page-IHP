@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLANTILLA // Galaxia 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PLANTILLA: GALAXIA 3D (WebGL / Three.js)
+       Campo de estrellas real en WebGL detras de las slides.
+       Al cambiar de slide las estrellas entran en "warp" y la
+       camara deriva con el mouse (parallax).
+
+       Three.js se carga desde CDN (requiere internet). Si falla,
+       la plantilla sigue funcionando con un fondo estatico.
+
+       COMO USARLA
+       1. Duplica esta carpeta a presentations/<tu-slug>/
+       2. Edita las <section class="slide">
+       3. Colores del fondo: STAR_COLOR / NEBULA en js/galaxia.js
+       4. Registra tu presentacion en presentations.json
+       ============================================================ -->
+
+  <canvas id="space"></canvas>
+
+  <main class="deck" id="deck">
+
+    <!-- SLIDE 01 : portada -->
+    <section class="slide slide--cover is-active">
+      <p class="kicker">[ PLANTILLA / GALAXIA 3D · WEBGL ]</p>
+      <h1>Titulo a escala<br><em>galactica</em></h1>
+      <p class="lead">Detras de este texto hay miles de estrellas renderizadas en WebGL. Cambia de slide y mira el salto a warp.</p>
+      <p class="meta">AUTOR · FECHA · CONTEXTO</p>
+    </section>
+
+    <!-- SLIDE 02 -->
+    <section class="slide">
+      <p class="kicker">01 / PROBLEMA</p>
+      <h2>El statu quo</h2>
+      <p>Plantea el problema en pocas lineas. El fondo se mueve solo y reacciona al mouse, asi que el contenido puede (y debe) ser sobrio.</p>
+      <div class="grid2">
+        <div class="cell"><strong>Hoy</strong><span>como funcionan las cosas ahora</span></div>
+        <div class="cell"><strong>El costo</strong><span>que se pierde por no cambiar</span></div>
+      </div>
+    </section>
+
+    <!-- SLIDE 03 -->
+    <section class="slide">
+      <p class="kicker">02 / PROPUESTA</p>
+      <h2>El plan</h2>
+      <ul class="points">
+        <li>Primer movimiento del plan</li>
+        <li>Segundo movimiento del plan</li>
+        <li>Tercer movimiento del plan</li>
+      </ul>
+    </section>
+
+    <!-- SLIDE 04 : cifra -->
+    <section class="slide slide--big">
+      <p class="kicker">03 / IMPACTO</p>
+      <p class="bignum">10<sup>6</sup></p>
+      <p class="lead">El numero que justifica todo lo demas. Una cifra, una linea de contexto.</p>
+    </section>
+
+    <!-- SLIDE 05 : cierre -->
+    <section class="slide">
+      <p class="kicker">04 / PERSONALIZAR</p>
+      <h2>Hazla tuya</h2>
+      <ul class="points">
+        <li>Color de estrellas y nebulosa: constantes al inicio de <code>js/galaxia.js</code></li>
+        <li>Cantidad de estrellas: <code>STAR_COUNT</code> (bajalo en equipos modestos)</li>
+        <li>Slides: <code>&lt;section class="slide"&gt;</code> en este archivo</li>
+        <li>Si no hay internet, el fondo cae a un degradado estatico y todo sigue funcionando</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <div class="hud">
+    <div class="hud__bar"><span id="hud-fill"></span></div>
+    <span class="hud__counter" id="hud-counter">-- / --</span>
+    <span class="hud__hint">flechas o swipe · el fondo sigue tu mouse</span>
+  </div>
+
+  <script type="module" src="js/galaxia.js"></script>
+</body>
+</html>

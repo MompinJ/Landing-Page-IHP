@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLANTILLA // HP Red Global 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PLANTILLA: HP RED GLOBAL 3D
+       "The World's Leading Port Network": un globo de puntos en
+       WebGL (Three.js) gira hasta el puerto de cada slide. Las
+       rutas entre puertos se dibujan como arcos con pulsos de
+       carga viajando en tiempo real.
+
+       CADA SLIDE SE ANCLA A UN PUERTO:
+         data-port="2"  (indice del arreglo PORTS en js/red.js)
+
+       Three.js se carga via CDN; sin internet el globo cae a un
+       fondo estatico y las slides siguen funcionando.
+
+       COMO USARLA
+       1. Duplica esta carpeta a presentations/<tu-slug>/
+       2. Edita los puertos del arreglo PORTS (nombre, lat, lon)
+          y las <section class="slide"> con su data-port
+       3. Registra tu presentacion en presentations.json
+       ============================================================ -->
+
+  <canvas id="globe"></canvas>
+  <div class="fallback" aria-hidden="true"></div>
+
+  <main class="deck">
+
+    <!-- SLIDE 01 : portada -->
+    <section class="slide is-active" data-port="0">
+      <p class="eyebrow">PLANTILLA / HP RED GLOBAL 3D</p>
+      <h1>La red de puertos<br>lider del mundo.</h1>
+      <p class="copy">Cada slide ancla la narrativa a un puerto de la red: el globo gira hasta el, las rutas se encienden y los pulsos de carga siguen viajando. Empieza el recorrido.</p>
+      <p class="sub">53 PUERTOS · 24 PAISES · 6 CONTINENTES</p>
+    </section>
+
+    <!-- SLIDE 02 : puerto origen -->
+    <section class="slide" data-port="1">
+      <p class="eyebrow">ESCALA 01</p>
+      <h2>Donde empieza<br>la historia.</h2>
+      <p class="copy">Usa cada escala para un capitulo: contexto, problema, propuesta. El globo hace la transicion por ti, girando hasta el puerto que toque.</p>
+      <ul class="list">
+        <li>Idea principal de esta escala</li>
+        <li>Dato de apoyo de la region</li>
+      </ul>
+    </section>
+
+    <!-- SLIDE 03 -->
+    <section class="slide" data-port="2">
+      <p class="eyebrow">ESCALA 02</p>
+      <h2>El puerto que<br>nos toca de cerca.</h2>
+      <p class="copy">Aterriza el argumento en tu region. Cambia los puertos del arreglo PORTS con nombre, codigo y coordenadas reales.</p>
+      <div class="stats">
+        <div class="stat"><strong>1.2M</strong><span>TEU / ANIO</span></div>
+        <div class="stat"><strong>x2.4</strong><span>CRECIMIENTO</span></div>
+      </div>
+    </section>
+
+    <!-- SLIDE 04 -->
+    <section class="slide" data-port="3">
+      <p class="eyebrow">ESCALA 03</p>
+      <h2>La conexion<br>europea.</h2>
+      <p class="copy">Tercera escala del derrotero. Las rutas recorridas quedan encendidas en el globo: tu narrativa se va dibujando sobre el mapa.</p>
+      <ul class="list">
+        <li>Propuesta concreta de esta escala</li>
+        <li>Siguiente paso accionable</li>
+      </ul>
+    </section>
+
+    <!-- SLIDE 05 : cierre -->
+    <section class="slide" data-port="4">
+      <p class="eyebrow">ESCALA FINAL / PERSONALIZAR</p>
+      <h2>Hazla tuya.</h2>
+      <ul class="list">
+        <li>Puertos y rutas: arreglo <code>PORTS</code> en <code>js/red.js</code></li>
+        <li>Cada slide elige su puerto con <code>data-port</code></li>
+        <li>Colores del globo: constantes al inicio de <code>js/red.js</code></li>
+        <li>Sin internet hay fallback estatico: la presentacion no se cae</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <header class="hud hud--top">
+    <span class="hud__brand"><i></i>RED GLOBAL HP</span>
+    <span id="hud-port">PUERTO --</span>
+  </header>
+  <footer class="hud hud--bottom">
+    <span id="hud-counter">01 / --</span>
+    <span class="hud__hint">flechas o swipe para navegar la red</span>
+  </footer>
+
+  <script type="module" src="js/red.js"></script>
+</body>
+</html>

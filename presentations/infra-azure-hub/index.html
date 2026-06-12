@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HUB · Infraestructura Azure — MVP</title>
+    <meta name="description" content="Infraestructura Azure que soporta al HUB Digital IHP. Arquitectura MVP.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- React + Babel via CDN (sin build step) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+/* ============================================================
+   DATOS
+   ============================================================ */
+const SLIDES = [
+  'Portada', 'Concepto', 'Mapa', 'Computo', 'Datos',
+  'Almacenamiento', 'Frontend', 'Seguridad', 'Costos', 'Produccion', 'Cierre'
+];
+
+const PROPS = [
+  { k: 'Aislado',    d: 'Cada servicio corre en su propio espacio sellado. Si uno falla, no tumba a los demas — como un contenedor independiente en el patio.' },
+  { k: 'Gestionado', d: 'Es PaaS: Azure opera el sistema operativo, los parches y la disponibilidad. Tu solo subes tu codigo y configuras.' },
+  { k: 'Modular',    d: 'Se combinan como piezas de lego: computo + datos + cache + almacenamiento arman la plataforma completa.' },
+  { k: 'Escalable',  d: 'Pides mas capacidad y el servicio crece. En el MVP arranca al minimo y sube por SKU cuando haga falta.' },
+  { k: 'Conectado',  d: 'Se enlazan por red privada (VNet) e identidad gestionada, sin exponer contrasenas ni secretos en el codigo.' },
+  { k: 'Medible',    d: 'Cada servicio reporta su telemetria y su costo individual: sabes exactamente que pagas y como rinde.' },
+];
+
+const NODES = [
+  { id: 'user',  name: 'Usuario',         sub: 'HTTPS',           x: 47, y: 6,  kind: 'edge', tip: 'El usuario entra por el navegador a la interfaz del HUB (Static Web Apps), por HTTPS.' },
+  { id: 'swa',   name: 'Static Web Apps', sub: 'frontend',        x: 19, y: 26, tip: 'Frontend del HUB con SSL automatico. Recibe al usuario, llama a las APIs y carga la media del Blob.' },
+  { id: 'obs',   name: 'Observabilidad',  sub: 'Logs + AI',       x: 80, y: 11, tip: 'Log Analytics + Application Insights — telemetria centralizada de los microservicios.' },
+  { id: 'app',   name: 'App Services',    sub: '4 micro · B3',    x: 47, y: 46, kind: 'compute', tip: 'App Service Plan B3: 4 microservicios (Gateway, Comunidad, Reportes, E-Learning) con Managed Identity. El cerebro que orquesta cada peticion.' },
+  { id: 'pg',    name: 'PostgreSQL',      sub: 'B1ms · 4 bases',  x: 76, y: 58, kind: 'data', tip: 'Un servidor con 4 bases logicas, inyectado en la VNet (subnet delegada) — el unico servicio 100% privado en el MVP.' },
+  { id: 'redis', name: 'Redis',           sub: 'Basic C1',        x: 90, y: 34, kind: 'data', tip: 'Redis Basic C1 — obligatorio: refresh tokens, rate-limit distribuido y cache. Endpoint publico protegido por credencial + TLS.' },
+  { id: 'kv',    name: 'Key Vault',       sub: 'RBAC',            x: 52, y: 70, kind: 'data', tip: 'Key Vault — secretos por RBAC + Managed Identity. Endpoint publico seguro en el MVP.' },
+  { id: 'acr',   name: 'ACR',             sub: 'Basic',           x: 23, y: 70, kind: 'data', tip: 'Container Registry Basic — imagenes Docker; el App Service las descarga al desplegar.' },
+  { id: 'blob',  name: 'Blob Storage',    sub: 'LRS · privado',   x: 13, y: 50, kind: 'data', tip: 'Blob Storage LRS privado — videos e imagenes servidos con SAS URLs firmadas; el backend los sube.' },
+];
+
+const EDGES = [
+  { a: 'user', b: 'swa'   },
+  { a: 'swa',  b: 'app'   },
+  { a: 'swa',  b: 'blob'  },
+  { a: 'app',  b: 'blob'  },
+  { a: 'app',  b: 'pg'    },
+  { a: 'app',  b: 'redis' },
+  { a: 'app',  b: 'acr'   },
+  { a: 'app',  b: 'kv'    },
+  { a: 'app',  b: 'obs'   },
+];
+
+const SERVICES = {
+  computo: [
+    { name: 'App Service Plan', sku: 'B3 · Basic · Linux', code: 'asp-hubihp-mvp', accent: true,
+      desc: 'El servidor que aloja los 4 microservicios como apps independientes que comparten el plan.',
+      config: ['1 instancia (sin autoscale)', 'VNet Integration para salida privada', 'HTTPS only · Always On', 'Managed Identity por cada app'],
+      cost: { val: '~$53', note: 'B3 (4 vCPU / 7 GB) para alojar 2 JVMs Java, Python y el placeholder. La VNet Integration funciona desde Basic; no requiere PremiumV3.' },
+      prod: { sube: 'B3 → P1V3 zona-redundante con autoscale 2–6 instancias', costo: '~$290/mes', cubre: 'Alta disponibilidad, escala automatica al subir la demanda y backend privado detras de Front Door.' },
+      micros: ['api-gateway', 'comunidad-hp', 'reportes-lms', 'e-learning'] },
+  ],
+  datos: [
+    { name: 'PostgreSQL', sku: 'Flexible · B1ms · v16', code: 'pg-hubihp-mvp', accent: true,
+      desc: 'Base de datos transaccional. El corazon de los datos del HUB, inyectada en la red privada.',
+      config: ['32 GB de almacenamiento', 'Tier Burstable (1 vCPU / 2GB)', '4 bases logicas (1 por servicio)', 'Subnet Delegation + Private DNS'],
+      cost: { val: '~$16', note: '~$12.41 de computo + ~$3.68 de disco. Las 4 bases no cuestan extra: se paga por el servidor, no por base.' },
+      prod: { sube: 'B1ms → D2ds_v5 General Purpose, con backup geo-redundante', costo: '~$190/mes · ~$365 con HA', cubre: 'Potencia para 5,000 usuarios; replica en espera si corporativo activa el HA.' } },
+    { name: 'Redis Cache', sku: 'Basic · C1', code: 'redis-hubihp-mvp',
+      desc: 'Base de datos en memoria. Obligatoria: aloja refresh tokens, rate-limit distribuido y cache de queries y feeds.',
+      config: ['1 nodo (sin replica ni persistencia)', 'TLS 1.2 forzado', 'Endpoint publico protegido por credencial'],
+      cost: { val: '~$40', note: 'Tras la migracion V10, los refresh tokens viven en Redis. Sin el, el login/refresh del Gateway no funciona.' },
+      prod: { sube: 'Basic C1 → Standard C1 (con replica) y acceso privado', costo: '~$101/mes', cubre: 'Replica para alta disponibilidad y acceso 100% privado (sin internet publico).' } },
+  ],
+  almacenamiento: [
+    { name: 'Blob Storage', sku: 'Standard LRS · Hot', code: 'st·hubihp·mvp', accent: true,
+      desc: 'Almacenamiento masivo de los videos de capacitacion e imagenes de perfil del HUB.',
+      config: ['Contenedores /videos e /imagenes', 'Acceso publico deshabilitado · SAS URLs firmadas', 'Redundancia local (LRS)'],
+      cost: { val: '~$1.84', unit: '/100GB', note: 'Costo variable segun el volumen. La media se sirve con SAS firmadas; en la BD se guarda el blob path.' },
+      prod: { sube: 'LRS → ZRS y acceso privado; media servida por Front Door (CDN)', costo: '~$2.50/100GB + egress', cubre: 'Redundancia de zona y entrega de videos e imagenes acelerada y segura.' } },
+    { name: 'Container Registry', sku: 'ACR · Basic', code: 'acr·hubihp·mvp',
+      desc: 'Bodega privada de las imagenes Docker de los microservicios. Es el origen del despliegue.',
+      config: ['Admin user habilitado (facilidad MVP)', 'Push desde CI/CD (GitHub Actions)', 'Acceso publico'],
+      cost: { val: '~$5', note: 'Almacena las imagenes que el App Service descarga al desplegar.' },
+      prod: { sube: 'Basic → Premium privado, pull por identidad (sin usuario admin)', costo: '~$50/mes', cubre: 'Imagenes 100% privadas; requiere runners en la VNet para el CI/CD.' } },
+  ],
+  frontend: [
+    { name: 'Static Web Apps', sku: 'SKU Free', code: 'swa-hubihp-mvp', accent: true,
+      desc: 'Hosting del frontend React (por construir) con SSL automatico. Sera la URL principal para los usuarios.',
+      config: ['Deploy directo desde GitHub', 'SSL / dominio gestionado', 'CDN de contenido estatico'],
+      cost: { val: '$0', note: 'El tier Free basta para el MVP. Sin Front Door: esta es la puerta de entrada del HUB.' },
+      prod: { sube: 'Free → Standard, detras de Front Door', costo: '~$9/mes', cubre: 'SLA, dominio corporativo e integracion con el borde y el WAF.' } },
+    { name: 'Observabilidad', sku: 'Log Analytics + App Insights', code: 'law / ai · mvp',
+      desc: 'Telemetria centralizada: Application Map, trazas distribuidas y rastreo de errores entre APIs.',
+      config: ['Retencion de 30 dias', 'App Insights por microservicio', 'Connection string vía App Settings'],
+      cost: { val: '~$1.00', note: 'Incluido en "otros". Fundamental para depurar microservicios distribuidos.' },
+      prod: { sube: 'Diagnostic Settings de todos los recursos + retencion mayor', costo: 'Variable por ingesta', cubre: 'Visibilidad completa y alertas proactivas de latencia, errores y base de datos.' } },
+  ],
+};
+
+const SECURITY = [
+  { title: 'IDENTIDAD', items: [
+    { n: 'Managed Identity', s: 'mvp', d: 'Cada microservicio se autentica ante Azure sin contrasenas ni claves en el codigo.' },
+    { n: 'RBAC en Key Vault', s: 'mvp', d: 'Permisos por rol: cada identidad accede unicamente a lo que necesita.' },
+    { n: 'Entra ID (Azure AD)', s: 'pot', d: 'SSO corporativo y acceso condicional para usuarios y administradores.' },
+  ]},
+  { title: 'RED', items: [
+    { n: 'VNet + aislamiento', s: 'mvp', d: 'Computo y datos en subredes separadas dentro de una red privada.' },
+    { n: 'Subnet Delegation', s: 'mvp', d: 'PostgreSQL inyectado en la VNet, sin exposicion a internet.' },
+    { n: 'Private Endpoints', s: 'pot', d: 'Redis, Key Vault, ACR y Blob 100% privados, fuera del internet publico.' },
+    { n: 'NSG / firewall', s: 'pot', d: 'Reglas explicitas de trafico entrante y saliente por subred.' },
+  ]},
+  { title: 'BORDE', items: [
+    { n: 'HTTPS only · TLS 1.2', s: 'mvp', d: 'Todo el trafico cifrado en transito; sin puertos inseguros.' },
+    { n: 'Front Door + WAF', s: 'pot', d: 'Firewall de aplicacion contra SQLi/XSS y proteccion DDoS gestionada.' },
+    { n: 'Geo-filtering', s: 'pot', d: 'Permite o bloquea trafico segun la ubicacion geografica.' },
+  ]},
+  { title: 'DATOS & DEFENSA', items: [
+    { n: 'Cifrado en reposo', s: 'mvp', d: 'Discos y almacenamiento cifrados por defecto en Azure.' },
+    { n: 'Secretos en Key Vault', s: 'mvp', d: 'Cadenas de conexion y llaves fuera del codigo fuente.' },
+    { n: 'Defender for Cloud', s: 'pot', d: 'Postura de seguridad (CSPM) y deteccion de amenazas en tiempo real.' },
+  ]},
+];
+
+const PROD_CRITERIOS = [
+  { title: 'UNA PUERTA BLINDADA', items: [
+    { n: 'Entrada unica protegida', b: 'NUEVO', d: 'Todo el trafico pasa por un solo punto con un firewall que bloquea ataques y bots antes de llegar a la plataforma.' },
+    { n: 'Media rapida', b: 'NUEVO', d: 'Los videos e imagenes se entregan desde una red de distribucion cercana al usuario. Clave para una red social con mucho contenido.' },
+    { n: 'Sin servicio de CDN aparte', b: 'NUEVO', d: 'Azure ya no vende el CDN por separado; este mismo servicio cubre el firewall y la entrega rapida de media.' },
+  ]},
+  { title: 'TODO EN PRIVADO', items: [
+    { n: 'Servicios sin cara a internet', b: 'NUEVO', d: 'Base de datos, cache, archivos y secretos dejan de estar expuestos: solo se hablan entre ellos por una red privada.' },
+    { n: 'Backend invisible', b: 'NUEVO', d: 'Las apps internas no tienen direccion publica; nadie de afuera las alcanza, solo la puerta de entrada.' },
+  ]},
+  { title: 'CRECE Y NO SE CAE', items: [
+    { n: 'Crece sola con la demanda', b: 'SUBE', d: 'Si llegan mas usuarios, la plataforma agrega capacidad automaticamente; cuando baja, la reduce.' },
+    { n: 'A la medida, sin pagar de mas', b: 'SUBE', d: 'Ajustada a ~5,000 usuarios reales. No se sobre-aprovisiona.' },
+    { n: 'Respaldo ante fallos', b: 'SUBE', d: 'Replicas y copias de seguridad para que una caida no tumbe el servicio.' },
+  ]},
+  { title: 'LO DECIDE CORPORATIVO', items: [
+    { n: 'Respaldo de la base de datos', b: 'FLAG', d: 'Tener una replica en espera duplica el costo de la BD: es una decision de nivel de servicio. Queda como interruptor.' },
+    { n: 'Login corporativo (SSO)', b: 'FLAG', d: 'Que los empleados entren con su cuenta de Hutchison. Lo habilita el area que administra las cuentas.' },
+  ]},
+];
+
+const COSTS = [
+  { label: 'Cómputo · App Service Plan (B3)', w: '100%', val: '~$53' },
+  { label: 'Redis Cache (obligatorio)',       w: '77%',  val: '~$41' },
+  { label: 'PostgreSQL · 4 bases',            w: '29%',  val: '~$16' },
+  { label: 'Container Registry',              w: '9%',   val: '~$5'  },
+  { label: 'Storage · Blob (LRS)',            w: '4%',   val: '~$2'  },
+  { label: 'Otros · KV + Logs + SWA Free',    w: '4%',   val: '~$2'  },
+];
+
+/* ============================================================
+   HELPERS / UI
+   ============================================================ */
+const idx2 = (n) => String(n + 1).padStart(2, '0');
+
+function Counter({ to, decimals = 0, active }) {
+  const [val, setVal] = useState(0);
+  const done = useRef(false);
+  useEffect(() => {
+    if (!active || done.current) return;
+    done.current = true;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setVal(to); return; }
+    const dur = 1300; let start = null;
+    const tick = (now) => {
+      if (start === null) start = now;
+      const p = Math.min((now - start) / dur, 1);
+      setVal(to * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(tick); else setVal(to);
+    };
+    requestAnimationFrame(tick);
+  }, [active]);
+  return <span className="cost__value mono">{val.toFixed(decimals)}</span>;
+}
+
+function ServiceCard({ s }) {
+  const [tab, setTab] = useState('config');
+  return (
+    <article className={'svc-card' + (s.accent ? ' svc-card--accent' : '')} data-reveal>
+      <div className="svc-card__head">
+        <div>
+          <h3>{s.name}</h3>
+          <span className="svc-card__sku">{s.sku}</span>
+        </div>
+        <span className="mono svc-card__code">{s.code}</span>
+      </div>
+      <p className="svc-card__desc">{s.desc}</p>
+
+      <div className="tabs" role="tablist">
+        <button className={'tab' + (tab === 'config' ? ' is-active' : '')} role="tab" aria-selected={tab === 'config'} onClick={() => setTab('config')}>Config</button>
+        <button className={'tab' + (tab === 'cost' ? ' is-active' : '')} role="tab" aria-selected={tab === 'cost'} onClick={() => setTab('cost')}>Costo</button>
+        <button className={'tab tab--upgrade' + (tab === 'prod' ? ' is-active' : '')} role="tab" aria-selected={tab === 'prod'} onClick={() => setTab('prod')}>Producción</button>
+      </div>
+
+      <div className="tab-panel">
+        {tab === 'config' && (
+          <ul>{s.config.map((c, i) => <li key={i}>{c}</li>)}</ul>
+        )}
+        {tab === 'cost' && (
+          <div>
+            <div className="tab-cost">
+              <strong>{s.cost.val}</strong>
+              <small>{s.cost.unit || 'USD / mes'}</small>
+            </div>
+            <p className="tab-cost__note">{s.cost.note}</p>
+          </div>
+        )}
+        {tab === 'prod' && (
+          <div>
+            <div className="tab-cost">
+              <strong>{s.prod.costo}</strong>
+              <small>en producción</small>
+            </div>
+            <ul className="tab-panel--upgrade">
+              <li><strong>Sube a:</strong> {s.prod.sube}</li>
+              <li><strong>Cubre:</strong> {s.prod.cubre}</li>
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {s.micros && (
+        <div className="svc-micros">{s.micros.map((m) => <span key={m}>{m}</span>)}</div>
+      )}
+    </article>
+  );
+}
+
+/* ============================================================
+   SLIDES INTERACTIVOS
+   ============================================================ */
+function ConceptYard() {
+  const [sel, setSel] = useState(0);
+  return (
+    <div className="port">
+      <svg className="port__svg" viewBox="0 0 400 120" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <line className="water" x1="0" y1="112" x2="400" y2="112" />
+        <path className="crane" d="M70 112 V30 M150 112 V30 M55 30 H250 M250 30 V52 M55 22 H262" />
+        <line className="crane" x1="120" y1="30" x2="120" y2="60" />
+        <polygon className="ship" points="250,96 392,96 378,112 264,112" />
+        <rect className="ship-deck" x="266" y="78" width="30" height="18" />
+        <rect className="ship-deck" x="300" y="78" width="30" height="18" />
+        <rect className="ship-deck" x="334" y="78" width="30" height="18" />
+        <rect className="ship-deck" x="283" y="60" width="30" height="18" />
+      </svg>
+
+      <div className="yard">
+        {PROPS.map((p, i) => (
+          <button
+            key={p.k}
+            className={'yard-box yard-box--' + i + (sel === i ? ' is-active' : '')}
+            onClick={() => setSel(i)}
+            onMouseEnter={() => setSel(i)}
+            aria-pressed={sel === i}
+          >
+            <svg className="yard-box__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <rect x="3" y="7" width="18" height="12" /><path d="M3 11h18M9 7v12M15 7v12" />
+            </svg>
+            {p.k}
+          </button>
+        ))}
+      </div>
+
+      <div className="yard-detail" aria-live="polite">
+        <strong>{PROPS[sel].k}</strong>
+        <p>{PROPS[sel].d}</p>
+      </div>
+    </div>
+  );
+}
+
+function ArchMap() {
+  const [hot, setHot] = useState(null);
+  const byId = (id) => NODES.find((n) => n.id === id);
+  const related = new Set();
+  if (hot) {
+    related.add(hot);
+    EDGES.forEach((e) => { if (e.a === hot) related.add(e.b); if (e.b === hot) related.add(e.a); });
+  }
+  const tip = hot ? byId(hot).tip : null;
+
+  return (
+    <div className="diagram">
+      <svg className="diagram__svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        {EDGES.map((e, i) => {
+          const A = byId(e.a), B = byId(e.b);
+          const active = hot && (e.a === hot || e.b === hot);
+          const dim = hot && !active;
+          const cls = 'edge' + (active ? ' is-active' : '') + (dim ? ' is-dim' : '');
+          return <line key={i} className={cls} x1={A.x} y1={A.y} x2={B.x} y2={B.y} vectorEffect="non-scaling-stroke" />;
+        })}
+      </svg>
+
+      <div className="vnet-box" style={{ left: '34%', top: '33%', width: '50%', height: '34%' }}>
+        <span className="vnet-box__label">VNET · 10.0.0.0/16</span>
+      </div>
+
+      {NODES.map((n) => {
+        const cls = 'node' + (n.kind ? ' node--' + n.kind : '')
+          + (hot === n.id ? ' is-active' : '')
+          + (hot && !related.has(n.id) ? ' is-dim' : '');
+        return (
+          <button
+            key={n.id}
+            className={cls}
+            style={{ left: n.x + '%', top: n.y + '%' }}
+            onMouseEnter={() => setHot(n.id)}
+            onMouseLeave={() => setHot(null)}
+            onFocus={() => setHot(n.id)}
+            onBlur={() => setHot(null)}
+            aria-label={n.name + ': ' + n.tip}
+          >
+            <span className="node__name">{n.name}</span>
+            <span className="node__sub mono">{n.sub}</span>
+          </button>
+        );
+      })}
+
+      <div className="map__tip">
+        {tip ? tip : <span><span className="mono">›</span> Pasa el cursor sobre un nodo para ver sus conexiones</span>}
+      </div>
+    </div>
+  );
+}
+
+function SecurityLayers() {
+  const [f, setF] = useState('all');
+  return (
+    <React.Fragment>
+      <div className="sec__head">
+        <div>
+          <span className="mono-label" data-reveal>[ SLIDE_08 · SECURITY_RADAR ]</span>
+          <h2 className="display-lg" data-reveal>PERIMETRO<br /><span className="t-sunray">BLINDADO</span></h2>
+          <p className="sec__hint" data-reveal>
+            <span className="sec-key sec-key--mvp">MVP</span> ya activo en esta infraestructura
+            <span className="sec__sep">·</span>
+            <span className="sec-key sec-key--pot">PROD</span> se suma al escalar a Produccion
+          </p>
+        </div>
+        <div className="sec-filter" data-reveal role="group" aria-label="Filtrar capas de seguridad">
+          <button className={f === 'all' ? 'is-active' : ''} onClick={() => setF('all')}>Todo</button>
+          <button className={f === 'mvp' ? 'is-active' : ''} onClick={() => setF('mvp')}>En el MVP</button>
+          <button className={f === 'pot' ? 'is-active' : ''} onClick={() => setF('pot')}>En Produccion</button>
+        </div>
+      </div>
+      <div className="sec-grid">
+        {SECURITY.map((col, ci) => (
+          <div className="sec-col" data-reveal style={{ '--d': ci }} key={col.title}>
+            <h3>{col.title}</h3>
+            {col.items.map((it, ii) => (
+              <div key={ii} className={'sec-item sec-item--' + it.s + (f !== 'all' && f !== it.s ? ' is-hidden' : '')}>
+                <strong>
+                  <span className={'sec-badge sec-badge--' + it.s}>{it.s === 'mvp' ? 'MVP' : 'PROD'}</span>
+                  {it.n}
+                </strong>
+                <p>{it.d}</p>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </React.Fragment>
+  );
+}
+
+/* ============================================================
+   CATEGORIA DE SERVICIOS (reutilizable)
+   ============================================================ */
+function ServicesSlide({ index, label, title, accentWord, group, dark }) {
+  return (
+    <div className="slide__inner">
+      <div className="section-head">
+        <span className="mono-label" data-reveal>{label}</span>
+        <h2 className="display-lg" data-reveal>{title} <span className="t-sky">{accentWord}</span></h2>
+      </div>
+      <div className="svc-grid">
+        {SERVICES[group].map((s) => <ServiceCard key={s.name} s={s} />)}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   APP
+   ============================================================ */
+function App() {
+  const [active, setActive] = useState(0);
+  const activeRef = useRef(0);
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const goTo = (i) => {
+    const slides = document.querySelectorAll('.slide');
+    const c = Math.max(0, Math.min(i, slides.length - 1));
+    slides[c] && slides[c].scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  };
+
+  useEffect(() => {
+    const deck = document.getElementById('deck');
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    if (slides[0]) slides[0].classList.add('is-active');
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        const i = slides.indexOf(e.target);
+        if (e.isIntersecting && e.intersectionRatio >= 0.55) {
+          e.target.classList.add('is-active');
+          activeRef.current = i;
+          setActive(i);
+        } else if (e.intersectionRatio < 0.2) {
+          e.target.classList.remove('is-active');
+        }
+      });
+    }, { root: deck, threshold: [0, 0.2, 0.55, 0.9] });
+    slides.forEach((s) => io.observe(s));
+
+    const onKey = (ev) => {
+      if (ev.target.tagName === 'BUTTON' && ev.key === ' ') return;
+      if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(ev.key)) { ev.preventDefault(); goTo(activeRef.current + 1); }
+      else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(ev.key)) { ev.preventDefault(); goTo(activeRef.current - 1); }
+      else if (ev.key === 'Home') { ev.preventDefault(); goTo(0); }
+      else if (ev.key === 'End') { ev.preventDefault(); goTo(slides.length - 1); }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => { io.disconnect(); document.removeEventListener('keydown', onKey); };
+  }, []);
+
+  return (
+    <React.Fragment>
+      {/* HUD */}
+      <div className="hud" aria-hidden="true">
+        <span className="hud__bracket hud__bracket--tl"></span>
+        <span className="hud__bracket hud__bracket--tr"></span>
+        <span className="hud__bracket hud__bracket--bl"></span>
+        <span className="hud__bracket hud__bracket--br"></span>
+      </div>
+
+      <header className="topbar">
+        <div className="topbar__brand">
+          <span className="topbar__logo">HUTCHISON PORTS</span>
+          <span className="topbar__tag">HUB · INFRA AZURE / MVP</span>
+        </div>
+        <div className="topbar__status">
+          <span className="status-dot"></span>
+          <span className="mono">SYSTEM ONLINE</span>
+        </div>
+      </header>
+
+      <div className="progress" aria-hidden="true">
+        {SLIDES.map((_, i) => <span key={i} className={'progress__seg' + (i <= active ? ' is-done' : '')}></span>)}
+      </div>
+
+      <nav className="deck-nav" aria-label="Navegacion de diapositivas">
+        {SLIDES.map((t, i) => (
+          <button key={t} className={'nav-dot' + (i === active ? ' is-active' : '')} onClick={() => goTo(i)} aria-label={'Ir a ' + t}>
+            <span className="nav-dot__mark"></span>
+            <span className="nav-dot__label">{t}</span>
+          </button>
+        ))}
+      </nav>
+
+      <footer className="botbar">
+        <span className="botbar__coords mono">[ LAT 19.19 · LON -96.13 — MEXICO CENTRAL ]</span>
+        <span className="botbar__counter mono">{idx2(active)} / {idx2(SLIDES.length - 1)}</span>
+      </footer>
+
+      {/* DECK */}
+      <main id="deck">
+        {/* 01 PORTADA */}
+        <section className="slide slide--cover" data-index="01" data-title="Portada">
+          <div className="port-scene" aria-hidden="true">
+            <svg className="port-skyline" viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax meet" fill="none">
+              <line className="sky-water" x1="0" y1="300" x2="1440" y2="300" />
+              <g className="crane crane--1">
+                <path className="sky-stroke" d="M180 300 V120 M320 300 V120 M150 120 H540 M540 120 V150 M150 100 H560" />
+                <line className="sky-trolley" x1="250" y1="120" x2="250" y2="170" />
+                <rect className="sky-load" x="232" y="168" width="36" height="26" />
+              </g>
+              <g className="crane crane--2">
+                <path className="sky-stroke" d="M760 300 V90 M900 300 V90 M730 90 H1180 M1180 90 V130 M730 70 H1200" />
+                <line className="sky-trolley" x1="1010" y1="90" x2="1010" y2="150" />
+                <rect className="sky-load" x="992" y="148" width="36" height="26" />
+              </g>
+              <g className="sky-containers">
+                <rect x="980" y="252" width="70" height="24" /><rect x="1054" y="252" width="70" height="24" />
+                <rect x="980" y="276" width="70" height="24" /><rect x="1054" y="276" width="70" height="24" />
+                <rect x="1017" y="228" width="70" height="24" />
+              </g>
+            </svg>
+            <div className="port-grid"></div>
+          </div>
+          <div className="slide__inner cover__inner">
+            <span className="mono-label" data-reveal>[ DEPLOY_TARGET · AZURE / MEXICO CENTRAL ]</span>
+            <h1 className="display-giant title-stack" data-reveal>
+              <span>INFRA</span><span className="t-sky">ESTRUCTURA</span><span className="t-sunray">DEL HUB</span>
+            </h1>
+            <p className="body-lg" data-reveal>La infraestructura Azure que soporta al HUB Digital IHP. Cloud-native, segura por aislamiento y con costo optimizado — version MVP.</p>
+            <div className="stat-strip" data-reveal>
+              <div className="stat-strip__item"><strong className="mono">04</strong><span>microservicios</span></div>
+              <div className="stat-strip__item"><strong className="mono">01</strong><span>region</span></div>
+              <div className="stat-strip__item"><strong className="mono">~$120</strong><span>USD / mes</span></div>
+            </div>
+            <div className="cta-row" data-reveal>
+              <button className="btn btn--sunray" onClick={() => goTo(1)}>INICIAR RECORRIDO</button>
+              <span className="scroll-hint mono">SCROLL ↓</span>
+            </div>
+          </div>
+        </section>
+
+        {/* 02 CONCEPTO */}
+        <section className="slide slide--light" data-index="02" data-title="Concepto">
+          <div className="slide__inner">
+            <div className="concept">
+              <div className="concept__text">
+                <span className="mono-label" data-reveal>[ SLIDE_02 · MODELO_MENTAL ]</span>
+                <h2 className="display-lg" data-reveal>¿QUE ES UN<br /><span className="t-sky">SERVICIO</span> DE AZURE?</h2>
+                <p className="body-lg" data-reveal>Imagina Azure como un puerto inteligente. Cada servicio es un <strong>contenedor</strong>: una pieza sellada que llega lista, se apila junto a las demas y se opera de forma independiente.</p>
+                <p className="concept__lead" data-reveal>Toca cada contenedor para ver una propiedad:</p>
+              </div>
+              <div data-reveal><ConceptYard /></div>
+            </div>
+          </div>
+        </section>
+
+        {/* 03 MAPA */}
+        <section className="slide slide--dark" data-index="03" data-title="Mapa">
+          <div className="slide__inner">
+            <div className="map">
+              <div className="map__text">
+                <span className="mono-label" data-reveal>[ SLIDE_03 · TOPOLOGIA ]</span>
+                <h2 className="display-lg" data-reveal>TODO<br /><span className="t-sky">CONECTADO</span></h2>
+                <p className="body-lg" data-reveal>La vista general: sigue el flujo de una peticion tipica. El usuario entra por el Frontend, que llama al Backend, y este orquesta datos, cache y archivos. Solo PostgreSQL vive dentro de la VNet.</p>
+                <div className="map__legend" data-reveal>
+                  <span className="legend-flow"><i></i> Flujo de una peticion · Usuario → Frontend → Backend → Datos</span>
+                  <span className="legend-vnet"><b></b> Recursos dentro de la VNet (privados)</span>
+                </div>
+              </div>
+              <div data-reveal><ArchMap /></div>
+            </div>
+          </div>
+        </section>
+
+        {/* 04 COMPUTO */}
+        <section className="slide slide--dark" data-index="04" data-title="Computo">
+          <ServicesSlide label="[ SLIDE_04 · COMPUTE ]" title="EL" accentWord="MOTOR" group="computo" />
+        </section>
+
+        {/* 05 DATOS */}
+        <section className="slide slide--light" data-index="05" data-title="Datos">
+          <ServicesSlide label="[ SLIDE_05 · PERSISTENCIA ]" title="DATOS" accentWord="CRITICOS" group="datos" />
+        </section>
+
+        {/* 06 ALMACENAMIENTO */}
+        <section className="slide slide--dark" data-index="06" data-title="Almacenamiento">
+          <ServicesSlide label="[ SLIDE_06 · ALMACENAMIENTO ]" title="LA BODEGA" accentWord="DIGITAL" group="almacenamiento" />
+        </section>
+
+        {/* 07 FRONTEND */}
+        <section className="slide slide--light" data-index="07" data-title="Frontend">
+          <ServicesSlide label="[ SLIDE_07 · ENTRADA & TELEMETRIA ]" title="CARA Y" accentWord="CONTROL" group="frontend" />
+        </section>
+
+        {/* 08 SEGURIDAD */}
+        <section className="slide slide--ocean" data-index="08" data-title="Seguridad">
+          <div className="slide__inner"><SecurityLayers /></div>
+        </section>
+
+        {/* 09 COSTOS */}
+        <section className="slide slide--light" data-index="09" data-title="Costos">
+          <div className="slide__inner">
+            <div className="cost">
+              <div className="cost__head">
+                <span className="mono-label" data-reveal>[ SLIDE_09 · BURN_RATE / MENSUAL ]</span>
+                <div className="cost__total" data-reveal>
+                  <span className="cost__currency">$</span>
+                  <Counter to={120} decimals={0} active={active === 8} />
+                  <span className="cost__unit">USD<br />/mes</span>
+                </div>
+                <span className="badge--aqua" data-reveal>− $24 / mes vs. el diseño inicial (B3 en vez de P0V3 · SWA Free)</span>
+              </div>
+              <div className="cost__bars">
+                {COSTS.map((c, i) => (
+                  <div className="cost-row" data-reveal style={{ '--d': i }} key={c.label}>
+                    <span className="cost-row__label">{c.label}</span>
+                    <div className="cost-row__track"><span className="cost-row__fill" style={{ '--w': c.w }}></span></div>
+                    <strong className="mono">{c.val}</strong>
+                  </div>
+                ))}
+              </div>
+              <p className="cost__footer mono" data-reveal>OPTIMIZADO PARA MEXICO CENTRAL · BALANCE COSTO / SEGURIDAD</p>
+            </div>
+          </div>
+        </section>
+
+        {/* 10 PRODUCCION */}
+        <section className="slide slide--ocean" data-index="10" data-title="Produccion">
+          <div className="slide__inner">
+            <div className="sec__head">
+              <div>
+                <span className="mono-label" data-reveal>[ SLIDE_10 · PRODUCCION_BLINDADA ]</span>
+                <h2 className="display-lg" data-reveal>CAMINO A<br /><span className="t-sunray">PRODUCCION</span></h2>
+                <p className="sec__hint" data-reveal>
+                  Mas seguridad y mas capacidad, ajustada a la escala real (~5,000 usuarios · 11 unidades).
+                  <span className="sec__sep">·</span> No es "todo al maximo".
+                </p>
+              </div>
+              <span className="badge--aqua" data-reveal>MVP ~$120/mes → Produccion ~$900–1,400/mes</span>
+            </div>
+            <div className="sec-grid">
+              {PROD_CRITERIOS.map((col, ci) => (
+                <div className="sec-col" data-reveal style={{ '--d': ci }} key={col.title}>
+                  <h3>{col.title}</h3>
+                  {col.items.map((it, ii) => {
+                    const flag = it.b === 'FLAG';
+                    return (
+                      <div key={ii} className={'sec-item ' + (flag ? 'sec-item--mvp' : 'sec-item--pot')}>
+                        <strong>
+                          <span className={'sec-badge ' + (flag ? 'sec-badge--mvp' : 'sec-badge--pot')}>{it.b}</span>
+                          {it.n}
+                        </strong>
+                        <p>{it.d}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 11 CIERRE */}
+        <section className="slide slide--cover" data-index="11" data-title="Cierre">
+          <div className="port-grid" aria-hidden="true"></div>
+          <div className="slide__inner cover__inner">
+            <span className="mono-label" data-reveal>[ BICEP_DEPLOY_STATUS · READY ]</span>
+            <h1 className="display-giant title-stack" data-reveal>
+              <span>LISTO PARA</span><span className="t-sunray">DESPLEGAR</span>
+            </h1>
+            <p className="body-lg" data-reveal>Infraestructura del HUB Digital IHP en dos fases: un MVP para validar (~$120/mes) y una produccion blindada dimensionada a la escala real. Eficiencia, escala y seguridad — un puerto moderno en la nube.</p>
+            <div className="deploy-line" data-reveal>
+              <span className="status-dot"></span>
+              <span className="mono">az deployment group create -f MVP.bicep | Produccion.bicep</span>
+            </div>
+            <div className="cta-row" data-reveal>
+              <button className="btn btn--ghost" onClick={() => goTo(0)}>VOLVER AL INICIO</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>

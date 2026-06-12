@@ -1,0 +1,228 @@
+/* ============================================================
+   PLANTILLA PROFUNDIDAD 3D — "EDITORIAL"
+   Papel calido, serif con caracter, tinta densa.
+   ============================================================ */
+
+:root {
+  --paper: #f5f1e8;          /* fondo papel */
+  --paper-deep: #e9e2d2;     /* sombra del papel */
+  --card: #fffdf8;           /* fondo de slide */
+  --ink: #1c1814;            /* tinta principal */
+  --ink-soft: #6f675b;       /* tinta secundaria */
+  --accent: #c2410c;         /* naranja quemado editorial */
+  --accent-soft: rgba(194, 65, 12, 0.12);
+  --line: rgba(28, 24, 20, 0.16);
+  --f-serif: 'Fraunces', serif;
+  --f-body: 'Inter', sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+
+  --slide-w: 980px;
+  --slide-h: 600px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-body);
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 30%, var(--paper), var(--paper-deep)),
+    var(--paper);
+}
+
+/* textura de puntos tipo papel de imprenta */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(28, 24, 20, 0.08) 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+}
+
+/* ============================================================
+   CAMARA
+   .viewport aporta la perspectiva; .canvas3d es el mundo que
+   se transforma (la "camara" es su transform inverso, via JS).
+   ============================================================ */
+.viewport {
+  position: absolute;
+  inset: 0;
+  perspective: 1000px;
+  overflow: hidden;
+}
+
+.canvas3d {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-style: preserve-3d;
+  transition: transform var(--fly-ms, 1100ms) cubic-bezier(0.6, 0.05, 0.15, 1);
+}
+
+/* en vista general el vuelo es mas rapido */
+.viewport.is-overview .canvas3d { transition-duration: 700ms; }
+
+/* ============================================================
+   SLIDES
+   ============================================================ */
+.slide {
+  position: absolute;
+  width: var(--slide-w);
+  height: var(--slide-h);
+  /* centrada en su coordenada; JS aplica el resto del transform */
+  margin: calc(var(--slide-h) / -2) 0 0 calc(var(--slide-w) / -2);
+  padding: clamp(2.2rem, 4vw, 4rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.1rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 30px 60px -25px rgba(28, 24, 20, 0.35);
+  transition: opacity 0.6s ease;
+  opacity: 0.35;
+}
+.slide.is-active { opacity: 1; }
+
+/* esquina doblada */
+.slide::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0;
+  border-style: solid;
+  border-width: 0 34px 34px 0;
+  border-color: var(--paper-deep) var(--paper-deep) var(--card) var(--card);
+  box-shadow: -2px 2px 3px rgba(28, 24, 20, 0.12);
+}
+
+/* numeral de fondo por slide */
+.slide .kicker::after { content: ""; }
+
+/* en vista general, las slides son clicables y se iluminan */
+.viewport.is-overview .slide { opacity: 0.85; cursor: pointer; }
+.viewport.is-overview .slide:hover { opacity: 1; outline: 3px solid var(--accent); }
+
+/* ============================================================
+   TIPOGRAFIA
+   ============================================================ */
+.kicker {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+h1 {
+  font-family: var(--f-serif);
+  font-size: clamp(3rem, 7vw, 5.4rem);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+h1 em {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+h2 {
+  font-family: var(--f-serif);
+  font-size: clamp(2rem, 4.4vw, 3.2rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+}
+
+p { color: var(--ink-soft); line-height: 1.65; max-width: 52ch; font-size: 1.02rem; }
+.lead { font-size: clamp(1.05rem, 1.8vw, 1.3rem); }
+
+.points {
+  list-style: none;
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+}
+.points li {
+  position: relative;
+  padding-left: 1.7rem;
+  color: var(--ink);
+  line-height: 1.5;
+}
+.points li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.52em;
+  width: 9px; height: 9px;
+  background: var(--accent);
+  transform: rotate(45deg);
+}
+
+.slide--cover { border-top: 10px solid var(--accent); }
+
+.slide--accent {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.slide--accent h2 { color: var(--paper); }
+.slide--accent p { color: rgba(245, 241, 232, 0.75); }
+.slide--accent::after { border-color: var(--paper-deep) var(--paper-deep) var(--ink) var(--ink); }
+
+.slide--quote { align-items: center; text-align: center; }
+blockquote {
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-size: clamp(1.8rem, 3.6vw, 2.8rem);
+  font-weight: 500;
+  line-height: 1.3;
+  max-width: 24ch;
+}
+
+code {
+  font-family: var(--f-mono);
+  font-size: 0.85em;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+}
+
+/* ============================================================
+   HUD
+   ============================================================ */
+.hud {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  z-index: 20;
+  pointer-events: none;
+}
+.hud__brand { color: var(--ink); }
+.hud__counter { color: var(--accent); }
+
+/* ============================================================
+   RESPONSIVE / MOTION
+   ============================================================ */
+@media (max-width: 700px) {
+  .hud__hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas3d { transition-duration: 0.01ms !important; }
+}

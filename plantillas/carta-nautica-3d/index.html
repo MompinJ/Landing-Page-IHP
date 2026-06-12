@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLANTILLA // Carta Nautica 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PLANTILLA: CARTA NAUTICA 3D
+       Mesa de derrota: las slides son waypoints clavados sobre una
+       carta nautica inclinada en 3D. La camara navega de waypoint
+       en waypoint, la linea de derrota se traza en rojo conforme
+       avanzas y un barco recorre la ruta.
+
+       CADA SLIDE DECLARA SU POSICION EN LA CARTA:
+         data-cx / data-cy   coordenadas en px (origen = centro)
+
+       COMO USARLA
+       1. Duplica esta carpeta a presentations/<tu-slug>/
+       2. Edita las <section class="wp"> y sus coordenadas
+       3. Esc = vista de toda la carta (click en un waypoint para ir)
+       4. Registra tu presentacion en presentations.json
+       ============================================================ -->
+
+  <div class="scene" id="scene">
+    <div class="world" id="world">
+
+      <!-- la carta (papel, grid, rosa de los vientos, sondas) -->
+      <div class="chart" id="chart">
+        <div class="rose" aria-hidden="true">
+          <i></i><i></i>
+          <span class="rose__n">N</span>
+        </div>
+      </div>
+
+      <!-- la derrota (ruta) se dibuja aqui desde JS -->
+      <svg class="route" id="route" aria-hidden="true"></svg>
+
+      <!-- barco que recorre la ruta -->
+      <div class="ship" id="ship" aria-hidden="true"></div>
+
+      <!-- WAYPOINT 01 : zarpe -->
+      <section class="wp" data-cx="-1800" data-cy="-550">
+        <header><span class="wp__id">WP-01</span><span class="wp__name">PUERTO DE SALIDA</span></header>
+        <h1>Titulo de tu<br><em>derrota</em></h1>
+        <p class="lead">Cada slide es un waypoint clavado en la carta. Pulsa Esc para ver la ruta completa desde arriba.</p>
+        <p class="annot">zarpamos con buen tiempo</p>
+      </section>
+
+      <!-- WAYPOINT 02 -->
+      <section class="wp" data-cx="-850" data-cy="350">
+        <header><span class="wp__id">WP-02</span><span class="wp__name">AGUAS CONOCIDAS</span></header>
+        <h2>El contexto</h2>
+        <p>Lo que tu audiencia ya sabe: el estado actual, el terreno seguro. Desde aqui se decide el rumbo.</p>
+        <ul class="list">
+          <li>Hecho conocido uno</li>
+          <li>Hecho conocido dos</li>
+          <li>Hecho conocido tres</li>
+        </ul>
+      </section>
+
+      <!-- WAYPOINT 03 -->
+      <section class="wp" data-cx="0" data-cy="-500">
+        <header><span class="wp__id">WP-03</span><span class="wp__name">CAMBIO DE RUMBO</span></header>
+        <h2>La propuesta</h2>
+        <p>El viraje: que propones hacer distinto y por que este es el momento de virar.</p>
+        <ul class="list">
+          <li>Maniobra principal</li>
+          <li>Maniobra de apoyo</li>
+          <li>Maniobra de respaldo</li>
+        </ul>
+      </section>
+
+      <!-- WAYPOINT 04 : el riesgo -->
+      <section class="wp wp--danger" data-cx="850" data-cy="450">
+        <header><span class="wp__id">WP-04</span><span class="wp__name">BAJIO SENALADO</span></header>
+        <h2>Los riesgos</h2>
+        <p>Todo derrotero honesto marca sus bajios. Nombra los riesgos y como piensas sortearlos: da mas confianza que ocultarlos.</p>
+        <p class="annot">precaucion: fondo a 3 brazas</p>
+      </section>
+
+      <!-- WAYPOINT 05 : el dato -->
+      <section class="wp" data-cx="1650" data-cy="-350">
+        <header><span class="wp__id">WP-05</span><span class="wp__name">SONDA MAYOR</span></header>
+        <p class="bignum">x4</p>
+        <p class="lead">La medida que valida la ruta. Una cifra clavada en la carta, con su posicion exacta.</p>
+      </section>
+
+      <!-- WAYPOINT 06 : puerto de llegada -->
+      <section class="wp" data-cx="2300" data-cy="500">
+        <header><span class="wp__id">WP-06</span><span class="wp__name">PUERTO DE LLEGADA</span></header>
+        <h2>Hazla tuya</h2>
+        <ul class="list">
+          <li>Mueve los waypoints con <code>data-cx</code> / <code>data-cy</code></li>
+          <li>Papel y tintas en <code>css/styles.css</code> (:root)</li>
+          <li>Inclinacion de la mesa: <code>TILT_FOCUS</code> y <code>TILT_MAP</code> en <code>js/carta.js</code></li>
+          <li>La ruta y el barco se recalculan solos al mover waypoints</li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+  <header class="hud hud--top">
+    <span>CARTA N-203 · DERROTA DEL PROYECTO</span>
+    <span>ESCALA 1:50000</span>
+  </header>
+  <footer class="hud hud--bottom">
+    <span id="hud-counter">WP-01 / --</span>
+    <span class="hud__hint">flechas avanzan · esc = ver la carta</span>
+  </footer>
+
+  <script src="js/carta.js"></script>
+</body>
+</html>

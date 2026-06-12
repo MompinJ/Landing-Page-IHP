@@ -1,0 +1,364 @@
+/* ============================================================
+   PLANTILLA CARTA NAUTICA 3D — "DERROTA"
+   Mesa de navegacion: papel envejecido, tinta azul de carta,
+   derrota roja y anotaciones a mano.
+   ============================================================ */
+
+:root {
+  --room: #1b1610;            /* madera oscura de la mesa/sala */
+  --paper: #ece1c4;           /* papel de la carta */
+  --paper-dark: #ddcfa9;
+  --chart-ink: #2c4a6e;       /* tinta azul de carta nautica */
+  --chart-ink-soft: rgba(44, 74, 110, 0.45);
+  --card: #f7efdb;            /* tarjeta de waypoint */
+  --ink: #232019;
+  --ink-soft: #6b6353;
+  --route: #b3261e;           /* rojo de la derrota */
+  --brass: #8f6c25;
+  --f-serif: 'EB Garamond', serif;
+  --f-hand: 'Caveat', cursive;
+  --f-mono: 'JetBrains Mono', monospace;
+
+  /* JS sobreescribe --tilt al cambiar entre foco y mapa */
+  --tilt: 22deg;
+
+  --chart-w: 5200px;
+  --chart-h: 3000px;
+  --wp-w: 640px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-serif);
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(143, 108, 37, 0.12), transparent 65%),
+    var(--room);
+}
+
+/* lampara de mesa de cartas: luz calida desde arriba */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 45% at 50% 38%, rgba(255, 232, 178, 0.10), transparent 70%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ============================================================
+   ESCENA / MUNDO (la mesa inclinada)
+   ============================================================ */
+.scene {
+  position: absolute;
+  inset: 0;
+  perspective: 1650px;
+  perspective-origin: 50% 38%;
+  overflow: hidden;
+}
+
+.world {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-style: preserve-3d;
+  transition: transform 1.45s cubic-bezier(0.55, 0.06, 0.18, 1);
+}
+
+/* ============================================================
+   LA CARTA
+   ============================================================ */
+.chart {
+  position: absolute;
+  width: var(--chart-w);
+  height: var(--chart-h);
+  margin: calc(var(--chart-h) / -2) 0 0 calc(var(--chart-w) / -2);
+  background:
+    /* manchas de humedad */
+    radial-gradient(ellipse 18% 22% at 78% 20%, rgba(143, 108, 37, 0.10), transparent 70%),
+    radial-gradient(ellipse 24% 18% at 14% 76%, rgba(143, 108, 37, 0.12), transparent 70%),
+    /* graticula */
+    linear-gradient(var(--chart-ink-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--chart-ink-soft) 1px, transparent 1px),
+    linear-gradient(rgba(44, 74, 110, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(44, 74, 110, 0.18) 1px, transparent 1px),
+    /* papel */
+    linear-gradient(140deg, var(--paper), var(--paper-dark));
+  background-size:
+    100% 100%,
+    100% 100%,
+    400px 400px,
+    400px 400px,
+    80px 80px,
+    80px 80px,
+    100% 100%;
+  border: 14px solid #d9c89e;
+  outline: 3px solid rgba(44, 74, 110, 0.5);
+  outline-offset: -28px;
+  box-shadow: 0 60px 140px -30px rgba(0, 0, 0, 0.85);
+}
+
+/* sondas (numeritos de profundidad), los reparte JS */
+.chart .sound {
+  position: absolute;
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--chart-ink-soft);
+  transform: translate(-50%, -50%);
+}
+
+/* ---------- rosa de los vientos ---------- */
+.rose {
+  position: absolute;
+  right: 7%;
+  top: 9%;
+  width: 240px;
+  height: 240px;
+  border: 2px solid var(--chart-ink-soft);
+  border-radius: 50%;
+}
+.rose::before {
+  content: "";
+  position: absolute;
+  inset: 26px;
+  border: 1px solid var(--chart-ink-soft);
+  border-radius: 50%;
+}
+/* puntas cardinales (dos rombos cruzados) */
+.rose i {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 26px; height: 196px;
+  margin: -98px 0 0 -13px;
+  background: var(--chart-ink);
+  clip-path: polygon(50% 0, 68% 50%, 50% 100%, 32% 50%);
+  opacity: 0.65;
+}
+.rose i:nth-child(2) { transform: rotate(90deg); }
+.rose__n {
+  position: absolute;
+  left: 50%;
+  top: -38px;
+  transform: translateX(-50%);
+  font-family: var(--f-serif);
+  font-weight: 700;
+  font-size: 30px;
+  color: var(--chart-ink);
+}
+
+/* ============================================================
+   DERROTA (SVG) Y BARCO
+   ============================================================ */
+.route {
+  position: absolute;
+  width: var(--chart-w);
+  height: var(--chart-h);
+  margin: calc(var(--chart-h) / -2) 0 0 calc(var(--chart-w) / -2);
+  overflow: visible;
+  pointer-events: none;
+}
+.route .base {
+  fill: none;
+  stroke: var(--chart-ink-soft);
+  stroke-width: 3;
+  stroke-dasharray: 14 16;
+}
+.route .done {
+  fill: none;
+  stroke: var(--route);
+  stroke-width: 4;
+  /* dasharray/dashoffset los maneja JS para "trazar" la ruta */
+  transition: stroke-dashoffset 1.45s cubic-bezier(0.55, 0.06, 0.18, 1);
+}
+.route .mark { fill: var(--paper); stroke: var(--route); stroke-width: 3.5; }
+
+.ship {
+  position: absolute;
+  width: 30px; height: 38px;
+  margin: -19px 0 0 -15px;
+  background: var(--route);
+  clip-path: polygon(50% 0, 100% 78%, 50% 100%, 0 78%);
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.35));
+  transition: left 1.45s cubic-bezier(0.55, 0.06, 0.18, 1),
+              top 1.45s cubic-bezier(0.55, 0.06, 0.18, 1),
+              transform 1.45s ease;
+  z-index: 3;
+}
+
+/* ============================================================
+   WAYPOINTS (las slides, clavadas en la carta)
+   ============================================================ */
+.wp {
+  position: absolute;
+  width: var(--wp-w);
+  padding: 2.1rem 2.3rem 1.9rem;
+  margin-left: calc(var(--wp-w) / -2);
+  /* el alto es libre; JS centra verticalmente con translate */
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  background:
+    linear-gradient(170deg, rgba(255, 255, 255, 0.5), transparent 30%),
+    var(--card);
+  border: 1px solid rgba(35, 32, 25, 0.25);
+  box-shadow: 0 24px 50px -18px rgba(0, 0, 0, 0.55);
+  transform-origin: 50% 100%;
+  transform: translateY(-50%);
+  transition: transform 1.1s cubic-bezier(0.3, 1.1, 0.35, 1), opacity 0.8s ease, filter 0.8s ease;
+  opacity: 0.55;
+  filter: saturate(0.8);
+}
+
+/* chincheta */
+.wp::before {
+  content: "";
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 22px; height: 22px;
+  margin-left: -11px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e0524a, var(--route) 65%, #7c1812);
+  box-shadow: 0 4px 7px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+/* la activa se LEVANTA de la mesa para mirar a la camara */
+.wp.is-up {
+  transform: translateY(-50%) rotateX(calc(var(--tilt) * -1)) translateZ(30px);
+  opacity: 1;
+  filter: none;
+  z-index: 4;
+}
+
+/* en vista mapa todas reposan legibles y clicables */
+.is-map .wp { cursor: pointer; opacity: 0.92; filter: none; }
+.is-map .wp:hover { outline: 4px solid var(--route); opacity: 1; }
+
+/* ============================================================
+   CONTENIDO DE WAYPOINT
+   ============================================================ */
+.wp header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid rgba(35, 32, 25, 0.18);
+}
+.wp__id {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #fff;
+  background: var(--route);
+  padding: 0.18rem 0.5rem;
+}
+.wp__name {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  color: var(--brass);
+}
+
+h1 {
+  font-size: 3.3rem;
+  font-weight: 700;
+  line-height: 1.0;
+  letter-spacing: -0.01em;
+}
+h1 em { font-style: italic; font-weight: 500; color: var(--route); }
+
+h2 { font-size: 2.1rem; font-weight: 700; line-height: 1.08; }
+
+p { color: var(--ink-soft); line-height: 1.55; font-size: 1.05rem; }
+.lead { font-size: 1.15rem; }
+
+.annot {
+  font-family: var(--f-hand);
+  font-size: 1.5rem;
+  color: var(--chart-ink);
+  transform: rotate(-2deg);
+  margin-top: 0.4rem;
+}
+
+.list {
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.2rem;
+}
+.list li {
+  position: relative;
+  padding-left: 1.5rem;
+  font-size: 1.02rem;
+  line-height: 1.45;
+}
+.list li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.5em;
+  width: 8px; height: 8px;
+  border: 2px solid var(--route);
+  border-radius: 50%;
+}
+
+.bignum {
+  font-size: 6.5rem;
+  font-weight: 700;
+  line-height: 0.95;
+  color: var(--route);
+}
+
+.wp--danger {
+  background:
+    repeating-linear-gradient(-45deg, rgba(179, 38, 30, 0.06) 0 18px, transparent 18px 36px),
+    var(--card);
+  border-color: var(--route);
+}
+
+code {
+  font-family: var(--f-mono);
+  font-size: 0.82em;
+  color: var(--route);
+  background: rgba(179, 38, 30, 0.08);
+  padding: 0.08em 0.35em;
+}
+
+/* ============================================================
+   HUD
+   ============================================================ */
+.hud {
+  position: fixed;
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: rgba(236, 225, 196, 0.75);
+  z-index: 20;
+  pointer-events: none;
+}
+.hud--top { top: 0; }
+.hud--bottom { bottom: 0; }
+.hud--bottom #hud-counter { color: #e0a060; }
+
+/* ============================================================
+   RESPONSIVE / MOTION
+   ============================================================ */
+@media (max-width: 760px) {
+  :root { --wp-w: 480px; }
+  .hud__hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world, .wp, .ship, .route .done { transition-duration: 0.01ms !important; }
+}

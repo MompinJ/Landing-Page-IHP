@@ -1,0 +1,214 @@
+/* ============================================================
+   PLANTILLA HP RED GLOBAL 3D
+   Globo de puntos sobre blanco, paleta oficial Hutchison Ports.
+   El contenido vive a la izquierda; el globo, a la derecha.
+   ============================================================ */
+
+:root {
+  --sky: #009BDE;
+  --sea: #002E6D;
+  --horizon: #9ACAEB;
+  --aqua: #54BBAB;
+  --sunray: #FFC627;
+  --sunset: #EE7523;
+  --paper: #ffffff;
+  --mist: #eef1f4;
+  --f-sans: 'Montserrat', Arial, sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-sans);
+  color: var(--sea);
+  background: var(--paper);
+}
+
+#globe {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* fallback si Three.js no carga: globo punteado en CSS */
+.fallback {
+  position: fixed;
+  top: 50%;
+  right: 4vw;
+  width: min(44vw, 78vh);
+  aspect-ratio: 1;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(0, 46, 109, 0.55) 1.5px, transparent 1.5px) 0 0 / 16px 16px,
+    radial-gradient(circle at 32% 28%, rgba(154, 202, 235, 0.35), transparent 65%);
+  -webkit-mask: radial-gradient(circle, #000 99%, transparent 100%);
+  mask: radial-gradient(circle, #000 99%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+body.no-webgl .fallback { opacity: 1; }
+body.no-webgl #globe { display: none; }
+
+/* ============================================================
+   DECK (columna izquierda)
+   ============================================================ */
+.deck {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  align-items: center;
+  padding: clamp(1.5rem, 6vw, 6rem);
+  pointer-events: none;
+}
+
+.slide {
+  grid-area: 1 / 1;
+  width: min(560px, 92%);
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.55s ease, transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.slide.is-active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition-delay: 0.35s; /* espera a que el globo empiece a girar */
+}
+
+/* ============================================================
+   TIPOGRAFIA
+   ============================================================ */
+.eyebrow {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--sky);
+}
+
+h1 {
+  font-size: clamp(2.3rem, 5.4vw, 4.2rem);
+  font-weight: 900;
+  line-height: 1.0;
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
+}
+h2 {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 900;
+  line-height: 1.04;
+  text-transform: uppercase;
+}
+
+.copy {
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--sea);
+}
+
+.sub {
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--sky);
+}
+
+.list { list-style: none; display: grid; gap: 0.7rem; }
+.list li {
+  position: relative;
+  padding-left: 1.6rem;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.list li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.42em;
+  width: 10px; height: 10px;
+  background: var(--sunray);
+  clip-path: polygon(0 100%, 100% 0, 100% 100%);
+}
+
+.stats { display: flex; gap: 1rem; margin-top: 0.3rem; }
+.stat {
+  padding: 1rem 1.4rem;
+  background: var(--mist);
+  border-left: 5px solid var(--sky);
+}
+.stat strong {
+  display: block;
+  font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+  font-weight: 900;
+  color: var(--sea);
+  line-height: 1;
+}
+.stat span {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--sky);
+}
+
+code {
+  font-family: var(--f-mono);
+  font-size: 0.85em;
+  font-weight: 700;
+  color: var(--sky);
+  background: var(--mist);
+  padding: 0.08em 0.35em;
+}
+
+/* ============================================================
+   HUD
+   ============================================================ */
+.hud {
+  position: fixed;
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.6rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--sea);
+  z-index: 20;
+  pointer-events: none;
+}
+.hud--top { top: 0; }
+.hud--bottom { bottom: 0; }
+.hud__brand { display: flex; align-items: center; gap: 0.55rem; }
+.hud__brand i {
+  width: 15px; height: 15px;
+  background: linear-gradient(-30.3deg, var(--sea) 0 44%, #fff 44% 56%, var(--sky) 56% 100%);
+}
+#hud-port { font-family: var(--f-mono); color: var(--sky); }
+#hud-counter { color: var(--sky); }
+
+/* ============================================================
+   RESPONSIVE / MOTION
+   ============================================================ */
+@media (max-width: 860px) {
+  .deck { align-items: end; padding-bottom: 4.5rem; }
+  .slide { width: 100%; }
+  .hud__hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide { transition-duration: 0.01ms; }
+}

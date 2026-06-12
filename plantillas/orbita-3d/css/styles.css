@@ -1,0 +1,260 @@
+/* ============================================================
+   PLANTILLA ORBITA 3D — "AURORA"
+   Anillo cilindrico de slides sobre un degradado nocturno.
+   ============================================================ */
+
+:root {
+  --bg-a: #120a2a;          /* arriba del degradado */
+  --bg-b: #2b0f3f;          /* abajo del degradado */
+  --panel: rgba(20, 12, 48, 0.55);
+  --panel-edge: rgba(186, 148, 255, 0.22);
+  --ink: #f3eeff;
+  --ink-soft: #b4a8d4;
+  --accent: #c084fc;        /* violeta aurora */
+  --accent-b: #67e8f9;      /* cian secundario */
+  --f-display: 'Unbounded', sans-serif;
+  --f-body: 'Outfit', sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+
+  --slide-w: min(720px, 78vw);
+  --slide-h: min(520px, 64vh);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-body);
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(103, 232, 249, 0.10), transparent 60%),
+    radial-gradient(ellipse 70% 60% at 85% 100%, rgba(192, 132, 252, 0.16), transparent 65%),
+    linear-gradient(180deg, var(--bg-a), var(--bg-b));
+  display: flex;
+  flex-direction: column;
+}
+
+/* estrellas leves con gradientes punteados */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 12% 22%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 38% 8%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1.5px 1.5px at 64% 30%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 82% 12%, rgba(255,255,255,0.45), transparent),
+    radial-gradient(1px 1px at 24% 64%, rgba(255,255,255,0.35), transparent),
+    radial-gradient(1.5px 1.5px at 91% 58%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 50% 82%, rgba(255,255,255,0.3), transparent);
+  pointer-events: none;
+}
+
+/* ============================================================
+   MARCOS SUPERIOR / INFERIOR
+   ============================================================ */
+.frame {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  z-index: 10;
+}
+
+.dots { display: flex; gap: 0.55rem; }
+.dots button {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--ink-soft);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+.dots button.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.35);
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.7);
+}
+
+/* ============================================================
+   ESCENARIO 3D
+   ============================================================ */
+.stage {
+  flex: 1;
+  perspective: 1700px;
+  perspective-origin: 50% 42%;
+  display: grid;
+  place-items: center;
+  cursor: grab;
+  touch-action: pan-y;
+}
+.stage.is-dragging { cursor: grabbing; }
+
+.ring {
+  position: relative;
+  width: var(--slide-w);
+  height: var(--slide-h);
+  transform-style: preserve-3d;
+  /* el giro lo escribe JS en cada frame: sin transition aqui */
+}
+
+/* ============================================================
+   SLIDES
+   JS asigna a cada una su rotateY(...) translateZ(...)
+   ============================================================ */
+.slide {
+  position: absolute;
+  inset: 0;
+  padding: clamp(1.8rem, 4vw, 3.2rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  border-radius: 18px;
+  background:
+    linear-gradient(155deg, rgba(192, 132, 252, 0.10), transparent 45%),
+    var(--panel);
+  border: 1px solid var(--panel-edge);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6);
+  transition: opacity 0.35s ease, filter 0.35s ease;
+  overflow: hidden;
+}
+
+/* las que no estan al frente se atenuan (JS pone .is-far / .is-front) */
+.slide.is-far { opacity: 0.28; filter: blur(2px) saturate(0.7); }
+.slide.is-front { opacity: 1; filter: none; }
+
+/* brillo superior de cada panel */
+.slide::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(243, 238, 255, 0.5), transparent);
+}
+
+/* ============================================================
+   TIPOGRAFIA / COMPONENTES
+   ============================================================ */
+.kicker {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent-b);
+}
+
+h1 {
+  font-family: var(--f-display);
+  font-size: clamp(2rem, 5.2vw, 3.6rem);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  background: linear-gradient(100deg, var(--ink) 30%, var(--accent) 70%, var(--accent-b));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+h2 {
+  font-family: var(--f-display);
+  font-size: clamp(1.4rem, 3.4vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+p { color: var(--ink-soft); line-height: 1.6; max-width: 46ch; }
+.lead { font-size: clamp(0.95rem, 1.7vw, 1.15rem); }
+
+.points {
+  list-style: none;
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.4rem;
+}
+.points li {
+  position: relative;
+  padding-left: 1.5rem;
+  color: var(--ink);
+  font-weight: 500;
+}
+.points li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.5em;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(192, 132, 252, 0.8);
+}
+.points li strong { color: var(--accent-b); font-weight: 600; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 0.6rem;
+}
+.stat {
+  padding: 1.1rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--panel-edge);
+  background: rgba(243, 238, 255, 0.04);
+  text-align: center;
+}
+.stat strong {
+  display: block;
+  font-family: var(--f-display);
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-weight: 700;
+  color: var(--accent);
+}
+.stat span {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.slide--quote { align-items: center; text-align: center; }
+blockquote {
+  font-family: var(--f-display);
+  font-size: clamp(1.2rem, 2.8vw, 1.9rem);
+  font-weight: 500;
+  line-height: 1.35;
+  max-width: 26ch;
+  color: var(--ink);
+}
+
+code {
+  font-family: var(--f-mono);
+  font-size: 0.85em;
+  color: var(--accent-b);
+  background: rgba(103, 232, 249, 0.1);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   RESPONSIVE / MOTION
+   ============================================================ */
+@media (max-width: 700px) {
+  .stats { grid-template-columns: 1fr; gap: 0.6rem; }
+  .frame--bottom span { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide { transition: none; }
+}
