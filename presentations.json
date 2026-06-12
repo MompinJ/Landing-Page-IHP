@@ -235,6 +235,16 @@
       "accent": "#FFC627",
       "theme": "dyn-etica-hp",
       "path": "dinamicas/etica-hp/index.html"
+    },
+    {
+      "slug": "cero-emisiones",
+      "title": "Ruta a Cero Emisiones",
+      "subtitle": "Dos presupuestos: dinero y carbono",
+      "description": "Juego de gestion ESG: 8 decisiones operativas del anio (flota de patio, RTG, tren vs camiones, cold ironing, reefers, iluminacion...) con dos presupuestos que no puedes reventar: dinero y toneladas de CO2. Lo barato contamina y lo verde cuesta, asi que hay que mezclar con cabeza. Cierre con comparativa de carbono evitado frente a operar todo en diesel.",
+      "tags": ["Dinamica", "Sostenibilidad", "ESG"],
+      "accent": "#54BBAB",
+      "theme": "dyn-cero-emisiones",
+      "path": "dinamicas/cero-emisiones/index.html"
     }
   ]
 }

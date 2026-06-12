@@ -1335,6 +1335,51 @@ code {
 }
 
 /* ============================================================
+   TEMA: dyn-cero-emisiones — TRANSICION ENERGETICA
+   blanco HP con verde aqua y las dos barras de presupuesto
+   ============================================================ */
+.hub-card[data-theme="dyn-cero-emisiones"] {
+  --card-accent: #54BBAB;
+  background:
+    linear-gradient(-30.3deg, rgba(84, 187, 171, 0.18) 0 18%, transparent 18%),
+    linear-gradient(150.3deg, rgba(0, 155, 222, 0.10) 0 10%, transparent 10%),
+    #ffffff;
+  border: 3px solid #002E6D;
+  box-shadow: 9px 9px 0 rgba(84, 187, 171, 0.5);
+  color: #12263c;
+}
+.hub-card[data-theme="dyn-cero-emisiones"]:hover { box-shadow: 16px 16px 0 #2e8b57; }
+.hub-card[data-theme="dyn-cero-emisiones"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-cero-emisiones"] .hub-card__date,
+.hub-card[data-theme="dyn-cero-emisiones"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #2e8b57; }
+.hub-card[data-theme="dyn-cero-emisiones"] .hub-card__kind::before { content: "DINAMICA // ESG · USD vs tCO2"; }
+.hub-card[data-theme="dyn-cero-emisiones"] .hub-card__subtitle { color: #EE7523; }
+.hub-card[data-theme="dyn-cero-emisiones"] .hub-card__desc { color: #41557a; }
+.hub-card[data-theme="dyn-cero-emisiones"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #002E6D;
+  background: #eef1f4;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-cero-emisiones"] .hub-card__arrow { color: #2e8b57; }
+/* las dos barras de presupuesto */
+.hub-card[data-theme="dyn-cero-emisiones"] .hub-card__deco {
+  bottom: 1.5rem; right: 1.4rem;
+  width: 92px; height: 34px;
+  background:
+    linear-gradient(90deg, #009BDE 0 70%, transparent 70%) 0 2px / 100% 10px no-repeat,
+    linear-gradient(90deg, #54BBAB 0 45%, transparent 45%) 0 22px / 100% 10px no-repeat,
+    linear-gradient(#dde4ec, #dde4ec) 0 2px / 100% 10px no-repeat,
+    linear-gradient(#dde4ec, #dde4ec) 0 22px / 100% 10px no-repeat;
+  border-radius: 6px;
+}
+
+/* ============================================================
    STEPS / FOOTER
    ============================================================ */
 .hub-section--add .hub-steps {

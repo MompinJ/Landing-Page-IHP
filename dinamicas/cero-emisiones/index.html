@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Ruta a Cero Emisiones</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: RUTA A CERO EMISIONES
+       Eres el planeador de la terminal por un ano. Cada decision
+       operativa tiene opciones con distinto COSTO y distinto CO2,
+       y traes DOS presupuestos que no puedes reventar:
+
+         DINERO ........ lo que autorizo finanzas
+         CARBONO ....... el tope de emisiones del ano
+
+       Lo barato contamina y lo verde cuesta: hay que MEZCLAR con
+       cabeza (y descubrir que a veces lo verde tambien es lo mas
+       barato). Reventar cualquiera de los dos = fin del juego.
+
+       CONTROLES: clic en la opcion (o teclas 1/2/3) · R reiniciar
+       PERSONALIZAR: presupuestos y decisiones en js/cero.js
+       (BUDGET_MONEY, BUDGET_CO2, TASKS).
+       ============================================================ -->
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>RUTA A CERO EMISIONES</span></div>
+    <span class="hud__step" id="hud-step">DECISION 1/--</span>
+  </header>
+
+  <!-- presupuestos -->
+  <section class="budgets">
+    <div class="budget">
+      <p class="budget__label">PRESUPUESTO <b id="b-money">--</b></p>
+      <div class="budget__bar"><i id="bar-money"></i></div>
+    </div>
+    <div class="budget">
+      <p class="budget__label">CARBONO <b id="b-co2">--</b></p>
+      <div class="budget__bar budget__bar--co2"><i id="bar-co2"></i></div>
+    </div>
+  </section>
+
+  <main class="desk">
+    <div class="task" id="task">
+      <p class="task__kicker" id="task-kicker">DECISION 1</p>
+      <h1 class="task__title" id="task-title">--</h1>
+      <p class="task__desc" id="task-desc">--</p>
+      <div class="options" id="options"></div>
+    </div>
+  </main>
+
+  <div class="feedback" id="feedback" hidden></div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">--</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <div class="compare" id="compare">
+      <p class="compare__label">TU ANIO VS OPERACION TODO-DIESEL</p>
+      <div class="compare__row"><span>TODO DIESEL</span><div class="compare__bar"><i id="cmp-base"></i></div><b id="cmp-base-v">--</b></div>
+      <div class="compare__row"><span>TU OPERACION</span><div class="compare__bar"><i id="cmp-you" class="is-you"></i></div><b id="cmp-you-v">--</b></div>
+    </div>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRO ANIO [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">CADA DECISION GASTA DINERO Y CARBONO: QUE NO TE FALTE NINGUNO</span>
+    <span class="hud__keys">clic o teclas 1/2/3 · R reiniciar</span>
+  </footer>
+
+  <script src="js/cero.js"></script>
+</body>
+</html>
