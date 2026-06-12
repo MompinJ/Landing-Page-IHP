@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Caza de Fugas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: CAZA DE FUGAS (ambiente)
+       La version ambiental de la Caza de Riesgos: una zona de la
+       terminal con 11 fugas, derroches y malas practicas
+       escondidas entre buenas practicas (paneles solares, tambos
+       con charola, segregacion correcta...).
+
+       Mismo motor que caza-riesgos: cada hallazgo es un <g
+       class="hz"> con data-label y data-why. Clic en 90 segundos;
+       los fallos restan.
+       ============================================================ -->
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>CAZA DE FUGAS</span></div>
+    <div class="meters">
+      <span class="meter">HALLADAS <b id="m-found">0/--</b></span>
+      <span class="meter">PTS <b id="m-score">0</b></span>
+      <span class="meter meter--time">T <b id="m-time">--</b></span>
+    </div>
+  </header>
+
+  <div class="timerbar"><i id="timer-fill"></i></div>
+
+  <main class="board">
+    <div class="scene-wrap">
+      <svg id="scene" viewBox="0 0 1200 640" preserveAspectRatio="xMidYMid meet">
+
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#bfe0f5"/><stop offset="1" stop-color="#eef7fd"/>
+          </linearGradient>
+          <linearGradient id="mar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3f8fc7"/><stop offset="1" stop-color="#1f6da8"/>
+          </linearGradient>
+        </defs>
+
+        <!-- cielo con SOL (pleno dia: clave para dos fugas) -->
+        <rect x="0" y="0" width="1200" height="170" fill="url(#sky)"/>
+        <circle cx="120" cy="80" r="38" fill="#FFC627"/>
+        <g stroke="#FFC627" stroke-width="5" stroke-linecap="round">
+          <path d="M 120 22 v -14 M 120 138 v 14 M 62 80 h -14 M 178 80 h 14 M 79 39 l -10 -10 M 161 121 l 10 10 M 161 39 l 10 -10 M 79 121 l -10 10"/>
+        </g>
+
+        <!-- patio -->
+        <rect x="0" y="170" width="1200" height="470" fill="#97a3ae"/>
+        <rect x="0" y="170" width="1200" height="8" fill="#7c8893"/>
+
+        <!-- mar a la derecha -->
+        <rect x="1056" y="178" width="144" height="462" fill="url(#mar)"/>
+        <rect x="1040" y="170" width="16" height="470" fill="#5d6b80"/>
+        <rect x="1036" y="170" width="24" height="10" fill="#FFC627"/>
+        <path d="M 1070 260 q 14 6 28 0 M 1100 330 q 14 6 28 0 M 1075 430 q 14 6 28 0 M 1110 520 q 14 6 28 0" stroke="rgba(255,255,255,0.5)" stroke-width="4" fill="none"/>
+
+        <!-- FUGA 1: descarga directa al mar -->
+        <g class="hz" data-label="Descarga al mar" data-why="NINGUNA DESCARGA VA AL MAR SIN TRATAMIENTO">
+          <circle cx="1058" cy="486" r="46" class="hitpad"/>
+          <rect x="980" y="466" width="74" height="16" fill="#5d6b80"/>
+          <rect x="1046" y="466" width="14" height="22" fill="#5d6b80"/>
+          <path d="M 1060 486 q 26 10 22 44 q -2 24 -14 40" stroke="#3b2f23" stroke-width="13" fill="none" stroke-linecap="round"/>
+          <ellipse cx="1090" cy="586" rx="40" ry="14" fill="#3b2f23" opacity="0.75"/>
+          <ellipse cx="1126" cy="600" rx="9" ry="4" fill="#e8e2d4"/>
+        </g>
+
+        <!-- ================= TALLER ================= -->
+        <g>
+          <rect x="64" y="218" width="270" height="204" fill="#dfe6ec" stroke="#5d6b80" stroke-width="3"/>
+          <path d="M 52 218 L 199 168 L 346 218 Z" fill="#b3422c"/>
+          <!-- paneles solares (BUENA practica, senuelo) -->
+          <g transform="rotate(-18.5 199 193)">
+            <rect x="120" y="180" width="52" height="26" fill="#0d4486" stroke="#9fd8ff" stroke-width="2"/>
+            <rect x="180" y="180" width="52" height="26" fill="#0d4486" stroke="#9fd8ff" stroke-width="2"/>
+            <rect x="240" y="180" width="52" height="26" fill="#0d4486" stroke="#9fd8ff" stroke-width="2"/>
+          </g>
+          <rect x="90" y="250" width="52" height="40" fill="#9fd8ff" stroke="#5d6b80" stroke-width="2"/>
+          <text x="199" y="244" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="13" font-weight="800" fill="#5d6b80" letter-spacing="2">TALLER</text>
+        </g>
+
+        <!-- FUGA 2: clima encendido con la puerta abierta -->
+        <g class="hz" data-label="Clima con puerta abierta" data-why="CLIMA ENCENDIDO CON LA PUERTA ABIERTA: ENERGIA AL PATIO">
+          <circle cx="262" cy="350" r="48" class="hitpad"/>
+          <rect x="226" y="300" width="58" height="26" rx="3" fill="#eef4f9" stroke="#5d6b80" stroke-width="2.5"/>
+          <path d="M 232 306 h 46 M 232 312 h 46 M 232 318 h 46" stroke="#9aa8b8" stroke-width="2"/>
+          <path d="M 238 332 q 4 8 0 16 M 252 332 q 4 8 0 16 M 266 332 q 4 8 0 16" stroke="#6fd5ff" stroke-width="3" fill="none"/>
+          <rect x="238" y="352" width="48" height="70" fill="#2c3a4d"/>
+          <rect x="286" y="352" width="34" height="70" fill="#5d7191" transform="rotate(24 286 422)"/>
+        </g>
+
+        <!-- FUGA 3: luminaria encendida a pleno dia -->
+        <g class="hz" data-label="Luminaria de dia" data-why="ILUMINACION DE DIA ES ENERGIA TIRADA: APAGA O AUTOMATIZA">
+          <circle cx="420" cy="240" r="46" class="hitpad"/>
+          <rect x="414" y="208" width="9" height="180" fill="#5d6b80"/>
+          <rect x="396" y="196" width="46" height="16" rx="6" fill="#2c3a4d"/>
+          <ellipse cx="419" cy="216" rx="17" ry="9" fill="#FFC627"/>
+          <g stroke="#FFC627" stroke-width="3" stroke-linecap="round" opacity="0.85">
+            <path d="M 392 226 l -10 8 M 446 226 l 10 8 M 419 230 v 13"/>
+          </g>
+        </g>
+
+        <!-- ================= ESTACION DE LAVADO ================= -->
+        <g>
+          <rect x="468" y="318" width="120" height="14" fill="#5d6b80"/>
+          <rect x="472" y="332" width="8" height="74" fill="#5d6b80"/>
+          <rect x="576" y="332" width="8" height="74" fill="#5d6b80"/>
+          <text x="528" y="312" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="11" font-weight="800" fill="#41566c" letter-spacing="1">LAVADO</text>
+        </g>
+
+        <!-- FUGA 4: manguera abierta tirando agua -->
+        <g class="hz" data-label="Manguera abierta" data-why="AGUA CORRIENDO SIN NADIE USANDOLA: CIERRA LA LLAVE">
+          <circle cx="500" cy="408" r="42" class="hitpad"/>
+          <path d="M 478 348 q -18 26 6 38 q 22 10 14 24" stroke="#2e8b57" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <path d="M 498 410 q 6 10 2 18" stroke="#6fd5ff" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <ellipse cx="508" cy="436" rx="34" ry="9" fill="#9fd8ff" opacity="0.85"/>
+        </g>
+
+        <!-- FUGA 5: grifo goteando -->
+        <g class="hz" data-label="Llave goteando" data-why="UNA LLAVE GOTEANDO PIERDE MILES DE LITROS AL ANO">
+          <circle cx="582" cy="372" r="38" class="hitpad"/>
+          <path d="M 580 340 h 18 v 10 h -10" stroke="#2c3a4d" stroke-width="6" fill="none"/>
+          <circle cx="589" cy="334" r="6" fill="#c23b2e"/>
+          <circle cx="588" cy="366" r="3.5" fill="#6fd5ff"/>
+          <circle cx="588" cy="382" r="3" fill="#6fd5ff"/>
+          <ellipse cx="588" cy="400" rx="14" ry="5" fill="#9fd8ff" opacity="0.85"/>
+        </g>
+
+        <!-- ================= TAMBOS ================= -->
+        <!-- FUGA 6: tambo goteando SIN charola -->
+        <g class="hz" data-label="Tambo sin contencion" data-why="TODO TAMBO VA SOBRE CHAROLA DE CONTENCION">
+          <circle cx="660" cy="398" r="44" class="hitpad"/>
+          <rect x="636" y="352" width="44" height="62" rx="4" fill="#0d4486"/>
+          <rect x="636" y="364" width="44" height="6" fill="#9fd8ff" opacity="0.6"/>
+          <circle cx="668" cy="420" r="3.5" fill="#3b2f23"/>
+          <ellipse cx="668" cy="436" rx="26" ry="8" fill="#3b2f23" opacity="0.8"/>
+        </g>
+        <!-- tambo CON charola (BUENA practica, senuelo) -->
+        <g>
+          <rect x="700" y="352" width="44" height="62" rx="4" fill="#54BBAB"/>
+          <rect x="700" y="364" width="44" height="6" fill="#eef4f9" opacity="0.6"/>
+          <rect x="690" y="412" width="64" height="12" rx="3" fill="#FFC627" stroke="#8a6a0a" stroke-width="2"/>
+        </g>
+
+        <!-- ================= RINCON DE RESIDUOS ================= -->
+        <g>
+          <text x="868" y="318" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="11" font-weight="800" fill="#41566c" letter-spacing="1">RESIDUOS</text>
+        </g>
+        <!-- bote organico correcto (senuelo) -->
+        <g>
+          <rect x="778" y="338" width="52" height="66" rx="5" fill="#2e8b57" stroke="#1d5c39" stroke-width="2.5"/>
+          <rect x="774" y="330" width="60" height="10" rx="4" fill="#1d5c39"/>
+          <text x="804" y="378" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="9" font-weight="800" fill="#fff">ORGANICO</text>
+        </g>
+        <!-- FUGA 7: llanta dentro del bote de reciclables -->
+        <g class="hz" data-label="Residuo mal segregado" data-why="CADA RESIDUO EN SU CONTENEDOR: LA SEGREGACION EMPIEZA AQUI">
+          <circle cx="868" cy="352" r="42" class="hitpad"/>
+          <rect x="842" y="338" width="52" height="66" rx="5" fill="#0b78c2" stroke="#08507f" stroke-width="2.5"/>
+          <text x="868" y="382" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="8.5" font-weight="800" fill="#fff">RECICLABLE</text>
+          <circle cx="868" cy="330" r="17" fill="#1d2837"/>
+          <circle cx="868" cy="330" r="8" fill="#97a3ae"/>
+        </g>
+        <!-- FUGA 8: bote desbordado junto al mar -->
+        <g class="hz" data-label="Bote desbordado" data-why="UN BOTE DESBORDADO JUNTO AL MAR TERMINA EN EL MAR">
+          <circle cx="952" cy="370" r="44" class="hitpad"/>
+          <rect x="926" y="338" width="52" height="66" rx="5" fill="#5b6770" stroke="#39434c" stroke-width="2.5"/>
+          <path d="M 928 338 q 10 -16 24 -8 q 4 -10 16 -6 q 12 4 8 14" fill="#c8a86a"/>
+          <rect x="918" y="398" width="16" height="10" fill="#c8a86a" transform="rotate(-14 918 398)"/>
+          <rect x="982" y="394" width="14" height="9" fill="#e8e2d4" transform="rotate(18 982 394)"/>
+        </g>
+        <!-- contenedor rojo de peligrosos (senuelo correcto) -->
+        <g>
+          <rect x="778" y="430" width="62" height="56" rx="5" fill="#c23b2e" stroke="#7a1d14" stroke-width="2.5"/>
+          <text x="809" y="455" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="8" font-weight="800" fill="#fff">PELIGROSOS</text>
+          <rect x="800" y="462" width="18" height="18" fill="#FFC627" transform="rotate(45 809 471)"/>
+        </g>
+        <!-- FUGA 9: trapos impregnados en el piso -->
+        <g class="hz" data-label="Trapos impregnados al piso" data-why="TRAPOS IMPREGNADOS SON RESIDUO PELIGROSO: AL CONTENEDOR ROJO">
+          <circle cx="892" cy="470" r="40" class="hitpad"/>
+          <path d="M 866 462 q 12 -12 28 -4 q 16 -8 24 4 q 10 10 -6 16 q -8 8 -22 4 q -18 4 -24 -8 Z" fill="#8a6a52"/>
+          <path d="M 874 466 q 10 -6 20 0 M 886 472 q 10 -4 18 0" stroke="#5e4632" stroke-width="2.5" fill="none"/>
+        </g>
+
+        <!-- ================= TRACTOR EN RALENTI ================= -->
+        <g class="hz" data-label="Motor en ralenti" data-why="MOTOR ENCENDIDO SIN OPERAR: COMBUSTIBLE Y CO2 AL AIRE">
+          <circle cx="270" cy="528" r="56" class="hitpad"/>
+          <rect x="196" y="500" width="120" height="46" rx="6" fill="#EE7523" stroke="#9c4a12" stroke-width="2.5"/>
+          <rect x="298" y="474" width="44" height="44" rx="4" fill="#2c3a4d"/>
+          <rect x="306" y="482" width="28" height="18" fill="#9fd8ff"/>
+          <circle cx="226" cy="552" r="14" fill="#1d2837"/>
+          <circle cx="306" cy="552" r="14" fill="#1d2837"/>
+          <rect x="206" y="478" width="9" height="24" fill="#39434c"/>
+          <circle cx="211" cy="470" r="8" fill="#6e7c8a" opacity="0.8"/>
+          <circle cx="206" cy="452" r="11" fill="#6e7c8a" opacity="0.6"/>
+          <circle cx="214" cy="430" r="14" fill="#6e7c8a" opacity="0.4"/>
+        </g>
+
+        <!-- carrito electrico (BUENA practica, senuelo) -->
+        <g>
+          <rect x="470" y="514" width="84" height="34" rx="8" fill="#54BBAB" stroke="#22685c" stroke-width="2.5"/>
+          <rect x="540" y="494" width="26" height="26" rx="4" fill="#2c3a4d"/>
+          <circle cx="492" cy="552" r="11" fill="#1d2837"/>
+          <circle cx="536" cy="552" r="11" fill="#1d2837"/>
+          <path d="M 504 524 l 8 8 l 6 -14" stroke="#fff" stroke-width="3" fill="none"/>
+        </g>
+
+        <!-- FUGA 10: foco del poste chico tambien... no: hidrante/tubo roto -->
+        <g class="hz" data-label="Tuberia rota" data-why="UNA TUBERIA ROTA SE REPORTA HOY, NO EL VIERNES">
+          <circle cx="700" cy="540" r="44" class="hitpad"/>
+          <rect x="652" y="528" width="96" height="12" fill="#5d6b80"/>
+          <path d="M 700 528 l -6 -10 M 706 528 l 2 -12 M 694 540 l -10 6" stroke="#6fd5ff" stroke-width="4" stroke-linecap="round"/>
+          <path d="M 696 526 q 4 -16 10 -2" stroke="#5d6b80" stroke-width="3" fill="none"/>
+          <ellipse cx="700" cy="560" rx="40" ry="10" fill="#9fd8ff" opacity="0.85"/>
+        </g>
+
+      </svg>
+    </div>
+
+    <aside class="panel">
+      <p class="panel__title">REPORTE AMBIENTAL</p>
+      <ol class="panel__list" id="panel-list"></ol>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">--</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRA RONDA [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">ENCUENTRA LAS FUGAS Y DERROCHES: CLIC SOBRE CADA UNO</span>
+    <span class="hud__keys">clic o toque · los fallos restan · R reiniciar</span>
+  </footer>
+
+  <script src="js/caza.js"></script>
+</body>
+</html>

@@ -6,7 +6,11 @@
       "subtitle": "Nutricion Estudiantil - UCC",
       "description": "Presentacion ejecutiva del producto Check-Eat para autoridades academicas de la Universidad Cristobal Colon. 10 diapositivas que cubren vision, paradigma, diseno, motor antropometrico, stack y roadmap.",
       "date": "2026-05",
-      "tags": ["UCC", "Salud", "Ejecutiva"],
+      "tags": [
+        "UCC",
+        "Salud",
+        "Ejecutiva"
+      ],
       "accent": "#0f4c2d",
       "theme": "check-eat",
       "path": "presentations/check-eat/index.html"
@@ -17,7 +21,12 @@
       "subtitle": "HUB Hutchison Ports · Ultra-MVP — Mexico Central",
       "description": "Arquitectura Ultra-MVP de la infraestructura Azure que soporta al HUB: VNet con 2 subnets, App Service Plan P0V3 con 4 microservicios, PostgreSQL Flexible B1ms, Redis Basic, Blob Storage, Key Vault, ACR, Static Web Apps y observabilidad (Log Analytics + App Insights). 10 slides interactivas (React) con costo optimizado de ~$144.25 USD/mes.",
       "date": "2026-06",
-      "tags": ["Hutchison Ports", "Azure", "Infraestructura", "Bicep"],
+      "tags": [
+        "Hutchison Ports",
+        "Azure",
+        "Infraestructura",
+        "Bicep"
+      ],
       "accent": "#009BDE",
       "theme": "infra-azure-hub",
       "path": "presentations/infra-azure-hub/index.html"
@@ -29,7 +38,11 @@
       "title": "Cubo 3D",
       "subtitle": "Cada transicion rota un cubo real",
       "description": "Plantilla oscura con acento cian electrico. Las slides son caras de un cubo CSS 3D que gira en cada cambio; soporta cualquier numero de slides. Navegacion con teclado, swipe y rueda.",
-      "tags": ["Plantilla", "CSS 3D", "Oscura"],
+      "tags": [
+        "Plantilla",
+        "CSS 3D",
+        "Oscura"
+      ],
       "accent": "#22d3ee",
       "theme": "tpl-cubo-3d",
       "path": "plantillas/cubo-3d/index.html"
@@ -39,7 +52,11 @@
       "title": "Orbita 3D",
       "subtitle": "Carrusel cilindrico con inercia",
       "description": "Las slides flotan en un anillo 3D sobre un cielo aurora. Se gira con flechas o arrastrando con inercia; click en una slide lateral la trae al frente. Glassmorphism violeta y cian.",
-      "tags": ["Plantilla", "CSS 3D", "Glassmorphism"],
+      "tags": [
+        "Plantilla",
+        "CSS 3D",
+        "Glassmorphism"
+      ],
       "accent": "#c084fc",
       "theme": "tpl-orbita-3d",
       "path": "plantillas/orbita-3d/index.html"
@@ -49,7 +66,11 @@
       "title": "Profundidad 3D",
       "subtitle": "Lienzo infinito estilo impress.js",
       "description": "Las slides viven en un espacio 3D con coordenadas propias y la camara vuela entre ellas: pan, zoom profundo y rotaciones en 3 ejes. Esc muestra el mapa completo. Estetica editorial: papel, serif y tinta.",
-      "tags": ["Plantilla", "Impress", "Editorial"],
+      "tags": [
+        "Plantilla",
+        "Impress",
+        "Editorial"
+      ],
       "accent": "#c2410c",
       "theme": "tpl-profundidad-3d",
       "path": "plantillas/profundidad-3d/index.html"
@@ -59,7 +80,11 @@
       "title": "Galaxia 3D",
       "subtitle": "Campo de estrellas WebGL con warp",
       "description": "Miles de estrellas renderizadas con Three.js detras de slides de vidrio. Cada cambio de slide dispara un salto a warp y el fondo sigue al mouse con parallax. Si no hay internet, cae a un fondo estatico.",
-      "tags": ["Plantilla", "WebGL", "Three.js"],
+      "tags": [
+        "Plantilla",
+        "WebGL",
+        "Three.js"
+      ],
       "accent": "#8b9cff",
       "theme": "tpl-galaxia-3d",
       "path": "plantillas/galaxia-3d/index.html"
@@ -69,7 +94,11 @@
       "title": "Sonar 3D",
       "subtitle": "Inmersion en submarino, CRT verde",
       "description": "Cada slide desciende a una profundidad mayor: el medidor de metros se anima en cada cambio, el sonar barre en tiempo real con blips por slide, hay nieve marina flotando y la transicion es un descenso fisico en Z con ping incluido.",
-      "tags": ["Plantilla", "Naval", "Submarino"],
+      "tags": [
+        "Plantilla",
+        "Naval",
+        "Submarino"
+      ],
       "accent": "#34d399",
       "theme": "tpl-sonar-3d",
       "path": "plantillas/sonar-3d/index.html"
@@ -79,7 +108,11 @@
       "title": "Altamar 3D",
       "subtitle": "Travesia con oleaje vivo en canvas",
       "description": "Oleaje real dibujado en canvas que se embravece en cada transicion, slides que se mecen como veleros y un cielo que viaja del amanecer a la noche conforme avanzas. La bitacora del HUD actualiza lat/lon en cada singladura.",
-      "tags": ["Plantilla", "Naval", "Canvas"],
+      "tags": [
+        "Plantilla",
+        "Naval",
+        "Canvas"
+      ],
       "accent": "#c8401a",
       "theme": "tpl-altamar-3d",
       "path": "plantillas/altamar-3d/index.html"
@@ -89,7 +122,11 @@
       "title": "Carta Nautica 3D",
       "subtitle": "Mesa de derrota con ruta trazada en vivo",
       "description": "Las slides son waypoints clavados sobre una carta nautica inclinada en 3D. La camara navega entre ellos, la derrota se traza en rojo conforme avanzas y un barco recorre la ruta. Esc levanta la vista a toda la carta.",
-      "tags": ["Plantilla", "Naval", "Impress"],
+      "tags": [
+        "Plantilla",
+        "Naval",
+        "Impress"
+      ],
       "accent": "#b3261e",
       "theme": "tpl-carta-nautica-3d",
       "path": "plantillas/carta-nautica-3d/index.html"
@@ -99,7 +136,11 @@
       "title": "HP Corporativo 3D",
       "subtitle": "Sistema de marca al angulo 30.3",
       "description": "Plantilla fiel al manual Hutchison Ports v4.1: formas Sky/Sea/Horizon planas, Montserrat con titulares Black en mayusculas, paleta oficial completa y transicion de barrido diagonal a 30.3 grados con parallax por capas. Incluye slide divisoria con numeral gigante y contador de dato animado.",
-      "tags": ["Plantilla", "Hutchison Ports", "Brand"],
+      "tags": [
+        "Plantilla",
+        "Hutchison Ports",
+        "Brand"
+      ],
       "accent": "#009BDE",
       "theme": "tpl-hp-corporativo-3d",
       "path": "plantillas/hp-corporativo-3d/index.html"
@@ -109,7 +150,11 @@
       "title": "HP Terminal 3D",
       "subtitle": "La grua baja cada slide en contenedor",
       "description": "Patio de contenedores: cada slide es un contenedor 3D real (frente corrugado, costado y techo) colgado del spreader. La grua iza el actual y baja el siguiente con balanceo fisico. Contenedores en la paleta oficial, patio de fondo con pilas, grua lejana y AGV cruzando.",
-      "tags": ["Plantilla", "Hutchison Ports", "Contenedores"],
+      "tags": [
+        "Plantilla",
+        "Hutchison Ports",
+        "Contenedores"
+      ],
       "accent": "#FFC627",
       "theme": "tpl-hp-terminal-3d",
       "path": "plantillas/hp-terminal-3d/index.html"
@@ -119,7 +164,11 @@
       "title": "HP Red Global 3D",
       "subtitle": "El globo gira hasta cada puerto",
       "description": "The World's Leading Port Network: globo de puntos WebGL que gira hasta el puerto de cada slide, con arcos entre escalas y pulsos de carga viajando en tiempo real. Puertos reales de la red (HIT, ICAVE, BEST, Felixstowe) editables con lat/lon. Fallback estatico sin internet.",
-      "tags": ["Plantilla", "Hutchison Ports", "WebGL"],
+      "tags": [
+        "Plantilla",
+        "Hutchison Ports",
+        "WebGL"
+      ],
       "accent": "#002E6D",
       "theme": "tpl-hp-red-global-3d",
       "path": "plantillas/hp-red-global-3d/index.html"
@@ -129,7 +178,11 @@
       "title": "Ciudad 3D",
       "subtitle": "Arrastra para mirar la avenida",
       "description": "Una ciudad nocturna generada en CSS 3D: torres con ventanas encendidas, neones y luna. Cada slide es un espectacular LED y la camara vuela por la avenida entre uno y otro. Interactiva: arrastra en cualquier momento para mirar alrededor; al soltar, la vista regresa sola al rumbo.",
-      "tags": ["Plantilla", "Interactiva", "CSS 3D"],
+      "tags": [
+        "Plantilla",
+        "Interactiva",
+        "CSS 3D"
+      ],
       "accent": "#22d3ee",
       "theme": "tpl-ciudad-3d",
       "path": "plantillas/ciudad-3d/index.html"
@@ -139,7 +192,11 @@
       "title": "Puerto 3D",
       "subtitle": "Orbita el diorama del puerto",
       "description": "Diorama completo en CSS 3D: buque atracado que se mece, dos gruas STS trabajando solas (trolley y gancho en movimiento), patio de contenedores, gate y mar animado. Cada slide es una estacion y la camara orbita hasta ella; arrastra para orbitar libremente cuando quieras.",
-      "tags": ["Plantilla", "Interactiva", "Diorama"],
+      "tags": [
+        "Plantilla",
+        "Interactiva",
+        "Diorama"
+      ],
       "accent": "#0b78c2",
       "theme": "tpl-puerto-3d",
       "path": "plantillas/puerto-3d/index.html"
@@ -149,7 +206,11 @@
       "title": "Grua Sim 3D",
       "subtitle": "Opera la grua tu mismo",
       "description": "Cada slide viaja en un contenedor que mueve una grua portico con fisica de pendulo real. Modo AUTO: las flechas ejecutan la maniobra completa (archivar en la pila, camion trae la siguiente). Modo CABINA (tecla M): tu controlas trolley, izaje y enganche con A/D, W/S y ESPACIO.",
-      "tags": ["Plantilla", "Interactiva", "Simulador"],
+      "tags": [
+        "Plantilla",
+        "Interactiva",
+        "Simulador"
+      ],
       "accent": "#ffc115",
       "theme": "tpl-grua-sim-3d",
       "path": "plantillas/grua-sim-3d/index.html"
@@ -161,7 +222,11 @@
       "title": "Ruta Hutchison Mexico",
       "subtitle": "Navega y desembarca en las 5 sedes",
       "description": "Mapa interactivo de Mexico con las sedes de Hutchison Ports: Ensenada, Manzanillo, Lazaro Cardenas, Veracruz e Hidalgo. El participante navega un buque que al tocar tierra mexicana se convierte en grua movil para recorrer el pais. Al llegar a cada sede salta su ficha en pantalla completa con todas sus unidades (ICAVE, TNG y HPMX en Veracruz; LCT y LCMT en Lazaro...) y hay que dar ACEPTAR para seguir. Tren intermodal a Hidalgo incluido.",
-      "tags": ["Dinamica", "Hutchison Ports", "Juego"],
+      "tags": [
+        "Dinamica",
+        "Hutchison Ports",
+        "Juego"
+      ],
       "accent": "#FFC627",
       "theme": "dyn-mexico-hp",
       "path": "dinamicas/mexico-hp/index.html"
@@ -171,7 +236,11 @@
       "title": "Trivia Grua",
       "subtitle": "Verdadero o falso... con contenedor",
       "description": "El camion trae un contenedor rotulado con una pregunta. El participante opera la grua (teclado o la consola de botones en pantalla) para engancharlo, llevarlo con su balanceo de pendulo y soltarlo sobre la plataforma VERDADERO o FALSO. Caida con gravedad real, veredicto en grande, marcador de aciertos y ronda de preguntas editable.",
-      "tags": ["Dinamica", "Trivia", "Grua"],
+      "tags": [
+        "Dinamica",
+        "Trivia",
+        "Grua"
+      ],
       "accent": "#54BBAB",
       "theme": "dyn-trivia-grua",
       "path": "dinamicas/trivia-grua/index.html"
@@ -181,7 +250,11 @@
       "title": "Atraca el Buque",
       "subtitle": "Maniobra de practico en 3 niveles",
       "description": "Fisica naval real: el buque tarda en frenar, el timon solo muerde con arrancada y los remolcadores (Q/E) empujan de costado. Hay que entrar por la bocana del rompeolas y quedar en la bahia marcada, alineado y a menos de 1.5 nudos. Golpes al muelle cuestan cascos; niveles con viento de traves y bahias mas cerradas. Puntaje por suavidad, tiempo y cascos: ideal para competir.",
-      "tags": ["Dinamica", "Naval", "Maniobra"],
+      "tags": [
+        "Dinamica",
+        "Naval",
+        "Maniobra"
+      ],
       "accent": "#009BDE",
       "theme": "dyn-atraque-hp",
       "path": "dinamicas/atraque-hp/index.html"
@@ -191,7 +264,11 @@
       "title": "Estiba el Buque",
       "subtitle": "Equilibra la carga o vuelcas",
       "description": "Corte transversal del buque con 7 bahias. La grua entrega contenedores con su tonelaje rotulado y hay que estibarlos cuidando la escora: cada tonelada lejos de la cruija inclina el buque (clinometro en vivo). Pasarse de 8 grados es volcadura. Cola de siguientes visibles, puntaje por escora final y tiempo.",
-      "tags": ["Dinamica", "Naval", "Estiba"],
+      "tags": [
+        "Dinamica",
+        "Naval",
+        "Estiba"
+      ],
       "accent": "#EE7523",
       "theme": "dyn-estiba-hp",
       "path": "dinamicas/estiba-hp/index.html"
@@ -201,7 +278,11 @@
       "title": "Despacho de Patio",
       "subtitle": "Lee las marcas y despacha a tiempo",
       "description": "Arcade de clasificacion: los contenedores llegan por la banda y hay que leer sus marcas (reefer con su temperatura, rombo IMO, averias) y despacharlos con WASD o la botonera a su zona correcta antes de que expire el anillo de tiempo de la junta. Combos por racha, errores que explican la regla, ritmo que se acelera y pilas que crecen en cada zona.",
-      "tags": ["Dinamica", "Patio", "Arcade"],
+      "tags": [
+        "Dinamica",
+        "Patio",
+        "Arcade"
+      ],
       "accent": "#9ACAEB",
       "theme": "dyn-despacho-hp",
       "path": "dinamicas/despacho-hp/index.html"
@@ -211,7 +292,11 @@
       "title": "Cadena Logistica",
       "subtitle": "Ordena el flujo de punta a punta",
       "description": "Las etapas del flujo portuario llegan revueltas y hay que arrastrarlas a la ruta en el orden correcto: 3 escenarios (importacion del buque al cliente, exportacion de la planta al mar, y cadena de frio reefer). Al confirmar, las correctas se fijan en verde y las equivocadas regresan; puntaje por intentos y tiempo. Tambien jugable con teclado.",
-      "tags": ["Dinamica", "Logistica", "Ordenar"],
+      "tags": [
+        "Dinamica",
+        "Logistica",
+        "Ordenar"
+      ],
       "accent": "#002E6D",
       "theme": "dyn-cadena-hp",
       "path": "dinamicas/cadena-hp/index.html"
@@ -221,7 +306,11 @@
       "title": "Caza de Riesgos",
       "subtitle": "10 actos inseguros escondidos en el patio",
       "description": "Una escena del patio dibujada con 10 actos y condiciones inseguras escondidas entre trabajadores que si hacen las cosas bien: carga suspendida, estiba desfasada, derrame sin senalizar, salida bloqueada, punto ciego del montacargas... Clic sobre cada riesgo antes de que acabe el tiempo; los fallos restan, cada hallazgo ensena la regla y al final se revelan los que se te fueron. El clasico de las semanas de seguridad.",
-      "tags": ["Dinamica", "Seguridad", "HSE"],
+      "tags": [
+        "Dinamica",
+        "Seguridad",
+        "HSE"
+      ],
       "accent": "#2e8b57",
       "theme": "dyn-caza-riesgos",
       "path": "dinamicas/caza-riesgos/index.html"
@@ -231,7 +320,11 @@
       "title": "Regalo o Soborno",
       "subtitle": "Dilemas de integridad en 3 plataformas",
       "description": "Cada contenedor trae un dilema real de etica y cumplimiento (la cena del licitante, el primo proveedor, el pago de facilitacion...). La grua lo coloca en ACEPTAR, DECLARAR AL COMITE o DECLINAR. El veredicto siempre explica la politica, aciertes o falles, y si fallas la plataforma correcta parpadea. La capacitacion de compliance que si se recuerda.",
-      "tags": ["Dinamica", "Gobernanza", "Etica"],
+      "tags": [
+        "Dinamica",
+        "Gobernanza",
+        "Etica"
+      ],
       "accent": "#FFC627",
       "theme": "dyn-etica-hp",
       "path": "dinamicas/etica-hp/index.html"
@@ -241,7 +334,11 @@
       "title": "Ruta a Cero Emisiones",
       "subtitle": "Dos presupuestos: dinero y carbono",
       "description": "Juego de gestion ESG: 8 decisiones operativas del anio (flota de patio, RTG, tren vs camiones, cold ironing, reefers, iluminacion...) con dos presupuestos que no puedes reventar: dinero y toneladas de CO2. Lo barato contamina y lo verde cuesta, asi que hay que mezclar con cabeza. Cierre con comparativa de carbono evitado frente a operar todo en diesel.",
-      "tags": ["Dinamica", "Sostenibilidad", "ESG"],
+      "tags": [
+        "Dinamica",
+        "Sostenibilidad",
+        "ESG"
+      ],
       "accent": "#54BBAB",
       "theme": "dyn-cero-emisiones",
       "path": "dinamicas/cero-emisiones/index.html"
@@ -251,10 +348,28 @@
       "title": "Memorama UNITY",
       "subtitle": "Une cada valor con su conducta",
       "description": "Memorama de los valores UNITY: las cartas azules traen el valor (Unrivalled Standards, Network Strength, Informed Decisions, Trusted and Honest, Your Partners) y las blancas la conducta que lo demuestra. Modo 1 equipo contra el reloj o 2 equipos por turnos donde acertar da punto y repite turno: perfecto para partir a la audiencia en dos porras.",
-      "tags": ["Dinamica", "RH", "Valores"],
+      "tags": [
+        "Dinamica",
+        "RH",
+        "Valores"
+      ],
       "accent": "#009BDE",
       "theme": "dyn-memorama-unity",
       "path": "dinamicas/memorama-unity/index.html"
+    },
+    {
+      "slug": "caza-fugas",
+      "title": "Caza de Fugas",
+      "subtitle": "11 derroches ambientales escondidos",
+      "description": "La version ambiental de la Caza de Riesgos: descarga al mar, motor en ralenti, tambo sin charola, manguera abierta, residuo mal segregado, clima con la puerta abierta, luminaria a pleno dia... escondidos entre buenas practicas (paneles solares, charolas de contencion, carrito electrico). Mismo motor: clic en 90 segundos, los fallos restan y al final se revela lo que se escapo.",
+      "tags": [
+        "Dinamica",
+        "Ambiente",
+        "Caza"
+      ],
+      "accent": "#2e8b57",
+      "theme": "dyn-caza-fugas",
+      "path": "dinamicas/caza-fugas/index.html"
     }
   ]
 }

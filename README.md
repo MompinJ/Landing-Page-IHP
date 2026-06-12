@@ -43,6 +43,7 @@ Hub estatico para navegar entre presentaciones independientes. Cada presentacion
     etica-hp/
     cero-emisiones/
     memorama-unity/
+    caza-fugas/
 ```
 
 ## Como abrir
@@ -92,6 +93,7 @@ Juegos interactivos para la audiencia, en `dinamicas/<slug>/` (clave `dinamicas`
 | `etica-hp` | Compliance gamificado: cada contenedor trae un dilema de integridad (la cena del licitante, el primo proveedor, el pago de facilitacion...) y la grua lo coloca en ACEPTAR, DECLARAR AL COMITE o DECLINAR. El veredicto siempre explica la politica; si fallas, la plataforma correcta parpadea. Dilemas editables en `js/etica.js` |
 | `cero-emisiones` | Gestion ESG: 8 decisiones operativas del anio con dos presupuestos que no se pueden reventar (dinero y toneladas de CO2). Lo barato contamina, lo verde cuesta y a veces lo verde tambien es lo barato (tren vs camiones). Cierre con comparativa de carbono evitado vs operar todo en diesel. Presupuestos y decisiones en `js/cero.js` |
 | `memorama-unity` | RH: memorama de parejas valor-comportamiento con los valores UNITY (cartas azules = valor, blancas = conducta). Modo 1 equipo contra reloj o 2 equipos por turnos (acertar da punto y repite). Cada pareja unida repasa el valor en el toast. Parejas editables en `js/memorama.js` |
+| `caza-fugas` | Ambiente: variante de la Caza de Riesgos con 11 fugas y derroches (descarga al mar, ralenti, tambo sin charola, manguera abierta, mala segregacion, clima con puerta abierta...) entre buenas practicas senuelo. Mismo motor de point-and-click: escena editable via grupos `.hz` del SVG |
 
 ## Como agregar una presentacion nueva
 
