@@ -225,6 +225,16 @@
       "accent": "#2e8b57",
       "theme": "dyn-caza-riesgos",
       "path": "dinamicas/caza-riesgos/index.html"
+    },
+    {
+      "slug": "etica-hp",
+      "title": "Regalo o Soborno",
+      "subtitle": "Dilemas de integridad en 3 plataformas",
+      "description": "Cada contenedor trae un dilema real de etica y cumplimiento (la cena del licitante, el primo proveedor, el pago de facilitacion...). La grua lo coloca en ACEPTAR, DECLARAR AL COMITE o DECLINAR. El veredicto siempre explica la politica, aciertes o falles, y si fallas la plataforma correcta parpadea. La capacitacion de compliance que si se recuerda.",
+      "tags": ["Dinamica", "Gobernanza", "Etica"],
+      "accent": "#FFC627",
+      "theme": "dyn-etica-hp",
+      "path": "dinamicas/etica-hp/index.html"
     }
   ]
 }

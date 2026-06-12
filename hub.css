@@ -1290,6 +1290,51 @@ code {
 }
 
 /* ============================================================
+   TEMA: dyn-etica-hp — BALANZA DE INTEGRIDAD
+   sala clara HP con las tres plataformas de decision
+   ============================================================ */
+.hub-card[data-theme="dyn-etica-hp"] {
+  --card-accent: #FFC627;
+  background:
+    linear-gradient(0deg, #cdd7e2 0 12%, transparent 12%),
+    linear-gradient(-30.3deg, rgba(0, 155, 222, 0.10) 0 16%, transparent 16%),
+    #f6f9fc;
+  border: 3px solid #002E6D;
+  box-shadow: 9px 9px 0 rgba(255, 198, 39, 0.55);
+  color: #12263c;
+}
+.hub-card[data-theme="dyn-etica-hp"]:hover { box-shadow: 16px 16px 0 #54BBAB; }
+.hub-card[data-theme="dyn-etica-hp"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-etica-hp"] .hub-card__date,
+.hub-card[data-theme="dyn-etica-hp"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #009BDE; }
+.hub-card[data-theme="dyn-etica-hp"] .hub-card__kind::before { content: "DINAMICA // ACEPTAR-DECLARAR-DECLINAR"; }
+.hub-card[data-theme="dyn-etica-hp"] .hub-card__subtitle { color: #EE7523; }
+.hub-card[data-theme="dyn-etica-hp"] .hub-card__desc { color: #41557a; }
+.hub-card[data-theme="dyn-etica-hp"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #002E6D;
+  background: #fff;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-etica-hp"] .hub-card__arrow { color: #EE7523; }
+/* tres plataformas con contenedor cayendo a la del centro */
+.hub-card[data-theme="dyn-etica-hp"] .hub-card__deco {
+  bottom: calc(12% + 4px); right: 1.3rem;
+  width: 104px; height: 58px;
+  background:
+    linear-gradient(#54BBAB, #54BBAB) 0 100% / 30px 14px no-repeat,
+    linear-gradient(#FFC627, #FFC627) 37px 100% / 30px 14px no-repeat,
+    linear-gradient(#EE7523, #EE7523) 74px 100% / 30px 14px no-repeat,
+    linear-gradient(#002E6D, #002E6D) 41px 8px / 22px 13px no-repeat,
+    linear-gradient(#11203a, #11203a) 51px 0 / 2px 8px no-repeat;
+}
+
+/* ============================================================
    STEPS / FOOTER
    ============================================================ */
 .hub-section--add .hub-steps {

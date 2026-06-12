@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Regalo o Soborno</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: REGALO O SOBORNO (etica y cumplimiento)
+       Cada contenedor trae un DILEMA de integridad real. La grua
+       lo coloca en una de TRES plataformas:
+
+         ACEPTAR ............. cortesia razonable, adelante
+         DECLARAR AL COMITE .. zona gris: transparencia primero
+         DECLINAR ............ aqui no, y a veces ademas se reporta
+
+       El veredicto siempre explica la politica, aciertes o no.
+
+       CONTROLES
+       - Flechas o WASD: trolley y spreader
+       - ESPACIO o boton GANCHO: enganchar / soltar
+       - Consola de botones en pantalla (tactil)
+       - R: reiniciar la ronda
+
+       PERSONALIZAR: dilemas en DILEMAS de js/etica.js
+       ({ q, answer: 'ok'|'declare'|'no', why }).
+       ============================================================ -->
+
+  <div class="scene" id="scene">
+    <div class="bg" aria-hidden="true"><div class="bg__shapes"></div></div>
+
+    <!-- grua -->
+    <div class="beam"></div>
+    <div class="leg leg--l"></div>
+    <div class="leg leg--r"></div>
+    <div class="trolley" id="trolley"></div>
+    <i class="cable" id="cable-l"></i>
+    <i class="cable" id="cable-r"></i>
+    <div class="spreader" id="spreader"><i></i><i></i></div>
+
+    <!-- plataformas de decision -->
+    <div class="platform platform--ok" id="plat-ok">
+      <span class="platform__label">ACEPTAR</span>
+    </div>
+    <div class="platform platform--declare" id="plat-declare">
+      <span class="platform__label">DECLARAR AL COMITE</span>
+    </div>
+    <div class="platform platform--no" id="plat-no">
+      <span class="platform__label">DECLINAR</span>
+    </div>
+
+    <!-- camion -->
+    <div class="truck" id="truck">
+      <i class="truck__cab"></i>
+      <i class="truck__bed"></i>
+      <i class="truck__wheel truck__wheel--1"></i>
+      <i class="truck__wheel truck__wheel--2"></i>
+      <i class="truck__wheel truck__wheel--3"></i>
+    </div>
+
+    <!-- contenedor con el dilema -->
+    <div class="cargo" id="cargo">
+      <span class="cargo__code" id="cargo-code">DIL-01</span>
+      <div class="qcard">
+        <p class="qcard__kicker" id="q-kicker">DILEMA 01</p>
+        <p class="qcard__text" id="q-text">--</p>
+        <p class="qcard__ask">ACEPTAR, DECLARAR O DECLINAR?</p>
+      </div>
+    </div>
+
+    <div class="floor" aria-hidden="true"></div>
+  </div>
+
+  <div class="verdict" id="verdict" hidden></div>
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>REGALO O SOBORNO</span></div>
+    <span class="hud__score" id="hud-score">ACIERTOS 00 · DILEMA 01/--</span>
+  </header>
+
+  <div class="console" aria-label="Controles de la grua">
+    <div class="console__group">
+      <button type="button" class="cbtn" data-k="left">&#9664;</button>
+      <button type="button" class="cbtn" data-k="right">&#9654;</button>
+    </div>
+    <button type="button" class="cbtn cbtn--hook" id="hook-btn" data-k="hook">GANCHO</button>
+    <div class="console__group">
+      <button type="button" class="cbtn" data-k="up">&#9650;</button>
+      <button type="button" class="cbtn" data-k="down">&#9660;</button>
+    </div>
+  </div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker">RONDA TERMINADA</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRA RONDA [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">LLEGA EL PRIMER DILEMA...</span>
+    <span class="hud__keys">flechas o WASD · ESPACIO gancho · R reiniciar</span>
+  </footer>
+
+  <script src="js/etica.js"></script>
+</body>
+</html>

@@ -40,6 +40,7 @@ Hub estatico para navegar entre presentaciones independientes. Cada presentacion
     despacho-hp/
     cadena-hp/
     caza-riesgos/
+    etica-hp/
 ```
 
 ## Como abrir
@@ -86,6 +87,7 @@ Juegos interactivos para la audiencia, en `dinamicas/<slug>/` (clave `dinamicas`
 | `despacho-hp` | Arcade de clasificacion: los contenedores llegan por la banda y hay que leer sus marcas (reefer, rombo IMO, averia, carga seca) y despacharlos con WASD o botonera a la zona correcta antes de que expire el anillo de tiempo. Combos, errores que ensenan la regla y ritmo creciente. Tipos y ritmo en `js/despacho.js` |
 | `cadena-hp` | Ordenar el flujo logistico arrastrando fichas a la ruta: importacion (buque a cliente), exportacion (planta a buque) y cadena de frio reefer. Al confirmar, las correctas se fijan y las equivocadas regresan; puntaje por intentos y tiempo. Tambien jugable con teclado. Escenarios editables en `js/cadena.js` |
 | `caza-riesgos` | Semana de seguridad: escena del patio en SVG con 10 actos/condiciones inseguras escondidas entre senuelos seguros (carga suspendida, estiba desfasada, salida bloqueada, punto ciego...). Clic sobre cada riesgo en 90 segundos; los fallos restan, cada hallazgo ensena la regla y al final se revelan los no encontrados. Los riesgos son grupos `.hz` del SVG: editables sin tocar el motor |
+| `etica-hp` | Compliance gamificado: cada contenedor trae un dilema de integridad (la cena del licitante, el primo proveedor, el pago de facilitacion...) y la grua lo coloca en ACEPTAR, DECLARAR AL COMITE o DECLINAR. El veredicto siempre explica la politica; si fallas, la plataforma correcta parpadea. Dilemas editables en `js/etica.js` |
 
 ## Como agregar una presentacion nueva
 
