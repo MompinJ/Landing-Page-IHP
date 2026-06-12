@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VISUAL // Flujo de Terminal 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       VISUAL: FLUJO DE TERMINAL 3D
+       Animacion continua del ciclo de descarga de una terminal de
+       contenedores, construida en CSS 3D:
+
+         BUQUE -> GRUA STS -> TRACTOR -> RTG -> PILA DE PATIO
+
+       La grua STS toma cada contenedor del buque, lo baja a un
+       tractor de patio que maneja hasta el bloque, y ahi la RTG
+       lo estiba. Dos tractores trabajan en circuito, las pilas
+       crecen, y al vaciar la cubierta el turno se reinicia solo.
+
+       Es una pieza VISUAL (para proyectar en eventos o dejar de
+       fondo). Interaccion ligera:
+       - Arrastrar: orbitar la camara (vuelve sola al modo cine)
+       - Teclas 1-4: vistas fijas (muelle, grua, patio, general)
+       - ESPACIO: pausa
+
+       PERSONALIZAR: ritmo, cantidad de contenedores y colores en
+       las constantes de js/flujo.js.
+       ============================================================ -->
+
+  <div class="viewport" id="viewport">
+    <div class="world" id="world"><!-- escena construida por js/flujo.js --></div>
+  </div>
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>FLUJO DE TERMINAL 3D</span></div>
+    <span class="hud__mov" id="hud-mov">MOV 00/00 · TURNO 1</span>
+  </header>
+
+  <!-- tira de flujo: cuantos contenedores hay en cada etapa -->
+  <footer class="flowstrip" id="flowstrip">
+    <div class="step" data-stage="ship"><span class="step__n" id="n-ship">0</span><span class="step__l">BUQUE</span></div>
+    <i class="flow-arrow"></i>
+    <div class="step" data-stage="sts"><span class="step__n" id="n-sts">0</span><span class="step__l">GRUA STS</span></div>
+    <i class="flow-arrow"></i>
+    <div class="step" data-stage="tractor"><span class="step__n" id="n-tractor">0</span><span class="step__l">TRACTOR</span></div>
+    <i class="flow-arrow"></i>
+    <div class="step" data-stage="rtg"><span class="step__n" id="n-rtg">0</span><span class="step__l">RTG</span></div>
+    <i class="flow-arrow"></i>
+    <div class="step" data-stage="yard"><span class="step__n" id="n-yard">0</span><span class="step__l">PILA</span></div>
+  </footer>
+
+  <div class="cycle-banner" id="cycle-banner" hidden>
+    <p class="cycle-banner__kicker">CUBIERTA VACIA</p>
+    <h2>Turno completado.</h2>
+    <p class="cycle-banner__sub" id="cycle-sub">--</p>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">DESCARGANDO BUQUE...</span>
+    <span class="hud__keys">arrastra para orbitar · 1-4 vistas · espacio pausa</span>
+  </footer>
+
+  <script src="js/flujo.js"></script>
+</body>
+</html>

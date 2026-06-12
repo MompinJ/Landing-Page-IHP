@@ -384,6 +384,20 @@
       "accent": "#EE7523",
       "theme": "dyn-linea-fuego",
       "path": "dinamicas/linea-fuego/index.html"
+    },
+    {
+      "slug": "flujo-terminal",
+      "title": "Flujo de Terminal 3D",
+      "subtitle": "El ciclo de descarga, animado",
+      "description": "Pieza visual para proyectar: el ciclo completo de descarga animado en CSS 3D. La grua STS toma cada contenedor del buque, lo baja a un tractor que maneja hasta el bloque, y la RTG lo estiba en pilas que crecen. Dos tractores en circuito traslapado, tira de flujo en vivo (buque-STS-tractor-RTG-pila), camara cinematica que recorre la operacion sola (arrastra para orbitar, 1-4 vistas, espacio pausa) y reinicio automatico al vaciar la cubierta.",
+      "tags": [
+        "Visual",
+        "3D",
+        "Operacion"
+      ],
+      "accent": "#0b78c2",
+      "theme": "dyn-flujo-terminal",
+      "path": "dinamicas/flujo-terminal/index.html"
     }
   ]
 }

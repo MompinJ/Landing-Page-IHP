@@ -45,6 +45,7 @@ Hub estatico para navegar entre presentaciones independientes. Cada presentacion
     memorama-unity/
     caza-fugas/
     linea-fuego/
+    flujo-terminal/
 ```
 
 ## Como abrir
@@ -96,6 +97,7 @@ Juegos interactivos para la audiencia, en `dinamicas/<slug>/` (clave `dinamicas`
 | `memorama-unity` | RH: memorama de parejas valor-comportamiento con los valores UNITY (cartas azules = valor, blancas = conducta). Modo 1 equipo contra reloj o 2 equipos por turnos (acertar da punto y repite). Cada pareja unida repasa el valor en el toast. Parejas editables en `js/memorama.js` |
 | `caza-fugas` | Ambiente: variante de la Caza de Riesgos con 11 fugas y derroches (descarga al mar, ralenti, tambo sin charola, manguera abierta, mala segregacion, clima con puerta abierta...) entre buenas practicas senuelo. Mismo motor de point-and-click: escena editable via grupos `.hz` del SVG |
 | `linea-fuego` | Seguridad: 6 maniobras cenitales (grua girando, reversa, snap-back de cabo, pasillo de montacargas, izaje con viento, apertura de contenedor) con 4 posiciones marcadas; hay que elegir la UNICA segura contra reloj. Al responder se revelan las zonas de peligro y la regla. Rondas editables como grupos `.round` del SVG |
+| `flujo-terminal` | Pieza VISUAL (no juego): el ciclo de descarga animado en CSS 3D — STS toma del buque, tractores en circuito, RTG estiba en pilas que crecen. Tira de flujo en vivo, camara cinematica automatica (arrastra para orbitar, 1-4 vistas, espacio pausa) y reinicio al vaciar la cubierta. Ritmo y layout en `js/flujo.js` |
 
 ## Como agregar una presentacion nueva
 

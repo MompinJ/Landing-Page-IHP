@@ -1522,6 +1522,54 @@ code {
 }
 
 /* ============================================================
+   TEMA: dyn-flujo-terminal — CICLO DE DESCARGA
+   dia de operacion con la cadena buque-grua-tractor-pila
+   ============================================================ */
+.hub-card[data-theme="dyn-flujo-terminal"] {
+  --card-accent: #0b78c2;
+  background:
+    linear-gradient(0deg, #aebac4 0 16%, #f0c52a 16% 17.5%, transparent 17.5%),
+    linear-gradient(180deg, #bfe0f5, #e4f3fc);
+  border: 2px solid #16304f;
+  box-shadow: 9px 9px 0 rgba(11, 120, 194, 0.4);
+  color: #12263c;
+}
+.hub-card[data-theme="dyn-flujo-terminal"]:hover { box-shadow: 16px 16px 0 #FFC627; }
+.hub-card[data-theme="dyn-flujo-terminal"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-flujo-terminal"] .hub-card__date,
+.hub-card[data-theme="dyn-flujo-terminal"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #0b78c2; }
+.hub-card[data-theme="dyn-flujo-terminal"] .hub-card__kind::before { content: "VISUAL // BUQUE-STS-TRACTOR-RTG-PILA"; }
+.hub-card[data-theme="dyn-flujo-terminal"] .hub-card__subtitle { color: #EE7523; }
+.hub-card[data-theme="dyn-flujo-terminal"] .hub-card__desc { color: #41566c; }
+.hub-card[data-theme="dyn-flujo-terminal"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #002E6D;
+  background: #fff;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-flujo-terminal"] .hub-card__arrow { color: #EE7523; }
+/* mini STS con contenedor colgando sobre tractor */
+.hub-card[data-theme="dyn-flujo-terminal"] .hub-card__deco {
+  bottom: calc(16% + 2px); right: 1.4rem;
+  width: 96px; height: 72px;
+  background:
+    linear-gradient(#0b78c2, #0b78c2) 0 8px / 100% 7px no-repeat,
+    linear-gradient(#0b78c2, #0b78c2) 14px 8px / 7px 64px no-repeat,
+    linear-gradient(#0b78c2, #0b78c2) 76px 8px / 7px 64px no-repeat,
+    linear-gradient(#EE7523, #EE7523) 38px 0 / 16px 9px no-repeat,
+    linear-gradient(#16304f, #16304f) 45px 9px / 2px 18px no-repeat,
+    linear-gradient(#FFC627, #FFC627) 34px 27px / 24px 11px no-repeat,
+    linear-gradient(#002E6D, #002E6D) 30px 56px / 34px 10px no-repeat,
+    radial-gradient(circle 5px at 38px 70px, #10151f 4px, transparent 5px),
+    radial-gradient(circle 5px at 58px 70px, #10151f 4px, transparent 5px);
+}
+
+/* ============================================================
    STEPS / FOOTER
    ============================================================ */
 .hub-section--add .hub-steps {
