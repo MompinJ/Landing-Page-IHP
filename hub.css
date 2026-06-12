@@ -1056,6 +1056,52 @@ code {
 }
 
 /* ============================================================
+   TEMA: dyn-atraque-hp — CARTA DE MANIOBRA
+   agua nocturna de puerto, bahia amarilla, buque entrando
+   ============================================================ */
+.hub-card[data-theme="dyn-atraque-hp"] {
+  --card-accent: #009BDE;
+  background-color: #14568c;
+  background-image:
+    linear-gradient(0deg, #c3ccd3 0 12%, #FFC627 12% 13.5%, transparent 13.5%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 26px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 26px),
+    radial-gradient(ellipse 90% 70% at 50% 0%, #1f6da8, #14568c);
+  border: 1px solid rgba(154, 202, 235, 0.45);
+  box-shadow: 9px 9px 0 rgba(0, 155, 222, 0.4);
+  color: #eaf2fb;
+}
+.hub-card[data-theme="dyn-atraque-hp"]:hover { box-shadow: 16px 16px 0 #FFC627; }
+.hub-card[data-theme="dyn-atraque-hp"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+}
+.hub-card[data-theme="dyn-atraque-hp"] .hub-card__date,
+.hub-card[data-theme="dyn-atraque-hp"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #9ACAEB; }
+.hub-card[data-theme="dyn-atraque-hp"] .hub-card__kind::before { content: "DINAMICA // MAX 1.5 KN"; }
+.hub-card[data-theme="dyn-atraque-hp"] .hub-card__subtitle { color: #FFC627; }
+.hub-card[data-theme="dyn-atraque-hp"] .hub-card__desc { color: rgba(234, 242, 251, 0.75); }
+.hub-card[data-theme="dyn-atraque-hp"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 1px solid rgba(154, 202, 235, 0.5);
+  color: #9ACAEB;
+}
+.hub-card[data-theme="dyn-atraque-hp"] .hub-card__arrow { color: #FFC627; }
+/* bahia punteada con buque enfilado */
+.hub-card[data-theme="dyn-atraque-hp"] .hub-card__deco {
+  bottom: calc(12% + 6px); right: 1.4rem;
+  width: 86px; height: 34px;
+  border: 3px dashed rgba(255, 198, 39, 0.85);
+  background:
+    linear-gradient(#002E6D, #002E6D) 12px 11px / 50px 12px no-repeat,
+    linear-gradient(#EE7523, #EE7523) 20px 13px / 8px 8px no-repeat,
+    linear-gradient(#009BDE, #009BDE) 30px 13px / 8px 8px no-repeat,
+    linear-gradient(#FFC627, #FFC627) 40px 13px / 8px 8px no-repeat;
+}
+
+/* ============================================================
    STEPS / FOOTER
    ============================================================ */
 .hub-section--add .hub-steps {

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Atraca el Buque</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: ATRACA EL BUQUE
+       Maniobra de atraque con fisica naval: el buque tiene inercia
+       de verdad (tarda en frenar, el timon solo muerde con arrancada)
+       y hay que dejarlo dentro de la bahia marcada, alineado y a
+       menos de 1.5 nudos. Golpear el muelle o los buques atracados
+       a velocidad cuesta un casco; tres cascos y se reinicia el
+       intento. En niveles avanzados sopla viento.
+
+       CONTROLES
+       - W/S o flechas arriba/abajo: maquina AVANTE / ATRAS
+       - A/D o flechas izq/der: TIMON
+       - Q / E: remolcador a babor / estribor (empuje lateral)
+       - Consola de botones en pantalla (tactil y mouse)
+       - R: reiniciar intento
+
+       PUNTAJE: suavidad de llegada + alineacion + tiempo + cascos.
+       Ideal para competir entre participantes.
+
+       PERSONALIZAR: niveles (bahia, viento, trafico) en LEVELS de
+       js/atraque.js.
+       ============================================================ -->
+
+  <div class="harbor" id="harbor">
+    <!-- agua, muelle, buques atracados, boyas: los pinta js/atraque.js -->
+  </div>
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>ATRACA EL BUQUE</span></div>
+    <div class="gauges">
+      <span class="gauge">VEL <b id="g-speed">0.0</b> KN</span>
+      <span class="gauge">TIMON <b id="g-rudder">--</b></span>
+      <span class="gauge">CASCOS <b id="g-hits">0/3</b></span>
+      <span class="gauge">T <b id="g-time">0:00</b></span>
+    </div>
+  </header>
+
+  <!-- indicador de viento -->
+  <div class="wind" id="wind" hidden>
+    <span class="wind__arrow" id="wind-arrow">&#10148;</span>
+    <span class="wind__label" id="wind-label">VIENTO</span>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- resultado de la maniobra -->
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">MANIOBRA COMPLETADA</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <div class="finale__btns">
+      <button type="button" id="btn-retry">REPETIR NIVEL [R]</button>
+      <button type="button" id="btn-next" hidden>SIGUIENTE NIVEL [ENTER]</button>
+    </div>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">NIVEL 1 · ENFILA LA BAHIA AMARILLA</span>
+    <span class="hud__keys">W/S maquina · A/D timon · Q/E remolcadores · R reiniciar</span>
+  </footer>
+
+  <!-- consola del puente -->
+  <div class="console" aria-label="Controles del buque">
+    <button type="button" class="cbtn cbtn--tug" data-k="tugl">&#8678; REM</button>
+    <div class="console__group">
+      <button type="button" class="cbtn" data-k="left">&#9664;</button>
+      <button type="button" class="cbtn cbtn--throttle" data-k="fwd">AVANTE</button>
+      <button type="button" class="cbtn cbtn--throttle cbtn--rev" data-k="rev">ATRAS</button>
+      <button type="button" class="cbtn" data-k="right">&#9654;</button>
+    </div>
+    <button type="button" class="cbtn cbtn--tug" data-k="tugr">REM &#8680;</button>
+  </div>
+
+  <script src="js/atraque.js"></script>
+</body>
+</html>

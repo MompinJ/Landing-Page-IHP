@@ -1,0 +1,350 @@
+/* ============================================================
+   DINAMICA ATRACA EL BUQUE — vista cenital del puerto
+   Paleta Hutchison Ports. La geometria la pinta js/atraque.js.
+   ============================================================ */
+
+:root {
+  --sky-d: #009BDE;
+  --sea-blue: #002E6D;
+  --horizon: #9ACAEB;
+  --aqua: #54BBAB;
+  --sunray: #FFC627;
+  --sunset: #EE7523;
+  --water: #1f6da8;
+  --water-deep: #14568c;
+  --concrete: #c3ccd3;
+  --f-sans: 'Montserrat', Arial, sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--f-sans);
+  color: #eaf2fb;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.045) 0 2px, transparent 2px 64px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.045) 0 2px, transparent 2px 64px),
+    radial-gradient(ellipse 90% 70% at 50% 0%, var(--water), var(--water-deep));
+}
+body.shake { animation: shake 0.45s ease; }
+@keyframes shake {
+  20% { transform: translate(-10px, 4px); }
+  40% { transform: translate(8px, -3px); }
+  60% { transform: translate(-5px, 2px); }
+  80% { transform: translate(3px, -1px); }
+}
+
+.harbor { position: fixed; inset: 0; }
+
+/* ---------- elementos que genera el JS ---------- */
+.quay {
+  position: absolute;
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 28, 64, 0.25) 0 4px, transparent 4px 90px),
+    linear-gradient(0deg, #b4bfc8, var(--concrete));
+  border-top: 6px solid var(--sunray);
+  box-shadow: 0 -8px 24px rgba(0, 10, 30, 0.35);
+}
+.bollard {
+  position: absolute;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #2c3a4d;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.25);
+}
+
+.berth {
+  position: absolute;
+  border: 4px dashed var(--sunray);
+  background: rgba(255, 198, 39, 0.10);
+  display: grid;
+  place-items: center;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.berth span {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: rgba(255, 198, 39, 0.85);
+}
+.berth.is-good { background: rgba(84, 187, 171, 0.25); border-color: var(--aqua); }
+
+.parked {
+  position: absolute;
+  filter: saturate(0.8) brightness(0.92);
+}
+.parked svg { width: 100%; height: 100%; display: block; }
+
+.breakwater {
+  position: absolute;
+  background:
+    repeating-linear-gradient(45deg, rgba(0,0,0,0.18) 0 12px, transparent 12px 24px),
+    #5d6b80;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0, 10, 30, 0.45);
+}
+
+.buoy {
+  position: absolute;
+  width: 16px; height: 16px;
+  margin: -8px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  animation: buoy-bob 3.2s ease-in-out infinite;
+}
+.buoy--green { background: #2e8b57; }
+.buoy--red { background: #c23b2e; animation-delay: -1.6s; }
+@keyframes buoy-bob { 50% { transform: scale(1.18); } }
+
+/* el buque del jugador (sprite SVG, proa a la derecha) */
+.ship {
+  position: absolute;
+  width: 150px; height: 56px;
+  margin: -28px 0 0 -75px;
+  z-index: 6;
+  filter: drop-shadow(3px 6px 5px rgba(0, 10, 30, 0.5));
+}
+.ship svg { width: 100%; height: 100%; display: block; }
+
+.wake {
+  position: absolute;
+  width: 6px; height: 6px;
+  margin: -3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.75);
+  z-index: 4;
+  animation: wake-fade 1.8s linear forwards;
+}
+@keyframes wake-fade { to { opacity: 0; transform: scale(2.6); } }
+
+/* chorro del remolcador */
+.tugjet {
+  position: absolute;
+  width: 10px; height: 10px;
+  margin: -5px;
+  border-radius: 50%;
+  background: rgba(154, 202, 235, 0.9);
+  z-index: 5;
+  animation: wake-fade 0.7s linear forwards;
+}
+
+/* amarras al atracar */
+.mooring {
+  position: absolute;
+  height: 3px;
+  background: #f6e3b4;
+  transform-origin: 0 50%;
+  z-index: 7;
+  animation: moor-in 0.5s ease both;
+}
+@keyframes moor-in { from { transform: scaleX(0) rotate(var(--ang)); } to { transform: scaleX(1) rotate(var(--ang)); } }
+
+/* ---------- HUD ---------- */
+.hud {
+  position: fixed;
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.4rem;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  z-index: 25;
+  pointer-events: none;
+  color: rgba(234, 242, 251, 0.8);
+}
+.hud--top { top: 0; }
+.hud--bottom { bottom: 5.6rem; }
+.hud__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--f-sans);
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: #fff;
+}
+.hud__brand i {
+  width: 16px; height: 16px;
+  background: linear-gradient(-30.3deg, var(--sea-blue) 0 44%, #fff 44% 56%, var(--sky-d) 56% 100%);
+}
+#hud-status { color: var(--sunray); }
+
+.gauges { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.gauge {
+  padding: 0.35rem 0.7rem;
+  background: rgba(0, 22, 56, 0.55);
+  border: 1px solid rgba(154, 202, 235, 0.35);
+}
+.gauge b { color: var(--sunray); margin-left: 0.3rem; }
+
+/* viento */
+.wind {
+  position: fixed;
+  top: 4.2rem;
+  right: 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  background: rgba(0, 22, 56, 0.55);
+  border: 1px solid rgba(154, 202, 235, 0.35);
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  z-index: 25;
+}
+.wind__arrow {
+  display: inline-block;
+  font-size: 1.2rem;
+  color: var(--sunray);
+  /* la rotacion la escribe JS segun la direccion del viento */
+}
+
+.toast {
+  position: fixed;
+  top: 4.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--f-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  background: var(--sea-blue);
+  color: #fff;
+  padding: 0.55rem 1.1rem;
+  z-index: 30;
+  animation: toast-in 0.3s ease;
+}
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, -8px); } }
+
+/* ---------- consola del puente ---------- */
+.console {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.65rem 0.95rem;
+  background: #16304f;
+  border: 3px solid #0a1f3f;
+  border-radius: 14px;
+  box-shadow: 0 14px 34px -12px rgba(0, 10, 30, 0.7), inset 0 1px 0 rgba(255,255,255,0.12);
+  z-index: 26;
+}
+.console__group { display: flex; gap: 0.5rem; }
+.cbtn {
+  min-width: 54px;
+  height: 54px;
+  padding: 0 0.7rem;
+  border-radius: 12px;
+  border: 3px solid #0a1f3f;
+  background: linear-gradient(180deg, #ffd45c, var(--sunray));
+  color: var(--sea-blue);
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #b78a0a;
+  user-select: none;
+  touch-action: none;
+}
+.cbtn:active, .cbtn.is-press { transform: translateY(4px); box-shadow: 0 1px 0 #b78a0a; }
+.cbtn--throttle {
+  background: linear-gradient(180deg, #6fd9c6, var(--aqua));
+  color: #042c24;
+  box-shadow: 0 5px 0 #2b7a6c;
+}
+.cbtn--throttle:active, .cbtn--throttle.is-press { box-shadow: 0 1px 0 #2b7a6c; }
+.cbtn--rev {
+  background: linear-gradient(180deg, #ff8e44, var(--sunset));
+  color: #fff;
+  box-shadow: 0 5px 0 #93470f;
+}
+.cbtn--rev:active, .cbtn--rev.is-press { box-shadow: 0 1px 0 #93470f; }
+.cbtn--tug {
+  background: linear-gradient(180deg, #b9d8f0, var(--horizon));
+  color: var(--sea-blue);
+  box-shadow: 0 5px 0 #5e87ab;
+}
+.cbtn--tug:active, .cbtn--tug.is-press { box-shadow: 0 1px 0 #5e87ab; }
+
+/* ---------- resultado ---------- */
+.finale {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 0.9rem;
+  background:
+    linear-gradient(-30.3deg, rgba(0, 155, 222, 0.25) 0 14%, transparent 14%),
+    rgba(0, 22, 56, 0.92);
+  z-index: 40;
+  padding: 2rem;
+}
+.finale__kicker {
+  font-family: var(--f-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--sunray);
+}
+.finale h2 {
+  font-size: clamp(2rem, 5.5vw, 3.6rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 1.02;
+  color: #fff;
+}
+.finale__score {
+  font-family: var(--f-mono);
+  font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+  font-weight: 700;
+  color: var(--aqua);
+}
+.finale__sub {
+  font-family: var(--f-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  color: var(--horizon);
+}
+.finale__btns { display: flex; gap: 0.8rem; margin-top: 0.8rem; flex-wrap: wrap; justify-content: center; }
+.finale button {
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--sea-blue);
+  background: var(--sunray);
+  border: 0;
+  padding: 0.85rem 1.6rem;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.35);
+}
+.finale button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(0,0,0,0.35); }
+#btn-next { background: var(--aqua); }
+
+@media (max-width: 760px) {
+  .hud__keys { display: none; }
+  .ship { width: 110px; height: 42px; margin: -21px 0 0 -55px; }
+  .cbtn { min-width: 46px; height: 48px; font-size: 0.68rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.shake { animation: none; }
+  .buoy { animation: none; }
+}

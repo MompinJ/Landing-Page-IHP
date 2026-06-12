@@ -175,6 +175,16 @@
       "accent": "#54BBAB",
       "theme": "dyn-trivia-grua",
       "path": "dinamicas/trivia-grua/index.html"
+    },
+    {
+      "slug": "atraque-hp",
+      "title": "Atraca el Buque",
+      "subtitle": "Maniobra de practico en 3 niveles",
+      "description": "Fisica naval real: el buque tarda en frenar, el timon solo muerde con arrancada y los remolcadores (Q/E) empujan de costado. Hay que entrar por la bocana del rompeolas y quedar en la bahia marcada, alineado y a menos de 1.5 nudos. Golpes al muelle cuestan cascos; niveles con viento de traves y bahias mas cerradas. Puntaje por suavidad, tiempo y cascos: ideal para competir.",
+      "tags": ["Dinamica", "Naval", "Maniobra"],
+      "accent": "#009BDE",
+      "theme": "dyn-atraque-hp",
+      "path": "dinamicas/atraque-hp/index.html"
     }
   ]
 }
