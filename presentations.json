@@ -245,6 +245,16 @@
       "accent": "#54BBAB",
       "theme": "dyn-cero-emisiones",
       "path": "dinamicas/cero-emisiones/index.html"
+    },
+    {
+      "slug": "memorama-unity",
+      "title": "Memorama UNITY",
+      "subtitle": "Une cada valor con su conducta",
+      "description": "Memorama de los valores UNITY: las cartas azules traen el valor (Unrivalled Standards, Network Strength, Informed Decisions, Trusted and Honest, Your Partners) y las blancas la conducta que lo demuestra. Modo 1 equipo contra el reloj o 2 equipos por turnos donde acertar da punto y repite turno: perfecto para partir a la audiencia en dos porras.",
+      "tags": ["Dinamica", "RH", "Valores"],
+      "accent": "#009BDE",
+      "theme": "dyn-memorama-unity",
+      "path": "dinamicas/memorama-unity/index.html"
     }
   ]
 }

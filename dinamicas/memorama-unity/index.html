@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Memorama UNITY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: MEMORAMA UNITY (recursos humanos)
+       Memorama de parejas VALOR <-> COMPORTAMIENTO con los valores
+       UNITY de Hutchison Ports. Las cartas de valor son azules y
+       las de comportamiento blancas: hay que unir cada valor con
+       la conducta que lo demuestra.
+
+       MODOS
+       - 1 EQUIPO: contra el reloj y los intentos
+       - 2 EQUIPOS: por turnos; acertar da punto y repite turno
+         (ideal para dividir a la audiencia en dos porras)
+
+       CONTROLES: clic/toque en las cartas · R reiniciar
+       PERSONALIZAR: parejas en PAIRS de js/memorama.js
+       ============================================================ -->
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>MEMORAMA UNITY</span></div>
+    <div class="meters" id="meters">
+      <span class="meter meter--a" id="m-a" hidden>EQUIPO A <b id="score-a">0</b></span>
+      <span class="meter meter--b" id="m-b" hidden>EQUIPO B <b id="score-b">0</b></span>
+      <span class="meter" id="m-tries">INTENTOS <b id="tries">0</b></span>
+      <span class="meter">T <b id="time">0:00</b></span>
+    </div>
+  </header>
+
+  <!-- seleccion de modo -->
+  <div class="modal" id="mode-modal">
+    <div class="modal__sheet">
+      <p class="modal__kicker">MEMORAMA UNITY</p>
+      <h1 class="modal__title">Une cada valor con<br>su comportamiento.</h1>
+      <p class="modal__sub">Cartas azules = valores. Cartas blancas = conductas. Encuentra las parejas.</p>
+      <div class="modal__btns">
+        <button type="button" class="modebtn" data-mode="1">1 EQUIPO<small>contra el reloj</small></button>
+        <button type="button" class="modebtn modebtn--vs" data-mode="2">2 EQUIPOS<small>por turnos, acertar repite</small></button>
+      </div>
+    </div>
+  </div>
+
+  <main class="table">
+    <div class="turn" id="turn" hidden>TURNO: <b id="turn-team">EQUIPO A</b></div>
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">--</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRA PARTIDA [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">ELIGE MODO DE JUEGO</span>
+    <span class="hud__keys">clic en las cartas · R reiniciar</span>
+  </footer>
+
+  <script src="js/memorama.js"></script>
+</body>
+</html>

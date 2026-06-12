@@ -1380,6 +1380,50 @@ code {
 }
 
 /* ============================================================
+   TEMA: dyn-memorama-unity — CARTAS BOCA ABAJO
+   mesa clara HP con tres cartas, una volteada
+   ============================================================ */
+.hub-card[data-theme="dyn-memorama-unity"] {
+  --card-accent: #009BDE;
+  background:
+    linear-gradient(150.3deg, rgba(0, 155, 222, 0.12) 0 12%, transparent 12%),
+    linear-gradient(-30.3deg, rgba(255, 198, 39, 0.14) 0 14%, transparent 14%),
+    #ffffff;
+  border: 3px solid #002E6D;
+  box-shadow: 9px 9px 0 rgba(0, 155, 222, 0.35);
+  color: #12263c;
+}
+.hub-card[data-theme="dyn-memorama-unity"]:hover { box-shadow: 16px 16px 0 #EE7523; }
+.hub-card[data-theme="dyn-memorama-unity"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-memorama-unity"] .hub-card__date,
+.hub-card[data-theme="dyn-memorama-unity"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #009BDE; }
+.hub-card[data-theme="dyn-memorama-unity"] .hub-card__kind::before { content: "DINAMICA // U-N-I-T-Y"; }
+.hub-card[data-theme="dyn-memorama-unity"] .hub-card__subtitle { color: #EE7523; }
+.hub-card[data-theme="dyn-memorama-unity"] .hub-card__desc { color: #41557a; }
+.hub-card[data-theme="dyn-memorama-unity"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #002E6D;
+  background: #eef1f4;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-memorama-unity"] .hub-card__arrow { color: #EE7523; }
+/* tres cartitas: dos boca abajo (diagonal HP) y una volteada aqua */
+.hub-card[data-theme="dyn-memorama-unity"] .hub-card__deco {
+  bottom: 1.4rem; right: 1.3rem;
+  width: 102px; height: 40px;
+  background:
+    linear-gradient(-30.3deg, #009BDE 0 32%, #fff 32% 40%, #002E6D 40% 100%) 0 0 / 30px 40px no-repeat,
+    linear-gradient(-30.3deg, #009BDE 0 32%, #fff 32% 40%, #002E6D 40% 100%) 36px 0 / 30px 40px no-repeat,
+    linear-gradient(#54BBAB, #54BBAB) 72px 0 / 30px 40px no-repeat;
+  border-radius: 4px;
+}
+
+/* ============================================================
    STEPS / FOOTER
    ============================================================ */
 .hub-section--add .hub-steps {
