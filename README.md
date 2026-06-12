@@ -36,6 +36,7 @@ Hub estatico para navegar entre presentaciones independientes. Cada presentacion
     mexico-hp/
     trivia-grua/
     atraque-hp/
+    estiba-hp/
 ```
 
 ## Como abrir
@@ -78,6 +79,7 @@ Juegos interactivos para la audiencia, en `dinamicas/<slug>/` (clave `dinamicas`
 | `mexico-hp` | Navega un buque por un mapa de Mexico que al tocar tierra se convierte en grua movil. Hay que llegar a las 5 sedes de Hutchison Ports (Ensenada, Manzanillo, Lazaro Cardenas, Veracruz, Hidalgo); cada llegada abre la ficha de la sede en pantalla completa con sus unidades de negocio (ICAVE/TNG/HPMX, LCT/LCMT, etc.) y un boton ACEPTAR para continuar. Tren intermodal Veracruz-Hidalgo con la tecla T |
 | `trivia-grua` | Llega un contenedor con una pregunta rotulada; hay que operarlo con la grua (teclado o consola de botones en pantalla) y soltarlo en la plataforma VERDADERO o FALSO. Balanceo de pendulo, caida con gravedad, veredicto en grande y marcador de aciertos. Preguntas editables en `js/trivia.js` |
 | `atraque-hp` | Maniobra de atraque con fisica naval: inercia real, timon que solo muerde con arrancada, remolcadores (Q/E) y viento de traves en niveles avanzados. Entrar por la bocana y quedar en la bahia alineado a menos de 1.5 nudos; puntaje por suavidad, tiempo y cascos para competir entre participantes. Niveles editables en `js/atraque.js` |
+| `estiba-hp` | Corte transversal del buque con 7 bahias: la grua entrega contenedores con tonelaje rotulado y hay que estibarlos cuidando la escora (clinometro en vivo, momento = peso x distancia a cruija). Pasarse de 8 grados = volcadura animada. Puntaje por escora final y tiempo. Configuracion en `js/estiba.js` |
 
 ## Como agregar una presentacion nueva
 

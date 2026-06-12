@@ -1102,6 +1102,51 @@ code {
 }
 
 /* ============================================================
+   TEMA: dyn-estiba-hp — CORTE TRANSVERSAL
+   buque escorado con pilas de contenedores
+   ============================================================ */
+.hub-card[data-theme="dyn-estiba-hp"] {
+  --card-accent: #EE7523;
+  background:
+    linear-gradient(0deg, rgba(31, 109, 168, 0.9) 0 16%, transparent 16%),
+    linear-gradient(180deg, #bfe0f5, #8fc4e8);
+  border: 2px solid #16304f;
+  box-shadow: 9px 9px 0 rgba(238, 117, 35, 0.45);
+  color: #12263c;
+}
+.hub-card[data-theme="dyn-estiba-hp"]:hover { box-shadow: 16px 16px 0 #FFC627; }
+.hub-card[data-theme="dyn-estiba-hp"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-estiba-hp"] .hub-card__date,
+.hub-card[data-theme="dyn-estiba-hp"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #0b78c2; }
+.hub-card[data-theme="dyn-estiba-hp"] .hub-card__kind::before { content: "DINAMICA // ESCORA MAX 8 GRADOS"; }
+.hub-card[data-theme="dyn-estiba-hp"] .hub-card__subtitle { color: #EE7523; }
+.hub-card[data-theme="dyn-estiba-hp"] .hub-card__desc { color: #41566c; }
+.hub-card[data-theme="dyn-estiba-hp"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #002E6D;
+  background: #fff;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-estiba-hp"] .hub-card__arrow { color: #EE7523; }
+/* buque escorado con contenedores apilados */
+.hub-card[data-theme="dyn-estiba-hp"] .hub-card__deco {
+  bottom: calc(16% - 2px); right: 1.4rem;
+  width: 92px; height: 58px;
+  transform: rotate(-6deg);
+  background:
+    linear-gradient(#002E6D, #002E6D) 0 100% / 100% 22px no-repeat,
+    linear-gradient(#EE7523, #EE7523) 6px 22px / 20px 14px no-repeat,
+    linear-gradient(#009BDE, #009BDE) 6px 8px / 20px 14px no-repeat,
+    linear-gradient(#FFC627, #FFC627) 28px 22px / 20px 14px no-repeat,
+    linear-gradient(#54BBAB, #54BBAB) 50px 22px / 20px 14px no-repeat;
+}
+
+/* ============================================================
    STEPS / FOOTER
    ============================================================ */
 .hub-section--add .hub-steps {

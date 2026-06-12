@@ -185,6 +185,16 @@
       "accent": "#009BDE",
       "theme": "dyn-atraque-hp",
       "path": "dinamicas/atraque-hp/index.html"
+    },
+    {
+      "slug": "estiba-hp",
+      "title": "Estiba el Buque",
+      "subtitle": "Equilibra la carga o vuelcas",
+      "description": "Corte transversal del buque con 7 bahias. La grua entrega contenedores con su tonelaje rotulado y hay que estibarlos cuidando la escora: cada tonelada lejos de la cruija inclina el buque (clinometro en vivo). Pasarse de 8 grados es volcadura. Cola de siguientes visibles, puntaje por escora final y tiempo.",
+      "tags": ["Dinamica", "Naval", "Estiba"],
+      "accent": "#EE7523",
+      "theme": "dyn-estiba-hp",
+      "path": "dinamicas/estiba-hp/index.html"
     }
   ]
 }

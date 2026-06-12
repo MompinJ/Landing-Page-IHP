@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Estiba el Buque</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: ESTIBA EL BUQUE
+       Vista transversal del buque atracado. La grua entrega
+       contenedores de distinto PESO (el tonelaje viene rotulado)
+       y hay que estibarlos en las bahias de babor a estribor
+       cuidando la ESCORA: cada tonelada lejos de la cruija inclina
+       el buque. Si la escora pasa de 8 grados... volcadura.
+
+       OBJETIVO: estibar todos los contenedores de la lista y
+       terminar lo mas adrizado posible. Puntaje por escora final,
+       tiempo y volcaduras evitadas.
+
+       CONTROLES
+       - A/D o flechas izq/der: mover el spreader por las bahias
+       - S, ESPACIO o flecha abajo: soltar el contenedor
+       - Consola de botones en pantalla (tactil y mouse)
+       - R: reiniciar
+
+       PERSONALIZAR: numero de contenedores, pesos y limites de
+       escora en las constantes de js/estiba.js.
+       ============================================================ -->
+
+  <div class="scene" id="scene">
+    <!-- grua superior -->
+    <div class="beam"></div>
+    <div class="trolley" id="trolley"></div>
+    <i class="cable" id="cable"></i>
+    <div class="hangbox" id="hangbox"><span id="hang-w">--</span></div>
+
+    <!-- buque (rota con la escora), lo arma js/estiba.js -->
+    <div class="vessel" id="vessel"></div>
+
+    <!-- agua al frente -->
+    <div class="water" aria-hidden="true"></div>
+  </div>
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>ESTIBA EL BUQUE</span></div>
+    <div class="next" id="next">
+      <span class="next__label">SIGUEN</span>
+      <span class="next__box" id="next-1">--</span>
+      <span class="next__box" id="next-2">--</span>
+    </div>
+  </header>
+
+  <!-- clinometro -->
+  <div class="clino">
+    <p class="clino__label">ESCORA <b id="clino-deg">0.0&#176;</b></p>
+    <div class="clino__bar">
+      <i class="clino__zone clino__zone--warn-l"></i>
+      <i class="clino__zone clino__zone--warn-r"></i>
+      <i class="clino__needle" id="clino-needle"></i>
+    </div>
+    <div class="clino__marks"><span>BABOR 8&#176;</span><span>0&#176;</span><span>8&#176; ESTRIBOR</span></div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">--</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRA ESTIBA [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">ESTIBA LOS CONTENEDORES SIN PASAR DE 8 GRADOS</span>
+    <span class="hud__keys">A/D mover · S o ESPACIO soltar · R reiniciar</span>
+  </footer>
+
+  <!-- consola -->
+  <div class="console" aria-label="Controles de estiba">
+    <button type="button" class="cbtn" data-k="left">&#9664;</button>
+    <button type="button" class="cbtn cbtn--drop" data-k="drop">SOLTAR</button>
+    <button type="button" class="cbtn" data-k="right">&#9654;</button>
+  </div>
+
+  <script src="js/estiba.js"></script>
+</body>
+</html>
