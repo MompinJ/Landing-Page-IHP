@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Cadena Logistica</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: CADENA LOGISTICA
+       Las etapas del flujo portuario llegan revueltas; hay que
+       ARRASTRARLAS a la ruta en el orden correcto y confirmar.
+       Las correctas se fijan en verde; las equivocadas regresan
+       al pool (cada intento descuenta puntos).
+
+       3 escenarios: importacion, exportacion y reefer.
+
+       CONTROLES
+       - Arrastrar con mouse o dedo (principal)
+       - Teclado: A/D selecciona ficha del pool, 1-6 la coloca,
+         ENTER confirma, R reinicia el escenario
+
+       PERSONALIZAR: escenarios y etapas en ROUNDS de js/cadena.js.
+       ============================================================ -->
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>CADENA LOGISTICA</span></div>
+    <div class="meters">
+      <span class="meter">ESCENARIO <b id="m-round">1/3</b></span>
+      <span class="meter">INTENTOS <b id="m-tries">0</b></span>
+      <span class="meter">PTS <b id="m-score">0</b></span>
+    </div>
+  </header>
+
+  <main class="table">
+    <div class="brief">
+      <p class="brief__kicker" id="brief-kicker">ESCENARIO 1</p>
+      <h1 class="brief__title" id="brief-title">--</h1>
+      <p class="brief__sub" id="brief-sub">--</p>
+    </div>
+
+    <!-- la ruta con sus posiciones -->
+    <div class="route" id="route"></div>
+
+    <!-- fichas revueltas -->
+    <div class="pool" id="pool"></div>
+
+    <div class="actions">
+      <button type="button" class="confirm" id="confirm" disabled>CONFIRMAR ORDEN [ENTER]</button>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">--</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <div class="finale__btns">
+      <button type="button" id="btn-retry" hidden>REPETIR [R]</button>
+      <button type="button" id="btn-next">CONTINUAR [ENTER]</button>
+    </div>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">ARRASTRA LAS ETAPAS A LA RUTA EN EL ORDEN CORRECTO</span>
+    <span class="hud__keys">arrastra con el mouse · A/D + 1-6 con teclado · ENTER confirmar · R reiniciar</span>
+  </footer>
+
+  <script src="js/cadena.js"></script>
+</body>
+</html>

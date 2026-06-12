@@ -1196,6 +1196,49 @@ code {
 }
 
 /* ============================================================
+   TEMA: dyn-cadena-hp — MESA DE PLANEACION
+   blanco HP, fichas y flechas de ruta
+   ============================================================ */
+.hub-card[data-theme="dyn-cadena-hp"] {
+  --card-accent: #002E6D;
+  background:
+    linear-gradient(-30.3deg, rgba(0, 155, 222, 0.12) 0 16%, transparent 16%),
+    linear-gradient(150.3deg, rgba(255, 198, 39, 0.14) 0 10%, transparent 10%),
+    #ffffff;
+  border: 3px solid #002E6D;
+  box-shadow: 9px 9px 0 rgba(0, 46, 109, 0.4);
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-cadena-hp"]:hover { box-shadow: 16px 16px 0 #54BBAB; }
+.hub-card[data-theme="dyn-cadena-hp"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.hub-card[data-theme="dyn-cadena-hp"] .hub-card__date,
+.hub-card[data-theme="dyn-cadena-hp"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #009BDE; }
+.hub-card[data-theme="dyn-cadena-hp"] .hub-card__kind::before { content: "DINAMICA // BUQUE-STS-PATIO-ADUANA"; }
+.hub-card[data-theme="dyn-cadena-hp"] .hub-card__subtitle { color: #EE7523; }
+.hub-card[data-theme="dyn-cadena-hp"] .hub-card__desc { color: #41557a; }
+.hub-card[data-theme="dyn-cadena-hp"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #002E6D;
+  background: #eef1f4;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-cadena-hp"] .hub-card__arrow { color: #EE7523; }
+/* tres fichas encadenadas con flechas */
+.hub-card[data-theme="dyn-cadena-hp"] .hub-card__deco {
+  bottom: 1.4rem; right: 1.3rem;
+  width: 96px; height: 30px;
+  background:
+    linear-gradient(#009BDE, #009BDE) 0 4px / 22px 22px no-repeat,
+    linear-gradient(#FFC627, #FFC627) 37px 4px / 22px 22px no-repeat,
+    linear-gradient(#54BBAB, #54BBAB) 74px 4px / 22px 22px no-repeat,
+    linear-gradient(to right, transparent 0 24px, #002E6D 24px 35px, transparent 35px 61px, #002E6D 61px 72px, transparent 72px) 0 13px / 100% 4px no-repeat;
+}
+
+/* ============================================================
    STEPS / FOOTER
    ============================================================ */
 .hub-section--add .hub-steps {

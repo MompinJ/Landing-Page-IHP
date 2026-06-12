@@ -205,6 +205,16 @@
       "accent": "#9ACAEB",
       "theme": "dyn-despacho-hp",
       "path": "dinamicas/despacho-hp/index.html"
+    },
+    {
+      "slug": "cadena-hp",
+      "title": "Cadena Logistica",
+      "subtitle": "Ordena el flujo de punta a punta",
+      "description": "Las etapas del flujo portuario llegan revueltas y hay que arrastrarlas a la ruta en el orden correcto: 3 escenarios (importacion del buque al cliente, exportacion de la planta al mar, y cadena de frio reefer). Al confirmar, las correctas se fijan en verde y las equivocadas regresan; puntaje por intentos y tiempo. Tambien jugable con teclado.",
+      "tags": ["Dinamica", "Logistica", "Ordenar"],
+      "accent": "#002E6D",
+      "theme": "dyn-cadena-hp",
+      "path": "dinamicas/cadena-hp/index.html"
     }
   ]
 }

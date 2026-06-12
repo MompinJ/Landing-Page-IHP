@@ -38,6 +38,7 @@ Hub estatico para navegar entre presentaciones independientes. Cada presentacion
     atraque-hp/
     estiba-hp/
     despacho-hp/
+    cadena-hp/
 ```
 
 ## Como abrir
@@ -82,6 +83,7 @@ Juegos interactivos para la audiencia, en `dinamicas/<slug>/` (clave `dinamicas`
 | `atraque-hp` | Maniobra de atraque con fisica naval: inercia real, timon que solo muerde con arrancada, remolcadores (Q/E) y viento de traves en niveles avanzados. Entrar por la bocana y quedar en la bahia alineado a menos de 1.5 nudos; puntaje por suavidad, tiempo y cascos para competir entre participantes. Niveles editables en `js/atraque.js` |
 | `estiba-hp` | Corte transversal del buque con 7 bahias: la grua entrega contenedores con tonelaje rotulado y hay que estibarlos cuidando la escora (clinometro en vivo, momento = peso x distancia a cruija). Pasarse de 8 grados = volcadura animada. Puntaje por escora final y tiempo. Configuracion en `js/estiba.js` |
 | `despacho-hp` | Arcade de clasificacion: los contenedores llegan por la banda y hay que leer sus marcas (reefer, rombo IMO, averia, carga seca) y despacharlos con WASD o botonera a la zona correcta antes de que expire el anillo de tiempo. Combos, errores que ensenan la regla y ritmo creciente. Tipos y ritmo en `js/despacho.js` |
+| `cadena-hp` | Ordenar el flujo logistico arrastrando fichas a la ruta: importacion (buque a cliente), exportacion (planta a buque) y cadena de frio reefer. Al confirmar, las correctas se fijan y las equivocadas regresan; puntaje por intentos y tiempo. Tambien jugable con teclado. Escenarios editables en `js/cadena.js` |
 
 ## Como agregar una presentacion nueva
 
