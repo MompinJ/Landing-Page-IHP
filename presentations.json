@@ -370,6 +370,20 @@
       "accent": "#2e8b57",
       "theme": "dyn-caza-fugas",
       "path": "dinamicas/caza-fugas/index.html"
+    },
+    {
+      "slug": "linea-fuego",
+      "title": "Linea de Fuego",
+      "subtitle": "Elige donde SI es seguro pararte",
+      "description": "6 maniobras vistas desde arriba (grua girando, camion en reversa, cabo en tension con zona snap-back, pasillo de montacargas, izaje con viento, apertura de contenedor) con cuatro posiciones marcadas: solo una esta fuera de la linea de fuego. Clic en la segura antes de que corra el tiempo; al responder se revelan las zonas de peligro en rojo y la regla que las explica.",
+      "tags": [
+        "Dinamica",
+        "Seguridad",
+        "HSE"
+      ],
+      "accent": "#EE7523",
+      "theme": "dyn-linea-fuego",
+      "path": "dinamicas/linea-fuego/index.html"
     }
   ]
 }

@@ -1474,6 +1474,54 @@ code {
 }
 
 /* ============================================================
+   TEMA: dyn-linea-fuego — ZONA DE PELIGRO
+   asfalto cenital con zona roja y posicion segura
+   ============================================================ */
+.hub-card[data-theme="dyn-linea-fuego"] {
+  --card-accent: #EE7523;
+  background:
+    linear-gradient(115deg, transparent 0 58%, rgba(195, 45, 45, 0.30) 58%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 38px),
+    linear-gradient(180deg, #6e7c8a, #5a6876);
+  border: 2px solid #16304f;
+  box-shadow: 9px 9px 0 rgba(238, 117, 35, 0.5);
+  color: #eaf2fb;
+}
+.hub-card[data-theme="dyn-linea-fuego"]:hover { box-shadow: 16px 16px 0 #FFC627; }
+.hub-card[data-theme="dyn-linea-fuego"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+}
+.hub-card[data-theme="dyn-linea-fuego"] .hub-card__date,
+.hub-card[data-theme="dyn-linea-fuego"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #FFC627; }
+.hub-card[data-theme="dyn-linea-fuego"] .hub-card__kind::before { content: "DINAMICA // HSE · A-B-C-D"; }
+.hub-card[data-theme="dyn-linea-fuego"] .hub-card__subtitle { color: #FFC627; }
+.hub-card[data-theme="dyn-linea-fuego"] .hub-card__desc { color: rgba(234, 242, 251, 0.75); }
+.hub-card[data-theme="dyn-linea-fuego"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 1px solid rgba(255, 198, 39, 0.5);
+  color: #FFC627;
+}
+.hub-card[data-theme="dyn-linea-fuego"] .hub-card__arrow { color: #FFC627; }
+/* posicion segura (verde) fuera de la zona rayada */
+.hub-card[data-theme="dyn-linea-fuego"] .hub-card__deco {
+  bottom: 1.6rem; right: 4.4rem;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 4px solid #2e8b57;
+  background: rgba(46, 139, 87, 0.4);
+}
+.hub-card[data-theme="dyn-linea-fuego"] .hub-card__chrome {
+  bottom: 1.2rem; right: 1rem;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 3px dashed #c23b2e;
+  background: rgba(195, 45, 45, 0.35);
+}
+
+/* ============================================================
    STEPS / FOOTER
    ============================================================ */
 .hub-section--add .hub-steps {

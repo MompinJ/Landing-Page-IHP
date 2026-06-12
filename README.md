@@ -44,6 +44,7 @@ Hub estatico para navegar entre presentaciones independientes. Cada presentacion
     cero-emisiones/
     memorama-unity/
     caza-fugas/
+    linea-fuego/
 ```
 
 ## Como abrir
@@ -94,6 +95,7 @@ Juegos interactivos para la audiencia, en `dinamicas/<slug>/` (clave `dinamicas`
 | `cero-emisiones` | Gestion ESG: 8 decisiones operativas del anio con dos presupuestos que no se pueden reventar (dinero y toneladas de CO2). Lo barato contamina, lo verde cuesta y a veces lo verde tambien es lo barato (tren vs camiones). Cierre con comparativa de carbono evitado vs operar todo en diesel. Presupuestos y decisiones en `js/cero.js` |
 | `memorama-unity` | RH: memorama de parejas valor-comportamiento con los valores UNITY (cartas azules = valor, blancas = conducta). Modo 1 equipo contra reloj o 2 equipos por turnos (acertar da punto y repite). Cada pareja unida repasa el valor en el toast. Parejas editables en `js/memorama.js` |
 | `caza-fugas` | Ambiente: variante de la Caza de Riesgos con 11 fugas y derroches (descarga al mar, ralenti, tambo sin charola, manguera abierta, mala segregacion, clima con puerta abierta...) entre buenas practicas senuelo. Mismo motor de point-and-click: escena editable via grupos `.hz` del SVG |
+| `linea-fuego` | Seguridad: 6 maniobras cenitales (grua girando, reversa, snap-back de cabo, pasillo de montacargas, izaje con viento, apertura de contenedor) con 4 posiciones marcadas; hay que elegir la UNICA segura contra reloj. Al responder se revelan las zonas de peligro y la regla. Rondas editables como grupos `.round` del SVG |
 
 ## Como agregar una presentacion nueva
 
