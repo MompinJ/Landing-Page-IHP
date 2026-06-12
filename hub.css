@@ -1239,6 +1239,57 @@ code {
 }
 
 /* ============================================================
+   TEMA: dyn-caza-riesgos — OBSERVACION HSE
+   patio de dia, mira de busqueda, verde seguridad
+   ============================================================ */
+.hub-card[data-theme="dyn-caza-riesgos"] {
+  --card-accent: #2e8b57;
+  background:
+    linear-gradient(0deg, #8d99a6 0 22%, #5e9f7a 22% 28%, transparent 28%),
+    linear-gradient(180deg, #bfe0f5, #eef7fd);
+  border: 2px solid #16304f;
+  box-shadow: 9px 9px 0 rgba(46, 139, 87, 0.45);
+  color: #12263c;
+}
+.hub-card[data-theme="dyn-caza-riesgos"]:hover { box-shadow: 16px 16px 0 #FFC627; }
+.hub-card[data-theme="dyn-caza-riesgos"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-caza-riesgos"] .hub-card__date,
+.hub-card[data-theme="dyn-caza-riesgos"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #2e8b57; }
+.hub-card[data-theme="dyn-caza-riesgos"] .hub-card__kind::before { content: "DINAMICA // HSE · 90 SEGUNDOS"; }
+.hub-card[data-theme="dyn-caza-riesgos"] .hub-card__subtitle { color: #EE7523; }
+.hub-card[data-theme="dyn-caza-riesgos"] .hub-card__desc { color: #41566c; }
+.hub-card[data-theme="dyn-caza-riesgos"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #002E6D;
+  background: #fff;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-caza-riesgos"] .hub-card__arrow { color: #2e8b57; }
+/* mira de observador sobre un riesgo */
+.hub-card[data-theme="dyn-caza-riesgos"] .hub-card__deco {
+  bottom: calc(22% - 14px); right: 1.6rem;
+  width: 48px; height: 48px;
+  border: 4px solid #2e8b57;
+  border-radius: 50%;
+}
+.hub-card[data-theme="dyn-caza-riesgos"] .hub-card__deco::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  background:
+    linear-gradient(#2e8b57, #2e8b57) 50% 0 / 3px 8px no-repeat,
+    linear-gradient(#2e8b57, #2e8b57) 50% 100% / 3px 8px no-repeat,
+    linear-gradient(#2e8b57, #2e8b57) 0 50% / 8px 3px no-repeat,
+    linear-gradient(#2e8b57, #2e8b57) 100% 50% / 8px 3px no-repeat,
+    radial-gradient(circle, #EE7523 4px, transparent 5px);
+}
+
+/* ============================================================
    STEPS / FOOTER
    ============================================================ */
 .hub-section--add .hub-steps {

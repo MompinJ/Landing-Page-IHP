@@ -215,6 +215,16 @@
       "accent": "#002E6D",
       "theme": "dyn-cadena-hp",
       "path": "dinamicas/cadena-hp/index.html"
+    },
+    {
+      "slug": "caza-riesgos",
+      "title": "Caza de Riesgos",
+      "subtitle": "10 actos inseguros escondidos en el patio",
+      "description": "Una escena del patio dibujada con 10 actos y condiciones inseguras escondidas entre trabajadores que si hacen las cosas bien: carga suspendida, estiba desfasada, derrame sin senalizar, salida bloqueada, punto ciego del montacargas... Clic sobre cada riesgo antes de que acabe el tiempo; los fallos restan, cada hallazgo ensena la regla y al final se revelan los que se te fueron. El clasico de las semanas de seguridad.",
+      "tags": ["Dinamica", "Seguridad", "HSE"],
+      "accent": "#2e8b57",
+      "theme": "dyn-caza-riesgos",
+      "path": "dinamicas/caza-riesgos/index.html"
     }
   ]
 }

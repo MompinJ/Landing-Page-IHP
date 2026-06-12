@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Caza de Riesgos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: CAZA DE RIESGOS (semana de seguridad)
+       Una escena del patio con 10 actos y condiciones inseguras
+       escondidas entre trabajadores que SI hacen las cosas bien.
+       Clic (o toque) sobre cada riesgo antes de que acabe el
+       tiempo. Los clics fallidos restan puntos.
+
+       Cada riesgo es un <g class="hz"> del SVG con:
+         data-label = nombre corto (aparece en la lista)
+         data-why   = la regla que se esta violando (toast)
+       Para editar la escena, agrega o quita grupos .hz; el motor
+       los detecta solo.
+
+       CONTROLES: clic/toque · R reiniciar
+       CONFIG: tiempo y puntajes al inicio de js/caza.js
+       ============================================================ -->
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>CAZA DE RIESGOS</span></div>
+    <div class="meters">
+      <span class="meter">HALLADOS <b id="m-found">0/--</b></span>
+      <span class="meter">PTS <b id="m-score">0</b></span>
+      <span class="meter meter--time">T <b id="m-time">--</b></span>
+    </div>
+  </header>
+
+  <div class="timerbar"><i id="timer-fill"></i></div>
+
+  <main class="board">
+    <div class="scene-wrap">
+      <svg id="scene" viewBox="0 0 1200 640" preserveAspectRatio="xMidYMid meet">
+
+        <!-- ================= FONDO ================= -->
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#bfe0f5"/><stop offset="1" stop-color="#eef7fd"/>
+          </linearGradient>
+          <!-- trabajador base (sin casco; el casco se agrega por instancia) -->
+          <g id="w-base">
+            <rect x="-7" y="22" width="6" height="18" fill="#2c3a4d"/>
+            <rect x="1" y="22" width="6" height="18" fill="#2c3a4d"/>
+            <rect x="-9" y="0" width="18" height="24" rx="4" fill="#EE7523"/>
+            <rect x="-9" y="9" width="18" height="4" fill="#f6e3b4"/>
+            <circle cx="0" cy="-8" r="7.5" fill="#e8b88a"/>
+          </g>
+          <g id="casco">
+            <path d="M -8 -10 a 8 8 0 0 1 16 0 Z" fill="#FFC627" stroke="#b78a0a" stroke-width="1"/>
+          </g>
+        </defs>
+
+        <rect x="0" y="0" width="1200" height="175" fill="url(#sky)"/>
+        <!-- gruas lejanas -->
+        <g fill="#0d4486" opacity="0.18">
+          <rect x="860" y="75" width="10" height="100"/><rect x="930" y="75" width="10" height="100"/>
+          <rect x="845" y="68" width="180" height="9"/>
+          <rect x="1050" y="95" width="9" height="80"/><rect x="1105" y="95" width="9" height="80"/>
+          <rect x="1040" y="88" width="120" height="8"/>
+        </g>
+        <!-- patio -->
+        <rect x="0" y="175" width="1200" height="465" fill="#8d99a6"/>
+        <rect x="0" y="175" width="1200" height="8" fill="#73818f"/>
+        <!-- anden peatonal -->
+        <rect x="0" y="430" width="1200" height="42" fill="#5e9f7a"/>
+        <g stroke="#eef4ee" stroke-width="5" opacity="0.7">
+          <path d="M 30 468 l 22 -34 M 90 468 l 22 -34 M 150 468 l 22 -34 M 210 468 l 22 -34 M 270 468 l 22 -34 M 330 468 l 22 -34 M 390 468 l 22 -34 M 450 468 l 22 -34 M 510 468 l 22 -34 M 570 468 l 22 -34 M 630 468 l 22 -34 M 750 468 l 22 -34 M 810 468 l 22 -34 M 870 468 l 22 -34 M 930 468 l 22 -34 M 990 468 l 22 -34 M 1050 468 l 22 -34 M 1110 468 l 22 -34"/>
+        </g>
+        <!-- vialidad inferior -->
+        <rect x="0" y="472" width="1200" height="168" fill="#6e7c8a"/>
+        <g stroke="#FFC627" stroke-width="5" stroke-dasharray="34 26">
+          <path d="M 0 556 H 1200"/>
+        </g>
+
+        <!-- ================= GRUA STS (izquierda) ================= -->
+        <g>
+          <rect x="70" y="92" width="20" height="338" fill="#0b78c2"/>
+          <rect x="300" y="92" width="20" height="338" fill="#0b78c2"/>
+          <rect x="40" y="78" width="330" height="18" fill="#0b78c2"/>
+          <rect x="226" y="92" width="44" height="16" fill="#EE7523"/>
+          <path d="M 238 108 V 196 M 258 108 V 196" stroke="#2c3a4d" stroke-width="3"/>
+          <rect x="216" y="196" width="64" height="10" fill="#FFC627"/>
+          <!-- contenedor suspendido -->
+          <rect x="206" y="206" width="84" height="40" fill="#EE7523" stroke="#9c4a12" stroke-width="2"/>
+          <path d="M 214 206 v 40 M 230 206 v 40 M 246 206 v 40 M 262 206 v 40 M 278 206 v 40" stroke="#9c4a12" stroke-width="2" opacity="0.5"/>
+        </g>
+
+        <!-- RIESGO 1: persona bajo la carga suspendida -->
+        <g class="hz" data-label="Bajo carga suspendida" data-why="NADIE SE PARA NI CRUZA DEBAJO DE UNA CARGA SUSPENDIDA">
+          <circle cx="248" cy="382" r="46" class="hitpad"/>
+          <use href="#w-base" x="248" y="362"/>
+          <use href="#casco" x="248" y="362"/>
+        </g>
+
+        <!-- senalero correcto (senuelo seguro, lejos de la carga) -->
+        <g>
+          <use href="#w-base" x="392" y="372"/>
+          <use href="#casco" x="392" y="372"/>
+          <rect x="400" y="350" width="4" height="22" fill="#2c3a4d"/>
+          <circle cx="402" cy="346" r="7" fill="#EE7523" stroke="#fff" stroke-width="2"/>
+        </g>
+
+        <!-- ================= PILAS DE CONTENEDORES ================= -->
+        <g>
+          <rect x="450" y="388" width="92" height="42" fill="#009BDE" stroke="#0a3a75" stroke-width="2"/>
+          <rect x="450" y="346" width="92" height="42" fill="#54BBAB" stroke="#22685c" stroke-width="2"/>
+          <rect x="450" y="304" width="92" height="42" fill="#b3422c" stroke="#5e1f12" stroke-width="2"/>
+          <rect x="560" y="388" width="92" height="42" fill="#d18a26" stroke="#6e4612" stroke-width="2"/>
+          <rect x="560" y="346" width="92" height="42" fill="#5b6770" stroke="#2c343c" stroke-width="2"/>
+          <rect x="670" y="388" width="92" height="42" fill="#009BDE" stroke="#0a3a75" stroke-width="2"/>
+          <rect x="670" y="346" width="92" height="42" fill="#EE7523" stroke="#9c4a12" stroke-width="2"/>
+        </g>
+
+        <!-- RIESGO 2: contenedor mal apilado (volado y chueco) -->
+        <g class="hz" data-label="Estiba desfasada" data-why="UN CONTENEDOR MAL ASENTADO SE CAE CON EL VIENTO O UN GOLPE">
+          <circle cx="640" cy="320" r="48" class="hitpad"/>
+          <rect x="592" y="302" width="92" height="42" fill="#FFC627" stroke="#8a6a0a" stroke-width="2" transform="rotate(-5 592 344)"/>
+        </g>
+
+        <!-- RIESGO 3: trabajador en altura sin proteccion -->
+        <g class="hz" data-label="Altura sin arnes" data-why="TRABAJO EN ALTURA SOLO CON ARNES Y LINEA DE VIDA">
+          <circle cx="716" cy="296" r="42" class="hitpad"/>
+          <use href="#w-base" x="716" y="306"/>
+          <use href="#casco" x="716" y="306"/>
+        </g>
+
+        <!-- ================= TAMBOS Y DERRAME ================= -->
+        <g>
+          <rect x="806" y="384" width="26" height="40" rx="3" fill="#0d4486"/>
+          <rect x="836" y="384" width="26" height="40" rx="3" fill="#54BBAB"/>
+          <rect x="806" y="392" width="56" height="5" fill="#f6f8fb" opacity="0.5"/>
+        </g>
+        <!-- RIESGO 4: derrame sin senalizar -->
+        <g class="hz" data-label="Derrame sin senalizar" data-why="TODO DERRAME SE ACORDONA, SE SENALIZA Y SE REPORTA">
+          <circle cx="900" cy="430" r="44" class="hitpad"/>
+          <path d="M 868 424 q 18 -14 44 -6 q 30 8 22 20 q -10 12 -40 8 q -34 -4 -26 -22 Z" fill="#1d2837" opacity="0.85"/>
+          <path d="M 882 426 q 12 -6 26 -2" stroke="#5b8bd4" stroke-width="3" fill="none" opacity="0.7"/>
+        </g>
+
+        <!-- ================= CASETA Y RUTA DE EVACUACION ================= -->
+        <g>
+          <rect x="985" y="252" width="190" height="178" fill="#dfe6ec" stroke="#5d6b80" stroke-width="3"/>
+          <rect x="985" y="252" width="190" height="16" fill="#c23b2e"/>
+          <rect x="1010" y="290" width="42" height="34" fill="#9fd8ff" stroke="#5d6b80" stroke-width="2"/>
+          <rect x="1105" y="290" width="42" height="34" fill="#9fd8ff" stroke="#5d6b80" stroke-width="2"/>
+          <!-- puerta de salida con letrero -->
+          <rect x="1056" y="340" width="46" height="90" fill="#5d7191" stroke="#2c3a4d" stroke-width="2"/>
+          <rect x="1046" y="318" width="66" height="20" fill="#2e8b57"/>
+          <text x="1079" y="332" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="11" font-weight="800" fill="#ffffff">SALIDA</text>
+        </g>
+        <!-- RIESGO 5: salida de emergencia bloqueada -->
+        <g class="hz" data-label="Salida bloqueada" data-why="LAS RUTAS DE EVACUACION SE MANTIENEN LIBRES, SIEMPRE">
+          <circle cx="1079" cy="412" r="42" class="hitpad"/>
+          <rect x="1042" y="392" width="40" height="38" fill="#c8a86a" stroke="#7c6230" stroke-width="2"/>
+          <rect x="1086" y="402" width="34" height="28" fill="#b8945a" stroke="#7c6230" stroke-width="2"/>
+          <path d="M 1042 405 h 40 M 1062 392 v 38" stroke="#7c6230" stroke-width="2"/>
+        </g>
+
+        <!-- RIESGO 6: extintor obstruido -->
+        <g class="hz" data-label="Extintor obstruido" data-why="EL EQUIPO CONTRA INCENDIO NUNCA SE OBSTRUYE">
+          <circle cx="950" cy="370" r="40" class="hitpad"/>
+          <rect x="938" y="318" width="6" height="100" fill="#5d6b80"/>
+          <rect x="930" y="330" width="22" height="34" rx="4" fill="#c23b2e" stroke="#7a1d14" stroke-width="2"/>
+          <path d="M 941 330 v -8 h 8" stroke="#2c3a4d" stroke-width="3" fill="none"/>
+          <rect x="922" y="376" width="44" height="40" fill="#c8a86a" stroke="#7c6230" stroke-width="2"/>
+          <path d="M 922 392 h 44" stroke="#7c6230" stroke-width="2"/>
+        </g>
+
+        <!-- ================= ZONA PEATONAL ================= -->
+        <!-- supervisor correcto con tabla (senuelo) -->
+        <g>
+          <use href="#w-base" x="540" y="446"/>
+          <use href="#casco" x="540" y="446"/>
+          <rect x="550" y="452" width="12" height="16" rx="2" fill="#f6f8fb" stroke="#2c3a4d" stroke-width="1.5"/>
+        </g>
+
+        <!-- RIESGO 7: manguera cruzando el anden -->
+        <g class="hz" data-label="Linea de tropiezo" data-why="CABLES Y MANGUERAS NO CRUZAN PASOS PEATONALES SIN PROTECCION">
+          <circle cx="700" cy="450" r="44" class="hitpad"/>
+          <path d="M 652 478 q 30 -36 56 -22 q 26 14 44 -26" stroke="#1d2837" stroke-width="7" fill="none" stroke-linecap="round"/>
+        </g>
+
+        <!-- RIESGO 8: caminando con el celular en zona operativa -->
+        <g class="hz" data-label="Distraido con celular" data-why="EN ZONAS OPERATIVAS, CERO DISTRACCIONES: EL CELULAR ESPERA">
+          <circle cx="180" cy="446" r="44" class="hitpad"/>
+          <use href="#w-base" x="180" y="428"/>
+          <use href="#casco" x="180" y="428"/>
+          <rect x="190" y="424" width="7" height="11" rx="1.5" fill="#1d2837"/>
+          <path d="M 189 432 q -4 4 -9 4" stroke="#e8b88a" stroke-width="4" fill="none"/>
+        </g>
+
+        <!-- ================= VIALIDAD ================= -->
+        <!-- montacargas -->
+        <g>
+          <rect x="372" y="506" width="74" height="44" rx="6" fill="#FFC627" stroke="#8a6a0a" stroke-width="2.5"/>
+          <rect x="394" y="480" width="36" height="30" rx="4" fill="#2c3a4d"/>
+          <rect x="400" y="486" width="24" height="16" fill="#9fd8ff"/>
+          <rect x="348" y="500" width="8" height="56" fill="#5d6b80"/>
+          <path d="M 348 552 h -26 M 348 532 h -26" stroke="#5d6b80" stroke-width="6"/>
+          <circle cx="392" cy="556" r="13" fill="#1d2837"/>
+          <circle cx="430" cy="556" r="13" fill="#1d2837"/>
+          <!-- torreta y alarma visibles: el equipo esta bien, el peaton no -->
+          <circle cx="412" cy="476" r="5" fill="#EE7523"/>
+        </g>
+        <!-- RIESGO 9: peaton en el punto ciego del montacargas -->
+        <g class="hz" data-label="Peaton en punto ciego" data-why="DISTANCIA DE SEGURIDAD CON EQUIPOS EN MOVIMIENTO: 3 METROS">
+          <circle cx="480" cy="528" r="42" class="hitpad"/>
+          <use href="#w-base" x="480" y="510"/>
+          <use href="#casco" x="480" y="510"/>
+        </g>
+
+        <!-- RIESGO 10: trabajador sin casco cargando caja -->
+        <g class="hz" data-label="Sin casco" data-why="EPP COMPLETO EN TODA LA TERMINAL: CASCO, CHALECO Y BOTAS">
+          <circle cx="760" cy="540" r="44" class="hitpad"/>
+          <use href="#w-base" x="760" y="522"/>
+          <path d="M -8 -12 a 8 6 0 0 1 16 0 q -8 -4 -16 0 Z" transform="translate(760 522)" fill="#5a4632"/>
+          <rect x="744" y="516" width="22" height="16" fill="#c8a86a" stroke="#7c6230" stroke-width="2"/>
+        </g>
+
+        <!-- camion estacionado correcto (senuelo, con calzas) -->
+        <g>
+          <rect x="950" y="492" width="160" height="52" fill="#0d4486" stroke="#0a1f3f" stroke-width="2.5"/>
+          <rect x="1110" y="504" width="56" height="40" rx="5" fill="#002E6D"/>
+          <rect x="1120" y="510" width="22" height="14" fill="#9fd8ff"/>
+          <circle cx="990" cy="552" r="14" fill="#1d2837"/>
+          <circle cx="1060" cy="552" r="14" fill="#1d2837"/>
+          <circle cx="1132" cy="552" r="14" fill="#1d2837"/>
+          <path d="M 976 560 l 10 -8 M 1004 560 l -10 -8" stroke="#FFC627" stroke-width="4"/>
+          <use href="#w-base" x="922" y="528"/>
+          <use href="#casco" x="922" y="528"/>
+        </g>
+
+      </svg>
+    </div>
+
+    <!-- lista de hallazgos -->
+    <aside class="panel">
+      <p class="panel__title">REPORTE DE OBSERVACIONES</p>
+      <ol class="panel__list" id="panel-list"></ol>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">--</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRA RONDA [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">ENCUENTRA LOS RIESGOS: CLIC SOBRE CADA UNO</span>
+    <span class="hud__keys">clic o toque sobre los riesgos · los fallos restan · R reiniciar</span>
+  </footer>
+
+  <script src="js/caza.js"></script>
+</body>
+</html>
