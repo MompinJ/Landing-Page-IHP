@@ -195,6 +195,16 @@
       "accent": "#EE7523",
       "theme": "dyn-estiba-hp",
       "path": "dinamicas/estiba-hp/index.html"
+    },
+    {
+      "slug": "despacho-hp",
+      "title": "Despacho de Patio",
+      "subtitle": "Lee las marcas y despacha a tiempo",
+      "description": "Arcade de clasificacion: los contenedores llegan por la banda y hay que leer sus marcas (reefer con su temperatura, rombo IMO, averias) y despacharlos con WASD o la botonera a su zona correcta antes de que expire el anillo de tiempo de la junta. Combos por racha, errores que explican la regla, ritmo que se acelera y pilas que crecen en cada zona.",
+      "tags": ["Dinamica", "Patio", "Arcade"],
+      "accent": "#9ACAEB",
+      "theme": "dyn-despacho-hp",
+      "path": "dinamicas/despacho-hp/index.html"
     }
   ]
 }

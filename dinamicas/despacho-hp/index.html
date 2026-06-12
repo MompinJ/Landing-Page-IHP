@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Despacho de Patio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: DESPACHO DE PATIO
+       Llegan contenedores por la banda y hay que LEER sus marcas
+       y despacharlos a la zona correcta antes de que se venza el
+       tiempo de la junta:
+
+         W / flecha arriba ..... ZONA REEFER (refrigerados)
+         S / flecha abajo ...... ZONA IMO (mercancia peligrosa)
+         D / flecha derecha .... PILA ESTANDAR
+         A / flecha izquierda .. RECHAZO (averias, a inspeccion)
+
+       Cada acierto suma y sube el combo; los errores restan y
+       te dicen por que. El ritmo se acelera. Tambien hay botonera
+       en pantalla para tactil.
+
+       PERSONALIZAR: tipos, textos, cantidad y ritmo en las
+       constantes de js/despacho.js.
+       ============================================================ -->
+
+  <div class="yard" id="yard">
+    <!-- banda transportadora -->
+    <div class="belt" id="belt"></div>
+    <div class="junction" id="junction">
+      <svg class="junction__ring" viewBox="0 0 60 60">
+        <circle cx="30" cy="30" r="26" class="ring-bg"/>
+        <circle cx="30" cy="30" r="26" class="ring-fg" id="ring-fg"/>
+      </svg>
+    </div>
+
+    <!-- zonas de despacho -->
+    <div class="zone zone--reefer" id="zone-reefer">
+      <span class="zone__name">ZONA REEFER</span>
+      <span class="zone__key">[W]</span>
+      <div class="zone__plugs"><i></i><i></i><i></i><i></i></div>
+      <div class="zone__stack" id="stack-reefer"></div>
+    </div>
+    <div class="zone zone--imo" id="zone-imo">
+      <span class="zone__name">ZONA IMO</span>
+      <span class="zone__key">[S]</span>
+      <div class="zone__stack" id="stack-imo"></div>
+    </div>
+    <div class="zone zone--std" id="zone-std">
+      <span class="zone__name">PILA ESTANDAR</span>
+      <span class="zone__key">[D]</span>
+      <div class="zone__stack" id="stack-std"></div>
+    </div>
+    <div class="zone zone--rej" id="zone-rej">
+      <span class="zone__name">RECHAZO / INSPECCION</span>
+      <span class="zone__key">[A]</span>
+      <div class="zone__stack" id="stack-rej"></div>
+    </div>
+
+    <!-- el contenedor en transito lo crea js/despacho.js -->
+  </div>
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>DESPACHO DE PATIO</span></div>
+    <div class="meters">
+      <span class="meter">PTS <b id="m-score">0</b></span>
+      <span class="meter">COMBO <b id="m-combo">x1</b></span>
+      <span class="meter">RESTAN <b id="m-left">--</b></span>
+    </div>
+  </header>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">TURNO TERMINADO</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRO TURNO [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">LEE LAS MARCAS Y DESPACHA ANTES DE QUE EXPIRE LA JUNTA</span>
+    <span class="hud__keys">W reefer · S IMO · D estandar · A rechazo · R reiniciar</span>
+  </footer>
+
+  <!-- botonera tactil en cruz -->
+  <div class="console" aria-label="Botones de despacho">
+    <button type="button" class="cbtn cbtn--up" data-k="up">REEFER &#9650;</button>
+    <div class="console__mid">
+      <button type="button" class="cbtn cbtn--left" data-k="left">&#9664; RECHAZO</button>
+      <button type="button" class="cbtn cbtn--right" data-k="right">PILA &#9654;</button>
+    </div>
+    <button type="button" class="cbtn cbtn--down" data-k="down">IMO &#9660;</button>
+  </div>
+
+  <script src="js/despacho.js"></script>
+</body>
+</html>

@@ -1147,6 +1147,55 @@ code {
 }
 
 /* ============================================================
+   TEMA: dyn-despacho-hp — PATIO NOCTURNO DE CLASIFICACION
+   asfalto, banda y rombo IMO
+   ============================================================ */
+.hub-card[data-theme="dyn-despacho-hp"] {
+  --card-accent: #9ACAEB;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 34px),
+    linear-gradient(0deg, #1d2837 0 20%, transparent 20%),
+    linear-gradient(180deg, #54657a, #3e4d5d);
+  border: 2px solid #11203a;
+  box-shadow: 9px 9px 0 rgba(154, 202, 235, 0.4);
+  color: #eaf2fb;
+}
+.hub-card[data-theme="dyn-despacho-hp"]:hover { box-shadow: 16px 16px 0 #EE7523; }
+.hub-card[data-theme="dyn-despacho-hp"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+}
+.hub-card[data-theme="dyn-despacho-hp"] .hub-card__date,
+.hub-card[data-theme="dyn-despacho-hp"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #9ACAEB; }
+.hub-card[data-theme="dyn-despacho-hp"] .hub-card__kind::before { content: "DINAMICA // REEFER-IMO-PILA-RECHAZO"; }
+.hub-card[data-theme="dyn-despacho-hp"] .hub-card__subtitle { color: #FFC627; }
+.hub-card[data-theme="dyn-despacho-hp"] .hub-card__desc { color: rgba(234, 242, 251, 0.72); }
+.hub-card[data-theme="dyn-despacho-hp"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 1px solid rgba(154, 202, 235, 0.5);
+  color: #9ACAEB;
+}
+.hub-card[data-theme="dyn-despacho-hp"] .hub-card__arrow { color: #FFC627; }
+/* rombo IMO sobre la banda */
+.hub-card[data-theme="dyn-despacho-hp"] .hub-card__deco {
+  bottom: calc(20% - 8px); right: 1.6rem;
+  width: 30px; height: 30px;
+  background: #FFC627;
+  border: 3px solid #11203a;
+  transform: rotate(45deg);
+}
+.hub-card[data-theme="dyn-despacho-hp"] .hub-card__chrome {
+  bottom: calc(20% + 2px); right: 4.2rem;
+  width: 52px; height: 22px;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.2) 0 6px, transparent 6px 13px),
+    #eef4f9;
+  border: 2px solid #11203a;
+}
+
+/* ============================================================
    STEPS / FOOTER
    ============================================================ */
 .hub-section--add .hub-steps {
