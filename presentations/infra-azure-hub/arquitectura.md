@@ -1,174 +1,196 @@
-# Arquitectura HUB Digital IHP
+# Arquitectura HUB Digital IHP — Infraestructura Azure
 
-Documento de referencia técnica para el equipo. Describe la infraestructura del HUB en
-lenguaje natural, servicio por servicio. La fuente de verdad ejecutable es el archivo
-[MVP.bicep](recursos/MVP.bicep). El diseño de producción se definirá en una fase posterior.
+Documento de referencia tecnica para el equipo. Describe la infraestructura del HUB en
+lenguaje natural, servicio por servicio. La fuente de verdad ejecutable es el Bicep del
+repo principal en `InstitutoHutchisonPorts/infra/` (orquestador `main.bicep` +
+`params/prod.bicepparam`); el runbook de despliegue es `InstitutoHutchisonPorts/DEPLOY-AZURE.md`.
+La referencia conceptual completa vive en
+`InstitutoHutchisonPorts/hub-digital-api-contracts/Infraestructura/`.
 
-## Estrategia de Despliegue
+## Principio rector
 
-El proyecto sigue un camino evolutivo de dos etapas:
+El codigo de aplicacion ya estaba listo para Azure: todo es parametrizable por variables de
+entorno, hay perfiles `prod` endurecidos, hooks de Azure Front Door, Redis TLS y dependencias
+`azure-storage-blob` integradas. La migracion es de **infraestructura y configuracion**, no de
+logica de negocio.
 
-1. **MVP**: arquitectura esencial para validar funcionalidad sobre crédito gratuito de Azure.
-   Sin tráfico real, solo pruebas internas y validación con corporativo, TI y gerencia.
-   Se eliminan los componentes de borde (Front Door) y el aislamiento extremo (Private
-   Endpoints) para reducir costo y complejidad.
-2. **Producción** (pendiente): una vez aprobado el proyecto, se diseñará la arquitectura
-   corporativa con red privada, WAF, alta disponibilidad e integración con Entra ID,
-   alineada a las políticas de Hutchison Ports.
+La filosofia de tier es la del ADR-006: **fase 1 economica pero ya capaz** (con borde y
+aislamiento reales), codigo stateless listo para escalar horizontalmente, y endurecimiento
+**incremental** cuando las metricas o el negocio lo justifiquen. No es un MVP de juguete ni es
+"todo al maximo": es la base economica que ya se puede operar, con palancas para subir.
 
 ---
 
-## Topología de Red (MVP)
+## Ejes parametrizados (decisiones con doble opcion)
 
-La red virtual (VNet) `10.0.0.0/16` tiene dos subredes:
+El Bicep expone las decisiones que no tienen una unica respuesta correcta; el default es la
+base economica de fase 1:
 
-- **subnet-computo** (`10.0.1.0/24`): delegada a App Services. Da salida privada de los
-  microservicios hacia PostgreSQL vía VNet Integration.
-- **subnet-datos** (`10.0.2.0/24`): delegada exclusivamente a PostgreSQL Flexible Server.
+| Eje | Parametro | Default | Alternativa |
+|---|---|---|---|
+| App Service Plan | `planLayout` | `two` (Gateway aislado) | `one` (plan compartido, ~$120 menos) |
+| Aislamiento de red | `networkIsolation` | `economic` (Access Restrictions) | `max` (Private Endpoints) |
+| Media / CDN | `mediaMode` | `publicSas` (SAS + Front Door Standard) | `privateAfdPremium` |
+| HA de PostgreSQL | `dbHighAvailability` | `none` (Burstable) | `zoneRedundant` (GP + standby) |
 
-*Nota: Redis, Storage, ACR y Key Vault operan con endpoints públicos protegidos por
-credenciales y TLS en el MVP. El aislamiento por Private Endpoints es una decisión de
-producción.*
+---
 
-> La VNet Integration funciona desde el tier **Basic** de App Service; **no** requiere
-> PremiumV3. El plan se dimensiona por la RAM que consumen las JVM, no por la red.
+## Topologia de Red
+
+VNet `10.20.0.0/16` con tres subredes:
+
+- **snet-appsvc-integration**: VNet Integration de salida de los 4 Web Apps (`vnetRouteAll`),
+  delegada a `Microsoft.Web/serverFarms`.
+- **snet-private-endpoints**: Private Endpoints de datos/KV/apps internos (solo en modo de
+  maximo aislamiento).
+- **snet-postgres-flex**: VNet injection de PostgreSQL (subnet delegada), con su Private DNS.
+
+> Gotcha que marca el diseno: **la VNet Integration de App Service es solo de salida (egress)**.
+> No oculta el ingress. Por eso el Gateway se cierra con Access Restriction (solo Front Door) y
+> los internos con Access Restrictions (solo la subnet del Gateway), o con Private Endpoints en
+> el modo de maximo aislamiento.
 
 ---
 
 ## Los cuatro microservicios
 
-Los cuatro microservicios corren sobre el mismo App Service Plan (Linux, **B3**). Comparten
-el plan, pero cada uno es una App Service independiente con su propia Managed Identity.
+Corren como Web App for Containers (Linux) sobre App Service Plan **P1v3**. Por default son
+**dos planes** (Gateway aislado en el suyo + Comunidad/Elearning/Reportes compartiendo otro);
+se puede colapsar a uno solo para ahorrar ~$120/mes a cambio de acoplar el login a los picos de
+los internos. Cada app es independiente, con su propia Managed Identity.
 
-**Estado real del código:** hoy existen como código el API Gateway y Comunidad-HP.
-Reportes-LMS existe pero debe readaptarse, y E-Learning se construirá próximamente. Mientras
-tanto, sus App Services apuntan a una imagen placeholder.
+> Por que P1v3 y no algo mas barato: son 3 JVM (Gateway WebFlux, Comunidad y Elearning MVC) mas
+> Python (Reportes). La VNet Integration corre desde Basic, pero la **RAM** de las JVM con
+> `MaxRAMPercentage=75` exige Premium v3.
 
 ### 1. API Gateway (`api-gateway`)
-Único punto de entrada e Identity Broker. **Java 21, Spring WebFlux (reactivo) + R2DBC.**
-Autentica usuarios, valida y rota tokens JWT, aplica rate-limiting distribuido y enruta hacia
-los microservicios internos (proxy reverso con `StripPrefix`). Usa su base de datos `gateway`
-y depende de Redis para sesiones y rate-limit.
+Unico punto de entrada e Identity Broker. **Java 21, Spring WebFlux (reactivo) + R2DBC.**
+Unico servicio publico, y solo a traves de Front Door. Autentica, valida y rota JWT RS256 (2
+claves: acceso de usuario + token interno), aplica rate-limit distribuido y enruta hacia los
+internos (token exchange + proxy). Usa la base `gateway` y depende de Redis para refresh tokens,
+rate-limit y sesiones.
 
 ### 2. Comunidad HP (`comunidad-hp`)
-Red social, comunicación y gamificación. **Java 21, Spring MVC (bloqueante) + JPA/Hibernate.**
-Organizada por módulos (muro, perfil, noticias, formularios, eventos, foros, dinámicas,
-soporte, unity points). Usa la base `comunidad` (schema `comunidad`, migraciones Flyway
-V1..V18), Redis (caché de feeds, rate-limit, folios de soporte) y Azure Blob para media.
+Red social, comunicacion y gamificacion. **Java 21, Spring MVC (bloqueante) + JPA/Hibernate.**
+Modulos: muro, perfil, noticias, formularios, eventos, foros, dinamicas, soporte, unity points.
+Usa la base `comunidad` (schema `comunidad`, Flyway V1..V19+), Redis (cache de feeds, rate-limit,
+folios de soporte por INCR) y Blob (container `comunidad-media`).
 
-### 3. Reportes LMS (`reportes-lms`)
-Generación on-demand de reportes y certificados. **Python / FastAPI + SQLAlchemy.** El código
-existe pero debe readaptarse al HUB. Lectura intensiva sobre su base `reportes`. Operaciones
-largas se procesan en background (patrón "Database as a Queue", tabla `background_tasks`).
+### 3. Elearning HP (`elearning-hp`)
+Plataforma de cursos, lecciones y evaluaciones. **Java 21, Spring MVC + JPA.** Base tecnica ya
+creada (clon de Comunidad); la logica de negocio se completa por sprint. Usa la base `elearning`
+(schema `elearning`) y Blob (container `elearning-media`).
 
-### 4. E-Learning (`e-learning`)
-Plataforma de cursos, lecciones y evaluaciones. **Por construir** (stack por definir). Tiene
-su base `elearning` aprovisionada de forma tentativa.
+### 4. Reportes LMS (`reportes-lms`)
+Generacion on-demand de reportes y certificados. **Python / FastAPI + SQLAlchemy.** Ya migro a
+**PostgreSQL** y se esta adaptando al HUB; valida el token interno del Gateway (aud
+`reportes-service`). Lectura intensiva sobre su base `reportes`; operaciones largas en background
+(patron "Database as a Queue", tabla `background_tasks`).
 
 ---
 
 ## Servicios Compartidos
 
-### Capa de Entrada
-Acceso directo a las URLs de **Static Web Apps** (frontend, aún por construir) y a las
-`.azurewebsites.net` del Gateway. No se utiliza Front Door en el MVP para minimizar costos.
+### Borde — Azure Front Door (Standard)
+Unico punto de entrada de la API y CDN de la plataforma. **Azure CDN clasico esta retirado**
+(Edgio cerro ene-2025; Microsoft classic se retira sep-2027 y no admite recursos nuevos desde
+ago-2025), asi que el unico camino de borde/CDN para un despliegue nuevo es Front Door. Rutas:
+`/api/*` -> Gateway, `/*` -> Frontend. Solo Front Door alcanza al Gateway (service tag
+`AzureFrontDoor.Backend` + match del header `X-Azure-FDID`).
 
-### Base de Datos (PostgreSQL Flexible Server)
-- **Un único servidor** Flexible Server, versión 16, tier *Burstable* **B1ms** con 32 GB.
-- **Cuatro bases lógicas** en ese servidor: `gateway`, `comunidad`, `reportes`, `elearning`.
-  Las bases no tienen costo adicional; se paga por el cómputo y el disco del servidor.
-- Inyectado en la VNet vía Subnet Delegation (subnet-datos) + zona DNS privada.
+### Frontend — Static Web App (Standard)
+Hosting del frontend Navy Gate (React), bajo el mismo eTLD+1 que la API (ADR-010, para que
+sobreviva la cookie de refresh host-only). La URL de la API se inyecta en build time
+(`VITE_API_BASE_URL`).
 
-### Caché (Redis) — componente obligatorio
-Azure Cache for Redis tier **Basic C1**, endpoint público con TLS y password. **Es
-obligatorio**, no opcional: tras la migración V10, los refresh tokens viven en Redis (la
-tabla `refresh_tokens` fue eliminada), el rate-limit distribuido (Bucket4j-Lettuce) y la
-caché de queries y de feeds dependen de él. Redis es compartido por el Gateway y Comunidad,
-con namespaces separados (`rt:`, `rl:`, `cache:`).
+### Base de Datos — PostgreSQL Flexible Server
+- **Un unico servidor** Flexible, version 16, tier Burstable **B1ms** con 32 GB.
+- **Cuatro bases logicas**: `gateway`, `comunidad`, `elearning`, `reportes`. Las bases no
+  cuestan extra; se paga por el computo y el disco del servidor.
+- Inyectado en la VNet (subnet delegada) + Private DNS. TLS `verify-full`.
 
-El tier Basic no persiste datos: un reinicio del nodo implica logout masivo de usuarios.
-Es un trade-off explícitamente aceptado (ADR-007) y suficiente para el MVP.
+### Cache — Redis (Standard C1) — componente obligatorio
+Azure Cache for Redis **Standard C1** (primario + replica, con SLA), TLS 1.2 en puerto 6380,
+`allkeys-lru`, sin persistencia. Es **obligatorio**: tras la migracion V10 los refresh tokens
+viven en Redis (la tabla `refresh_tokens` se dropeo), igual que el rate-limit distribuido
+(Bucket4j-Lettuce) y la cache de queries y feeds. Compartido por Gateway y los internos con
+namespaces separados (`rt:`, `rl:`, `cache:`). Sin persistencia: un reinicio implica logout
+masivo, trade-off aceptado en ADR-007.
 
-### Almacenamiento (Blob Storage)
-Storage Account **Standard LRS**, con **acceso público deshabilitado**. El contenido (videos
-e imágenes de Comunidad) se sirve mediante **SAS URLs firmadas**; en la base de datos se
-guarda el blob path, no la URL. Contenedores `imagenes` y `videos`, ambos privados.
+### Almacenamiento — Blob Storage (Standard LRS)
+Storage Account Standard LRS, **acceso publico deshabilitado**. La media (imagenes y video del
+muro, noticias, revista Portuario, contenido educativo) se sirve por **SAS URLs firmadas**
+(TTL 1 dia) con validacion magic-bytes (Apache Tika); en la BD se guarda el blob path, no la URL.
+Containers `comunidad-media` y `elearning-media`.
 
-### Container Registry (ACR) — Basic
-Almacena las imágenes Docker de los microservicios. Acceso público habilitado y usuario
-admin activado para facilitar el pull desde App Service y el push desde CI/CD en el MVP.
+### Container Registry — ACR (Basic)
+Imagenes Docker de los microservicios. **Usuario admin deshabilitado**: cada Web App hace pull
+con su Managed Identity (rol AcrPull). Push desde CI/CD (GitHub Actions OIDC).
 
-### Key Vault
-Guarda los secretos (password de Postgres, clave de Redis, connection string de Storage,
-pepper de tokens, secreto interno). Cada App Service los lee con su Managed Identity vía RBAC
-(`Key Vault Secrets User`) y referencias `@Microsoft.KeyVault(...)` en sus app settings.
-Ningún secreto se hardcodea en el Bicep.
+### Key Vault (Standard)
+Secretos (password de Postgres, clave de Redis, connection string de Storage, JWK de acceso y
+de broker, pepper, secreto interno, hash del admin semilla, secreto del health probe de Front
+Door). Cada Web App los lee con su Managed Identity (rol Key Vault Secrets User) via referencias
+`@Microsoft.KeyVault(...)`. Ningun secreto en el codigo ni en el Bicep.
 
-### Observabilidad (Log Analytics + App Insights)
-Recolección centralizada de telemetría. El código ya propaga W3C Trace Context
-(`traceparent` + MDC) entre Gateway y Comunidad, lo que permite el Application Map y el
-rastreo de errores distribuidos.
-
----
-
-## Resumen de Capacidades (MVP)
-
-| Componente              | MVP                                              |
-|-------------------------|-------------------------------------------------|
-| **Front Door / WAF**    | No (acceso directo)                             |
-| **App Service Plan**    | B3 (Linux), 4 App Services                       |
-| **PostgreSQL**          | B1ms 32 GB, HA Off, 4 bases lógicas              |
-| **Redis**               | Basic C1, endpoint público con TLS (obligatorio) |
-| **Storage**             | Standard LRS, privado, SAS URLs                  |
-| **Container Registry**  | Basic, público (admin habilitado)               |
-| **Key Vault**           | Público, RBAC + Managed Identity                 |
-| **Observabilidad**      | Log Analytics + App Insights                     |
-| **Seguridad de Red**    | VNet Integration (salida a Postgres)            |
+### Observabilidad — Log Analytics + Application Insights
+Telemetria centralizada (Application Map, trazas distribuidas). El codigo ya propaga W3C Trace
+Context (`traceparent` + traceId) entre servicios; sampling de tracing 0.1 en prod y daily cap
+de 1-2 GB para contener la ingesta (el costo mas variable).
 
 ---
 
-## Evolución a Producción
+## Resumen de la fase 1
 
-Diseño definido en [Produccion.bicep](recursos/Produccion.bicep) y detallado en
-[Arquitectura para Produccion.md](recursos/Arquitectura%20para%20Produccion.md). Blindaje de
-seguridad al 100% y cómputo dimensionado a la escala real (~5,000 usuarios, 11 unidades).
-Alcance de esta fase: red privada + WAF + HA + Entra ID.
+| Componente | Fase 1 |
+|---|---|
+| **Borde / CDN** | Azure Front Door Standard (Gateway via FD) |
+| **App Service Plan** | P1v3 (2 planes default, o 1 compartido), 4 Web Apps |
+| **PostgreSQL** | B1ms 32 GB, HA off, 4 bases logicas |
+| **Redis** | Standard C1 (replica), TLS 6380 (obligatorio) |
+| **Storage** | Standard LRS, privado, SAS URLs, 2 containers |
+| **Container Registry** | Basic, admin off, pull por Managed Identity |
+| **Key Vault** | RBAC + Managed Identity |
+| **Frontend** | Static Web App Standard |
+| **Observabilidad** | Log Analytics + Application Insights |
+| **Red** | VNet (3 subnets), aislamiento por Access Restrictions |
 
-### Lo que se actualiza (sube de tier)
-| Componente | MVP | Producción |
-|---|---|---|
-| App Service Plan | B3 Basic, 1 instancia | P1V3 PremiumV3, zona-redundante, autoscale 2–6 |
-| PostgreSQL | B1ms Burstable | General Purpose D2ds_v5, HA parametrizable, backup geo |
-| Redis | Basic C1 (público) | Standard C1 (réplica) + Private Endpoint |
-| Storage | LRS, privado | ZRS + Private Endpoint |
-| Container Registry | Basic, público | Premium privado, pull por Managed Identity |
-| Static Web App | Free | Standard |
-| Key Vault | Público (RBAC) | Private Endpoint, acceso público off |
-
-### Lo que se añade (el blindaje)
-- **Azure Front Door Premium** = único punto de entrada y CDN. WAF (OWASP DRS + Bot Manager),
-  Private Link a los App Services y al Blob. Rutas: `/api/*`→Gateway, `/media/*`→Blob (caché),
-  `/*`→frontend. Es el CDN de la plataforma (ya no existe un CDN standalone en Azure).
-- **Private Endpoints + Private DNS** para Redis, Key Vault, ACR y Storage; Postgres inyectado.
-- **Inbound cerrado:** el Gateway solo lo alcanza Front Door (Private Link); los internos solo
-  desde la VNet de cómputo.
-- **Entra ID (SSO)** parametrizable por flag (el registro de la app lo hace el tenant).
-
-### Decisiones de corporativo como flags (no bloquean el despliegue)
-- `postgresHA` — HA zona-redundante de la BD (es lo único con peso real de costo; duplica el
-  cómputo de Postgres).
-- `entraIdHabilitado` + `entraClientId` — activa el SSO.
-
-### HA por servicio
-El HA es prácticamente gratis en todos lados menos en PostgreSQL (su HA duplica el cómputo de
-la BD). App Services, Redis (Standard), Storage (ZRS), Front Door y ACR (Premium) traen HA
-incluido al estar en sus tiers de producción.
-
-### Roadmap posterior (fuera de esta fase)
-Azure Service Bus (reemplaza Database-as-a-Queue para reportes), Azure Functions (transcoding
-de video) y Microsoft Defender for Cloud.
-
-**Costo estimado de producción:** ~$900–1,400 USD/mes bien dimensionado (vs ~$120 del MVP).
+Costo aproximado: **~$450/mes** (2 planes, Gateway aislado, recomendado) o **~$330/mes** con un
+solo plan compartido. Detalle de costos fijos y variables/invisibles (egreso, hit/miss del blob,
+ingesta de logs) en `Infraestructura/03-Costos.md`.
 
 ---
-*Última actualización: 5 de junio de 2026 (alineado con MVP.bicep, Produccion.bicep y el código real).*
+
+## Endurecimiento incremental hacia produccion
+
+Cada palanca es incremental y el Bicep ya queda parametrizado para encenderla sin reescritura.
+Se adopta por etapas cuando las metricas o el negocio lo justifiquen (ver consideraciones R1-R10
+del plan):
+
+- **Borde:** Front Door Standard -> Premium con WAF (OWASP + Bot Manager) + Private Link;
+  ruta `/media/*` -> Blob cacheada.
+- **Red:** `networkIsolation = max` — Private Endpoints en Redis, Key Vault, ACR, Storage e
+  internos; backend sin IP publica.
+- **Computo:** autoscale 2-6 + zona-redundante; deployment slots para swaps sin downtime.
+- **Datos:** PostgreSQL Burstable -> General Purpose D2ds_v5; Redis Standard -> Premium con
+  persistencia (AOF/RDB) + Private Link; Storage LRS -> GZRS.
+- **Observabilidad y seguridad operativa:** Diagnostic Settings de todo + alertas; Microsoft
+  Defender for Cloud; rotacion programada de secretos.
+
+### Decisiones de corporativo (flags, no bloquean el despliegue)
+- `dbHighAvailability` — HA zona-redundante de la BD. Es lo unico con peso real de costo
+  (duplica el computo de Postgres). El HA es practicamente gratis en todos los demas servicios
+  (App Services zona-redundante, Redis Standard, Storage ZRS, Front Door, ACR Premium lo traen
+  incluido en su tier de produccion); solo en PostgreSQL es una decision de SLA.
+- **Entra ID (SSO)** — a futuro: login corporativo Hutchison. Lo habilita el tenant (registro de
+  la app en el directorio). Queda como idea para una fase posterior, no formalizado aun.
+
+### Roadmap posterior (fuera de alcance)
+Azure Service Bus (reemplaza "Database as a Queue" para reportes pesados), Azure Functions
+(transcoding de video) y Key Vault Premium (HSM) para las claves JWT.
+
+**Costo estimado endurecido:** ~$900-1,400 USD/mes bien dimensionado (el HA de Postgres es el
+que mas pesa).
+
+---
+*Alineado con `InstitutoHutchisonPorts/infra/` y los docs de `hub-digital-api-contracts/Infraestructura/`.*

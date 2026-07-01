@@ -408,6 +408,108 @@ code {
 }
 
 /* ============================================================
+   TEMA: gateway — PRODUCTO (identidad real del frontend)
+   gradiente ocean sea->sky, Montserrat editorial, glow sky
+   ============================================================ */
+.hub-card[data-theme="gateway"] {
+  --card-accent: #009BDE;
+  border: 1px solid rgba(102,195,235,0.28);
+  box-shadow: 9px 9px 0 rgba(0,155,222,0.28);
+  color: #EAF4FB;
+  background-color: #002E6D;
+  background-image:
+    linear-gradient(135deg, #002E6D 0%, #1A4B8D 52%, #009BDE 140%),
+    linear-gradient(120.3deg, transparent 78%, rgba(255,255,255,0.06) 78%);
+  background-size: 100% 100%;
+  overflow: hidden;
+}
+.hub-card[data-theme="gateway"]:hover { box-shadow: 16px 16px 0 #FFC627; }
+.hub-card[data-theme="gateway"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+.hub-card[data-theme="gateway"] .hub-card__date,
+.hub-card[data-theme="gateway"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #66C3EB; }
+.hub-card[data-theme="gateway"] .hub-card__kind::before { content: "PRODUCTO · HUTCHISON PORTS"; }
+.hub-card[data-theme="gateway"] .hub-card__subtitle { color: #99D7F2; }
+.hub-card[data-theme="gateway"] .hub-card__desc { color: rgba(234,244,251,0.74); }
+.hub-card[data-theme="gateway"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 1px solid rgba(153,215,242,0.4);
+  color: #99D7F2;
+}
+.hub-card[data-theme="gateway"] .hub-card__arrow { color: #FFC627; }
+.hub-card[data-theme="gateway"] .hub-card__chrome {
+  bottom: 1rem; left: 1rem;
+  width: 22px; height: 22px;
+  border-bottom: 2px solid #66C3EB;
+  border-left: 2px solid #66C3EB;
+  opacity: 0.75;
+}
+.hub-card[data-theme="gateway"] .hub-card__deco {
+  bottom: 1.3rem; right: 1.2rem;
+  width: 26px; height: 8px;
+  background: #FFC627;
+  transform: skewX(-30.3deg);
+  box-shadow: 0 0 12px rgba(255,198,39,0.55);
+}
+
+/* ============================================================
+   TEMA: infra-gateway — HUTCHISON PORTS (manual v4.1)
+   blanco editorial, sea blue, angulo 30.3, banda sky/sunray
+   ============================================================ */
+.hub-card[data-theme="infra-gateway"] {
+  --card-accent: #002E6D;
+  border: 1px solid #d8e3ef;
+  box-shadow: 9px 9px 0 rgba(0,46,109,0.16);
+  color: #002E6D;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(120.3deg, rgba(0,155,222,0.10) 0 14%, transparent 14%),
+    linear-gradient(120.3deg, transparent 82%, rgba(0,46,109,0.06) 82%);
+  background-size: 100% 100%;
+  overflow: hidden;
+}
+.hub-card[data-theme="infra-gateway"]:hover { box-shadow: 16px 16px 0 #009BDE; }
+.hub-card[data-theme="infra-gateway"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: #002E6D;
+}
+.hub-card[data-theme="infra-gateway"] .hub-card__date,
+.hub-card[data-theme="infra-gateway"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #009BDE; }
+.hub-card[data-theme="infra-gateway"] .hub-card__kind::before { content: "IAC / BICEP · GATEWAY"; }
+.hub-card[data-theme="infra-gateway"] .hub-card__subtitle { color: #009BDE; }
+.hub-card[data-theme="infra-gateway"] .hub-card__desc { color: rgba(0,46,109,0.66); }
+.hub-card[data-theme="infra-gateway"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 1px solid rgba(0,46,109,0.22);
+  color: #002E6D;
+}
+.hub-card[data-theme="infra-gateway"] .hub-card__arrow { color: #009BDE; }
+/* bracket inferior-izquierdo en sea blue */
+.hub-card[data-theme="infra-gateway"] .hub-card__chrome {
+  bottom: 1rem; left: 1rem;
+  width: 22px; height: 22px;
+  border-bottom: 2px solid #009BDE;
+  border-left: 2px solid #009BDE;
+  opacity: 0.7;
+}
+/* barra sunray inclinada al angulo de marca */
+.hub-card[data-theme="infra-gateway"] .hub-card__deco {
+  bottom: 1.3rem; right: 1.2rem;
+  width: 26px; height: 8px;
+  background: #FFC627;
+  transform: skewX(-30.3deg);
+  box-shadow: 0 0 12px rgba(255,198,39,0.5);
+}
+
+/* ============================================================
    TEMA: tpl-cubo-3d — OBSIDIANA
    sala oscura, cian electrico, mono tecnico
    ============================================================ */

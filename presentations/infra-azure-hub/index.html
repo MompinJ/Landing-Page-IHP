@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HUB · Infraestructura Azure — MVP</title>
-    <meta name="description" content="Infraestructura Azure que soporta al HUB Digital IHP. Arquitectura MVP.">
+    <title>HUB · Infraestructura Azure — Fase 1</title>
+    <meta name="description" content="Infraestructura Azure que soporta al HUB Digital IHP. Fase 1 economica, lista para endurecer.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,134 +34,151 @@ const PROPS = [
   { k: 'Aislado',    d: 'Cada servicio corre en su propio espacio sellado. Si uno falla, no tumba a los demas — como un contenedor independiente en el patio.' },
   { k: 'Gestionado', d: 'Es PaaS: Azure opera el sistema operativo, los parches y la disponibilidad. Tu solo subes tu codigo y configuras.' },
   { k: 'Modular',    d: 'Se combinan como piezas de lego: computo + datos + cache + almacenamiento arman la plataforma completa.' },
-  { k: 'Escalable',  d: 'Pides mas capacidad y el servicio crece. En el MVP arranca al minimo y sube por SKU cuando haga falta.' },
+  { k: 'Escalable',  d: 'Pides mas capacidad y el servicio crece. En la fase 1 arranca al minimo y sube por SKU cuando haga falta.' },
   { k: 'Conectado',  d: 'Se enlazan por red privada (VNet) e identidad gestionada, sin exponer contrasenas ni secretos en el codigo.' },
   { k: 'Medible',    d: 'Cada servicio reporta su telemetria y su costo individual: sabes exactamente que pagas y como rinde.' },
 ];
 
 const NODES = [
-  { id: 'user',  name: 'Usuario',         sub: 'HTTPS',           x: 47, y: 6,  kind: 'edge', tip: 'El usuario entra por el navegador a la interfaz del HUB (Static Web Apps), por HTTPS.' },
-  { id: 'swa',   name: 'Static Web Apps', sub: 'frontend',        x: 19, y: 26, tip: 'Frontend del HUB con SSL automatico. Recibe al usuario, llama a las APIs y carga la media del Blob.' },
-  { id: 'obs',   name: 'Observabilidad',  sub: 'Logs + AI',       x: 80, y: 11, tip: 'Log Analytics + Application Insights — telemetria centralizada de los microservicios.' },
-  { id: 'app',   name: 'App Services',    sub: '4 micro · B3',    x: 47, y: 46, kind: 'compute', tip: 'App Service Plan B3: 4 microservicios (Gateway, Comunidad, Reportes, E-Learning) con Managed Identity. El cerebro que orquesta cada peticion.' },
-  { id: 'pg',    name: 'PostgreSQL',      sub: 'B1ms · 4 bases',  x: 76, y: 58, kind: 'data', tip: 'Un servidor con 4 bases logicas, inyectado en la VNet (subnet delegada) — el unico servicio 100% privado en el MVP.' },
-  { id: 'redis', name: 'Redis',           sub: 'Basic C1',        x: 90, y: 34, kind: 'data', tip: 'Redis Basic C1 — obligatorio: refresh tokens, rate-limit distribuido y cache. Endpoint publico protegido por credencial + TLS.' },
-  { id: 'kv',    name: 'Key Vault',       sub: 'RBAC',            x: 52, y: 70, kind: 'data', tip: 'Key Vault — secretos por RBAC + Managed Identity. Endpoint publico seguro en el MVP.' },
-  { id: 'acr',   name: 'ACR',             sub: 'Basic',           x: 23, y: 70, kind: 'data', tip: 'Container Registry Basic — imagenes Docker; el App Service las descarga al desplegar.' },
-  { id: 'blob',  name: 'Blob Storage',    sub: 'LRS · privado',   x: 13, y: 50, kind: 'data', tip: 'Blob Storage LRS privado — videos e imagenes servidos con SAS URLs firmadas; el backend los sube.' },
+  { id: 'user',  name: 'Usuario',            sub: 'HTTPS',              x: 44, y: 5,  kind: 'edge', tip: 'El usuario entra por el navegador: carga el frontend (Static Web App) y sus llamadas a la API viajan por Front Door, todo por HTTPS.' },
+  { id: 'swa',   name: 'Static Web App',     sub: 'frontend',           x: 15, y: 8,  tip: 'Frontend Navy Gate (React) con SSL y dominio propio, bajo el mismo eTLD+1 que la API (ADR-010). Carga la media del Blob por SAS.' },
+  { id: 'fd',    name: 'Front Door',         sub: 'Standard · borde',   x: 66, y: 8,  kind: 'edge', tip: 'Unico punto de entrada de la API y CDN de la plataforma. Solo Front Door alcanza al Gateway (service tag + header X-Azure-FDID). Reemplaza al CDN clasico, ya retirado.' },
+  { id: 'obs',   name: 'Observabilidad',     sub: 'Logs + AI',          x: 88, y: 8,  tip: 'Log Analytics + Application Insights — telemetria centralizada, Application Map y trazas distribuidas (W3C traceparent).' },
+  { id: 'gw',    name: 'API Gateway',        sub: 'publico via FD',     x: 40, y: 40, kind: 'compute', tip: 'Identity Broker y unico servicio publico, accesible solo por Front Door. Valida el JWT, firma un token interno y enruta a los servicios internos por la VNet.' },
+  { id: 'apps',  name: 'Servicios internos', sub: 'Comunidad·Elearning·Reportes', x: 67, y: 42, kind: 'compute', tip: 'Comunidad-HP, Elearning-HP y Reportes-lms. No tienen cara publica: solo los alcanza el Gateway por la VNet.' },
+  { id: 'redis', name: 'Redis',              sub: 'Standard C1',        x: 87, y: 54, kind: 'data', tip: 'Redis Standard C1 (primario + replica) — obligatorio: refresh tokens, rate-limit distribuido y cache. Sin el, el login del Gateway no arranca.' },
+  { id: 'pg',    name: 'PostgreSQL',         sub: 'B1ms · 4 bases',     x: 70, y: 70, kind: 'data', tip: 'Un servidor Flexible con 4 bases logicas (gateway, comunidad, elearning, reportes), inyectado en la VNet con TLS verify-full.' },
+  { id: 'kv',    name: 'Key Vault',          sub: 'RBAC',               x: 44, y: 80, kind: 'data', tip: 'Secretos por RBAC + Managed Identity, leidos como referencias @Microsoft.KeyVault(...). Ningun secreto en el codigo.' },
+  { id: 'blob',  name: 'Blob Storage',       sub: 'LRS · 2 containers', x: 23, y: 70, kind: 'data', tip: 'comunidad-media y elearning-media. Acceso publico off; la media se sirve con SAS firmadas (TTL 1 dia). En la BD se guarda el blob path.' },
+  { id: 'acr',   name: 'ACR',                sub: 'Basic',              x: 16, y: 84, kind: 'data', tip: 'Container Registry Basic — imagenes Docker; los Web Apps las descargan con su Managed Identity, sin usuario admin.' },
 ];
 
 const EDGES = [
   { a: 'user', b: 'swa'   },
-  { a: 'swa',  b: 'app'   },
+  { a: 'user', b: 'fd'    },
   { a: 'swa',  b: 'blob'  },
-  { a: 'app',  b: 'blob'  },
-  { a: 'app',  b: 'pg'    },
-  { a: 'app',  b: 'redis' },
-  { a: 'app',  b: 'acr'   },
-  { a: 'app',  b: 'kv'    },
-  { a: 'app',  b: 'obs'   },
+  { a: 'fd',   b: 'gw'    },
+  { a: 'gw',   b: 'apps'  },
+  { a: 'gw',   b: 'pg'    },
+  { a: 'gw',   b: 'redis' },
+  { a: 'gw',   b: 'kv'    },
+  { a: 'gw',   b: 'obs'   },
+  { a: 'apps', b: 'pg'    },
+  { a: 'apps', b: 'redis' },
+  { a: 'apps', b: 'blob'  },
+  { a: 'apps', b: 'kv'    },
 ];
 
 const SERVICES = {
   computo: [
-    { name: 'App Service Plan', sku: 'B3 · Basic · Linux', code: 'asp-hubihp-mvp', accent: true,
-      desc: 'El servidor que aloja los 4 microservicios como apps independientes que comparten el plan.',
-      config: ['1 instancia (sin autoscale)', 'VNet Integration para salida privada', 'HTTPS only · Always On', 'Managed Identity por cada app'],
-      cost: { val: '~$53', note: 'B3 (4 vCPU / 7 GB) para alojar 2 JVMs Java, Python y el placeholder. La VNet Integration funciona desde Basic; no requiere PremiumV3.' },
-      prod: { sube: 'B3 → P1V3 zona-redundante con autoscale 2–6 instancias', costo: '~$290/mes', cubre: 'Alta disponibilidad, escala automatica al subir la demanda y backend privado detras de Front Door.' },
-      micros: ['api-gateway', 'comunidad-hp', 'reportes-lms', 'e-learning'] },
+    { name: 'App Service Plan', sku: 'P1v3 · PremiumV3 · Linux', code: 'asp-hub-prod', accent: true,
+      desc: 'El plan donde corren los Web Apps. Decision parametrizada: Gateway aislado en su plan, o los 4 compartiendo uno.',
+      config: ['Default: 2 planes (Gateway aislado + internos)', 'Alternativa: 1 plan compartido (~$120 menos)', 'VNet Integration para salida privada', 'HTTPS only · Managed Identity por app', 'Pull de imagenes del ACR por identidad'],
+      cost: { val: '~$240', note: '2x P1v3 (Gateway aislado, recomendado); 1 plan compartido baja a ~$120. P1v3 (2 vCPU / 8 GB) por la RAM de 3 JVM + Python: la VNet corre desde Basic, pero la RAM exige Premium.' },
+      prod: { sube: 'Autoscale 2–6 instancias + zona-redundante; deployment slots', costo: 'segun instancias', cubre: 'Alta disponibilidad por zona, escala automatica con la demanda y swaps sin downtime.' },
+      micros: ['api-gateway', 'comunidad-hp', 'elearning-hp', 'reportes-lms'] },
   ],
   datos: [
-    { name: 'PostgreSQL', sku: 'Flexible · B1ms · v16', code: 'pg-hubihp-mvp', accent: true,
-      desc: 'Base de datos transaccional. El corazon de los datos del HUB, inyectada en la red privada.',
-      config: ['32 GB de almacenamiento', 'Tier Burstable (1 vCPU / 2GB)', '4 bases logicas (1 por servicio)', 'Subnet Delegation + Private DNS'],
-      cost: { val: '~$16', note: '~$12.41 de computo + ~$3.68 de disco. Las 4 bases no cuestan extra: se paga por el servidor, no por base.' },
-      prod: { sube: 'B1ms → D2ds_v5 General Purpose, con backup geo-redundante', costo: '~$190/mes · ~$365 con HA', cubre: 'Potencia para 5,000 usuarios; replica en espera si corporativo activa el HA.' } },
-    { name: 'Redis Cache', sku: 'Basic · C1', code: 'redis-hubihp-mvp',
-      desc: 'Base de datos en memoria. Obligatoria: aloja refresh tokens, rate-limit distribuido y cache de queries y feeds.',
-      config: ['1 nodo (sin replica ni persistencia)', 'TLS 1.2 forzado', 'Endpoint publico protegido por credencial'],
-      cost: { val: '~$40', note: 'Tras la migracion V10, los refresh tokens viven en Redis. Sin el, el login/refresh del Gateway no funciona.' },
-      prod: { sube: 'Basic C1 → Standard C1 (con replica) y acceso privado', costo: '~$101/mes', cubre: 'Replica para alta disponibilidad y acceso 100% privado (sin internet publico).' } },
+    { name: 'PostgreSQL', sku: 'Flexible · B1ms · v16', code: 'pg-hub-prod', accent: true,
+      desc: 'Base de datos transaccional. Un servidor con 4 bases logicas, inyectado en la red privada.',
+      config: ['4 bases: gateway, comunidad, elearning, reportes', '32 GB · Burstable (1 vCPU / 2 GB)', 'TLS verify-full', 'VNet injection (subnet delegada) + Private DNS'],
+      cost: { val: '~$30', note: 'Las 4 bases no cuestan extra: se paga por el servidor, no por base. Burstable basta para la fase 1.' },
+      prod: { sube: 'B1ms → General Purpose D2ds_v5 + HA zona-redundante', costo: '~$250–300 · ~2x con HA', cubre: 'Potencia para 5,000 usuarios y standby con failover automatico. El HA es flag (dbHighAvailability): lo decide corporativo por SLA.' } },
+    { name: 'Redis Cache', sku: 'Standard · C1', code: 'redis-hub-prod',
+      desc: 'Base de datos en memoria. Obligatoria: refresh tokens, rate-limit distribuido y cache de queries y feeds.',
+      config: ['Primario + replica (SLA)', 'TLS 1.2 · puerto 6380', 'allkeys-lru, sin persistencia', 'Compartido Gateway + internos (namespaces rt: / rl: / cache:)'],
+      cost: { val: '~$65', note: 'Standard C1 da replica y SLA. Tras la migracion V10 los refresh tokens viven aqui; sin Redis, el login/refresh del Gateway no arranca.' },
+      prod: { sube: 'Standard → Premium con persistencia + Private Link', costo: '~$400/mes', cubre: 'Elimina el logout masivo en reinicio (AOF/RDB) y acceso 100% privado.' } },
   ],
   almacenamiento: [
-    { name: 'Blob Storage', sku: 'Standard LRS · Hot', code: 'st·hubihp·mvp', accent: true,
-      desc: 'Almacenamiento masivo de los videos de capacitacion e imagenes de perfil del HUB.',
-      config: ['Contenedores /videos e /imagenes', 'Acceso publico deshabilitado · SAS URLs firmadas', 'Redundancia local (LRS)'],
-      cost: { val: '~$1.84', unit: '/100GB', note: 'Costo variable segun el volumen. La media se sirve con SAS firmadas; en la BD se guarda el blob path.' },
-      prod: { sube: 'LRS → ZRS y acceso privado; media servida por Front Door (CDN)', costo: '~$2.50/100GB + egress', cubre: 'Redundancia de zona y entrega de videos e imagenes acelerada y segura.' } },
-    { name: 'Container Registry', sku: 'ACR · Basic', code: 'acr·hubihp·mvp',
+    { name: 'Blob Storage', sku: 'Standard LRS · Hot', code: 'st·hub·prod', accent: true,
+      desc: 'Media del muro, noticias, revista Portuario y contenido educativo.',
+      config: ['Containers comunidad-media / elearning-media', 'Acceso publico off · SAS firmadas (TTL 1 dia)', 'Validacion magic-bytes (Apache Tika)', 'Redundancia local (LRS)'],
+      cost: { val: '~$10', unit: '+ uso', note: 'Costo variable segun volumen y egreso. En la BD se guarda el blob path, no la URL.' },
+      prod: { sube: 'LRS → GZRS + Private Endpoint; media por Front Door Premium', costo: '~$2.50/100GB + egress', cubre: 'Redundancia geo-zonal y entrega de media cacheada y privada.' } },
+    { name: 'Container Registry', sku: 'ACR · Basic', code: 'acr·hub·prod',
       desc: 'Bodega privada de las imagenes Docker de los microservicios. Es el origen del despliegue.',
-      config: ['Admin user habilitado (facilidad MVP)', 'Push desde CI/CD (GitHub Actions)', 'Acceso publico'],
-      cost: { val: '~$5', note: 'Almacena las imagenes que el App Service descarga al desplegar.' },
-      prod: { sube: 'Basic → Premium privado, pull por identidad (sin usuario admin)', costo: '~$50/mes', cubre: 'Imagenes 100% privadas; requiere runners en la VNet para el CI/CD.' } },
+      config: ['Admin user deshabilitado', 'Pull por Managed Identity (AcrPull)', 'Push desde CI/CD (GitHub Actions OIDC)'],
+      cost: { val: '~$5', note: 'Cada Web App descarga su imagen con su propia identidad, sin usuario admin.' },
+      prod: { sube: 'Basic → Premium privado (Private Link)', costo: '~$50/mes', cubre: 'Imagenes 100% privadas; requiere runners en la VNet para el CI/CD.' } },
   ],
   frontend: [
-    { name: 'Static Web Apps', sku: 'SKU Free', code: 'swa-hubihp-mvp', accent: true,
-      desc: 'Hosting del frontend React (por construir) con SSL automatico. Sera la URL principal para los usuarios.',
-      config: ['Deploy directo desde GitHub', 'SSL / dominio gestionado', 'CDN de contenido estatico'],
-      cost: { val: '$0', note: 'El tier Free basta para el MVP. Sin Front Door: esta es la puerta de entrada del HUB.' },
-      prod: { sube: 'Free → Standard, detras de Front Door', costo: '~$9/mes', cubre: 'SLA, dominio corporativo e integracion con el borde y el WAF.' } },
-    { name: 'Observabilidad', sku: 'Log Analytics + App Insights', code: 'law / ai · mvp',
+    { name: 'Front Door', sku: 'Standard · borde + CDN', code: 'afd-hub-prod', accent: true,
+      desc: 'Unico punto de entrada de la API y CDN de la plataforma. Reemplaza al CDN clasico de Azure, ya retirado.',
+      config: ['Rutas: /api/* → Gateway · /* → Frontend', 'TLS + dominio gestionado', 'Solo FD alcanza al Gateway (X-Azure-FDID)', 'Caché en el edge'],
+      cost: { val: '~$35', unit: '+ uso', note: 'Base Standard + egreso por GB. Azure ya no vende CDN aparte; Front Door cubre borde y CDN en un solo producto.' },
+      prod: { sube: 'Standard → Premium con WAF + Private Link', costo: '~$330/mes', cubre: 'WAF (OWASP + Bot Manager), origenes privados y ruta /media/* → Blob cacheada.' } },
+    { name: 'Static Web App', sku: 'Standard', code: 'swa-hub-prod',
+      desc: 'Hosting del frontend Navy Gate (React). Sera la URL principal para los usuarios.',
+      config: ['Deploy directo desde GitHub', 'SSL / dominio corporativo', 'VITE_API_BASE_URL en build time'],
+      cost: { val: '~$9', note: 'Standard por el dominio propio y el SLA: lo exige ADR-010 para que sobreviva la cookie de refresh (mismo eTLD+1 que la API).' },
+      prod: { sube: 'Detras de Front Door (mismo eTLD+1)', costo: 'incluido', cubre: 'Dominio corporativo e integracion con el borde.' } },
+    { name: 'Observabilidad', sku: 'Log Analytics + App Insights', code: 'law / ai · prod',
       desc: 'Telemetria centralizada: Application Map, trazas distribuidas y rastreo de errores entre APIs.',
-      config: ['Retencion de 30 dias', 'App Insights por microservicio', 'Connection string vía App Settings'],
-      cost: { val: '~$1.00', note: 'Incluido en "otros". Fundamental para depurar microservicios distribuidos.' },
-      prod: { sube: 'Diagnostic Settings de todos los recursos + retencion mayor', costo: 'Variable por ingesta', cubre: 'Visibilidad completa y alertas proactivas de latencia, errores y base de datos.' } },
+      config: ['Retencion de 30 dias', 'Sampling de tracing 0.1 en prod', 'Daily cap 1–2 GB (control de costo)', 'W3C traceparent + traceId'],
+      cost: { val: '~$20', unit: '+ uso', note: 'Ingesta por GB: es el costo mas variable. El daily cap lo contiene.' },
+      prod: { sube: 'Diagnostic Settings de todos los recursos + alertas + retencion mayor', costo: 'variable por ingesta', cubre: 'Visibilidad completa y alertas proactivas de latencia, errores y base de datos.' } },
   ],
 };
 
 const SECURITY = [
   { title: 'IDENTIDAD', items: [
-    { n: 'Managed Identity', s: 'mvp', d: 'Cada microservicio se autentica ante Azure sin contrasenas ni claves en el codigo.' },
-    { n: 'RBAC en Key Vault', s: 'mvp', d: 'Permisos por rol: cada identidad accede unicamente a lo que necesita.' },
-    { n: 'Entra ID (Azure AD)', s: 'pot', d: 'SSO corporativo y acceso condicional para usuarios y administradores.' },
+    { n: 'JWT RS256 · Identity Broker', s: 'mvp', d: 'El Gateway es el unico que autentica: firma 2 claves (acceso de usuario + token interno) y los servicios validan, sin auth propia.' },
+    { n: 'Managed Identity', s: 'mvp', d: 'Cada Web App se autentica ante Azure (ACR, Key Vault) sin contrasenas ni claves en el codigo.' },
+    { n: 'RBAC en Key Vault', s: 'mvp', d: 'Permisos por rol: cada identidad accede unicamente a los secretos que necesita.' },
+    { n: 'Entra ID (SSO)', s: 'pot', d: 'A futuro: login corporativo Hutchison y acceso condicional. Lo habilita el tenant; no bloquea la fase 1.' },
   ]},
   { title: 'RED', items: [
-    { n: 'VNet + aislamiento', s: 'mvp', d: 'Computo y datos en subredes separadas dentro de una red privada.' },
-    { n: 'Subnet Delegation', s: 'mvp', d: 'PostgreSQL inyectado en la VNet, sin exposicion a internet.' },
-    { n: 'Private Endpoints', s: 'pot', d: 'Redis, Key Vault, ACR y Blob 100% privados, fuera del internet publico.' },
-    { n: 'NSG / firewall', s: 'pot', d: 'Reglas explicitas de trafico entrante y saliente por subred.' },
+    { n: 'VNet + integration de salida', s: 'mvp', d: 'Los 4 Web Apps salen a datos por la red privada (vnetRouteAll).' },
+    { n: 'Gateway solo via Front Door', s: 'mvp', d: 'Access Restriction por service tag AzureFrontDoor.Backend + header X-Azure-FDID: nadie pega al Gateway por fuera.' },
+    { n: 'PostgreSQL inyectado en la VNet', s: 'mvp', d: 'Subnet delegada + Private DNS, sin exposicion a internet.' },
+    { n: 'Private Endpoints', s: 'pot', d: 'Redis, Key Vault, ACR, Blob e internos 100% privados (modo de maximo aislamiento).' },
   ]},
   { title: 'BORDE', items: [
-    { n: 'HTTPS only · TLS 1.2', s: 'mvp', d: 'Todo el trafico cifrado en transito; sin puertos inseguros.' },
-    { n: 'Front Door + WAF', s: 'pot', d: 'Firewall de aplicacion contra SQLi/XSS y proteccion DDoS gestionada.' },
+    { n: 'Front Door + HTTPS / TLS 1.2', s: 'mvp', d: 'Unico punto de entrada cifrado; reemplaza al CDN clasico retirado.' },
+    { n: 'Rate-limit distribuido', s: 'mvp', d: 'Bucket4j-Lettuce sobre Redis: frena fuerza bruta de login y abuso por IP/identidad.' },
+    { n: 'WAF (OWASP + Bot Manager)', s: 'pot', d: 'Front Door Premium: firewall de aplicacion contra SQLi/XSS y proteccion de bots.' },
     { n: 'Geo-filtering', s: 'pot', d: 'Permite o bloquea trafico segun la ubicacion geografica.' },
   ]},
   { title: 'DATOS & DEFENSA', items: [
     { n: 'Cifrado en reposo', s: 'mvp', d: 'Discos y almacenamiento cifrados por defecto en Azure.' },
-    { n: 'Secretos en Key Vault', s: 'mvp', d: 'Cadenas de conexion y llaves fuera del codigo fuente.' },
+    { n: 'Secretos en Key Vault', s: 'mvp', d: 'Cadenas de conexion, JWK y pepper fuera del codigo fuente.' },
+    { n: 'Media por SAS de vida corta', s: 'mvp', d: 'El Blob no es publico: solo responde con firma valida (TTL 1 dia) y validacion magic-bytes.' },
     { n: 'Defender for Cloud', s: 'pot', d: 'Postura de seguridad (CSPM) y deteccion de amenazas en tiempo real.' },
   ]},
 ];
 
 const PROD_CRITERIOS = [
-  { title: 'UNA PUERTA BLINDADA', items: [
-    { n: 'Entrada unica protegida', b: 'NUEVO', d: 'Todo el trafico pasa por un solo punto con un firewall que bloquea ataques y bots antes de llegar a la plataforma.' },
-    { n: 'Media rapida', b: 'NUEVO', d: 'Los videos e imagenes se entregan desde una red de distribucion cercana al usuario. Clave para una red social con mucho contenido.' },
-    { n: 'Sin servicio de CDN aparte', b: 'NUEVO', d: 'Azure ya no vende el CDN por separado; este mismo servicio cubre el firewall y la entrega rapida de media.' },
+  { title: 'BORDE BLINDADO', items: [
+    { n: 'WAF gestionado', b: 'SUBE', d: 'Front Door Standard → Premium: firewall de aplicacion (OWASP) y proteccion de bots antes de tocar la plataforma.' },
+    { n: 'Media por el edge', b: 'NUEVO', d: 'Ruta /media/* → Blob cacheada cerca del usuario. Clave para una red social con video e imagen pesados.' },
+    { n: 'Sin CDN aparte', b: 'BASE', d: 'Azure ya no vende CDN por separado; Front Door cubre borde + CDN. Ya esta en la fase 1.' },
   ]},
   { title: 'TODO EN PRIVADO', items: [
-    { n: 'Servicios sin cara a internet', b: 'NUEVO', d: 'Base de datos, cache, archivos y secretos dejan de estar expuestos: solo se hablan entre ellos por una red privada.' },
-    { n: 'Backend invisible', b: 'NUEVO', d: 'Las apps internas no tienen direccion publica; nadie de afuera las alcanza, solo la puerta de entrada.' },
+    { n: 'Servicios sin cara a internet', b: 'NUEVO', d: 'Redis, Key Vault, ACR y Blob pasan a Private Endpoint: solo se hablan entre ellos por la red privada.' },
+    { n: 'Backend invisible', b: 'NUEVO', d: 'Las apps internas dejan la IP publica; nadie de afuera las alcanza, solo el Gateway por la VNet.' },
+    { n: 'Aislamiento ya activo', b: 'BASE', d: 'En la fase 1 el aislamiento se logra gratis con Access Restrictions; los Private Endpoints son el siguiente nivel.' },
   ]},
   { title: 'CRECE Y NO SE CAE', items: [
-    { n: 'Crece sola con la demanda', b: 'SUBE', d: 'Si llegan mas usuarios, la plataforma agrega capacidad automaticamente; cuando baja, la reduce.' },
-    { n: 'A la medida, sin pagar de mas', b: 'SUBE', d: 'Ajustada a ~5,000 usuarios reales. No se sobre-aprovisiona.' },
-    { n: 'Respaldo ante fallos', b: 'SUBE', d: 'Replicas y copias de seguridad para que una caida no tumbe el servicio.' },
+    { n: 'Crece sola con la demanda', b: 'SUBE', d: 'Autoscale: si llegan mas usuarios, agrega instancias; cuando baja, las reduce.' },
+    { n: 'A la medida, sin pagar de mas', b: 'SUBE', d: 'PostgreSQL General Purpose dimensionado a ~5,000 usuarios reales. No se sobre-aprovisiona.' },
+    { n: 'Despliegue sin downtime', b: 'NUEVO', d: 'Deployment slots con swap: la version nueva calienta antes de recibir trafico.' },
   ]},
   { title: 'LO DECIDE CORPORATIVO', items: [
-    { n: 'Respaldo de la base de datos', b: 'FLAG', d: 'Tener una replica en espera duplica el costo de la BD: es una decision de nivel de servicio. Queda como interruptor.' },
-    { n: 'Login corporativo (SSO)', b: 'FLAG', d: 'Que los empleados entren con su cuenta de Hutchison. Lo habilita el area que administra las cuentas.' },
+    { n: 'Respaldo de la base de datos', b: 'FLAG', d: 'HA zona-redundante: un standby duplica el costo de la BD. Es decision de nivel de servicio (flag dbHighAvailability).' },
+    { n: 'Login corporativo (SSO)', b: 'FLAG', d: 'A futuro: que los empleados entren con su cuenta Hutchison (Entra ID). Lo habilita el area que administra las cuentas.' },
+    { n: 'Redis con persistencia', b: 'FLAG', d: 'Premium con AOF/RDB elimina el logout masivo en reinicio. Trade-off de costo aceptado hoy (ADR-007).' },
   ]},
 ];
 
 const COSTS = [
-  { label: 'Cómputo · App Service Plan (B3)', w: '100%', val: '~$53' },
-  { label: 'Redis Cache (obligatorio)',       w: '77%',  val: '~$41' },
-  { label: 'PostgreSQL · 4 bases',            w: '29%',  val: '~$16' },
-  { label: 'Container Registry',              w: '9%',   val: '~$5'  },
-  { label: 'Storage · Blob (LRS)',            w: '4%',   val: '~$2'  },
-  { label: 'Otros · KV + Logs + SWA Free',    w: '4%',   val: '~$2'  },
+  { label: 'Cómputo · App Service Plan (2x P1v3)', w: '100%', val: '~$240' },
+  { label: 'Redis Standard C1 (obligatorio)',      w: '27%',  val: '~$65'  },
+  { label: 'Front Door Standard (borde + CDN)',    w: '15%',  val: '~$35'  },
+  { label: 'PostgreSQL · 4 bases',                 w: '13%',  val: '~$30'  },
+  { label: 'Observabilidad · Logs + App Insights', w: '8%',   val: '~$20'  },
+  { label: 'Storage · Blob (LRS)',                 w: '4%',   val: '~$10'  },
+  { label: 'Otros · SWA + ACR + KV + VNet',        w: '8%',   val: '~$19'  },
 ];
 
 /* ============================================================
@@ -306,8 +323,8 @@ function ArchMap() {
         })}
       </svg>
 
-      <div className="vnet-box" style={{ left: '34%', top: '33%', width: '50%', height: '34%' }}>
-        <span className="vnet-box__label">VNET · 10.0.0.0/16</span>
+      <div className="vnet-box" style={{ left: '8%', top: '30%', width: '86%', height: '60%' }}>
+        <span className="vnet-box__label">VNET · 10.20.0.0/16</span>
       </div>
 
       {NODES.map((n) => {
@@ -347,15 +364,15 @@ function SecurityLayers() {
           <span className="mono-label" data-reveal>[ SLIDE_08 · SECURITY_RADAR ]</span>
           <h2 className="display-lg" data-reveal>PERIMETRO<br /><span className="t-sunray">BLINDADO</span></h2>
           <p className="sec__hint" data-reveal>
-            <span className="sec-key sec-key--mvp">MVP</span> ya activo en esta infraestructura
+            <span className="sec-key sec-key--mvp">FASE 1</span> ya activo en esta infraestructura
             <span className="sec__sep">·</span>
-            <span className="sec-key sec-key--pot">PROD</span> se suma al escalar a Produccion
+            <span className="sec-key sec-key--pot">PROD</span> se suma al endurecer
           </p>
         </div>
         <div className="sec-filter" data-reveal role="group" aria-label="Filtrar capas de seguridad">
           <button className={f === 'all' ? 'is-active' : ''} onClick={() => setF('all')}>Todo</button>
-          <button className={f === 'mvp' ? 'is-active' : ''} onClick={() => setF('mvp')}>En el MVP</button>
-          <button className={f === 'pot' ? 'is-active' : ''} onClick={() => setF('pot')}>En Produccion</button>
+          <button className={f === 'mvp' ? 'is-active' : ''} onClick={() => setF('mvp')}>En la fase 1</button>
+          <button className={f === 'pot' ? 'is-active' : ''} onClick={() => setF('pot')}>Al endurecer</button>
         </div>
       </div>
       <div className="sec-grid">
@@ -365,7 +382,7 @@ function SecurityLayers() {
             {col.items.map((it, ii) => (
               <div key={ii} className={'sec-item sec-item--' + it.s + (f !== 'all' && f !== it.s ? ' is-hidden' : '')}>
                 <strong>
-                  <span className={'sec-badge sec-badge--' + it.s}>{it.s === 'mvp' ? 'MVP' : 'PROD'}</span>
+                  <span className={'sec-badge sec-badge--' + it.s}>{it.s === 'mvp' ? 'FASE 1' : 'PROD'}</span>
                   {it.n}
                 </strong>
                 <p>{it.d}</p>
@@ -452,7 +469,7 @@ function App() {
       <header className="topbar">
         <div className="topbar__brand">
           <span className="topbar__logo">HUTCHISON PORTS</span>
-          <span className="topbar__tag">HUB · INFRA AZURE / MVP</span>
+          <span className="topbar__tag">HUB · INFRA AZURE / FASE 1</span>
         </div>
         <div className="topbar__status">
           <span className="status-dot"></span>
@@ -508,11 +525,11 @@ function App() {
             <h1 className="display-giant title-stack" data-reveal>
               <span>INFRA</span><span className="t-sky">ESTRUCTURA</span><span className="t-sunray">DEL HUB</span>
             </h1>
-            <p className="body-lg" data-reveal>La infraestructura Azure que soporta al HUB Digital IHP. Cloud-native, segura por aislamiento y con costo optimizado — version MVP.</p>
+            <p className="body-lg" data-reveal>La infraestructura Azure que soporta al HUB Digital IHP. Cloud-native, segura por aislamiento y con costo optimizado — fase 1 economica, lista para endurecer.</p>
             <div className="stat-strip" data-reveal>
               <div className="stat-strip__item"><strong className="mono">04</strong><span>microservicios</span></div>
               <div className="stat-strip__item"><strong className="mono">01</strong><span>region</span></div>
-              <div className="stat-strip__item"><strong className="mono">~$120</strong><span>USD / mes</span></div>
+              <div className="stat-strip__item"><strong className="mono">~$450</strong><span>USD / mes</span></div>
             </div>
             <div className="cta-row" data-reveal>
               <button className="btn btn--sunray" onClick={() => goTo(1)}>INICIAR RECORRIDO</button>
@@ -543,9 +560,9 @@ function App() {
               <div className="map__text">
                 <span className="mono-label" data-reveal>[ SLIDE_03 · TOPOLOGIA ]</span>
                 <h2 className="display-lg" data-reveal>TODO<br /><span className="t-sky">CONECTADO</span></h2>
-                <p className="body-lg" data-reveal>La vista general: sigue el flujo de una peticion tipica. El usuario entra por el Frontend, que llama al Backend, y este orquesta datos, cache y archivos. Solo PostgreSQL vive dentro de la VNet.</p>
+                <p className="body-lg" data-reveal>La vista general: sigue el flujo de una peticion. El usuario carga el Frontend y sus llamadas a la API entran por Front Door, unico camino al Gateway; este valida y enruta a los servicios internos, que orquestan datos, cache y archivos. Todo el backend vive en la VNet.</p>
                 <div className="map__legend" data-reveal>
-                  <span className="legend-flow"><i></i> Flujo de una peticion · Usuario → Frontend → Backend → Datos</span>
+                  <span className="legend-flow"><i></i> Flujo · Usuario → Front Door → Gateway → Internos → Datos</span>
                   <span className="legend-vnet"><b></b> Recursos dentro de la VNet (privados)</span>
                 </div>
               </div>
@@ -571,7 +588,7 @@ function App() {
 
         {/* 07 FRONTEND */}
         <section className="slide slide--light" data-index="07" data-title="Frontend">
-          <ServicesSlide label="[ SLIDE_07 · ENTRADA & TELEMETRIA ]" title="CARA Y" accentWord="CONTROL" group="frontend" />
+          <ServicesSlide label="[ SLIDE_07 · BORDE & TELEMETRIA ]" title="BORDE Y" accentWord="CONTROL" group="frontend" />
         </section>
 
         {/* 08 SEGURIDAD */}
@@ -587,10 +604,10 @@ function App() {
                 <span className="mono-label" data-reveal>[ SLIDE_09 · BURN_RATE / MENSUAL ]</span>
                 <div className="cost__total" data-reveal>
                   <span className="cost__currency">$</span>
-                  <Counter to={120} decimals={0} active={active === 8} />
+                  <Counter to={450} decimals={0} active={active === 8} />
                   <span className="cost__unit">USD<br />/mes</span>
                 </div>
-                <span className="badge--aqua" data-reveal>− $24 / mes vs. el diseño inicial (B3 en vez de P0V3 · SWA Free)</span>
+                <span className="badge--aqua" data-reveal>2 planes · Gateway aislado (recomendado) — baja a ~$330 con 1 plan compartido</span>
               </div>
               <div className="cost__bars">
                 {COSTS.map((c, i) => (
@@ -615,21 +632,21 @@ function App() {
                 <h2 className="display-lg" data-reveal>CAMINO A<br /><span className="t-sunray">PRODUCCION</span></h2>
                 <p className="sec__hint" data-reveal>
                   Mas seguridad y mas capacidad, ajustada a la escala real (~5,000 usuarios · 11 unidades).
-                  <span className="sec__sep">·</span> No es "todo al maximo".
+                  <span className="sec__sep">·</span> Incremental: se enciende lo que el negocio justifique, no "todo al maximo".
                 </p>
               </div>
-              <span className="badge--aqua" data-reveal>MVP ~$120/mes → Produccion ~$900–1,400/mes</span>
+              <span className="badge--aqua" data-reveal>Fase 1 ~$450/mes → Endurecido ~$900–1,400/mes</span>
             </div>
             <div className="sec-grid">
               {PROD_CRITERIOS.map((col, ci) => (
                 <div className="sec-col" data-reveal style={{ '--d': ci }} key={col.title}>
                   <h3>{col.title}</h3>
                   {col.items.map((it, ii) => {
-                    const flag = it.b === 'FLAG';
+                    const base = it.b === 'FLAG' || it.b === 'BASE';
                     return (
-                      <div key={ii} className={'sec-item ' + (flag ? 'sec-item--mvp' : 'sec-item--pot')}>
+                      <div key={ii} className={'sec-item ' + (base ? 'sec-item--mvp' : 'sec-item--pot')}>
                         <strong>
-                          <span className={'sec-badge ' + (flag ? 'sec-badge--mvp' : 'sec-badge--pot')}>{it.b}</span>
+                          <span className={'sec-badge ' + (base ? 'sec-badge--mvp' : 'sec-badge--pot')}>{it.b}</span>
                           {it.n}
                         </strong>
                         <p>{it.d}</p>
@@ -650,10 +667,10 @@ function App() {
             <h1 className="display-giant title-stack" data-reveal>
               <span>LISTO PARA</span><span className="t-sunray">DESPLEGAR</span>
             </h1>
-            <p className="body-lg" data-reveal>Infraestructura del HUB Digital IHP en dos fases: un MVP para validar (~$120/mes) y una produccion blindada dimensionada a la escala real. Eficiencia, escala y seguridad — un puerto moderno en la nube.</p>
+            <p className="body-lg" data-reveal>Infraestructura del HUB Digital IHP: una fase 1 economica pero ya capaz (~$450/mes, con borde y aislamiento reales) y un endurecimiento incremental hacia produccion. Eficiencia, escala y seguridad — un puerto moderno en la nube.</p>
             <div className="deploy-line" data-reveal>
               <span className="status-dot"></span>
-              <span className="mono">az deployment group create -f MVP.bicep | Produccion.bicep</span>
+              <span className="mono">az deployment sub create -f infra/main.bicep -p infra/params/prod.bicepparam</span>
             </div>
             <div className="cta-row" data-reveal>
               <button className="btn btn--ghost" onClick={() => goTo(0)}>VOLVER AL INICIO</button>

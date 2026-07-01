@@ -127,8 +127,10 @@ Campos `subtitle`, `description`, `date`, `tags`, `accent`, `theme` son opcional
 
 | Slug | Titulo |
 |---|---|
+| `nom-035` | NOM-035 — Modulo 0, factores de riesgo psicosocial, identidad Hutchison Ports v4.1 (en construccion) |
 | `check-eat` | Check-Eat — Nutricion Estudiantil UCC (10 slides) |
-| `infra-azure-hub` | Infraestructura Azure — HUB Hutchison Ports, Ultra-MVP (10 slides, React) |
+| `infra-azure-hub` | Infraestructura Azure — HUB Hutchison Ports, Fase 1 economica (11 slides, React) |
+| `infra-gateway` | HUB Digital IHP — Que se contrata en la nube y cuanto cuesta (divulgativa, servicio por servicio + costos), identidad Hutchison Ports v4.1 (13 slides, HTML/CSS/JS) |
 
 ## Notas
 

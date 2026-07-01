@@ -1,6 +1,40 @@
 {
   "presentations": [
     {
+      "slug": "nom-035",
+      "title": "NOM-035",
+      "subtitle": "Capacitacion interactiva - Factores de riesgo psicosocial",
+      "description": "Capacitacion NOM-035-STPS-2018 completa e interactiva con identidad Hutchison Ports (Montserrat, angulo dinamico 30.3 y formas Sky/Horizon/Sea). Recorre que es la norma, los 6 factores de riesgo psicosocial, la violencia laboral y las obligaciones del patron y del trabajador. Incluye dinamicas jugables integradas (Semaforo, Balanza de casos, Expediente detectivesco y Auditoria sorpresa) con estado persistente, ademas de las slides estaticas animadas con barrido diagonal de transicion.",
+      "date": "2026-07",
+      "tags": [
+        "Hutchison Ports",
+        "NOM-035",
+        "Capacitacion",
+        "Interactiva",
+        "Dinamicas",
+        "RH"
+      ],
+      "accent": "#009BDE",
+      "theme": "nom-035",
+      "path": "presentations/nom-035-react/index.html"
+    },
+    {
+      "slug": "gateway",
+      "title": "Gateway by Hutchison Ports",
+      "subtitle": "El ecosistema digital del colaborador",
+      "description": "Presentacion ejecutiva (para directivos) del producto Gateway: una sola puerta de entrada al desarrollo, la comunicacion y la comunidad de Hutchison Ports. Relato de vision unificadora con Comunidad HP como protagonista (Muro, Foros, Noticias, Eventos, Dinamicas y Unity Points), el potencial de Campus HP (tronco comun de 15 modulos en 6 disciplinas y malla de 3 especializaciones) y Smart Reports. 18 slides con la identidad visual real del producto (Montserrat, paleta Sea/Sky, lenguaje editorial). Cierre con vision a futuro.",
+      "date": "2026-06",
+      "tags": [
+        "Hutchison Ports",
+        "Gateway",
+        "Ejecutiva",
+        "Producto"
+      ],
+      "accent": "#009BDE",
+      "theme": "gateway",
+      "path": "presentations/gateway/index.html"
+    },
+    {
       "slug": "check-eat",
       "title": "Check-Eat",
       "subtitle": "Nutricion Estudiantil - UCC",
@@ -30,6 +64,22 @@
       "accent": "#009BDE",
       "theme": "infra-azure-hub",
       "path": "presentations/infra-azure-hub/index.html"
+    },
+    {
+      "slug": "infra-gateway",
+      "title": "HUB Digital IHP",
+      "subtitle": "Que se contrata en la nube y cuanto cuesta",
+      "description": "Presentacion divulgativa (para audiencia no tecnica) de la infraestructura Azure del HUB Digital IHP: explica servicio por servicio que es cada pieza, para que sirve, por que se elige y cuanto cuesta al mes, con analogias cotidianas. Arranca por la configuracion minima (~$295 USD/mes, un solo App Service) y muestra como crecer al esquema recomendado (~$415). 13 slides con la identidad visual Hutchison Ports v4.1 (Montserrat, angulo 30.3 y formas Sky/Horizon/Sea).",
+      "date": "2026-06",
+      "tags": [
+        "Hutchison Ports",
+        "Azure",
+        "Bicep",
+        "Gateway"
+      ],
+      "accent": "#002E6D",
+      "theme": "infra-gateway",
+      "path": "presentations/infra-gateway/index.html"
     }
   ],
   "templates": [
