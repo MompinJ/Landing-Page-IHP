@@ -365,7 +365,14 @@ export const DECK = [
     type: 'expediente',
   },
   {
-    type: 'auditoria',
+    type: 'instrucciones',
+    title: 'INSTRUCCIONES',
+    steps: [
+      'Cada equipo recibe un tablero con 18 tarjetas con acciones para implementar y dar cumplimiento a la NOM-035.',
+      'Lean cuidadosamente cada tarjeta y decidan a quién le corresponde realizar la acción: al patrón o a los trabajadores.',
+      'No se trata solo de clasificar: asegurarse de poder justificar su decisión es importante.',
+    ],
+    cobrand: { inst: 'azul' },
   },
   {
     type: 'nom-resp',
@@ -415,6 +422,9 @@ export const DECK = [
       'Participar activamente en cualquier evento relacionado a la NOM-035.',
     ],
     cobrand: { inst: 'azul' },
+  },
+  {
+    type: 'auditoria',
   },
   {
     type: 'nom-gracias',

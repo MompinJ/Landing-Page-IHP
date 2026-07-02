@@ -10,7 +10,7 @@ import { ExpedienteGame } from './ExpedienteGame.js';
 import { AuditoriaGame } from './AuditoriaGame.js';
 
 export const SLIDE_CLASS = {
-  cover: 's1', mission: 's2', divider: 's3', content: 's4', 'content-r': 's4', 'nom-intro': 's6', 'nom-goal': 's7', 'nom-what': 's8', 'nom-question': 's9', 'nom-quadrants': 's10', 'nom-sky-text': 's11', 'nom-wedge': 's12', 'nom-title': 's13', 'nom-para': 's14', 'nom-factor': 's15', 'nom-ask': 's16', 'nom-quad-cond': 's17', 'nom-quad-def': 's18', 'nom-key': 's19', 'nom-bands': 's20', 'nom-worker': 's21', 'nom-list': 's22', 'nom-resp': 's23', 'nom-aqua-title': 's24', 'nom-oblist': 's25', 'nom-gracias': 's26', semaforo: 's5', swipe: 's-swipe', expediente: 's-exp', auditoria: 's-aud',
+  cover: 's1', mission: 's2', divider: 's3', content: 's4', 'content-r': 's4', 'nom-intro': 's6', 'nom-goal': 's7', 'nom-what': 's8', 'nom-question': 's9', 'nom-quadrants': 's10', 'nom-sky-text': 's11', 'nom-wedge': 's12', 'nom-title': 's13', 'nom-para': 's14', 'nom-factor': 's15', 'nom-ask': 's16', 'nom-quad-cond': 's17', 'nom-quad-def': 's18', 'nom-key': 's19', 'nom-bands': 's20', 'nom-worker': 's21', 'nom-list': 's22', 'nom-resp': 's23', 'nom-aqua-title': 's24', 'nom-oblist': 's25', 'nom-gracias': 's26', instrucciones: 's27', semaforo: 's5', swipe: 's-swipe', expediente: 's-exp', auditoria: 's-aud',
 };
 
 // --- PORTADA: foto + banda que comparte su filo + titulo ---
@@ -332,6 +332,27 @@ function NomWorker(s) {
 }
 
 // --- LISTA (amarillo + cuña blanca + titular + viñetas) ---
+// --- INSTRUCCIONES: escalera de pasos numerados (numero aqua + texto marino) ---
+function Instrucciones(s) {
+  const cb = s.cobrand || {};
+  return html`
+    <${Shape} shape="steel-tr" fill="aqua" z=${1} delay=${120} anim="fig-in" />
+    <div class="s27-wrap">
+      <h2 class="s27-title r" style=${{ '--d': 420 }}>${s.title || 'Instrucciones'}</h2>
+      <ol class="s27-steps">
+        ${(s.steps || []).map((t, i) => html`
+          <li key=${i} class="s27-step r" style=${{ '--d': 560 + i * 130 }}>
+            <span class="s27-num">${i + 1}</span>
+            <p class="s27-text">${t}</p>
+          </li>
+        `)}
+      </ol>
+    </div>
+    <img class="brand-logo brand-logo--br r" style=${{ '--d': 1120 }} src="assets/hutchisonports-color.png" alt="Hutchison Ports" />
+    <img class="lg-inst-bl r" style=${{ '--d': 1160 }} src=${'assets/LogoInstitutoHP-' + (cb.inst || 'azul') + '.png'} alt="Instituto Hutchison Ports" />
+  `;
+}
+
 function NomList(s) {
   const cb = s.cobrand || {};
   return html`
@@ -419,7 +440,7 @@ function AuditoriaDyn() {
   return html`<${AuditoriaGame} />`;
 }
 
-const RENDERERS = { cover: Cover, mission: Mission, divider: Divider, content: Content, 'content-r': ContentR, 'nom-intro': NomIntro, 'nom-goal': NomGoal, 'nom-what': NomWhat, 'nom-question': NomQuestion, 'nom-quadrants': NomQuadrants, 'nom-sky-text': NomSkyText, 'nom-wedge': NomWedge, 'nom-title': NomTitleBlue, 'nom-para': NomParaBlue, 'nom-factor': NomFactor, 'nom-ask': NomAsk, 'nom-quad-cond': NomQuadCond, 'nom-quad-def': NomQuadDef, 'nom-key': NomKey, 'nom-bands': NomBands, 'nom-worker': NomWorker, 'nom-list': NomList, 'nom-resp': NomResp, 'nom-aqua-title': NomAquaTitle, 'nom-oblist': NomObList, 'nom-gracias': NomGracias, semaforo: Semaforo, swipe: SwipeDyn, expediente: ExpedienteDyn, auditoria: AuditoriaDyn };
+const RENDERERS = { cover: Cover, mission: Mission, divider: Divider, content: Content, 'content-r': ContentR, 'nom-intro': NomIntro, 'nom-goal': NomGoal, 'nom-what': NomWhat, 'nom-question': NomQuestion, 'nom-quadrants': NomQuadrants, 'nom-sky-text': NomSkyText, 'nom-wedge': NomWedge, 'nom-title': NomTitleBlue, 'nom-para': NomParaBlue, 'nom-factor': NomFactor, 'nom-ask': NomAsk, 'nom-quad-cond': NomQuadCond, 'nom-quad-def': NomQuadDef, 'nom-key': NomKey, 'nom-bands': NomBands, 'nom-worker': NomWorker, 'nom-list': NomList, 'nom-resp': NomResp, 'nom-aqua-title': NomAquaTitle, 'nom-oblist': NomObList, 'nom-gracias': NomGracias, instrucciones: Instrucciones, semaforo: Semaforo, swipe: SwipeDyn, expediente: ExpedienteDyn, auditoria: AuditoriaDyn };
 
 export function SlideBody({ slide }) {
   const fn = RENDERERS[slide.type];
