@@ -128,7 +128,7 @@ function NomGoal(s) {
 function NomWhat(s) {
   const cb = s.cobrand || {};
   return html`
-    <${Shape} shape="nom3-white" fill="paper" z=${1} delay=${120} anim="rs" />
+    <${Shape} shape="nom3-white" fill="sunray" z=${1} delay=${120} anim="rs" />
     <h2 class="s8-title r" style=${{ '--d': 460 }}>${s.title}</h2>
     <div class="s8-body">
       <p class="s8-q r" style=${{ '--d': 600 }}>${s.q}</p>

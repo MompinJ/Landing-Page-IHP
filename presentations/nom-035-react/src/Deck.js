@@ -13,6 +13,60 @@ function SlideView({ slide, extra }) {
   return html`<section class=${cls}><${SlideBody} slide=${slide} /></section>`;
 }
 
+// --- etiqueta corta de cada slide para el indice ---------------------
+function flattenText(x) {
+  if (x == null) return '';
+  if (typeof x === 'string') return x;
+  if (Array.isArray(x)) return x.map(flattenText).join(' ');
+  if (typeof x === 'object') return typeof x.t === 'string' ? x.t : '';
+  return '';
+}
+
+// tipos sin titulo: de donde sacar el nombre (string o funcion del slide)
+const LABEL_FALLBACK = {
+  swipe: 'Interludio',
+  expediente: 'Expediente',
+  auditoria: 'Escaneo',
+  'nom-quadrants': 'Quiénes están obligados',
+  'nom-quad-cond': (s) => flattenText(s.inseguras),
+  'nom-quad-def': (s) => flattenText(s.rebasa && s.rebasa.h),
+  'nom-bands': (s) => flattenText(s.a && s.a.h),
+};
+
+// tipos que son dinamicas interactivas (no slides normales)
+const DYNAMIC_TYPES = new Set(['semaforo', 'swipe', 'expediente', 'auditoria']);
+
+// agrupa las slides por seccion: cada slide con `section` abre un grupo
+// nuevo y las siguientes sin `section` se le suman.
+function buildGroups(deck) {
+  const groups = [];
+  let grp = null;
+  deck.forEach((slide, i) => {
+    if (slide.section || !grp) {
+      grp = { title: slide.section || 'Slides', items: [] };
+      groups.push(grp);
+    }
+    grp.items.push({ slide, i });
+  });
+  return groups;
+}
+
+function slideLabel(slide, i) {
+  let t = slide.label
+    || flattenText(slide.title)
+    || flattenText(slide.kicker)
+    || flattenText(slide.lead)
+    || (Array.isArray(slide.text) ? slide.text[0] : '')
+    || flattenText(slide.body);
+  if (!t) {
+    const fb = LABEL_FALLBACK[slide.type];
+    t = typeof fb === 'function' ? fb(slide) : (fb || '');
+  }
+  t = String(t).replace(/\s+/g, ' ').trim();
+  if (!t) return `Slide ${i + 1}`;
+  return t.length > 46 ? t.slice(0, 45).trimEnd() + '…' : t;
+}
+
 export function Deck({ deck }) {
   const initial = (() => {
     const h = parseInt((location.hash || '').replace('#', ''), 10);
@@ -21,6 +75,12 @@ export function Deck({ deck }) {
 
   const [cur, setCur] = useState(initial);
   const [prev, setPrev] = useState(null);       // slide saliente (solo fundido)
+  const [menuOpen, setMenuOpen] = useState(false);  // indice de slides abierto
+
+  const menuRef = useRef(false);
+  menuRef.current = menuOpen;
+
+  const groups = useMemo(() => buildGroups(deck), [deck]);
 
   const moving = useRef(false);
   const wipe = useRef(null), wipe2 = useRef(null), cvW = useRef(null), cvA = useRef(null), cvB = useRef(null);
@@ -90,9 +150,18 @@ export function Deck({ deck }) {
     goTo(curRef.current + dir);
   }, [goTo]);
 
+  // salto directo desde el indice
+  const jumpTo = useCallback((i) => { setMenuOpen(false); goTo(i); }, [goTo]);
+
   // teclado
   useEffect(() => {
     const onKey = (e) => {
+      // con el indice abierto: Esc cierra y las teclas de navegacion se ignoran
+      if (menuRef.current) {
+        if (e.key === 'Escape') { e.preventDefault(); setMenuOpen(false); }
+        else if (['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', ' ', 'Home', 'End'].includes(e.key)) e.preventDefault();
+        return;
+      }
       switch (e.key) {
         case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
           e.preventDefault(); requestNav(1, 'key'); break;
@@ -100,6 +169,7 @@ export function Deck({ deck }) {
           e.preventDefault(); requestNav(-1, 'key'); break;
         case 'Home': e.preventDefault(); goTo(0); break;
         case 'End': e.preventDefault(); goTo(deck.length - 1); break;
+        case 'i': case 'I': e.preventDefault(); setMenuOpen(true); break;
       }
     };
     document.addEventListener('keydown', onKey);
@@ -110,6 +180,7 @@ export function Deck({ deck }) {
   useEffect(() => {
     let lock = 0;
     const onWheel = (e) => {
+      if (menuRef.current) return;
       const now = Date.now();
       const ms = fxMs.current;
       if (now - lock < ms + 250 || Math.abs(e.deltaY) < 18) return;
@@ -123,7 +194,7 @@ export function Deck({ deck }) {
   // touch
   useEffect(() => {
     let x = null;
-    const start = (e) => { x = e.touches[0].clientX; };
+    const start = (e) => { if (menuRef.current) return; x = e.touches[0].clientX; };
     const end = (e) => {
       if (x === null) return;
       const dx = e.changedTouches[0].clientX - x; x = null;
@@ -154,6 +225,46 @@ export function Deck({ deck }) {
         ${prev != null ? html`<${SlideView} key=${'p' + prev} slide=${deck[prev]} extra="fx-out" />` : null}
         <${SlideView} key=${cur} slide=${deck[cur]} extra="enter" />
       </main>
+
+      <button class="idx-btn" onClick=${() => setMenuOpen(true)} title="Índice de slides (I)" aria-label="Abrir índice de slides">
+        <span class="idx-btn-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="idx-btn-num">${cur + 1}<em>/${deck.length}</em></span>
+      </button>
+
+      ${menuOpen ? html`
+        <div class="idx-overlay" onClick=${() => setMenuOpen(false)}>
+          <div class="idx-panel" onClick=${(e) => e.stopPropagation()} role="dialog" aria-label="Índice de slides">
+            <div class="idx-head">
+              <span class="idx-title">Índice</span>
+              <button class="idx-close" onClick=${() => setMenuOpen(false)} aria-label="Cerrar índice">×</button>
+            </div>
+            <div class="idx-list">
+              ${groups.map((g, gi) => html`
+                <div class="idx-group" key=${gi}>
+                  <div class="idx-group-ttl">${g.title}</div>
+                  <ul class="idx-sublist">
+                    ${g.items.map(({ slide, i }) => {
+    const dyn = DYNAMIC_TYPES.has(slide.type);
+    return html`
+                      <li key=${i}>
+                        <button
+                          class=${'idx-item' + (i === cur ? ' is-current' : '') + (dyn ? ' is-dyn' : '')}
+                          onClick=${() => jumpTo(i)}
+                        >
+                          <span class="idx-item-num">${String(i + 1).padStart(2, '0')}</span>
+                          <span class="idx-item-lbl">${slideLabel(slide, i)}</span>
+                          ${dyn ? html`<span class="idx-tag">Dinámica</span>` : null}
+                        </button>
+                      </li>
+                    `;
+  })}
+                  </ul>
+                </div>
+              `)}
+            </div>
+          </div>
+        </div>
+      ` : null}
     <//>
   `;
 }

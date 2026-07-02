@@ -62,25 +62,23 @@ function Rules({ onReset, hasProgress }) {
       <div class="sg-rules-body">
         <p class="sg-rules-eyebrow">Dinamica · NOM-035</p>
         <h2 class="sg-rules-ttl">El Semaforo</h2>
-        <div class="sg-rules-lower">
-          <div class="sg-colors">
-            ${Object.entries(COLORS).map(([key, c]) => html`
-              <div key=${key} class="sg-color-item" style=${{ '--sgc': c.bg }}>
-                <div class="sg-color-accent"></div>
-                <span class="sg-color-lbl" style=${{ color: c.bg }}>${c.label}</span>
-                <p class="sg-color-txt">${DESCS[key]}</p>
-              </div>
-            `)}
-          </div>
-          <p class="sg-rules-para">
-            En equipos, analicen cada caso de la mesa y voten en simultaneo con su paleta
-            si el escenario es verde, amarillo o rojo. Despues de votar, revisamos juntos
-            la respuesta correcta segun la NOM-035.
-          </p>
-        </div>
-        <p class="sg-rules-hint">
-          ${hasProgress ? html`<button class="sg-reset" onClick=${onReset}>Reiniciar dinamica</button>` : null}
+        <p class="sg-rules-para">
+          En equipos, analicen cada caso de la mesa y voten en simultaneo con su paleta
+          si el escenario es verde, amarillo o rojo. Despues de votar, revisamos juntos
+          la respuesta correcta segun la NOM-035.
         </p>
+        <div class="sg-colors">
+          ${Object.entries(COLORS).map(([key, c]) => html`
+            <div key=${key} class="sg-color-item" style=${{ '--sgc': c.bg }}>
+              <div class="sg-color-accent"></div>
+              <span class="sg-color-lbl" style=${{ color: c.bg }}>${c.label}</span>
+              <p class="sg-color-txt">${DESCS[key]}</p>
+            </div>
+          `)}
+        </div>
+        ${hasProgress ? html`
+          <p class="sg-rules-hint"><button class="sg-reset" onClick=${onReset}>Reiniciar dinamica</button></p>
+        ` : null}
       </div>
     </div>
   `;

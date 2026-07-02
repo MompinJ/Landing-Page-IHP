@@ -36,9 +36,9 @@ export const OBLIG = Object.fromEntries(
 
 export const CASES = [
   {
-    id: 1, answer: 'p8',
-    text: 'Hace un mes instalaron nueva maquinaria ruidosa, pero nadie le ha explicado a los operadores cómo afecta su estrés ni se ha dado entrenamiento sobre la NOM-035.',
-    why: 'El patrón debe difundir información y capacitar sobre la NOM-035. Si no la difunde, el trabajador no puede cumplir su parte. (También aplica "Proporcionar capacitación").',
+    id: 1, answer: 'p1',
+    text: 'La terminal tiene una política de prevención de riesgos psicosociales firmada por la dirección, pero vive en un PDF que nadie abrió: los operadores de patio ni saben que existe.',
+    why: 'No basta con tener la política; el patrón debe establecerla y difundirla. Una política que nadie conoce no previene nada.',
   },
   {
     id: 2, answer: 't8',
@@ -46,9 +46,9 @@ export const CASES = [
     why: 'Aquí la empresa sí cumplió al capacitar; el incumplimiento es del trabajador, que debe asistir y participar.',
   },
   {
-    id: 3, answer: 'p3',
-    text: 'Nunca se ha aplicado ningún cuestionario ni revisión para conocer cómo está el ambiente de trabajo en la terminal.',
-    why: 'El patrón está obligado a identificar los factores y evaluar el entorno organizacional. Sin evaluación no hay diagnóstico.',
+    id: 3, answers: ['p3', 't4'],
+    text: 'El cuestionario para evaluar el entorno organizacional no se volvió a aplicar este año; y de la vez pasada, la mitad de los operadores nunca lo contestaron.',
+    why: 'Responsabilidad compartida: el patrón debe evaluar el entorno organizacional aplicando el cuestionario, y el trabajador debe participar y contestarlo. Si cualquiera de los dos falla, no hay diagnóstico.',
   },
   {
     id: 4, answer: 't3',
@@ -64,5 +64,15 @@ export const CASES = [
     id: 6, answer: 't5',
     text: 'Un trabajador nota que cierta zona genera mucho estrés y riesgo, pero no lo comenta ni lo reporta a nadie.',
     why: 'El trabajador debe informar los riesgos y actos que dañan el entorno laboral saludable; callar impide corregir a tiempo.',
+  },
+  {
+    id: 7, answer: 'p4',
+    text: 'La evaluación del entorno detectó que el turno nocturno del patio vive con sobrecarga y fatiga alta. Un año después, no se implementó ni una sola medida para reducirla.',
+    why: 'El patrón no solo debe detectar los riesgos: está obligado a implementar medidas de prevención. Diagnosticar sin actuar deja el riesgo intacto.',
+  },
+  {
+    id: 8, answer: 't6',
+    text: 'Un jefe de turno humilla y grita a un operador frente a todos, seguido. Varios compañeros lo presencian, pero nadie lo denuncia por miedo a represalias.',
+    why: 'El trabajador debe denunciar los actos de violencia laboral que presencia. Callar por miedo permite que el hostigamiento continúe.',
   },
 ];

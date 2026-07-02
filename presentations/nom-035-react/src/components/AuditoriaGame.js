@@ -35,7 +35,7 @@ function Brief({ onStart, onReset, hasProgress }) {
     <div class="aud-screen aud-brief">
       <button class="sg-reset aud-reset" onClick=${onReset}>Reiniciar</button>
       <div class="aud-terminal">
-        <p class="aud-line">${'> PREPARANDO AUDITORÍA DE LA NOM-035'}<span class="aud-blink">_</span></p>
+        <p class="aud-line">${'> PREPARANDO ESCANEO DE LA NOM-035'}<span class="aud-blink">_</span></p>
         <p class="aud-line aud-dim">${'> DESPLIEGUEN SUS MANUALES'}</p>
         <p class="aud-line aud-dim">${'> Recorten y extiendan sus tiras (Patrón y Trabajador) sobre la mesa.'}</p>
         <p class="aud-brief-info">
@@ -43,15 +43,15 @@ function Brief({ onStart, onReset, hasProgress }) {
           con la regla que se rompió y levántenla antes que los demás. Puede ser
           responsabilidad de la empresa o del trabajador.
         </p>
-        <button class="aud-go" onClick=${onStart}>▶ Iniciar auditoría</button>
-        ${hasProgress ? html`<p class="aud-note">Auditoría en curso guardada.</p>` : null}
+        <button class="aud-go" onClick=${onStart}>▶ Iniciar escaneo</button>
+        ${hasProgress ? html`<p class="aud-note">Escaneo en curso guardado.</p>` : null}
       </div>
     </div>
   `;
 }
 
 // ─── PANTALLA 2/3: CASO + REVEAL ─────────────────────────────────
-function CaseView({ c, idx, total, timeLeft, revealed, ob, onReveal, onNext, onReset, last }) {
+function CaseView({ c, idx, total, timeLeft, revealed, obs, onReveal, onNext, onReset, last }) {
   const urgent = !revealed && timeLeft <= 6;
   return html`
     <div class=${'aud-screen aud-case' + (revealed ? ' is-revealed' : '')}>
@@ -69,10 +69,13 @@ function CaseView({ c, idx, total, timeLeft, revealed, ob, onReveal, onNext, onR
         ${revealed ? html`
           <div class="aud-verdict">
             <div class="aud-stamp">INCUMPLIMIENTO<br/>CONFIRMADO</div>
-            <div class=${'aud-strip aud-strip--' + ob.side}>
-              <span class="aud-strip-side">${sideLabel(ob.side)}</span>
-              <span class="aud-strip-txt">${ob.t}</span>
-            </div>
+            ${obs.length > 1 ? html`<p class="aud-shared">Responsabilidad compartida</p>` : null}
+            ${obs.map((ob, i) => html`
+              <div key=${i} class=${'aud-strip aud-strip--' + ob.side}>
+                <span class="aud-strip-side">${sideLabel(ob.side)}</span>
+                <span class="aud-strip-txt">${ob.t}</span>
+              </div>
+            `)}
             <p class="aud-why">${c.why}</p>
           </div>
         ` : null}
@@ -80,7 +83,7 @@ function CaseView({ c, idx, total, timeLeft, revealed, ob, onReveal, onNext, onR
 
       <div class="aud-foot">
         ${revealed
-      ? html`<button class="aud-go" onClick=${onNext}>${last ? 'Cerrar auditoría' : 'Siguiente caso ▶'}</button>`
+      ? html`<button class="aud-go" onClick=${onNext}>${last ? 'Cerrar escaneo' : 'Siguiente caso ▶'}</button>`
       : html`
             <span class=${'aud-timer' + (urgent ? ' urg' : '')}>00:${String(Math.max(0, timeLeft)).padStart(2, '0')}</span>
             <button class="aud-go aud-reveal" onClick=${onReveal}>Revelar incumplimiento</button>`}
@@ -94,7 +97,7 @@ function Closing({ onReset }) {
   return html`
     <div class="aud-screen aud-closing">
       <button class="sg-reset aud-reset" onClick=${onReset}>Reiniciar</button>
-      <p class="aud-close-kicker">Auditoría finalizada</p>
+      <p class="aud-close-kicker">Escaneo finalizado</p>
       <div class="aud-balance">
         <div class="aud-balance-side aud-balance--patron"><span>PATRÓN</span></div>
         <div class="aud-balance-eq">=</div>
@@ -171,9 +174,11 @@ export function AuditoriaGame() {
   }
   if (phase === 'case') {
     const c = CASES[idx];
+    // un caso puede tener 1 tira (answer) o varias compartidas (answers)
+    const obs = c.answers ? c.answers.map(id => OBLIG[id]).filter(Boolean) : [OBLIG[c.answer]];
     return html`<${CaseView}
       c=${c} idx=${idx} total=${CASES.length} timeLeft=${timeLeft} revealed=${revealed}
-      ob=${OBLIG[c.answer]} last=${idx === CASES.length - 1}
+      obs=${obs} last=${idx === CASES.length - 1}
       onReveal=${reveal} onNext=${nextCase} onReset=${resetGame}
     />`;
   }

@@ -6,6 +6,8 @@
 export const DECK = [
   {
     type: 'cover',
+    section: 'Apertura',
+    label: 'Portada',
     module: 'Módulo 0:',
     title: 'NOM', titleAccent: '035',
     photo: 'assets/portada.jpg',
@@ -35,9 +37,11 @@ export const DECK = [
   },
   {
     type: 'semaforo',
+    label: 'Dinámica · El Semáforo',
   },
   {
     type: 'nom-intro',
+    section: '¿Qué es la NOM-035?',
     lead: 'Identificación, análisis y prevención de factores de riesgo psicosocial en el trabajo.',
     title: 'NOM 035 STPS 2018',
     cobrand: { inst: 'azul' },
@@ -122,6 +126,7 @@ export const DECK = [
   },
   {
     type: 'nom-wedge',
+    section: 'Factores de riesgo psicosocial',
     title: ['¿QUÉ HAY EN COMÚN', 'CON SITUACIONES', 'IDENTIFICADAS COMO', 'CONDICIONES DE TRABAJO', 'DESFAVORABLES?'],
     cobrand: { inst: 'azul' },
   },
@@ -321,6 +326,7 @@ export const DECK = [
   },
   {
     type: 'nom-question',
+    section: 'Impacto y detección',
     title: ['¿POR QUÉ', 'LA STPS CREÓ', 'LA NOM-035?'],
     cobrand: { inst: 'azul' },
   },
@@ -363,6 +369,7 @@ export const DECK = [
   },
   {
     type: 'nom-resp',
+    section: 'Obligaciones',
     kicker: ['RESPONSABILIDAD', 'COMPARTIDA'],
     title: ['¿QUÉ OBLIGACIONES', 'LES CORRESPONDEN?'],
     cobrand: { inst: 'azul' },
@@ -411,6 +418,7 @@ export const DECK = [
   },
   {
     type: 'nom-gracias',
+    section: 'Cierre',
     title: 'GRACIAS',
     sub: ['Recuerda formar parte del', 'cumplimiento de la NOM-035'],
     cobrand: { inst: 'azul' },
