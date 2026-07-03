@@ -1,6 +1,41 @@
 {
   "presentations": [
     {
+      "slug": "gateway-tecnica",
+      "title": "Gateway — Arquitectura Tecnica",
+      "subtitle": "HUB Digital IHP para el area de TI",
+      "description": "Presentacion tecnica del HUB Digital IHP (Gateway) dirigida al area de TI: recorre el reto, la solucion como conjunto de microservicios detras de un unico API Gateway (Comunidad-HP, Campus-HP, Reportes/Smart Reports) y el frontend Navy Gate, seguido de un capitulo tecnico con el stack (Java 21 + Spring Boot 3.4 reactivo, Node.js 22 + Fastify, React 18 + TypeScript + Vite, Redis, PostgreSQL), seguridad, manejo de sesiones, auditoria y los recursos Azure. 13 slides en React con transiciones (cortina HP, barrido, fundido y portal al isotipo) e identidad visual Hutchison Ports (Montserrat, angulo 30.3).",
+      "date": "2026-06",
+      "tags": [
+        "Hutchison Ports",
+        "Gateway",
+        "Tecnica",
+        "Arquitectura",
+        "Microservicios",
+        "TI"
+      ],
+      "accent": "#009BDE",
+      "theme": "gateway",
+      "path": "presentations/gateway-tecnica/index.html"
+    },
+    {
+      "slug": "gateway-react",
+      "title": "Gateway by Hutchison Ports (React)",
+      "subtitle": "El ecosistema digital del colaborador",
+      "description": "Version React de la presentacion ejecutiva del producto Gateway: una sola puerta de entrada al desarrollo, la comunicacion y la comunidad de Hutchison Ports. Recorre el reto y el caos actual de la comunicacion, la solucion unificadora con Comunidad HP como protagonista, Campus HP, Reportes HP (Smart Reports) y donde estamos. 9 slides con la identidad visual real del producto (Montserrat, paleta Sea/Sky, angulo 30.3) y transiciones animadas (cortina HP, barrido, fundido y portal al isotipo). Sucesora en React de la version vanilla 'gateway'.",
+      "date": "2026-06",
+      "tags": [
+        "Hutchison Ports",
+        "Gateway",
+        "Ejecutiva",
+        "Producto",
+        "React"
+      ],
+      "accent": "#009BDE",
+      "theme": "gateway",
+      "path": "presentations/gateway-react/index.html"
+    },
+    {
       "slug": "nom-035",
       "title": "NOM-035",
       "subtitle": "Capacitacion interactiva - Factores de riesgo psicosocial",

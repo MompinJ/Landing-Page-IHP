@@ -127,6 +127,8 @@ Campos `subtitle`, `description`, `date`, `tags`, `accent`, `theme` son opcional
 
 | Slug | Titulo |
 |---|---|
+| `gateway-tecnica` | Gateway — Arquitectura Tecnica, HUB Digital IHP para el area de TI (microservicios tras el API Gateway + capitulo tecnico), identidad Hutchison Ports (13 slides, React) |
+| `gateway-react` | Gateway by Hutchison Ports — version React de la ejecutiva (9 slides), sucesora de la vanilla `gateway` |
 | `nom-035` | NOM-035 — Modulo 0, factores de riesgo psicosocial, identidad Hutchison Ports v4.1 (en construccion) |
 | `check-eat` | Check-Eat — Nutricion Estudiantil UCC (10 slides) |
 | `infra-azure-hub` | Infraestructura Azure — HUB Hutchison Ports, Fase 1 economica (11 slides, React) |
