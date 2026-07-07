@@ -1,0 +1,273 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --sea:      #002E6D;
+  --sea-alt:  #06376E;
+  --sky:      #009BDE;
+  --aqua:     #54BBAB;
+  --aqua-d:   #2BA697;
+  --aqua-l:   #6FCBBC;
+  --horizon:  #9ACAEB;
+  --yellow:   #FFC627;
+  --orange:   #EE7523;
+  --paper:    #ffffff;
+  --font:     'Montserrat', Arial, sans-serif;
+  --ms:       1300ms;   /* duracion de transicion; el JS la fija por preset */
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.stage-outer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.stage {
+  position: absolute;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: top left;
+  /* JS sets transform: translate(x,y) scale(s) */
+}
+
+/* Nav dots */
+.nav-dots {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 999;
+}
+
+.nav-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  transition: background 0.25s;
+}
+.nav-dot.active { background: #fff; }
+
+/* Orbit animations */
+@keyframes orbit-cw  { to { transform: rotate(360deg);  } }
+@keyframes orbit-ccw { to { transform: rotate(-360deg); } }
+
+/* Gateway mark self-draw */
+@keyframes draw-mark {
+  from { stroke-dashoffset: 600; opacity: 0; }
+  to   { stroke-dashoffset: 0;   opacity: 1; }
+}
+
+/* Pulse ring */
+@keyframes pulse-ring {
+  0%   { transform: translate(-50%,-50%) scale(0.92); opacity: 0.5; }
+  50%  { transform: translate(-50%,-50%) scale(1.04); opacity: 0.15; }
+  100% { transform: translate(-50%,-50%) scale(0.92); opacity: 0.5; }
+}
+
+/* Progress line */
+.progress {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--aqua);
+  transition: width 0.45s ease;
+  z-index: 999;
+}
+
+/* ============================================================
+   DECK / SLIDES  (portado de nom-035-react)
+   Las slides viven en una grilla 1/1; se cruzan via overlays .fx
+   ============================================================ */
+.deck {
+  position: absolute;
+  inset: 0;
+  display: grid;
+}
+
+.slide {
+  grid-area: 1 / 1;
+  position: relative;
+  overflow: hidden;
+  background: var(--paper);
+  visibility: hidden;
+}
+.slide.is-active { visibility: visible; }
+
+/* ============================================================
+   TRANSICIONES (3 estilos; --ms lo fija el JS por preset)
+   ============================================================ */
+.fx { position: absolute; inset: 0; z-index: 50; pointer-events: none; overflow: hidden; }
+
+/* --- 1. BARRIDO: overlay del tamano del stage, revelado por un clip-path
+       diagonal a la marca. --- */
+.fx-wipe {
+  position: absolute; inset: 0;
+  background: var(--fx-color, var(--sea));
+  clip-path: polygon(-5% 0, -5% 0, -33% 100%, -33% 100%);
+}
+.fx-wipe.run { animation: fx-wipe var(--ms, 1900ms) cubic-bezier(0.74, 0.02, 0.16, 1) both; }
+@keyframes fx-wipe {
+  0%   { clip-path: polygon(-5% 0, -5% 0, -33% 100%, -33% 100%); }
+  50%  { clip-path: polygon(-5% 0, 135% 0, 107% 100%, -33% 100%); }
+  100% { clip-path: polygon(135% 0, 135% 0, 107% 100%, 107% 100%); }
+}
+
+/* --- 2. CORTINA HP = isotipo bandera (Sky arriba-izq, Navy abajo-der,
+       costura blanca diagonal). 3 overlays revelados por clip-path con
+       una PAUSA central (38-62%) donde se cambia la slide bien tapada. --- */
+.fx-cv { position: absolute; inset: 0; }
+.fx-cv--white { background: var(--paper); clip-path: polygon(-3% -50%, 3% -50%, -50% 3%, -50% -3%); }
+.fx-cv--sky   { background: var(--sky);   clip-path: polygon(10% -50%, -50% 10%, -50% -50%); }
+.fx-cv--navy  { background: var(--sea);   clip-path: polygon(90% 150%, 150% 90%, 150% 150%); }
+
+.fx-cv--white.run { animation: cv-white var(--ms, 1300ms) both; }
+.fx-cv--sky.run   { animation: cv-sky   var(--ms, 1300ms) both; }
+.fx-cv--navy.run  { animation: cv-navy  var(--ms, 1300ms) both; }
+
+@keyframes cv-sky {
+  0%   { clip-path: polygon(10% -50%, -50% 10%, -50% -50%);    animation-timing-function: cubic-bezier(0.45, 0, 0.25, 1); }
+  38%  { clip-path: polygon(145.5% -50%, -50% 145.5%, -50% -50%); }
+  62%  { clip-path: polygon(145.5% -50%, -50% 145.5%, -50% -50%);  animation-timing-function: cubic-bezier(0.45, 0, 0.25, 1); }
+  100% { clip-path: polygon(10% -50%, -50% 10%, -50% -50%); }
+}
+@keyframes cv-navy {
+  0%   { clip-path: polygon(90% 150%, 150% 90%, 150% 150%);    animation-timing-function: cubic-bezier(0.45, 0, 0.25, 1); }
+  38%  { clip-path: polygon(-45.5% 150%, 150% -45.5%, 150% 150%); }
+  62%  { clip-path: polygon(-45.5% 150%, 150% -45.5%, 150% 150%);  animation-timing-function: cubic-bezier(0.45, 0, 0.25, 1); }
+  100% { clip-path: polygon(90% 150%, 150% 90%, 150% 150%); }
+}
+@keyframes cv-white {
+  0%   { clip-path: polygon(-3% -50%, 3% -50%, -50% 3%, -50% -3%);       animation-timing-function: cubic-bezier(0.45, 0, 0.25, 1); }
+  38%  { clip-path: polygon(145% -50%, 155% -50%, -50% 155%, -50% 145%); }
+  62%  { clip-path: polygon(145% -50%, 155% -50%, -50% 155%, -50% 145%); animation-timing-function: cubic-bezier(0.45, 0, 0.25, 1); }
+  100% { clip-path: polygon(-3% -50%, 3% -50%, -50% 3%, -50% -3%); }
+}
+
+/* --- 3. FUNDIDO: la slide saliente se desvanece --- */
+.slide.fx-out { z-index: 6; animation: fx-fade var(--ms, 1400ms) ease both; }
+@keyframes fx-fade { from { opacity: 1; } to { opacity: 0; } }
+
+/* --- PORTAL Gateway: la slide saliente hace ZOOM IN sobre su propio isotipo
+       (transform-origin = posicion del icono, via style) y "entramos" por la
+       puerta hasta revelar la siguiente slide --- */
+.slide.fx-portal {
+  z-index: 12;
+  animation: portal-zoom-out 2000ms cubic-bezier(0.5, 0, 0.85, 1) both;
+}
+@keyframes portal-zoom-out {
+  /* fase 1 (0-30%): el icono se centra con poco zoom */
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  30%  { transform: translate(var(--pdx, 0), var(--pdy, 0)) scale(4); opacity: 1; }
+  /* fase 2 (30-100%): zoom de lleno sobre el icono ya centrado */
+  72%  { opacity: 1; }
+  100% { transform: translate(var(--pdx, 0), var(--pdy, 0)) scale(24); opacity: 0; }
+}
+
+/* Solo la FLECHA del isotipo sale disparada hacia arriba durante el portal */
+.slide.fx-portal .gw-arrow {
+  animation: gw-arrow-rise 2000ms cubic-bezier(0.5, 0, 0.7, 1) both;
+}
+@keyframes gw-arrow-rise {
+  0%, 28% { transform: translateY(0); opacity: 1; }
+  85%     { opacity: 1; }
+  100%    { transform: translateY(-60px); opacity: 0; }
+}
+
+/* aviso de transicion */
+.toast {
+  position: fixed; left: 50%; bottom: 1.4rem;
+  transform: translateX(-50%) translateY(14px);
+  display: flex; align-items: center; gap: 0.6rem;
+  background: var(--sea); color: #fff;
+  font-family: var(--font);
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.6rem 1.05rem;
+  opacity: 0; z-index: 1000; pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.toast::before { content: ""; width: 13px; height: 13px; background: linear-gradient(-30.3deg, var(--sky) 0 50%, #fff 50% 100%); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ============================================================
+   ENTRADA DE ELEMENTOS (solo cuando la slide tiene .enter)
+   El contenido entra con la slide; escalonable con --d (ms).
+   ============================================================ */
+.slide .r,
+.slide .rs,
+.slide .fig-in,
+.slide .sg { opacity: 0; }
+
+.slide.enter .r {
+  animation: rise 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.slide.enter .rs {
+  animation: shape-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+@keyframes shape-in {
+  from { opacity: 0; transform: translateY(18px) scale(1.012); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.slide.enter .photo-wrap {
+  animation: photo-in 1.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+@keyframes photo-in {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); }
+  to   { opacity: 1; clip-path: inset(0 0 0 0); }
+}
+
+.slide.enter .fig-in {
+  animation: fig-in 1.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+@keyframes fig-in {
+  from { opacity: 0; transform: translate(var(--figx, 13%), -8%); }
+  to   { opacity: 1; transform: translate(0, 0); }
+}
+
+.slide.enter .sg {
+  animation: sg-draw 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+@keyframes sg-draw {
+  from { opacity: 0; width: 0; }
+  to   { opacity: 1; }
+}
+
+/* Reveal diagonal a 30.3°: la cinta se "dibuja" de izq a der (borde inclinado) */
+.slide.enter .ribbon {
+  animation: ribbon-reveal 1.3s cubic-bezier(0.7, 0, 0.3, 1) both;
+  animation-delay: 150ms;
+}
+@keyframes ribbon-reveal {
+  from { clip-path: polygon(-40% 0, -6% 0, -38.8% 100%, -40% 100%); }
+  to   { clip-path: polygon(-40% 0, 140% 0, 107.2% 100%, -40% 100%); }
+}

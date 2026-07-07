@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Planificador de Muelle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: PLANIFICADOR DE MUELLE
+       Tablero de planeacion (berth planning): filas = tramos del
+       muelle (6 x 100 m), columnas = horas del turno (06:00 a
+       18:00). Cada buque es un bloque de eslora (tramos) x
+       estadia (horas) que hay que acomodar sin encimar y
+       respetando:
+       - ETA: no puede atracar antes de que llegue.
+       - Calado: los profundos (>9 m) solo en tramos 1-2
+         (dragados a 14 m) y solo pueden ATRACAR en pleamar
+         (columnas azules).
+       - Reefer: su estadia debe tocar los tramos 5-6, donde
+         estan las conexiones electricas.
+       Cada hora que un buque espera despues de su ETA cuesta
+       puntos (demurrage); cada intento invalido tambien.
+
+       CONTROLES: click en la tarjeta para tomar el buque, click
+       en el tablero para atracarlo, click a un bloque colocado
+       para moverlo. ESC suelta, H instrucciones, R reinicia.
+
+       PERSONALIZAR: flota, mareas y puntajes en las constantes
+       de js/muelle.js. Reglas pensadas como DEMO: validar con un
+       experto en planificacion portuaria.
+       ============================================================ -->
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>PLANIFICADOR DE MUELLE</span></div>
+    <div class="stats">
+      <span class="stats__item">POR PROGRAMAR <b id="hud-pending">7</b></span>
+      <span class="stats__item">ESPERA <b id="hud-wait">0 H</b></span>
+      <span class="stats__item">RECHAZOS <b id="hud-reject">0</b></span>
+      <button type="button" class="helpbtn" id="help" title="Instrucciones [H]">?</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="board" id="board"></div>
+    <div class="legend">
+      <span class="legend__item"><i class="sw sw--tide"></i>PLEAMAR (VENTANA PARA CALADO PROFUNDO)</span>
+      <span class="legend__item"><i class="sw sw--deep"></i>TRAMOS 1-2 DRAGADOS A 14 M</span>
+      <span class="legend__item"><i class="sw sw--plug"></i>TRAMOS 5-6 CON CONEXIONES REEFER</span>
+    </div>
+  </main>
+
+  <div class="dock" id="dock">
+    <p class="dock__label">FLOTA POR PROGRAMAR &#8212; CLICK PARA TOMAR UN BUQUE</p>
+    <div class="dock__cards" id="cards"></div>
+  </div>
+
+  <button type="button" class="confirm" id="confirm" hidden>CONFIRMAR PLAN</button>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- instrucciones -->
+  <div class="intro" id="intro">
+    <div class="intro__panel">
+      <p class="intro__kicker">MESA DE PLANEACION // INSTRUCCIONES</p>
+      <h2>Programa el muelle</h2>
+      <p class="intro__mission">
+        Tienes <b>7 buques</b> que atender en el turno. El tablero es el muelle:
+        cada fila es un <b>tramo de 100 m</b> y cada columna una <b>hora</b>.
+        Acomoda cada buque como un bloque: su alto es la eslora y su ancho la estadia.
+      </p>
+      <p class="intro__flow">1) CLICK EN LA TARJETA &#8594; 2) CLICK EN EL TABLERO &#8594; 3) CLICK A UN BLOQUE PARA MOVERLO</p>
+      <ul class="intro__rules">
+        <li><b>ETA.</b> Ningun buque puede atracar antes de su hora de llegada.</li>
+        <li><b class="c-deep">CALADO PROFUNDO (+9 M).</b> Solo en los tramos 1-2, dragados a 14 m... y solo puede ATRACAR en las columnas azules de PLEAMAR.</li>
+        <li><b class="c-reef">REEFER.</b> Su estadia debe tocar los tramos 5-6, donde estan las conexiones electricas.</li>
+        <li><b>SIN ENCIMAR.</b> Dos buques no pueden compartir el mismo tramo a la misma hora.</li>
+        <li><b>LA ESPERA CUESTA.</b> Cada hora despues de su ETA son -30 pts (demurrage); cada intento invalido, -25.</li>
+      </ul>
+      <button type="button" id="start">A PLANEAR</button>
+    </div>
+  </div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">--</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRO TURNO [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">ACOMODA LA FLOTA SIN ENCIMAR Y CON LA MENOR ESPERA</span>
+    <span class="hud__keys">CLICK tomar/atracar &#183; ESC soltar &#183; H instrucciones &#183; R reiniciar</span>
+  </footer>
+
+  <script src="js/muelle.js"></script>
+</body>
+</html>

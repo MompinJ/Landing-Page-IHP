@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Trafico VTS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: TRAFICO VTS
+       Eres el operador del centro de control de trafico maritimo.
+       Pantalla radar: darsena con 4 muelles a la izquierda,
+       fondeadero a la derecha y un CANAL DE UN SOLO SENTIDO
+       en medio. Los buques llegan al fondeadero, esperan tu
+       autorizacion para entrar, descargan en muelle y luego piden
+       autorizacion para zarpar. Todo se autoriza con CLICK.
+
+       REGLAS QUE HAY QUE DESCUBRIR/RESPETAR
+       - Nunca dos sentidos a la vez en el canal: abordaje = fin.
+       - Guarda distancia: un buque rapido alcanza al lento
+         (incidente de ALCANCE, cuesta puntos y un strike).
+       - El TANQUERO exige canal exclusivo: nadie mas mientras
+         transita (incidente grave, 2 strikes).
+       - El REEFER es urgente: si espera de mas, se va a otro
+         puerto. Los demas tambien se cansan.
+       - Sin muelle libre no puede entrar nadie: despacha salidas.
+       - 3 strikes = te retiran la guardia.
+
+       CONTROLES: click/tap sobre el buque que pulsa. R reinicia.
+
+       PERSONALIZAR: tipos, velocidades, llegadas y puntajes en
+       las constantes de js/vts.js. Reglas pensadas como DEMO:
+       validar con un experto en operaciones portuarias.
+       ============================================================ -->
+
+  <div class="rings" aria-hidden="true"></div>
+  <div class="sweep" aria-hidden="true"></div>
+
+  <div class="scene" id="scene"></div>
+  <div class="ships" id="ships"></div>
+
+  <div class="scan" aria-hidden="true"></div>
+  <div class="vign" aria-hidden="true"></div>
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>TRAFICO VTS</span></div>
+    <div class="chan" id="chan">CANAL LIBRE</div>
+    <div class="stats">
+      <span class="stats__item">T <b id="hud-clock">0:00</b></span>
+      <span class="stats__item">ZARPES <b id="hud-sailed">0/13</b></span>
+      <span class="stats__item">PTS <b id="hud-score">0</b></span>
+      <span class="stats__lamps" id="lamps" title="Strikes"><i></i><i></i><i></i></span>
+      <button type="button" class="helpbtn" id="help" title="Instrucciones [H]">?</button>
+    </div>
+  </header>
+
+  <div class="toast" id="toast" hidden></div>
+  <div class="alarm" id="alarm" hidden></div>
+
+  <!-- instrucciones -->
+  <div class="intro" id="intro">
+    <div class="intro__panel">
+      <p class="intro__kicker">CENTRO DE CONTROL // INSTRUCCIONES</p>
+      <h2>Tu turno en la torre</h2>
+      <p class="intro__mission">
+        Mueve los <b>13 buques</b> del turno: entran del fondeadero al muelle,
+        descargan y vuelven a zarpar. Todo se autoriza con <b>CLICK</b> sobre
+        el buque que trae el anillo pulsante.
+      </p>
+      <p class="intro__flow">FONDEADERO &#8594; CANAL &#8594; MUELLE (DESCARGA) &#8594; CANAL &#8594; MAR</p>
+      <ul class="intro__rules">
+        <li><b>UN SOLO SENTIDO.</b> Si autorizas entrada y salida a la vez, se encuentran de frente: abordaje y fin de la guardia.</li>
+        <li><b>GUARDA DISTANCIA.</b> Un buque rapido alcanza al lento que va adelante: incidente y strike. Mira la velocidad de cada tipo.</li>
+        <li><b class="c-tanq">TANQUERO (NARANJA).</b> Exige el canal exclusivo: nadie mas mientras el transita. Doble strike.</li>
+        <li><b class="c-reef">REEFER (CELESTE).</b> Es urgente: su barra baja rapido y si espera de mas se va a otro puerto (-150).</li>
+        <li><b>SIN MUELLE LIBRE NO ENTRA NADIE.</b> Despacha salidas para liberar posiciones M1-M4.</li>
+        <li><b>3 STRIKES</b> (lamparas rojas) y te retiran la guardia.</li>
+      </ul>
+      <button type="button" id="start">INICIAR GUARDIA</button>
+    </div>
+  </div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">--</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRA GUARDIA [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">CLICK SOBRE UN BUQUE PARA AUTORIZARLO · UN SOLO SENTIDO EN EL CANAL</span>
+    <span class="hud__keys">CLICK autorizar &#183; H instrucciones &#183; R reiniciar</span>
+  </footer>
+
+  <script src="js/vts.js"></script>
+</body>
+</html>

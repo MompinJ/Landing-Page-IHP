@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Entrada al Dique</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: ENTRADA AL DIQUE
+       Vista cenital 2D. Hay que meter el buque a un dique seco
+       apenas mas ancho que la manga: cruzar el umbral DESPACIO,
+       quedar centrado y alineado sobre los picaderos, y detenerse.
+       Si lo logras: la compuerta se cierra, el dique se achica y
+       el buque queda asentado en seco.
+
+       FISICA
+       - El buque tiene inercia: tarda en tomar y en perder
+         arrancada. La cana solo muerde con velocidad.
+       - A baja velocidad se gobierna con el remolcador de proa
+         (Q/E o botones TUG).
+       - Tocar los muros o el umbral = averia (3 = casco abierto).
+       - Cruzar el umbral pasado de velocidad tambien cuenta.
+
+       3 NIVELES: dique ancho en calma, viento de traves, y dique
+       estrecho con mas viento y aproximacion desalineada.
+
+       CONTROLES
+       - W avante / S atras (telegrafo por pasos)
+       - A/D cana a babor/estribor (se recentra sola)
+       - Q/E remolcador: empuja la proa a babor/estribor
+       - Consola tactil en pantalla, H instrucciones, R reiniciar
+
+       PERSONALIZAR: niveles, fisica y puntajes en js/dique.js.
+       Fisica simplificada para demo: validar con un experto en
+       maniobras / dique seco.
+       ============================================================ -->
+
+  <div class="scene" id="scene">
+    <div class="water" aria-hidden="true"></div>
+    <div id="dock-layer"></div>
+    <div class="ship" id="ship">
+      <i class="ship__deck" aria-hidden="true"></i>
+      <i class="ship__bridge" aria-hidden="true"></i>
+      <i class="ship__mast" aria-hidden="true"></i>
+    </div>
+  </div>
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>ENTRADA AL DIQUE</span></div>
+    <div class="ins">
+      <span class="ins__item">VEL <b id="ins-speed">0.0 KN</b></span>
+      <span class="ins__item">MAQ <b id="ins-tel">PARADA</b></span>
+      <span class="ins__item">CANA <b id="ins-rudder">0&#176;</b></span>
+      <span class="ins__item">DESVIO <b id="ins-dev">0&#176;</b></span>
+      <span class="ins__item ins__wind" id="ins-wind" hidden>VIENTO <i id="wind-arrow"></i></span>
+    </div>
+    <div class="stats">
+      <span class="stats__item">NIVEL <b id="hud-level">1/3</b></span>
+      <span class="stats__item">PTS <b id="hud-score">0</b></span>
+      <span class="stats__lamps" id="lamps" title="Averias"><i></i><i></i><i></i></span>
+      <button type="button" class="helpbtn" id="help" title="Instrucciones [H]">?</button>
+    </div>
+  </header>
+
+  <div class="toast" id="toast" hidden></div>
+  <div class="alarm" id="alarm" hidden></div>
+
+  <!-- consola tactil -->
+  <div class="console" aria-label="Controles de maniobra">
+    <button type="button" class="cbtn" data-k="q">TUG &#9664;</button>
+    <button type="button" class="cbtn" data-k="a">&#9664; CANA</button>
+    <button type="button" class="cbtn cbtn--tel" data-k="s">ATRAS</button>
+    <button type="button" class="cbtn cbtn--tel" data-k="w">AVANTE</button>
+    <button type="button" class="cbtn" data-k="d">CANA &#9654;</button>
+    <button type="button" class="cbtn" data-k="e">TUG &#9654;</button>
+  </div>
+
+  <!-- veredicto de nivel -->
+  <div class="verdict" id="verdict" hidden>
+    <div class="verdict__card" id="verdict-card">
+      <p class="verdict__kicker" id="vd-kicker">--</p>
+      <h3 id="vd-title">--</h3>
+      <p class="verdict__detail" id="vd-detail">--</p>
+      <button type="button" id="vd-next">SIGUIENTE NIVEL</button>
+    </div>
+  </div>
+
+  <!-- instrucciones -->
+  <div class="intro" id="intro">
+    <div class="intro__panel">
+      <p class="intro__kicker">ASTILLERO // INSTRUCCIONES</p>
+      <h2>Entrada al dique</h2>
+      <p class="intro__mission">
+        Mete el buque al <b>dique seco</b>: cruza el umbral despacio, quedate
+        <b>centrado y alineado</b> sobre los picaderos (la silueta punteada) y
+        detente. Si lo logras, se cierra la compuerta y se achica el dique.
+        <b>3 niveles</b>, cada vez mas angosto y con mas viento.
+      </p>
+      <p class="intro__flow">W AVANTE &#183; S ATRAS &#183; A/D CANA &#183; Q/E REMOLCADOR DE PROA</p>
+      <ul class="intro__rules">
+        <li><b>EL BUQUE TIENE INERCIA.</b> Tarda en tomar arrancada y tarda en frenar: piensa dos maniobras adelante.</li>
+        <li><b>LA CANA SOLO MUERDE CON ARRANCADA.</b> Parado no gobiernas: a baja velocidad usa el remolcador (Q/E) para mover la proa.</li>
+        <li><b class="c-warn">EL UMBRAL TIENE LIMITE DE VELOCIDAD.</b> Cruzalo pasado de nudos y es averia.</li>
+        <li><b class="c-bad">TOCAR MURO = AVERIA.</b> Tres averias abren el casco y repites el nivel.</li>
+        <li><b>PARA ASENTAR:</b> dentro del dique, desvio menor a 4 grados, al centro y casi parado... y aguanta ahi.</li>
+        <li><b>PUNTOS:</b> 400 por nivel, menos tiempo, averias y reintentos.</li>
+      </ul>
+      <button type="button" id="start">INUNDAR EL DIQUE</button>
+    </div>
+  </div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">--</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRA VARADA [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">RUMBO AL DIQUE: LA CANA SOLO MUERDE CON ARRANCADA</span>
+    <span class="hud__keys">W/S maquina &#183; A/D cana &#183; Q/E tug &#183; H instrucciones &#183; R reiniciar</span>
+  </footer>
+
+  <script src="js/dique.js"></script>
+</body>
+</html>

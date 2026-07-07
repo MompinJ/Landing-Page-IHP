@@ -22,7 +22,7 @@
       "slug": "gateway-react",
       "title": "Gateway by Hutchison Ports (React)",
       "subtitle": "El ecosistema digital del colaborador",
-      "description": "Version React de la presentacion ejecutiva del producto Gateway: una sola puerta de entrada al desarrollo, la comunicacion y la comunidad de Hutchison Ports. Recorre el reto y el caos actual de la comunicacion, la solucion unificadora con Comunidad HP como protagonista, Campus HP, Reportes HP (Smart Reports) y donde estamos. 9 slides con la identidad visual real del producto (Montserrat, paleta Sea/Sky, angulo 30.3) y transiciones animadas (cortina HP, barrido, fundido y portal al isotipo). Sucesora en React de la version vanilla 'gateway'.",
+      "description": "Version React de la presentacion ejecutiva del producto Gateway: una sola puerta de entrada al desarrollo, la comunicacion y la comunidad de Hutchison Ports. Recorre el reto, el caos actual de la comunicacion, la matriz de diagnostico 4W+2H, el Ishikawa de las 6M, los objetivos SMART, la solucion unificadora con Comunidad HP como protagonista, Campus HP, Reportes HP (Smart Reports), el cronograma PDCA del proyecto, los beneficios esperados y cierra con el video de demostracion a pantalla completa que al terminar da paso solo a la diapositiva de gracias. 15 slides con la identidad visual real del producto (Montserrat, paleta Sea/Sky, angulo 30.3) y transiciones animadas (cortina HP, barrido, fundido y portal al isotipo). Sucesora en React de la version vanilla 'gateway'.",
       "date": "2026-06",
       "tags": [
         "Hutchison Ports",
@@ -54,22 +54,6 @@
       "path": "presentations/nom-035-react/index.html"
     },
     {
-      "slug": "gateway",
-      "title": "Gateway by Hutchison Ports",
-      "subtitle": "El ecosistema digital del colaborador",
-      "description": "Presentacion ejecutiva (para directivos) del producto Gateway: una sola puerta de entrada al desarrollo, la comunicacion y la comunidad de Hutchison Ports. Relato de vision unificadora con Comunidad HP como protagonista (Muro, Foros, Noticias, Eventos, Dinamicas y Unity Points), el potencial de Campus HP (tronco comun de 15 modulos en 6 disciplinas y malla de 3 especializaciones) y Smart Reports. 18 slides con la identidad visual real del producto (Montserrat, paleta Sea/Sky, lenguaje editorial). Cierre con vision a futuro.",
-      "date": "2026-06",
-      "tags": [
-        "Hutchison Ports",
-        "Gateway",
-        "Ejecutiva",
-        "Producto"
-      ],
-      "accent": "#009BDE",
-      "theme": "gateway",
-      "path": "presentations/gateway/index.html"
-    },
-    {
       "slug": "check-eat",
       "title": "Check-Eat",
       "subtitle": "Nutricion Estudiantil - UCC",
@@ -83,38 +67,6 @@
       "accent": "#0f4c2d",
       "theme": "check-eat",
       "path": "presentations/check-eat/index.html"
-    },
-    {
-      "slug": "infra-azure-hub",
-      "title": "Infraestructura Azure",
-      "subtitle": "HUB Hutchison Ports · Ultra-MVP — Mexico Central",
-      "description": "Arquitectura Ultra-MVP de la infraestructura Azure que soporta al HUB: VNet con 2 subnets, App Service Plan P0V3 con 4 microservicios, PostgreSQL Flexible B1ms, Redis Basic, Blob Storage, Key Vault, ACR, Static Web Apps y observabilidad (Log Analytics + App Insights). 10 slides interactivas (React) con costo optimizado de ~$144.25 USD/mes.",
-      "date": "2026-06",
-      "tags": [
-        "Hutchison Ports",
-        "Azure",
-        "Infraestructura",
-        "Bicep"
-      ],
-      "accent": "#009BDE",
-      "theme": "infra-azure-hub",
-      "path": "presentations/infra-azure-hub/index.html"
-    },
-    {
-      "slug": "infra-gateway",
-      "title": "HUB Digital IHP",
-      "subtitle": "Que se contrata en la nube y cuanto cuesta",
-      "description": "Presentacion divulgativa (para audiencia no tecnica) de la infraestructura Azure del HUB Digital IHP: explica servicio por servicio que es cada pieza, para que sirve, por que se elige y cuanto cuesta al mes, con analogias cotidianas. Arranca por la configuracion minima (~$295 USD/mes, un solo App Service) y muestra como crecer al esquema recomendado (~$415). 13 slides con la identidad visual Hutchison Ports v4.1 (Montserrat, angulo 30.3 y formas Sky/Horizon/Sea).",
-      "date": "2026-06",
-      "tags": [
-        "Hutchison Ports",
-        "Azure",
-        "Bicep",
-        "Gateway"
-      ],
-      "accent": "#002E6D",
-      "theme": "infra-gateway",
-      "path": "presentations/infra-gateway/index.html"
     }
   ],
   "templates": [
@@ -483,6 +435,172 @@
       "accent": "#0b78c2",
       "theme": "dyn-flujo-terminal",
       "path": "dinamicas/flujo-terminal/index.html"
+    },
+    {
+      "slug": "plan-estiba",
+      "title": "Plan de Estiba",
+      "subtitle": "Cada carga a su zona, sin perder el equilibrio",
+      "description": "Vista cenital de la cubierta del buque: llegan contenedores y hay que leer sus marcas para estibarlos en la zona correcta (reefer junto a los enchufes de la acomodacion, rombo clase 3 inflamable en su bahia aislada, otras clases IMO a proa y carga seca al centro) cuidando a la vez dos instrumentos: la escora babor-estribor y el asiento proa-popa. Colocar en zona equivocada explica la regla y cuenta como error; pasarse de 8 grados de escora o 6 de asiento termina la operacion. Jugable con mouse, tacto o teclado; puntaje por equilibrio final, errores y tiempo.",
+      "tags": [
+        "Dinamica",
+        "Naval",
+        "Estiba",
+        "Zonas"
+      ],
+      "accent": "#54BBAB",
+      "theme": "dyn-plan-estiba",
+      "path": "dinamicas/plan-estiba/index.html"
+    },
+    {
+      "slug": "trafico-vts",
+      "title": "Trafico VTS",
+      "subtitle": "Un solo sentido en el canal",
+      "description": "Eres el operador del centro de control de trafico maritimo, en pantalla radar CRT verde: los buques llegan al fondeadero, esperan tu click para entrar por el canal de un solo sentido, descargan en los 4 muelles de la darsena y vuelven a pedir permiso para zarpar. Hay que leer el trafico: el reefer urgente se va a otro puerto si espera de mas, el granelero lento provoca alcances si mandas un rapido detras, el tanquero IMO exige canal exclusivo y sin muelle libre nadie entra. Dos sentidos a la vez terminan en abordaje; tres strikes y te retiran la guardia. Puntaje por zarpes, puntualidad y demoras.",
+      "tags": [
+        "Dinamica",
+        "Naval",
+        "VTS",
+        "Radar"
+      ],
+      "accent": "#46dc96",
+      "theme": "dyn-trafico-vts",
+      "path": "dinamicas/trafico-vts/index.html"
+    },
+    {
+      "slug": "planificador-muelle",
+      "title": "Planificador de Muelle",
+      "subtitle": "Acomoda la flota en tramos y horas",
+      "description": "Berth planning jugable: el tablero es el muelle (6 tramos de 100 m) contra las 12 horas del turno, y cada buque es un bloque de eslora x estadia que se toma de la flota y se atraca con click. Hay que respetar la ETA de cada uno, mandar los calados profundos a los tramos dragados a 14 m y solo atracarlos en las ventanas de pleamar, pegar los reefer a los tramos con conexiones electricas y no encimar estadias. Cada hora de espera despues de la ETA cuesta puntos (demurrage) y cada intento invalido tambien, con aviso que explica la regla. Incluye instrucciones al inicio; ideal para discutir prioridades en equipo.",
+      "tags": [
+        "Dinamica",
+        "Naval",
+        "Planeacion",
+        "Puzzle"
+      ],
+      "accent": "#FFC627",
+      "theme": "dyn-planificador-muelle",
+      "path": "dinamicas/planificador-muelle/index.html"
+    },
+    {
+      "slug": "amarre-hp",
+      "title": "Amarre el Buque",
+      "subtitle": "Largos, traveses y springs contra el pronostico",
+      "description": "Vista cenital del buque atracado: 4 puntos de amarre a bordo y 8 bitas en el muelle. El jugador tiende cabos con click y el juego los clasifica en vivo por su angulo (largo, traves o spring); luego prueba el plano contra el pronostico de la ronda: corriente de proa, viento de tierra de 35 nudos y tormenta cruzada. Cada cabo solo jala y resiste segun su orientacion: la carga se reparte entre los alineados, el que se sobrecarga revienta con latigazo y zona snap-back marcada, y si nada resiste el buque queda al garete. Puntaje por aguantar con pocos cabos y sin reventar ninguno; instrucciones al inicio.",
+      "tags": [
+        "Dinamica",
+        "Naval",
+        "Amarre",
+        "HSE"
+      ],
+      "accent": "#e8d9b0",
+      "theme": "dyn-amarre-hp",
+      "path": "dinamicas/amarre-hp/index.html"
+    },
+    {
+      "slug": "cede-paso",
+      "title": "Cede el Paso",
+      "subtitle": "Lee las luces y decide la maniobra",
+      "description": "Practico nocturno: noche cerrada en el puente y solo se ven las luces de navegacion del otro buque. Hay que deducir que es y hacia donde va (roja = su babor te mira y normalmente cedes tu; verde = cede el; roja y verde con topes en linea = de frente; solo blanca = tu lo alcanzas) y elegir la maniobra correcta contra reloj, con trampas de luces especiales: dos rojas sin gobierno, roja-blanca-roja de draga, verde sobre blanca de pesquero y la verde sin tope que resulta ser un velero. Al responder se revela la silueta con su rumbo real y la regla que aplica. 8 rondas, puntos por acierto y rapidez; ideal para competir en grupo.",
+      "tags": [
+        "Dinamica",
+        "Naval",
+        "Reglamento",
+        "Trivia"
+      ],
+      "accent": "#37e07a",
+      "theme": "dyn-cede-paso",
+      "path": "dinamicas/cede-paso/index.html"
+    },
+    {
+      "slug": "entrada-dique",
+      "title": "Entrada al Dique",
+      "subtitle": "Metelo en seco sin tocar los muros",
+      "description": "Maniobra cenital 2D con fisica de inercia real: hay que meter el buque a un dique seco apenas mas ancho que la manga. La cana solo muerde con arrancada, asi que a baja velocidad se gobierna con el remolcador de proa (Q/E); el umbral tiene limite de velocidad, tocar los muros es averia (tres abren el casco) y para asentar hay que quedar centrado sobre los picaderos, con menos de 4 grados de desvio y casi parado. Al lograrlo, la compuerta se cierra y el dique se achica con el buque quedando en seco. 3 niveles: dique ancho en calma, viento de traves y dique estrecho con aproximacion desalineada. Idea original del usuario; instrucciones al inicio.",
+      "tags": [
+        "Dinamica",
+        "Naval",
+        "Maniobra",
+        "Astillero"
+      ],
+      "accent": "#54BBAB",
+      "theme": "dyn-entrada-dique",
+      "path": "dinamicas/entrada-dique/index.html"
+    },
+    {
+      "slug": "cero-remociones",
+      "title": "Cero Remociones",
+      "subtitle": "Apila hoy pensando en quien sale manana",
+      "description": "El problema numero uno del patio vuelto juego: en la fase de RECIBO llegan 16 contenedores rotulados con su dia de salida (D1 sale manana, D5 al ultimo) y se apilan con la grua en 7 pilas de 4 alturas. Luego corre la fase de DESPACHO: los dias pasan y vienen por cada caja en orden; cada una que estorba encima del que sale es una REMOCION de -60 puntos, y la grua la reacomoda sola en la pila mas baja... donde puede volver a estorbar. Apilar pensando al reves (los que salen pronto arriba) es la unica forma de lograr el cero. Motor heredado de Estiba el Buque.",
+      "tags": [
+        "Dinamica",
+        "Patio",
+        "Puzzle",
+        "Operaciones"
+      ],
+      "accent": "#EE7523",
+      "theme": "dyn-cero-remociones",
+      "path": "dinamicas/cero-remociones/index.html"
+    },
+    {
+      "slug": "circulo-borneo",
+      "title": "Circulo de Borneo",
+      "subtitle": "Donde sueltas el ancla y cuanta cadena largas",
+      "description": "Carta del fondeadero: hay que fondear 3 buques eligiendo el punto del ancla y los grilletes de cadena. Mas profundidad exige mas cadena (8 m = 3g, 12 m = 4g, 16 m = 5g) pero mas cadena agranda el circulo de borneo, y los circulos no pueden encimarse entre si ni pisar el cable submarino, el bajo, la orilla o los buques ya fondeados. Al confirmar, PROBAR BORNEO: el viento rola 360 grados y todos los buques giran alrededor de su ancla; los cortos de cadena GARREAN a favor del viento y terminan donde no deben. Puzzle geometrico con moraleja de capitania.",
+      "tags": [
+        "Dinamica",
+        "Naval",
+        "Fondeo",
+        "Puzzle"
+      ],
+      "accent": "#009BDE",
+      "theme": "dyn-circulo-borneo",
+      "path": "dinamicas/circulo-borneo/index.html"
+    },
+    {
+      "slug": "hombre-al-agua",
+      "title": "Hombre al Agua",
+      "subtitle": "Vira, vuelve por tu estela y llega parado",
+      "description": "Navegas a rumbo y alguien cae por la popa: alarma, splash y a ejecutar la maniobra de rescate con la misma fisica de inercia de Entrada al Dique. La estela queda pintada en el agua para guiar la vuelta de Williamson (cana toda, a 60 grados cambia de banda, y derecho sobre tu estela), el naufrago deriva con la corriente y pierde vitalidad, y hay que llegarle a menos de 15 metros casi parado para izarlo: pasarle encima con arrancada es tragedia. Nivel 1 de dia en calma; nivel 2 de noche, con mas corriente y el naufrago visible solo a destellos. Puntos por vitalidad restante al rescate.",
+      "tags": [
+        "Dinamica",
+        "Naval",
+        "Rescate",
+        "HSE"
+      ],
+      "accent": "#ff5d45",
+      "theme": "dyn-hombre-al-agua",
+      "path": "dinamicas/hombre-al-agua/index.html"
+    },
+    {
+      "slug": "puente-holo",
+      "title": "Puente de Mando Holografico",
+      "subtitle": "El mapa tactico del Instituto, proyectado",
+      "description": "Showcase visual del lenguaje holografico para el Instituto: una mesa tactica proyectada en cian con los tres sectores de la campana (Astillero asegurado, Terminal de Contenedores en curso y Terminal Multiproposito bloqueada), nucleo IA al centro con cono de proyeccion, anillos de radar, rutas de datos y columnas de luz por sector. Los dos mentores dialogan por consola con tipeo en vivo: el Mentor IA (cian) empuja el arte de lo posible y el Coronel (ambar) contrapesa con gobernanza y criterio humano. La camara recorre los sectores en modo cine; arrastra para orbitar, 1-3 salta de sector y espacio pausa. Sin mecanica de juego: es la prueba de concepto estetica antes de invertir en la dinamica completa.",
+      "tags": [
+        "Visual",
+        "Holograma",
+        "Instituto",
+        "IA"
+      ],
+      "accent": "#38e1ff",
+      "theme": "dyn-puente-holo",
+      "path": "dinamicas/puente-holo/index.html"
+    },
+    {
+      "slug": "mapa-tactico-3d",
+      "title": "Mapa Tactico NEXO-IA 3D",
+      "subtitle": "Cinco terminales en WebGL, estilo holograma",
+      "description": "Demo de la Ruta C para el Instituto: el mapa de campana NEXO-IA renderizado en 3D real (Three.js + bloom) con estetica low-poly holografica de relleno oscuro y aristas emisivas. Cinco terminales alrededor del Digital Hub, cada una con su silueta construida por codigo (patio de contenedores con gruas STS, crucero atracado, dique seco bajo domo de escudo, intermodal con tren, silos y granelero), rutas de datos cian y ambar con pulsos viajando, minimapa con barrido, medidores EVA/GAMMA/Criterio y tour cinematico que recorre los sectores. Camara libre: arrastra para orbitar, rueda para zoom, 1-5 enfoca terminal, 0 el hub, espacio pausa. Sin modelos externos ni assets binarios: pura geometria primitiva. Requiere servidor local y conexion (Three.js via CDN).",
+      "tags": [
+        "Visual",
+        "WebGL",
+        "Three.js",
+        "Instituto",
+        "IA"
+      ],
+      "accent": "#ff9b3a",
+      "theme": "dyn-mapa-tactico-3d",
+      "path": "dinamicas/mapa-tactico-3d/index.html"
     }
   ]
 }

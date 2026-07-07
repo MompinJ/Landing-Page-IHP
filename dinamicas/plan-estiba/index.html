@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Plan de Estiba</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: PLAN DE ESTIBA
+       Vista cenital (desde arriba) de la cubierta del buque.
+       Llegan contenedores y hay que estibarlos leyendo sus marcas:
+
+       - REEFER (caja blanca, marca RF y temperatura): solo en las
+         bahias con enchufe, junto a la acomodacion (popa).
+       - IMO CLASE 3 (rombo con 3): inflamable, va a su bahia
+         dedicada y aislada.
+       - IMO OTRAS CLASES (rombo 2.2 / 5.1 / 6.1 / 8 / 9):
+         mercancia peligrosa, a proa, lejos de la acomodacion.
+       - DRY (carga seca estandar): bahias centrales.
+
+       Ademas hay que EQUILIBRAR: cada tonelada lejos de la crujia
+       escora el buque (babor/estribor) y cada tonelada lejos de la
+       cuaderna maestra lo asienta (proa/popa). Pasarse de los
+       limites termina la operacion.
+
+       CONTROLES
+       - Mouse o tacto: click directo en la celda
+       - Flechas o WASD: mover el cursor; ESPACIO o ENTER estibar
+       - R: reiniciar
+
+       PERSONALIZAR: mezcla de contenedores, pesos y limites en las
+       constantes de js/plan.js. Reglas de zona pensadas como DEMO:
+       validar con un experto en planificacion antes de usar como
+       material formal.
+       ============================================================ -->
+
+  <div class="scene" id="scene">
+    <div class="sea" aria-hidden="true"></div>
+
+    <div class="ship" id="ship">
+      <div class="deckplate" aria-hidden="true"></div>
+      <div class="house" aria-hidden="true"><i class="funnel"></i></div>
+      <div class="deck" id="deck"></div>
+      <div class="bow-deco" aria-hidden="true"></div>
+      <!-- agua que entra por el lado que se hunde -->
+      <div class="flood" id="flood-heel" aria-hidden="true"></div>
+      <div class="flood" id="flood-trim" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>PLAN DE ESTIBA</span></div>
+    <div class="queue" id="queue">
+      <div class="cargo" id="cargo">
+        <span class="cargo__label">EN GANCHO</span>
+        <div class="cargo__box" id="cargo-box">--</div>
+      </div>
+      <div class="next">
+        <span class="next__label">SIGUEN</span>
+        <span class="next__box" id="next-1">--</span>
+        <span class="next__box" id="next-2">--</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- instrumentos: escora y asiento -->
+  <div class="meters">
+    <div class="meter">
+      <p class="meter__title">ESCORA <b id="heel-deg">0.0&#176;</b></p>
+      <div class="meter__bar">
+        <i class="meter__needle" id="heel-needle"></i>
+      </div>
+      <div class="meter__marks"><span id="ton-babor">BABOR 0t</span><span>MAX 8&#176;</span><span id="ton-estribor">0t ESTRIBOR</span></div>
+    </div>
+    <div class="meter">
+      <p class="meter__title">ASIENTO <b id="trim-deg">0.0&#176;</b></p>
+      <div class="meter__bar">
+        <i class="meter__needle" id="trim-needle"></i>
+      </div>
+      <div class="meter__marks"><span id="ton-popa">POPA 0t</span><span>MAX 6&#176;</span><span id="ton-proa">0t PROA</span></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+  <div class="alarm" id="alarm" hidden></div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">--</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRO PLAN [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">LEE LAS MARCAS Y ESTIBA CADA CARGA EN SU ZONA</span>
+    <span class="hud__keys">CLICK o FLECHAS + ESPACIO estibar &#183; R reiniciar</span>
+  </footer>
+
+  <script src="js/plan.js"></script>
+</body>
+</html>

@@ -1672,6 +1672,448 @@ code {
 }
 
 /* ============================================================
+   TEMA: dyn-plan-estiba — CUBIERTA CENITAL
+   mar abierto con el buque visto desde arriba y sus zonas
+   ============================================================ */
+.hub-card[data-theme="dyn-plan-estiba"] {
+  --card-accent: #54BBAB;
+  background:
+    repeating-linear-gradient(115deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 46px),
+    linear-gradient(160deg, #2f7fb8, #10466f);
+  border: 2px solid #0e2a4a;
+  box-shadow: 9px 9px 0 rgba(84, 187, 171, 0.45);
+  color: #eaf2fb;
+}
+.hub-card[data-theme="dyn-plan-estiba"]:hover { box-shadow: 16px 16px 0 #FFC627; }
+.hub-card[data-theme="dyn-plan-estiba"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+}
+.hub-card[data-theme="dyn-plan-estiba"] .hub-card__date,
+.hub-card[data-theme="dyn-plan-estiba"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #9ACAEB; }
+.hub-card[data-theme="dyn-plan-estiba"] .hub-card__kind::before { content: "DINAMICA // ZONAS + ESCORA + ASIENTO"; }
+.hub-card[data-theme="dyn-plan-estiba"] .hub-card__subtitle { color: #FFC627; }
+.hub-card[data-theme="dyn-plan-estiba"] .hub-card__desc { color: #c9dced; }
+.hub-card[data-theme="dyn-plan-estiba"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #9ACAEB;
+  background: rgba(4, 24, 46, 0.5);
+  color: #d9e9f6;
+}
+.hub-card[data-theme="dyn-plan-estiba"] .hub-card__arrow { color: #54BBAB; }
+/* buque cenital con las zonas de cubierta pintadas */
+.hub-card[data-theme="dyn-plan-estiba"] .hub-card__deco {
+  bottom: 3.6rem; right: 1.2rem;
+  width: 118px; height: 36px;
+  background:
+    linear-gradient(#e9eff5, #e9eff5) 8px 8px / 16px 20px no-repeat,
+    linear-gradient(#9ACAEB, #9ACAEB) 28px 6px / 22px 24px no-repeat,
+    linear-gradient(#009BDE, #009BDE) 52px 6px / 26px 24px no-repeat,
+    linear-gradient(#EE7523, #EE7523) 80px 6px / 12px 24px no-repeat,
+    linear-gradient(#FFC627, #FFC627) 94px 6px / 14px 24px no-repeat,
+    #0e2a4a;
+  clip-path: polygon(0 30%, 3% 8%, 9% 0, 80% 0, 100% 50%, 80% 100%, 9% 100%, 3% 92%, 0 70%);
+}
+
+/* ============================================================
+   TEMA: dyn-trafico-vts — RADAR CRT VERDE
+   pantalla de control de trafico con barrido y blips
+   ============================================================ */
+.hub-card[data-theme="dyn-trafico-vts"] {
+  --card-accent: #46dc96;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 90% 80% at 50% 40%, rgba(24, 82, 56, 0.6), transparent 75%),
+    #04170f;
+  border: 2px solid #1d5c3d;
+  box-shadow: 9px 9px 0 rgba(70, 220, 150, 0.35);
+  color: #cdeeda;
+}
+.hub-card[data-theme="dyn-trafico-vts"]:hover { box-shadow: 16px 16px 0 #46dc96; }
+.hub-card[data-theme="dyn-trafico-vts"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #eafff2;
+  text-shadow: 0 0 12px rgba(70, 255, 170, 0.5);
+}
+.hub-card[data-theme="dyn-trafico-vts"] .hub-card__date,
+.hub-card[data-theme="dyn-trafico-vts"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #46dc96; }
+.hub-card[data-theme="dyn-trafico-vts"] .hub-card__kind::before { content: "DINAMICA // AUTORIZA · SEPARA · DESPACHA"; }
+.hub-card[data-theme="dyn-trafico-vts"] .hub-card__subtitle { color: #ffc648; }
+.hub-card[data-theme="dyn-trafico-vts"] .hub-card__desc { color: #9fc9b2; }
+.hub-card[data-theme="dyn-trafico-vts"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #2e8b57;
+  background: rgba(4, 30, 18, 0.6);
+  color: #b9f2d4;
+}
+.hub-card[data-theme="dyn-trafico-vts"] .hub-card__arrow { color: #46dc96; }
+/* radar con barrido y blips */
+.hub-card[data-theme="dyn-trafico-vts"] .hub-card__deco {
+  bottom: 3.4rem; right: 1.4rem;
+  width: 84px; height: 84px;
+  border: 2px solid rgba(70, 220, 150, 0.5);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle 3px at 62% 30%, #8fe8ff 98%, transparent),
+    radial-gradient(circle 3px at 30% 62%, #ff9d6b 98%, transparent),
+    radial-gradient(circle 3px at 68% 66%, #46dc96 98%, transparent),
+    conic-gradient(from 40deg at 50% 50%, rgba(70, 255, 170, 0.4), transparent 22%),
+    radial-gradient(circle at 50% 50%, transparent 0 26px, rgba(70, 220, 150, 0.35) 26px 27px, transparent 27px 39px, rgba(70, 220, 150, 0.35) 39px 40px, transparent 40px);
+}
+
+/* ============================================================
+   TEMA: dyn-planificador-muelle — MESA DE PLANEACION
+   tablero cuadriculado azul con bloques de estadia
+   ============================================================ */
+.hub-card[data-theme="dyn-planificador-muelle"] {
+  --card-accent: #FFC627;
+  background:
+    repeating-linear-gradient(0deg, rgba(154, 202, 235, 0.07) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(90deg, rgba(154, 202, 235, 0.07) 0 1px, transparent 1px 26px),
+    linear-gradient(160deg, #0b3a5e, #062338);
+  border: 2px solid #0b4a78;
+  box-shadow: 9px 9px 0 rgba(255, 198, 39, 0.4);
+  color: #dcebf8;
+}
+.hub-card[data-theme="dyn-planificador-muelle"]:hover { box-shadow: 16px 16px 0 #FFC627; }
+.hub-card[data-theme="dyn-planificador-muelle"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+}
+.hub-card[data-theme="dyn-planificador-muelle"] .hub-card__date,
+.hub-card[data-theme="dyn-planificador-muelle"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #9ACAEB; }
+.hub-card[data-theme="dyn-planificador-muelle"] .hub-card__kind::before { content: "DINAMICA // ETA · CALADO · PLEAMAR"; }
+.hub-card[data-theme="dyn-planificador-muelle"] .hub-card__subtitle { color: #FFC627; }
+.hub-card[data-theme="dyn-planificador-muelle"] .hub-card__desc { color: #a7c4dd; }
+.hub-card[data-theme="dyn-planificador-muelle"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #9ACAEB;
+  background: rgba(2, 22, 40, 0.6);
+  color: #d9e9f6;
+}
+.hub-card[data-theme="dyn-planificador-muelle"] .hub-card__arrow { color: #FFC627; }
+/* mini gantt de estadias */
+.hub-card[data-theme="dyn-planificador-muelle"] .hub-card__deco {
+  bottom: 3.4rem; right: 1.4rem;
+  width: 104px; height: 64px;
+  border: 2px solid rgba(154, 202, 235, 0.4);
+  background:
+    linear-gradient(#b3422c, #b3422c) 4px 4px / 40px 12px no-repeat,
+    linear-gradient(#009BDE, #009BDE) 28px 20px / 30px 12px no-repeat,
+    linear-gradient(#54BBAB, #54BBAB) 62px 20px / 36px 12px no-repeat,
+    linear-gradient(#e9eff5, #e9eff5) 14px 36px / 30px 12px no-repeat,
+    linear-gradient(#FFC627, #FFC627) 48px 48px / 40px 12px no-repeat,
+    repeating-linear-gradient(90deg, rgba(154, 202, 235, 0.18) 0 1px, transparent 1px 17px);
+}
+
+/* ============================================================
+   TEMA: dyn-amarre-hp — MUELLE CON CABOS
+   atraque cenital con bitas y cabo tendido
+   ============================================================ */
+.hub-card[data-theme="dyn-amarre-hp"] {
+  --card-accent: #e8d9b0;
+  background:
+    linear-gradient(0deg, #414b56 0 22%, #FFC627 22% 23.5%, transparent 23.5%),
+    linear-gradient(180deg, #1d669e, #10466f);
+  border: 2px solid #0e2a4a;
+  box-shadow: 9px 9px 0 rgba(232, 217, 176, 0.45);
+  color: #eaf2fb;
+}
+.hub-card[data-theme="dyn-amarre-hp"]:hover { box-shadow: 16px 16px 0 #FFC627; }
+.hub-card[data-theme="dyn-amarre-hp"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+}
+.hub-card[data-theme="dyn-amarre-hp"] .hub-card__date,
+.hub-card[data-theme="dyn-amarre-hp"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #9ACAEB; }
+.hub-card[data-theme="dyn-amarre-hp"] .hub-card__kind::before { content: "DINAMICA // UN CABO SOLO JALA"; }
+.hub-card[data-theme="dyn-amarre-hp"] .hub-card__subtitle { color: #FFC627; }
+.hub-card[data-theme="dyn-amarre-hp"] .hub-card__desc { color: #c9dced; }
+.hub-card[data-theme="dyn-amarre-hp"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #9ACAEB;
+  background: rgba(4, 24, 46, 0.5);
+  color: #d9e9f6;
+}
+.hub-card[data-theme="dyn-amarre-hp"] .hub-card__arrow { color: #e8d9b0; }
+/* costado del buque con cabo a las bitas */
+.hub-card[data-theme="dyn-amarre-hp"] .hub-card__deco {
+  bottom: calc(22% - 6px); right: 1.4rem;
+  width: 120px; height: 58px;
+  background:
+    /* buque arriba */
+    linear-gradient(#0e2a4a, #0e2a4a) 8px 0 / 104px 18px no-repeat,
+    /* cabos diagonales */
+    linear-gradient(115deg, transparent calc(50% - 1.5px), #e8d9b0 calc(50% - 1.5px) calc(50% + 1.5px), transparent calc(50% + 1.5px)) 2px 14px / 44px 40px no-repeat,
+    linear-gradient(65deg, transparent calc(50% - 1.5px), #e8d9b0 calc(50% - 1.5px) calc(50% + 1.5px), transparent calc(50% + 1.5px)) 74px 14px / 44px 40px no-repeat,
+    linear-gradient(90deg, transparent calc(50% - 1.5px), #e8d9b0 calc(50% - 1.5px) calc(50% + 1.5px), transparent calc(50% + 1.5px)) 50px 14px / 20px 40px no-repeat,
+    /* bitas */
+    radial-gradient(circle 5px at 8px 52px, #14181d 4px, transparent 5px),
+    radial-gradient(circle 5px at 60px 52px, #14181d 4px, transparent 5px),
+    radial-gradient(circle 5px at 112px 52px, #14181d 4px, transparent 5px);
+}
+
+/* ============================================================
+   TEMA: dyn-cede-paso — NOCHE CERRADA EN EL PUENTE
+   luces de navegacion sobre mar nocturno
+   ============================================================ */
+.hub-card[data-theme="dyn-cede-paso"] {
+  --card-accent: #37e07a;
+  background:
+    radial-gradient(circle 2px at 18% 18%, rgba(255,255,255,0.8) 98%, transparent),
+    radial-gradient(circle 1px at 38% 10%, rgba(255,255,255,0.6) 98%, transparent),
+    radial-gradient(circle 1px at 62% 22%, rgba(255,255,255,0.7) 98%, transparent),
+    radial-gradient(circle 2px at 84% 13%, rgba(255,255,255,0.75) 98%, transparent),
+    linear-gradient(180deg, #04091a 0%, #071328 55%, #0d2440 100%);
+  border: 2px solid #12305a;
+  box-shadow: 9px 9px 0 rgba(55, 224, 122, 0.35);
+  color: #dce8f5;
+}
+.hub-card[data-theme="dyn-cede-paso"]:hover { box-shadow: 16px 16px 0 #ff4b3a; }
+.hub-card[data-theme="dyn-cede-paso"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 14px rgba(154, 202, 235, 0.4);
+}
+.hub-card[data-theme="dyn-cede-paso"] .hub-card__date,
+.hub-card[data-theme="dyn-cede-paso"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #9ACAEB; }
+.hub-card[data-theme="dyn-cede-paso"] .hub-card__kind::before { content: "DINAMICA // ROJA CEDES · VERDE SIGUES"; }
+.hub-card[data-theme="dyn-cede-paso"] .hub-card__subtitle { color: #FFC627; }
+.hub-card[data-theme="dyn-cede-paso"] .hub-card__desc { color: #a7c0d8; }
+.hub-card[data-theme="dyn-cede-paso"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #2e5a8a;
+  background: rgba(4, 14, 30, 0.6);
+  color: #d9e9f6;
+}
+.hub-card[data-theme="dyn-cede-paso"] .hub-card__arrow { color: #37e07a; }
+/* luces de un buque de vuelta encontrada en la oscuridad */
+.hub-card[data-theme="dyn-cede-paso"] .hub-card__deco {
+  bottom: 3.2rem; right: 1.8rem;
+  width: 90px; height: 74px;
+  background:
+    radial-gradient(circle 5px at 45px 10px, #fff3cf 55%, rgba(255, 243, 207, 0.25) 75%, transparent),
+    radial-gradient(circle 5px at 45px 32px, #fff3cf 55%, rgba(255, 243, 207, 0.25) 75%, transparent),
+    radial-gradient(circle 6px at 18px 58px, #ff4b3a 50%, rgba(255, 75, 58, 0.3) 72%, transparent),
+    radial-gradient(circle 6px at 72px 58px, #37e07a 50%, rgba(55, 224, 122, 0.3) 72%, transparent);
+}
+
+/* ============================================================
+   TEMA: dyn-entrada-dique — ASTILLERO CENITAL
+   dique seco cortado en el muelle con buque entrando
+   ============================================================ */
+.hub-card[data-theme="dyn-entrada-dique"] {
+  --card-accent: #54BBAB;
+  background:
+    linear-gradient(0deg, transparent 0 62%, #4c565f 62%),
+    linear-gradient(180deg, #17608f 0 62%, #14568c);
+  border: 2px solid #0e2a4a;
+  box-shadow: 9px 9px 0 rgba(84, 187, 171, 0.45);
+  color: #eaf2fb;
+}
+.hub-card[data-theme="dyn-entrada-dique"]:hover { box-shadow: 16px 16px 0 #FFC627; }
+.hub-card[data-theme="dyn-entrada-dique"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+}
+.hub-card[data-theme="dyn-entrada-dique"] .hub-card__date,
+.hub-card[data-theme="dyn-entrada-dique"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #9ACAEB; }
+.hub-card[data-theme="dyn-entrada-dique"] .hub-card__kind::before { content: "DINAMICA // DESPACIO Y AL CENTRO"; }
+.hub-card[data-theme="dyn-entrada-dique"] .hub-card__subtitle { color: #FFC627; }
+.hub-card[data-theme="dyn-entrada-dique"] .hub-card__desc { color: #c9dced; }
+.hub-card[data-theme="dyn-entrada-dique"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #9ACAEB;
+  background: rgba(4, 24, 46, 0.5);
+  color: #d9e9f6;
+}
+.hub-card[data-theme="dyn-entrada-dique"] .hub-card__arrow { color: #54BBAB; }
+/* dique cortado en tierra con buque en la bocana */
+.hub-card[data-theme="dyn-entrada-dique"] .hub-card__deco {
+  top: 1.2rem; right: 1.4rem;
+  width: 92px; height: 96px;
+  background:
+    /* buque entrando (vertical) */
+    linear-gradient(#0e2a4a, #0e2a4a) 39px 44px / 14px 46px no-repeat,
+    /* picaderos */
+    linear-gradient(#2c343d, #2c343d) 42px 10px / 8px 3px no-repeat,
+    linear-gradient(#2c343d, #2c343d) 42px 20px / 8px 3px no-repeat,
+    linear-gradient(#2c343d, #2c343d) 42px 30px / 8px 3px no-repeat,
+    /* agua interior del dique */
+    linear-gradient(#0d3a61, #0d3a61) 34px 4px / 24px 52px no-repeat,
+    /* tierra alrededor */
+    linear-gradient(#4c565f, #4c565f) 0 0 / 34px 56px no-repeat,
+    linear-gradient(#4c565f, #4c565f) 58px 0 / 34px 56px no-repeat,
+    linear-gradient(#39424b, #39424b) 0 56px / 92px 3px no-repeat,
+    #17608f;
+}
+
+/* ============================================================
+   TEMA: dyn-cero-remociones — PILAS CON DIAS DE SALIDA
+   patio claro con cajas de colores por urgencia
+   ============================================================ */
+.hub-card[data-theme="dyn-cero-remociones"] {
+  --card-accent: #EE7523;
+  background:
+    linear-gradient(0deg, #4c565f 0 15%, transparent 15%),
+    linear-gradient(180deg, #bfe0f5, #9fcdea);
+  border: 2px solid #16304f;
+  box-shadow: 9px 9px 0 rgba(238, 117, 35, 0.45);
+  color: #12263c;
+}
+.hub-card[data-theme="dyn-cero-remociones"]:hover { box-shadow: 16px 16px 0 #ff5d45; }
+.hub-card[data-theme="dyn-cero-remociones"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-cero-remociones"] .hub-card__date,
+.hub-card[data-theme="dyn-cero-remociones"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #0b78c2; }
+.hub-card[data-theme="dyn-cero-remociones"] .hub-card__kind::before { content: "DINAMICA // EL QUE SALE PRONTO VA ARRIBA"; }
+.hub-card[data-theme="dyn-cero-remociones"] .hub-card__subtitle { color: #EE7523; }
+.hub-card[data-theme="dyn-cero-remociones"] .hub-card__desc { color: #41566c; }
+.hub-card[data-theme="dyn-cero-remociones"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #002E6D;
+  background: #fff;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-cero-remociones"] .hub-card__arrow { color: #EE7523; }
+/* pilas con colores de urgencia */
+.hub-card[data-theme="dyn-cero-remociones"] .hub-card__deco {
+  bottom: calc(15% - 2px); right: 1.4rem;
+  width: 96px; height: 64px;
+  background:
+    linear-gradient(#009BDE, #009BDE) 0 48px / 28px 14px no-repeat,
+    linear-gradient(#54BBAB, #54BBAB) 0 32px / 28px 14px no-repeat,
+    linear-gradient(#ff5d45, #ff5d45) 0 16px / 28px 14px no-repeat,
+    linear-gradient(#FFC627, #FFC627) 34px 48px / 28px 14px no-repeat,
+    linear-gradient(#EE7523, #EE7523) 34px 32px / 28px 14px no-repeat,
+    linear-gradient(#009BDE, #009BDE) 68px 48px / 28px 14px no-repeat;
+}
+
+/* ============================================================
+   TEMA: dyn-circulo-borneo — CARTA DE FONDEO
+   papel de carta con circulos punteados
+   ============================================================ */
+.hub-card[data-theme="dyn-circulo-borneo"] {
+  --card-accent: #009BDE;
+  background:
+    linear-gradient(0deg, rgba(238, 117, 35, 0.14) 0 10%, transparent 10%),
+    linear-gradient(180deg, #cfe0ea, #a4cbdf);
+  border: 2px solid #123c5c;
+  box-shadow: 9px 9px 0 rgba(0, 155, 222, 0.4);
+  color: #123c5c;
+}
+.hub-card[data-theme="dyn-circulo-borneo"]:hover { box-shadow: 16px 16px 0 #FFC627; }
+.hub-card[data-theme="dyn-circulo-borneo"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-circulo-borneo"] .hub-card__date,
+.hub-card[data-theme="dyn-circulo-borneo"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #0b78c2; }
+.hub-card[data-theme="dyn-circulo-borneo"] .hub-card__kind::before { content: "DINAMICA // LA CADENA MANDA"; }
+.hub-card[data-theme="dyn-circulo-borneo"] .hub-card__subtitle { color: #EE7523; }
+.hub-card[data-theme="dyn-circulo-borneo"] .hub-card__desc { color: #35516b; }
+.hub-card[data-theme="dyn-circulo-borneo"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #002E6D;
+  background: rgba(255, 255, 255, 0.75);
+  color: #002E6D;
+}
+.hub-card[data-theme="dyn-circulo-borneo"] .hub-card__arrow { color: #0b78c2; }
+/* circulos de borneo punteados */
+.hub-card[data-theme="dyn-circulo-borneo"] .hub-card__deco {
+  bottom: 2.6rem; right: 1.6rem;
+  width: 100px; height: 76px;
+}
+.hub-card[data-theme="dyn-circulo-borneo"] .hub-card__deco::before,
+.hub-card[data-theme="dyn-circulo-borneo"] .hub-card__deco::after {
+  content: "";
+  position: absolute;
+  border: 2.5px dashed rgba(0, 91, 148, 0.75);
+  border-radius: 50%;
+}
+.hub-card[data-theme="dyn-circulo-borneo"] .hub-card__deco::before {
+  left: 0; top: 6px;
+  width: 58px; height: 58px;
+  background: radial-gradient(circle 4px at 50% 50%, #123c5c 90%, transparent);
+}
+.hub-card[data-theme="dyn-circulo-borneo"] .hub-card__deco::after {
+  right: 0; bottom: 0;
+  width: 44px; height: 44px;
+  border-color: #ff5d45;
+  background: radial-gradient(circle 4px at 50% 50%, #ff5d45 90%, transparent);
+}
+
+/* ============================================================
+   TEMA: dyn-hombre-al-agua — RESCATE EN ALTAMAR
+   mar abierto con estela curva y MOB
+   ============================================================ */
+.hub-card[data-theme="dyn-hombre-al-agua"] {
+  --card-accent: #ff5d45;
+  background:
+    radial-gradient(circle 5px at 78% 62%, #ff5d45 55%, rgba(255, 93, 69, 0.3) 75%, transparent),
+    linear-gradient(160deg, #2f7fb8, #10466f);
+  border: 2px solid #0e2a4a;
+  box-shadow: 9px 9px 0 rgba(255, 93, 69, 0.45);
+  color: #eaf2fb;
+}
+.hub-card[data-theme="dyn-hombre-al-agua"]:hover { box-shadow: 16px 16px 0 #FFC627; }
+.hub-card[data-theme="dyn-hombre-al-agua"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+}
+.hub-card[data-theme="dyn-hombre-al-agua"] .hub-card__date,
+.hub-card[data-theme="dyn-hombre-al-agua"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #9ACAEB; }
+.hub-card[data-theme="dyn-hombre-al-agua"] .hub-card__kind::before { content: "DINAMICA // VUELTA DE WILLIAMSON"; }
+.hub-card[data-theme="dyn-hombre-al-agua"] .hub-card__subtitle { color: #FFC627; }
+.hub-card[data-theme="dyn-hombre-al-agua"] .hub-card__desc { color: #c9dced; }
+.hub-card[data-theme="dyn-hombre-al-agua"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #9ACAEB;
+  background: rgba(4, 24, 46, 0.5);
+  color: #d9e9f6;
+}
+.hub-card[data-theme="dyn-hombre-al-agua"] .hub-card__arrow { color: #ff5d45; }
+/* estela curva punteada hacia el MOB */
+.hub-card[data-theme="dyn-hombre-al-agua"] .hub-card__deco {
+  bottom: 2.8rem; right: 1.4rem;
+  width: 104px; height: 78px;
+  border: 3px dashed rgba(235, 248, 255, 0.55);
+  border-right-color: transparent;
+  border-radius: 50%;
+  rotate: -20deg;
+}
+.hub-card[data-theme="dyn-hombre-al-agua"] .hub-card__deco::before {
+  content: "";
+  position: absolute;
+  left: -8px; top: 26px;
+  width: 10px; height: 26px;
+  background: #0e2a4a;
+  border: 1.5px solid #fff;
+  border-radius: 45% 45% 30% 30%;
+  rotate: 14deg;
+}
+
+/* ============================================================
    STEPS / FOOTER
    ============================================================ */
 .hub-section--add .hub-steps {
@@ -1698,6 +2140,103 @@ code {
   font-family: var(--f-black);
   background: var(--ink);
   color: var(--bone);
+}
+
+/* ============================================================
+   TEMA: dyn-puente-holo — PROYECCION HOLOGRAFICA
+   noche profunda, holograma cian y canal ambar del Coronel
+   ============================================================ */
+.hub-card[data-theme="dyn-puente-holo"] {
+  --card-accent: #38e1ff;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 100% 90% at 50% 100%, rgba(16, 60, 110, 0.55), transparent 70%),
+    #030812;
+  border: 2px solid #14476b;
+  box-shadow: 9px 9px 0 rgba(56, 225, 255, 0.35);
+  color: #dff4ff;
+}
+.hub-card[data-theme="dyn-puente-holo"]:hover { box-shadow: 16px 16px 0 #38e1ff; }
+.hub-card[data-theme="dyn-puente-holo"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #f2fcff;
+  text-shadow: 0 0 14px rgba(56, 225, 255, 0.55);
+}
+.hub-card[data-theme="dyn-puente-holo"] .hub-card__date,
+.hub-card[data-theme="dyn-puente-holo"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #38e1ff; }
+.hub-card[data-theme="dyn-puente-holo"] .hub-card__kind::before { content: "VISUAL // MAPA TACTICO · DOS MENTORES"; }
+.hub-card[data-theme="dyn-puente-holo"] .hub-card__subtitle { color: #ffb454; }
+.hub-card[data-theme="dyn-puente-holo"] .hub-card__desc { color: #8fb6cf; }
+.hub-card[data-theme="dyn-puente-holo"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #1c6d94;
+  background: rgba(4, 18, 36, 0.65);
+  color: #aee8fb;
+}
+.hub-card[data-theme="dyn-puente-holo"] .hub-card__arrow { color: #38e1ff; }
+/* proyector: cono de luz con orbe y anillos de mesa tactica */
+.hub-card[data-theme="dyn-puente-holo"] .hub-card__deco {
+  bottom: 3rem; right: 1.6rem;
+  width: 90px; height: 90px;
+  background:
+    radial-gradient(circle 9px at 50% 18%, #eafcff 30%, rgba(56, 225, 255, 0.9) 60%, transparent),
+    linear-gradient(to top, rgba(56, 225, 255, 0.03), rgba(56, 225, 255, 0.22)) 50% 100% / 46px 62px no-repeat,
+    radial-gradient(ellipse 44px 10px at 50% 92%, rgba(56, 225, 255, 0.5), transparent 70%),
+    radial-gradient(ellipse 60% 16% at 50% 92%, transparent 0 62%, rgba(56, 225, 255, 0.45) 63% 66%, transparent 67%);
+  clip-path: polygon(0 0, 100% 0, 100% 78%, 88% 100%, 12% 100%, 0 78%);
+}
+
+/* ============================================================
+   TEMA: dyn-mapa-tactico-3d — MAPA DE CAMPANA WEBGL
+   noche cian con circuitos ambar, cinco sectores y hub central
+   ============================================================ */
+.hub-card[data-theme="dyn-mapa-tactico-3d"] {
+  --card-accent: #ff9b3a;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px),
+    linear-gradient(206deg, rgba(255, 155, 58, 0.12), transparent 40%),
+    radial-gradient(ellipse 100% 90% at 50% 100%, rgba(14, 58, 92, 0.6), transparent 70%),
+    #030812;
+  border: 2px solid #14476b;
+  box-shadow: 9px 9px 0 rgba(255, 155, 58, 0.4);
+  color: #dff4ff;
+}
+.hub-card[data-theme="dyn-mapa-tactico-3d"]:hover { box-shadow: 16px 16px 0 #ff9b3a; }
+.hub-card[data-theme="dyn-mapa-tactico-3d"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #f2fcff;
+  text-shadow: 0 0 14px rgba(56, 225, 255, 0.55);
+}
+.hub-card[data-theme="dyn-mapa-tactico-3d"] .hub-card__date,
+.hub-card[data-theme="dyn-mapa-tactico-3d"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #38e1ff; }
+.hub-card[data-theme="dyn-mapa-tactico-3d"] .hub-card__kind::before { content: "VISUAL 3D // WEBGL · CINCO SECTORES · BLOOM"; }
+.hub-card[data-theme="dyn-mapa-tactico-3d"] .hub-card__subtitle { color: #ff9b3a; }
+.hub-card[data-theme="dyn-mapa-tactico-3d"] .hub-card__desc { color: #8fb6cf; }
+.hub-card[data-theme="dyn-mapa-tactico-3d"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #1c6d94;
+  background: rgba(4, 18, 36, 0.65);
+  color: #aee8fb;
+}
+.hub-card[data-theme="dyn-mapa-tactico-3d"] .hub-card__arrow { color: #ff9b3a; }
+/* constelacion de sectores: hub al centro y cinco nodos enlazados */
+.hub-card[data-theme="dyn-mapa-tactico-3d"] .hub-card__deco {
+  bottom: 3rem; right: 1.6rem;
+  width: 92px; height: 92px;
+  background:
+    radial-gradient(circle 4px at 50% 50%, #38e1ff 60%, transparent),
+    radial-gradient(circle 3px at 24% 26%, #54ffc8 60%, transparent),
+    radial-gradient(circle 3px at 78% 22%, rgba(90, 130, 175, 0.9) 60%, transparent),
+    radial-gradient(circle 3px at 14% 64%, rgba(90, 130, 175, 0.9) 60%, transparent),
+    radial-gradient(circle 3px at 58% 84%, rgba(90, 130, 175, 0.9) 60%, transparent),
+    radial-gradient(circle 3px at 88% 66%, #ff9b3a 60%, transparent),
+    linear-gradient(43deg, transparent calc(50% - 1px), rgba(56, 225, 255, 0.4) 50%, transparent calc(50% + 1px)) 0 0 / 55% 55% no-repeat,
+    linear-gradient(-47deg, transparent calc(50% - 1px), rgba(56, 225, 255, 0.4) 50%, transparent calc(50% + 1px)) 100% 0 / 55% 55% no-repeat,
+    linear-gradient(90deg, transparent calc(50% - 1px), rgba(255, 155, 58, 0.4) 50%, transparent calc(50% + 1px)) 100% 62% / 48% 30% no-repeat;
 }
 
 .hub-footer {

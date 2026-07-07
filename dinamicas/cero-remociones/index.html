@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Cero Remociones</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: CERO REMOCIONES
+       El problema numero uno del patio de contenedores, vuelto
+       juego. FASE 1 (RECIBO): llegan 16 contenedores, cada uno
+       rotulado con su DIA DE SALIDA (D1 a D5), y los apilas con
+       la grua en 7 posiciones x 4 alturas. FASE 2 (DESPACHO):
+       pasan los dias y vienen por cada contenedor en orden: si el
+       que sale tiene otros encima, cada uno que hay que quitar es
+       una REMOCION (-60 pts) y la grua lo reacomoda sola en la
+       pila mas baja... donde puede volver a estorbar.
+
+       LA LECCION: apila pensando en el orden de salida (los que
+       salen pronto arriba o en pilas propias) y las remociones
+       se vuelven cero.
+
+       CONTROLES: A/D mover la grua, S o ESPACIO soltar, consola
+       tactil, H instrucciones, R reiniciar.
+
+       PERSONALIZAR: mezcla de dias, tamano del patio y castigos
+       en js/remociones.js.
+       ============================================================ -->
+
+  <div class="scene" id="scene">
+    <div class="beam"></div>
+    <div class="trolley" id="trolley"></div>
+    <i class="cable" id="cable"></i>
+    <div class="hangbox" id="hangbox"><span id="hang-d">--</span></div>
+    <div class="yard" id="yard"></div>
+    <div class="ground" aria-hidden="true"></div>
+  </div>
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>CERO REMOCIONES</span></div>
+    <div class="phase" id="phase">FASE 1 // RECIBO</div>
+    <div class="stats">
+      <span class="stats__item">CAJAS <b id="hud-left">16</b></span>
+      <span class="stats__item">REMOCIONES <b id="hud-rem">0</b></span>
+      <span class="stats__item">PTS <b id="hud-score">1000</b></span>
+      <button type="button" class="helpbtn" id="help" title="Instrucciones [H]">?</button>
+    </div>
+  </header>
+
+  <div class="next" id="next">
+    <span class="next__label">SIGUEN</span>
+    <span class="next__box" id="next-1">--</span>
+    <span class="next__box" id="next-2">--</span>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- instrucciones -->
+  <div class="intro" id="intro">
+    <div class="intro__panel">
+      <p class="intro__kicker">PATIO DE CONTENEDORES // INSTRUCCIONES</p>
+      <h2>Cero remociones</h2>
+      <p class="intro__mission">
+        Llegan <b>16 contenedores</b> y cada uno trae rotulado su <b>dia de salida</b>
+        (D1 sale manana... D5 sale al ultimo). Apilalos como quieras. Despues pasan
+        los dias y vienen por ellos <b>en orden</b>.
+      </p>
+      <p class="intro__flow">A/D MOVER LA GRUA &#183; S o ESPACIO SOLTAR &#183; 7 PILAS x 4 ALTURAS</p>
+      <ul class="intro__rules">
+        <li><b class="c-rem">REMOCION = -60 PTS.</b> Si el que sale tiene cajas encima, cada una que hay que quitar cuesta.</li>
+        <li><b>LA GRUA REACOMODA SOLA</b> las que estorban... en la pila mas baja, sin pensar. Pueden volver a estorbar.</li>
+        <li><b>PIENSA AL REVES:</b> los que salen PRONTO van arriba o en pilas propias; los D5 al fondo.</li>
+        <li><b>EL COLOR AYUDA:</b> rojo sale ya, azul sale al ultimo.</li>
+        <li><b>PUNTAJE:</b> empiezas con 1000; cada remocion resta 60 y el reloj resta poco a poco.</li>
+      </ul>
+      <button type="button" id="start">ABRIR EL PATIO</button>
+    </div>
+  </div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">--</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRO TURNO [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">APILA PENSANDO EN EL DIA DE SALIDA DE CADA CAJA</span>
+    <span class="hud__keys">A/D mover &#183; S o ESPACIO soltar &#183; H instrucciones &#183; R reiniciar</span>
+  </footer>
+
+  <div class="console" aria-label="Controles de patio">
+    <button type="button" class="cbtn" data-k="left">&#9664;</button>
+    <button type="button" class="cbtn cbtn--drop" data-k="drop">SOLTAR</button>
+    <button type="button" class="cbtn" data-k="right">&#9654;</button>
+  </div>
+
+  <script src="js/remociones.js"></script>
+</body>
+</html>

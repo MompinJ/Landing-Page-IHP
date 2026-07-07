@@ -1,0 +1,5 @@
+Coloca aqui las capturas reales del producto. Nombres esperados por el deck:
+- comunidad-muro.png   (Pilar 1 - muro/feed de Comunidad)
+- reportes-dashboard.png (Pilar 3 - dashboard de reportes)
+
+Si un archivo no existe, el deck muestra un marco placeholder elegante en su lugar.

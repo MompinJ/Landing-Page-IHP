@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Cede el Paso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: CEDE EL PASO (practico nocturno)
+       Noche cerrada en el puente. En cada ronda aparecen SOLO las
+       luces de navegacion de otro buque: hay que deducir que es y
+       hacia donde va, y elegir la maniobra correcta segun el
+       reglamento de abordajes antes de que corra el tiempo.
+
+       CLAVES QUE ENSENA
+       - Roja = su costado de BABOR te mira: normalmente TU cedes.
+       - Verde = su costado de ESTRIBOR: normalmente el cede.
+       - Roja + verde con topes en linea = de frente: ambos caen
+         a estribor.
+       - Solo blanca de popa = tu lo alcanzas: tu te apartas.
+       - Luces especiales (sin gobierno, draga, pesquero, velero)
+         cambian la jerarquia.
+
+       Al responder se revela la silueta con su rumbo y la regla.
+       8 rondas, puntos por acierto y rapidez.
+
+       CONTROLES: click en la opcion (o teclas 1-3). H
+       instrucciones, R reinicia.
+
+       PERSONALIZAR: escenarios en js/cede.js. Simplificado para
+       demo: validar con un experto en reglamento (COLREG).
+       ============================================================ -->
+
+  <div class="scene" id="scene">
+    <div class="stars" aria-hidden="true"></div>
+    <div class="moon" aria-hidden="true"></div>
+    <div class="horizon" aria-hidden="true"></div>
+
+    <!-- el otro buque: luces + silueta que se revela -->
+    <div class="vessel" id="vessel">
+      <div class="sil" id="sil"><i class="sil__arrow"></i></div>
+      <div class="lights" id="lights"></div>
+      <p class="vessel__type" id="vessel-type" hidden>--</p>
+    </div>
+
+    <!-- tu proa -->
+    <div class="ownbow" aria-hidden="true"><i class="ownbow__mast"></i></div>
+    <div class="ownlight ownlight--r"><i></i>TU BABOR &#183; ROJA</div>
+    <div class="ownlight ownlight--g">TU ESTRIBOR &#183; VERDE<i></i></div>
+  </div>
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>CEDE EL PASO</span></div>
+    <div class="timer"><i id="timer-fill"></i></div>
+    <div class="stats">
+      <span class="stats__item">RONDA <b id="hud-round">1/8</b></span>
+      <span class="stats__item">PTS <b id="hud-score">0</b></span>
+      <button type="button" class="helpbtn" id="help" title="Instrucciones [H]">?</button>
+    </div>
+  </header>
+
+  <div class="question" id="question">--</div>
+
+  <div class="options" id="options"></div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- veredicto de ronda -->
+  <div class="verdict" id="verdict" hidden>
+    <div class="verdict__card" id="verdict-card">
+      <p class="verdict__kicker" id="vd-kicker">--</p>
+      <h3 id="vd-title">--</h3>
+      <p class="verdict__detail" id="vd-detail">--</p>
+      <button type="button" id="vd-next">SIGUIENTE</button>
+    </div>
+  </div>
+
+  <!-- instrucciones -->
+  <div class="intro" id="intro">
+    <div class="intro__panel">
+      <p class="intro__kicker">PUENTE DE NOCHE // INSTRUCCIONES</p>
+      <h2>Cede el paso</h2>
+      <p class="intro__mission">
+        Guardia nocturna: en cada ronda veras <b>solo las luces</b> de otro buque.
+        Deduce que es y hacia donde va, y elige la maniobra correcta
+        <b>antes de que corra el tiempo</b>. 8 rondas.
+      </p>
+      <p class="intro__flow">TU PROA APUNTA HACIA ARRIBA &#183; TU ROJA A BABOR (IZQ) &#183; TU VERDE A ESTRIBOR (DER)</p>
+      <ul class="intro__rules">
+        <li><b class="c-red">VES SU ROJA:</b> su babor te mira, viene de tu estribor... normalmente TU cedes.</li>
+        <li><b class="c-green">VES SU VERDE:</b> su estribor te mira... normalmente el cede y tu mantienes.</li>
+        <li><b>ROJA + VERDE con topes en linea:</b> viene de frente. Los dos caen a estribor.</li>
+        <li><b>SOLO BLANCA:</b> es su luz de popa: tu lo alcanzas y tu te apartas.</li>
+        <li><b class="c-esp">LUCES ESPECIALES</b> (dos rojas, roja-blanca-roja, verde sobre blanca, sin tope) cambian quien manda: ojo con ellas.</li>
+        <li><b>PUNTOS:</b> +100 por acierto, hasta +50 por rapidez. Fallar explica la regla.</li>
+      </ul>
+      <button type="button" id="start">TOMAR LA GUARDIA</button>
+    </div>
+  </div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">--</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRA GUARDIA [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">LEE LAS LUCES Y DECIDE LA MANIOBRA</span>
+    <span class="hud__keys">CLICK u 1-3 responder &#183; H instrucciones &#183; R reiniciar</span>
+  </footer>
+
+  <script src="js/cede.js"></script>
+</body>
+</html>

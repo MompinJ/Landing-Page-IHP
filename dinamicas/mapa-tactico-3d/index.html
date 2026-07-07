@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VISUAL 3D // Mapa Tactico NEXO-IA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       VISUAL 3D: MAPA TACTICO NEXO-IA
+       Demo de la "Ruta C" para el Instituto: mapa de campana en
+       WebGL real (Three.js) con estetica de holograma emisivo
+       low-poly. Cinco terminales alrededor del Digital Hub, rutas
+       de datos con pulsos viajando, domo de escudo en el Astillero
+       y bloom de postprocesado para el brillo.
+
+       Todo es geometria primitiva generada por codigo: no hay
+       modelos externos ni assets binarios.
+
+       Interaccion:
+       - Arrastrar: orbitar   - Rueda: zoom
+       - Teclas 1-5: enfocar terminal   - 0: Digital Hub
+       - ESPACIO: pausar el tour cinematico
+
+       Requiere servidor local (modulos ES + CDN de Three.js):
+         python -m http.server 8080
+
+       PERSONALIZAR: sectores, textos y paleta en las constantes
+       de js/mapa.js.
+       ============================================================ -->
+
+  <div class="fallback" id="fallback">
+    <p class="fallback__kicker">PROYECCION NO DISPONIBLE</p>
+    <h2>No se pudo iniciar el render 3D.</h2>
+    <p class="fallback__sub">
+      Esta pieza carga Three.js desde CDN y usa modulos ES:
+      necesita conexion y abrirse via <code>http://</code>
+      (por ejemplo <code>python -m http.server 8080</code>), no via <code>file://</code>.
+    </p>
+  </div>
+
+  <canvas id="gl"></canvas>
+  <div id="labels" aria-hidden="true"></div>
+
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="meters">
+    <div class="meter">
+      <i class="meter__icon meter__icon--shield"></i>
+      <div><span class="meter__name">Escudo de Seguridad (EVA)</span><strong id="m-eva">100/100</strong></div>
+    </div>
+    <div class="meter meter--warn">
+      <i class="meter__icon meter__icon--bolt"></i>
+      <div><span class="meter__name">Eficiencia Operativa (GAMMA)</span><strong id="m-gamma">0/100</strong></div>
+    </div>
+    <div class="meter">
+      <i class="meter__icon meter__icon--box"></i>
+      <div><span class="meter__name">Criterio Humano</span><strong id="m-crit">5000</strong></div>
+    </div>
+  </header>
+
+  <canvas class="minimap" id="minimap" width="150" height="150" aria-hidden="true"></canvas>
+
+  <div class="brand">
+    <h1>NEXO-IA</h1>
+    <p>OPERATIONS</p>
+  </div>
+
+  <footer class="hud-bottom">
+    <span id="hud-status">TOUR CINEMATICO EN CURSO</span>
+    <span class="hud-bottom__keys">arrastra orbita &middot; rueda zoom &middot; 1-5 terminales &middot; 0 hub &middot; espacio pausa</span>
+  </footer>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="js/mapa.js"></script>
+</body>
+</html>

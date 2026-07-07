@@ -1,0 +1,484 @@
+/* ============================================================
+   PUENTE DE MANDO HOLOGRAFICO — showcase visual
+   Paleta y look: proyeccion cian sobre noche profunda, con el
+   canal del Coronel en ambar. Toda la identidad vive en :root.
+   ============================================================ */
+
+:root {
+  --bg-0: #020610;
+  --bg-1: #051024;
+  --cyan: #38e1ff;
+  --cyan-soft: rgba(56, 225, 255, 0.45);
+  --cyan-faint: rgba(56, 225, 255, 0.14);
+  --aqua: #54ffc8;
+  --amber: #ffb454;
+  --locked: #4d6a96;
+  --ink: #dff4ff;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Montserrat', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  background:
+    radial-gradient(ellipse 120% 90% at 50% 62%, var(--bg-1), var(--bg-0) 70%),
+    var(--bg-0);
+  color: var(--ink);
+  font-family: var(--sans);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* vineta encima de la escena, debajo del HUD */
+body::after {
+  content: "";
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse 95% 85% at 50% 50%, transparent 55%, rgba(1, 4, 12, 0.6));
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ---------- polvo de fondo ---------- */
+
+#dust {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+}
+
+/* ---------- escenario 3D ---------- */
+
+.viewport {
+  position: fixed; inset: 0;
+  perspective: 1300px;
+  perspective-origin: 50% 42%;
+  z-index: 1;
+  cursor: grab;
+}
+.viewport:active { cursor: grabbing; }
+
+.world {
+  position: absolute;
+  left: 50%; top: 55%;
+  width: 0; height: 0;
+  transform-style: preserve-3d;
+}
+.world div, .world svg { position: absolute; transform-style: preserve-3d; }
+
+/* sprites que siempre miran a la camara (JS alimenta --bill y --tilt) */
+.bill, .core { transform: rotateY(var(--bill, 0deg)) rotateX(var(--tilt, 0deg)); }
+
+/* piso: rejilla que se desvanece hacia el horizonte */
+.floor {
+  width: 2600px; height: 2600px;
+  left: -1300px; top: -1300px;
+  transform: rotateX(90deg);
+  background:
+    radial-gradient(circle at 50% 50%, var(--cyan-faint), transparent 42%),
+    repeating-linear-gradient(0deg, rgba(56, 225, 255, 0.07) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(90deg, rgba(56, 225, 255, 0.07) 0 1px, transparent 1px 64px);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 26%, transparent 66%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 26%, transparent 66%);
+}
+
+/* anillos concentricos de la mesa tactica */
+.ring {
+  border-radius: 50%;
+  border: 1px solid var(--cyan-soft);
+  box-shadow: 0 0 18px rgba(56, 225, 255, 0.12), inset 0 0 24px rgba(56, 225, 255, 0.08);
+}
+.ring--a { animation: spin-cw 46s linear infinite; }
+.ring--b { border-style: dashed; opacity: 0.75; animation: spin-ccw 64s linear infinite; }
+.ring--c { opacity: 0.5; animation: spin-cw 90s linear infinite; }
+.ring--d { border-style: dashed; opacity: 0.3; animation: spin-ccw 120s linear infinite; }
+
+@keyframes spin-cw  { from { transform: rotateX(90deg) rotate(0turn); }  to { transform: rotateX(90deg) rotate(1turn); } }
+@keyframes spin-ccw { from { transform: rotateX(90deg) rotate(1turn); }  to { transform: rotateX(90deg) rotate(0turn); } }
+
+/* barrido tipo radar sobre la mesa */
+.sweep {
+  width: 880px; height: 880px;
+  left: -440px; top: -440px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(56, 225, 255, 0.2), transparent 16%);
+  animation: spin-cw 11s linear infinite;
+}
+
+/* rutas de datos entre sectores */
+.arcs {
+  width: 900px; height: 900px;
+  left: -450px; top: -450px;
+  transform: rotateX(90deg);
+}
+.arcs path {
+  fill: none;
+  stroke: rgba(56, 225, 255, 0.5);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 14;
+  animation: dashflow 2.6s linear infinite;
+}
+@keyframes dashflow { to { stroke-dashoffset: -38; } }
+
+/* ---------- nucleo central (la IA proyectada) ---------- */
+
+.core { transform-origin: 0 0; }
+
+.core-base {
+  width: 76px; height: 76px;
+  left: -38px; top: -38px;
+  border-radius: 50%;
+  transform: rotateX(90deg);
+  background: radial-gradient(circle, rgba(56, 225, 255, 0.55), transparent 62%);
+}
+
+.core__cone {
+  width: 150px; height: 130px;
+  left: -75px; top: -138px;
+  clip-path: polygon(14% 0, 86% 0, 57% 100%, 43% 100%);
+  background: linear-gradient(to top, rgba(56, 225, 255, 0.02), rgba(56, 225, 255, 0.16));
+  animation: flicker 5.2s steps(1) infinite;
+}
+
+.core__orb {
+  width: 58px; height: 58px;
+  left: -29px; top: -186px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 42%, #eafcff 0 18%, var(--cyan) 42%, rgba(56, 225, 255, 0.12) 74%, transparent);
+  box-shadow: 0 0 34px rgba(56, 225, 255, 0.55), 0 0 90px rgba(56, 225, 255, 0.25);
+  animation: bob 4.6s ease-in-out infinite;
+}
+
+.core__halo {
+  width: 96px; height: 30px;
+  left: -48px; top: -172px;
+  border-radius: 50%;
+  border: 1px solid var(--cyan-soft);
+  animation: bob 4.6s ease-in-out infinite, haloturn 7s linear infinite;
+}
+.core__halo--b {
+  width: 120px; height: 38px;
+  left: -60px; top: -176px;
+  opacity: 0.5;
+  animation: bob 4.6s ease-in-out infinite, haloturn 11s linear infinite reverse;
+}
+
+@keyframes bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -9px; } }
+@keyframes haloturn { from { transform: rotate(-8deg); } to { transform: rotate(352deg); } }
+
+/* parpadeo sutil de holograma */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  87% { opacity: 1; } 88% { opacity: 0.55; } 89% { opacity: 1; }
+  93% { opacity: 0.8; } 94% { opacity: 1; }
+}
+
+/* ---------- sectores ---------- */
+
+.base { --acc: var(--cyan); }
+.base--done   { --acc: var(--aqua); }
+.base--active { --acc: var(--cyan); }
+.base--locked { --acc: var(--locked); }
+
+/* aro y pulso a ras de piso */
+.base__ring {
+  width: 92px; height: 92px;
+  left: -46px; top: -46px;
+  border-radius: 50%;
+  transform: rotateX(90deg);
+  border: 1px solid var(--acc);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--acc) 35%, transparent);
+}
+.base--locked .base__ring { border-style: dashed; opacity: 0.6; }
+
+.base__pulse {
+  width: 92px; height: 92px;
+  left: -46px; top: -46px;
+  border-radius: 50%;
+  border: 2px solid var(--acc);
+  animation: basepulse 2.8s ease-out infinite;
+  opacity: 0;
+}
+.base__pulse--late { animation-delay: 1.4s; }
+.base--locked .base__pulse { display: none; }
+.base.is-focus .base__pulse { animation-duration: 1.6s; }
+
+@keyframes basepulse {
+  0%   { transform: rotateX(90deg) scale(0.55); opacity: 0.9; }
+  100% { transform: rotateX(90deg) scale(2.1);  opacity: 0; }
+}
+
+/* columna de luz */
+.base__beam {
+  width: 3px; height: 200px;
+  left: -1.5px; top: -200px;
+  background: linear-gradient(to top, var(--acc), transparent);
+  opacity: 0.55;
+  animation: flicker 6.4s steps(1) infinite;
+}
+.base.is-focus .base__beam { opacity: 1; width: 4px; left: -2px; }
+.base--locked .base__beam { opacity: 0.25; }
+
+/* silueta proyectada del sector */
+.glyph {
+  width: 66px; height: 46px;
+  left: -33px; top: -54px;
+  transform: translateZ(1px);
+  background: linear-gradient(to top, color-mix(in srgb, var(--acc) 30%, transparent), color-mix(in srgb, var(--acc) 8%, transparent));
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--acc) 40%, transparent));
+  animation: flicker 7.3s steps(1) infinite;
+}
+.glyph--ship  { clip-path: polygon(2% 58%, 12% 100%, 88% 100%, 98% 58%, 66% 58%, 66% 26%, 42% 26%, 42% 58%); }
+.glyph--stack { clip-path: polygon(0 100%, 0 66%, 30% 66%, 30% 33%, 62% 33%, 62% 0, 100% 0, 100% 100%); }
+.glyph--shed  { clip-path: polygon(0 100%, 0 46%, 50% 0, 100% 46%, 100% 100%); }
+.base--locked .glyph { opacity: 0.45; }
+
+/* placa de datos del sector */
+.base__tag {
+  width: max-content;
+  min-width: 168px;
+  left: 0; top: -252px;
+  transform: translateX(-50%) translateZ(3px);
+  padding: 9px 12px 10px;
+  background: rgba(4, 13, 28, 0.82);
+  border: 1px solid color-mix(in srgb, var(--acc) 65%, transparent);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  text-align: left;
+  white-space: nowrap;
+}
+.base__tag b {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--acc);
+  margin-bottom: 3px;
+}
+.base__tag strong {
+  display: block;
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: #fff;
+  margin-bottom: 3px;
+}
+.base__tag small {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--acc);
+}
+.base.is-focus .base__tag {
+  box-shadow: 0 0 22px color-mix(in srgb, var(--acc) 35%, transparent);
+  border-color: var(--acc);
+}
+.base--locked .base__tag { opacity: 0.65; }
+
+/* ---------- capas de ambiente ---------- */
+
+.scanlines {
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 4;
+}
+.scanlines::after {
+  content: "";
+  position: absolute; left: 0; right: 0; top: -20%;
+  height: 18%;
+  background: linear-gradient(to bottom, transparent, rgba(56, 225, 255, 0.045), transparent);
+  animation: scanbar 9s linear infinite;
+}
+@keyframes scanbar { to { translate: 0 780%; } }
+
+.frame { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+.frame__c {
+  position: absolute;
+  width: 26px; height: 26px;
+  border: 1px solid var(--cyan-soft);
+}
+.frame__c--tl { left: 14px; top: 14px; border-right: 0; border-bottom: 0; }
+.frame__c--tr { right: 14px; top: 14px; border-left: 0; border-bottom: 0; }
+.frame__c--bl { left: 14px; bottom: 14px; border-right: 0; border-top: 0; }
+.frame__c--br { right: 14px; bottom: 14px; border-left: 0; border-top: 0; }
+
+/* ---------- HUD ---------- */
+
+.hud {
+  position: fixed; left: 30px; right: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: rgba(160, 220, 245, 0.85);
+  z-index: 6;
+  pointer-events: none;
+}
+.hud--top { top: 24px; }
+.hud--bottom { bottom: 24px; }
+
+.hud__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: #fff;
+}
+.hud__brand i {
+  width: 10px; height: 10px;
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan);
+}
+.hud__phase { color: var(--cyan); text-align: right; }
+.hud__keys { color: rgba(160, 220, 245, 0.55); text-align: right; }
+
+/* ---------- paneles de mentores ---------- */
+
+.mentor {
+  position: fixed;
+  bottom: 64px;
+  width: min(340px, 41vw);
+  padding: 12px 14px 10px;
+  background: rgba(3, 11, 24, 0.78);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(120, 200, 235, 0.22);
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  opacity: 0.55;
+  transition: opacity 0.4s, border-color 0.4s, box-shadow 0.4s;
+  z-index: 6;
+}
+.mentor--ia { left: 30px; --acc: var(--cyan); }
+.mentor--cnl { right: 30px; --acc: var(--amber); }
+
+.mentor.is-live {
+  opacity: 1;
+  border-color: var(--acc);
+  box-shadow: 0 0 26px color-mix(in srgb, var(--acc) 22%, transparent);
+}
+
+.mentor__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.mentor__name {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--acc);
+}
+
+.mentor__avatar {
+  position: relative;
+  width: 34px; height: 34px;
+  flex: none;
+}
+
+/* avatar IA: anillos concentricos girando */
+.mentor--ia .mentor__avatar i {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid var(--acc);
+}
+.mentor--ia .mentor__avatar i:nth-child(1) { inset: 0;   border-top-color: transparent; animation: avatarspin 3.2s linear infinite; }
+.mentor--ia .mentor__avatar i:nth-child(2) { inset: 6px; border-bottom-color: transparent; animation: avatarspin 2.1s linear infinite reverse; }
+.mentor--ia .mentor__avatar i:nth-child(3) {
+  inset: 13px;
+  border: 0;
+  background: radial-gradient(circle, #eafcff, var(--acc) 70%);
+  box-shadow: 0 0 10px var(--acc);
+  animation: corepulse 2.4s ease-in-out infinite;
+}
+@keyframes avatarspin { to { rotate: 1turn; } }
+@keyframes corepulse { 0%, 100% { scale: 1; } 50% { scale: 0.72; } }
+
+/* avatar Coronel: galones apilados */
+.mentor--cnl .mentor__avatar i {
+  position: absolute;
+  left: 8px;
+  width: 16px; height: 16px;
+  border-left: 3px solid var(--acc);
+  border-top: 3px solid var(--acc);
+  rotate: 45deg;
+}
+.mentor--cnl .mentor__avatar i:nth-child(1) { top: 1px; }
+.mentor--cnl .mentor__avatar i:nth-child(2) { top: 10px; opacity: 0.7; }
+.mentor--cnl .mentor__avatar i:nth-child(3) { top: 19px; opacity: 0.4; }
+
+.mentor__text {
+  min-height: 60px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.caret {
+  display: none;
+  width: 7px; height: 13px;
+  margin-left: 3px;
+  background: var(--acc);
+  vertical-align: -2px;
+  animation: blink 0.9s steps(1) infinite;
+}
+.mentor.is-live .caret { display: inline-block; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* medidor de canal */
+.mentor__meter {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 12px;
+  margin-top: 8px;
+}
+.mentor__meter i {
+  flex: 1;
+  height: 3px;
+  background: var(--acc);
+  opacity: 0.35;
+}
+.mentor.is-live .mentor__meter i { animation: meter 0.9s ease-in-out infinite alternate; opacity: 0.9; }
+.mentor__meter i:nth-child(2n) { animation-delay: 0.18s; }
+.mentor__meter i:nth-child(3n) { animation-delay: 0.31s; }
+.mentor__meter i:nth-child(5n) { animation-delay: 0.47s; }
+@keyframes meter { from { height: 2px; } to { height: 12px; } }
+
+/* ---------- responsivo ---------- */
+
+@media (max-width: 900px) {
+  .mentor { width: min(300px, 44vw); bottom: 56px; }
+  .mentor__text { font-size: 11px; min-height: 68px; }
+  .hud { font-size: 9px; left: 18px; right: 18px; }
+  .mentor--ia { left: 18px; }
+  .mentor--cnl { right: 18px; }
+}
+
+@media (max-width: 620px) {
+  .mentor { width: calc(100vw - 36px); }
+  .mentor--ia { bottom: 210px; }
+  .mentor--cnl { bottom: 56px; }
+  .hud__keys { display: none; }
+}
+
+/* ---------- movimiento reducido ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ring, .sweep, .core__cone, .core__orb, .core__halo, .core__halo--b,
+  .base__pulse, .base__beam, .glyph, .scanlines::after,
+  .mentor--ia .mentor__avatar i, .mentor.is-live .mentor__meter i,
+  .arcs path, .caret {
+    animation: none;
+  }
+  .base__pulse { display: none; }
+}

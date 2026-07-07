@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Circulo de Borneo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: CIRCULO DE BORNEO
+       Carta del fondeadero vista desde arriba. Hay que fondear
+       3 buques eligiendo DONDE soltar el ancla y CUANTOS
+       GRILLETES de cadena largar:
+       - Mas profundidad exige mas grilletes (regla de la carta:
+         8 m = 3g, 12 m = 4g, 16 m = 5g). Menos = GARREO.
+       - Mas grilletes = circulo de borneo mas grande.
+       - Los circulos NO pueden encimarse entre si, ni pisar el
+         cable submarino, el bajo, la orilla o los buques ya
+         fondeados.
+       Al terminar, PROBAR BORNEO: el viento rola 360 grados y
+       todos los buques giran alrededor de su ancla. Los que
+       largaron poca cadena GARREAN (el ancla ara el fondo) y
+       terminan donde no deben.
+
+       CONTROLES: mueve el mouse por la carta (muestra prof. y
+       minimo), +/- o rueda cambia grilletes, click fondea.
+       H instrucciones, R reiniciar.
+
+       PERSONALIZAR: obstaculos, reglas y puntajes en js/borneo.js.
+       Simplificado para demo: validar con un experto.
+       ============================================================ -->
+
+  <svg id="chart"></svg>
+
+  <header class="hud hud--top">
+    <div class="hud__brand"><i></i><span>CIRCULO DE BORNEO</span></div>
+    <div class="probe" id="probe">PROF -- M &#183; MINIMO -- GRILLETES</div>
+    <div class="stats">
+      <span class="stats__item">BUQUE <b id="hud-ship">1/3</b></span>
+      <span class="stats__item">GRILLETES <b id="hud-g">4</b></span>
+      <span class="stats__item">PTS <b id="hud-score">0</b></span>
+      <button type="button" class="helpbtn" id="help" title="Instrucciones [H]">?</button>
+    </div>
+  </header>
+
+  <div class="gsel">
+    <button type="button" id="g-minus">-</button>
+    <span>CADENA</span>
+    <button type="button" id="g-plus">+</button>
+  </div>
+
+  <button type="button" class="testbtn" id="test" hidden>PROBAR BORNEO</button>
+
+  <div class="toast" id="toast" hidden></div>
+  <div class="alarm" id="alarm" hidden></div>
+
+  <!-- instrucciones -->
+  <div class="intro" id="intro">
+    <div class="intro__panel">
+      <p class="intro__kicker">FONDEADERO // INSTRUCCIONES</p>
+      <h2>Circulo de borneo</h2>
+      <p class="intro__mission">
+        Fondea <b>3 buques</b> en la bahia. Un buque fondeado no se queda quieto:
+        <b>bornea</b> alrededor de su ancla barriendo un circulo completo cuando
+        rola el viento. Tu eliges donde cae el ancla y cuanta cadena largas.
+      </p>
+      <p class="intro__flow">MOUSE APUNTA &#183; +/- o RUEDA CAMBIA GRILLETES &#183; CLICK FONDEA &#183; AL FINAL: PROBAR BORNEO</p>
+      <ul class="intro__rules">
+        <li><b>REGLA DE LA CADENA:</b> a 8 m bastan 3 grilletes, a 12 m son 4, a 16 m son 5. <b class="c-bad">Menos cadena = GARREO</b> (el ancla ara y el buque se va con el viento).</li>
+        <li><b>MAS CADENA = CIRCULO MAS GRANDE.</b> Agarra mejor, pero ocupa mas bahia.</li>
+        <li><b>LOS CIRCULOS NO SE ENCIMAN:</b> ni entre buques, ni sobre el cable submarino, el bajo, la orilla o los fondeados que ya estan.</li>
+        <li><b>EL VIENTO ROLA 360&#176;</b> en la prueba: todos giran a la vez y ahi se ve quien fondeo bien.</li>
+        <li><b>PUNTOS:</b> +300 por buque seguro; -150 por incidente en la prueba; -25 por intento invalido.</li>
+      </ul>
+      <button type="button" id="start">AL FONDEADERO</button>
+    </div>
+  </div>
+
+  <div class="finale" id="finale" hidden>
+    <p class="finale__kicker" id="finale-kicker">--</p>
+    <h2 id="finale-title">--</h2>
+    <p class="finale__score" id="finale-score">--</p>
+    <p class="finale__sub" id="finale-detail">--</p>
+    <button type="button" id="restart">OTRO FONDEO [R]</button>
+  </div>
+
+  <footer class="hud hud--bottom">
+    <span id="hud-status">ELIGE DONDE SOLTAR EL ANCLA Y CUANTA CADENA LARGAR</span>
+    <span class="hud__keys">CLICK fondear &#183; +/- grilletes &#183; H instrucciones &#183; R reiniciar</span>
+  </footer>
+
+  <script src="js/borneo.js"></script>
+</body>
+</html>

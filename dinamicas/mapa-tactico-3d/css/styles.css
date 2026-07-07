@@ -1,0 +1,272 @@
+/* ============================================================
+   MAPA TACTICO NEXO-IA — HUD sobre el render WebGL
+   Cian de proyeccion + ambar de circuito, sobre noche profunda.
+   ============================================================ */
+
+:root {
+  --bg-0: #020610;
+  --cyan: #38e1ff;
+  --cyan-soft: rgba(56, 225, 255, 0.45);
+  --amber: #ff9b3a;
+  --ink: #dff4ff;
+  --panel: rgba(3, 11, 24, 0.78);
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Montserrat', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  background: var(--bg-0);
+  color: var(--ink);
+  font-family: var(--sans);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#gl {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  cursor: grab;
+}
+#gl:active { cursor: grabbing; }
+
+/* vineta sobre el render */
+body::after {
+  content: "";
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse 95% 85% at 50% 50%, transparent 55%, rgba(1, 4, 12, 0.55));
+  pointer-events: none;
+  z-index: 2;
+}
+
+.scanlines {
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.13) 0 1px, transparent 1px 3px);
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ---------- aviso cuando no hay WebGL / CDN ---------- */
+
+.fallback {
+  position: fixed; inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 24px;
+  z-index: 1;
+}
+body.ready .fallback { display: none; }
+.fallback__kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--amber);
+}
+.fallback h2 {
+  font-weight: 800;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  color: #fff;
+}
+.fallback__sub {
+  max-width: 52ch;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: rgba(180, 220, 240, 0.75);
+}
+.fallback code { color: var(--cyan); }
+
+/* ---------- etiquetas proyectadas de los sectores ---------- */
+
+#labels {
+  position: fixed; inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.tag {
+  position: absolute;
+  left: 0; top: 0;
+  width: max-content;
+  max-width: 300px;
+  padding: 7px 11px 8px;
+  background: var(--panel);
+  border: 1px solid var(--cyan-soft);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  font-family: var(--mono);
+  will-change: transform;
+}
+.tag strong {
+  display: block;
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  color: #fff;
+  white-space: nowrap;
+}
+.tag small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--cyan);
+}
+.tag--hub strong { color: var(--cyan); }
+.tag--locked { border-color: rgba(90, 130, 175, 0.4); opacity: 0.72; }
+.tag--locked strong { color: rgba(200, 220, 235, 0.75); }
+.tag--locked small { color: #7d9cc0; }
+.tag.is-focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 22px rgba(56, 225, 255, 0.35);
+  opacity: 1;
+}
+
+/* candado dibujado en CSS */
+.lock {
+  position: relative;
+  width: 10px; height: 8px;
+  flex: none;
+  border: 1px solid currentColor;
+  border-radius: 1px;
+}
+.lock::before {
+  content: "";
+  position: absolute;
+  left: 1px; top: -5px;
+  width: 6px; height: 5px;
+  border: 1px solid currentColor;
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+}
+
+/* ---------- medidores superiores ---------- */
+
+.meters {
+  position: fixed;
+  top: 18px; left: 50%;
+  translate: -50% 0;
+  display: flex;
+  gap: 1px;
+  background: rgba(56, 225, 255, 0.25);
+  border: 1px solid rgba(56, 225, 255, 0.3);
+  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 100%, 0 100%);
+  z-index: 5;
+}
+.meter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 22px 10px;
+  background: var(--panel);
+}
+.meter__name {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: rgba(160, 215, 240, 0.85);
+}
+.meter strong {
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.04em;
+}
+.meter--warn strong { color: var(--amber); }
+
+.meter__icon { width: 18px; height: 20px; flex: none; }
+.meter__icon--shield {
+  background: var(--cyan);
+  clip-path: polygon(50% 0, 100% 18%, 100% 55%, 50% 100%, 0 55%, 0 18%);
+  opacity: 0.9;
+}
+.meter__icon--bolt {
+  background: var(--amber);
+  clip-path: polygon(62% 0, 20% 56%, 46% 56%, 38% 100%, 80% 42%, 54% 42%);
+}
+.meter__icon--box {
+  background: transparent;
+  border: 2px solid var(--cyan);
+  height: 16px;
+  margin-top: 2px;
+}
+
+/* ---------- minimapa ---------- */
+
+.minimap {
+  position: fixed;
+  top: 18px; right: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(56, 225, 255, 0.4);
+  background: rgba(3, 11, 24, 0.72);
+  box-shadow: 0 0 28px rgba(56, 225, 255, 0.15);
+  z-index: 5;
+}
+
+/* ---------- marca y pie ---------- */
+
+.brand {
+  position: fixed;
+  left: 30px; bottom: 52px;
+  z-index: 5;
+  pointer-events: none;
+}
+.brand h1 {
+  font-weight: 900;
+  font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+  letter-spacing: 0.04em;
+  color: #eaf9ff;
+  text-shadow: 0 0 22px rgba(56, 225, 255, 0.45);
+}
+.brand p {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.58em;
+  color: var(--cyan);
+}
+
+.hud-bottom {
+  position: fixed;
+  left: 30px; right: 30px; bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: rgba(160, 220, 245, 0.8);
+  z-index: 5;
+  pointer-events: none;
+}
+.hud-bottom__keys { color: rgba(160, 220, 245, 0.5); text-align: right; }
+
+/* ---------- responsivo ---------- */
+
+@media (max-width: 900px) {
+  .meter { padding: 7px 12px 8px; }
+  .meter strong { font-size: 14px; }
+  .meter__name { font-size: 8px; }
+  .minimap { width: 110px; height: 110px; }
+  .hud-bottom__keys { display: none; }
+  .tag { max-width: 210px; }
+  .tag strong { white-space: normal; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tag { transition: none; }
+}
