@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXO-IA: Eco Temporal</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="cab">
+    <p class="cab__sistema">NEXO-IA // PROYECTOR DE CONSECUENCIAS</p>
+    <h1 class="cab__titulo">ECO TEMPORAL</h1>
+  </header>
+
+  <main class="tablero">
+    <section class="panel escenario">
+      <p class="escenario__texto"><span class="quien quien--eva">[EVA]</span> Pico de arribos: 40% mas contenedores en las proximas 72 horas. Hay dos planes sobre la mesa. Elige uno y frota la linea de tiempo para ver que pasa.</p>
+      <div class="ramas" role="group" aria-label="Eleccion de plan">
+        <button class="rama rama--gamma activa" id="btn-gamma" type="button">PLAN GAMMA &middot; REASIGNACION POR IA</button>
+        <button class="rama rama--manual" id="btn-manual" type="button">PLAN MANUAL &middot; PROCEDIMIENTO CONOCIDO</button>
+      </div>
+    </section>
+
+    <section class="panel metricas" aria-label="Metricas proyectadas">
+      <div class="metrica" id="met-rendimiento">
+        <p class="metrica__nombre">RENDIMIENTO</p>
+        <div class="metrica__tubo"><div class="metrica__nivel"></div><div class="metrica__eco"></div></div>
+        <p class="metrica__valor">0%</p>
+      </div>
+      <div class="metrica" id="met-saturacion">
+        <p class="metrica__nombre">SATURACION PATIO</p>
+        <div class="metrica__tubo"><div class="metrica__nivel"></div><div class="metrica__eco"></div></div>
+        <p class="metrica__valor">0%</p>
+      </div>
+      <div class="metrica" id="met-riesgo">
+        <p class="metrica__nombre">RIESGO OPERATIVO</p>
+        <div class="metrica__tubo"><div class="metrica__nivel"></div><div class="metrica__eco"></div></div>
+        <p class="metrica__valor">0%</p>
+      </div>
+      <div class="bitacora">
+        <p class="bitacora__titulo">BITACORA PROYECTADA</p>
+        <ul id="bitacora"></ul>
+      </div>
+    </section>
+
+    <section class="panel tiempo" aria-label="Linea de tiempo">
+      <div class="riel" id="riel">
+        <div class="riel__barra"></div>
+        <div class="riel__progreso" id="riel-progreso"></div>
+        <div id="riel-eventos"></div>
+        <button class="riel__perilla" id="perilla" type="button"
+                role="slider" aria-label="Horas desde la decision"
+                aria-valuemin="0" aria-valuemax="72" aria-valuenow="0">
+          <span class="riel__lectura" id="lectura">T+0h</span>
+        </button>
+      </div>
+      <div class="tiempo__pie">
+        <span>T+0h</span>
+        <button class="reproducir" id="btn-play" type="button">REPRODUCIR</button>
+        <span>T+72h</span>
+      </div>
+      <p class="veredicto" id="veredicto"></p>
+    </section>
+  </main>
+
+  <div class="hud">
+    <button class="hud__btn" id="btn-ayuda" type="button" aria-label="Instrucciones">?</button>
+  </div>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-titulo">
+    <div class="overlay__caja">
+      <h1 id="overlay-titulo">ECO TEMPORAL</h1>
+      <p class="overlay__intro">Las decisiones no se evaluan en el momento: se evaluan en el tiempo. Este proyector simula las siguientes 72 horas de la terminal.</p>
+      <ul>
+        <li><strong>Elige un plan</strong>: la reasignacion por IA de GAMMA o el procedimiento manual conocido. Puedes cambiar de plan en cualquier momento.</li>
+        <li><strong>Arrastra la perilla</strong> de la linea de tiempo (o usa las flechas, o REPRODUCIR) para avanzar y retroceder en el futuro proyectado.</li>
+        <li>Las tres metricas se mueven en vivo; la marca tenue es el <strong>eco</strong>: lo que estaria pasando con el otro plan a esa misma hora.</li>
+        <li>Los rombos del riel son <strong>eventos</strong>: al pasarlos se escriben en la bitacora. En T+72h llega el veredicto.</li>
+      </ul>
+      <button class="overlay__btn" id="btn-entendido" type="button">ENTENDIDO</button>
+    </div>
+  </div>
+
+  <script src="js/eco.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Puntero de Proyector // diagnostico</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <canvas id="lienzo"></canvas>
+  <canvas id="rejilla"></canvas>
+
+  <header class="hud hud--top">
+    <h1>PUNTERO // DIAGNOSTICO</h1>
+    <p class="hud__hint">Toca, dibuja o usa el lapiz del proyector sobre la pantalla completa.</p>
+  </header>
+
+  <button class="help-btn" id="btn-help" type="button" aria-label="Ver instrucciones">?</button>
+
+  <aside class="hud hud--panel" id="panel">
+    <h2>Entorno</h2>
+    <dl>
+      <div><dt>maxTouchPoints</dt><dd id="env-touch">--</dd></div>
+      <div><dt>Pointer Events</dt><dd id="env-support">--</dd></div>
+      <div><dt>devicePixelRatio</dt><dd id="env-dpr">--</dd></div>
+      <div><dt>Viewport</dt><dd id="env-view">--</dd></div>
+    </dl>
+
+    <h2>Ultimo evento</h2>
+    <dl>
+      <div><dt>pointerType</dt><dd data-f="type">--</dd></div>
+      <div><dt>pointerId</dt><dd data-f="id">--</dd></div>
+      <div><dt>isPrimary</dt><dd data-f="primary">--</dd></div>
+      <div><dt>x, y</dt><dd data-f="xy">--</dd></div>
+      <div><dt>pressure</dt><dd data-f="pressure">--</dd></div>
+      <div><dt>tiltX / tiltY</dt><dd data-f="tilt">--</dd></div>
+      <div><dt>ancho x alto</dt><dd data-f="size">--</dd></div>
+      <div><dt>buttons</dt><dd data-f="buttons">--</dd></div>
+    </dl>
+
+    <h2>Actividad</h2>
+    <dl>
+      <div><dt>Punteros activos</dt><dd data-f="active">0</dd></div>
+      <div><dt>Conteo por tipo</dt><dd data-f="counts">--</dd></div>
+    </dl>
+  </aside>
+
+  <div class="hud hud--log" id="log" aria-live="off"></div>
+
+  <div class="toolbar">
+    <button id="btn-clear" type="button">Limpiar <kbd>C</kbd></button>
+    <button id="btn-grid" type="button">Rejilla <kbd>G</kbd></button>
+  </div>
+
+  <div class="intro" id="intro">
+    <div class="intro__card">
+      <h2>Puntero de Proyector</h2>
+      <p class="intro__mision">
+        Prueba si el lapiz/dedo de un proyector interactivo de tiro ultracorto (Epson BrightLink, BenQ, etc.)
+        llega al navegador como un puntero utilizable, y con que precision y datos.
+      </p>
+      <p class="intro__flujo">Dibuja en la pantalla completa; el panel lateral y la bitacora muestran cada evento en vivo.</p>
+
+      <h3>Requisitos para que funcione</h3>
+      <ul>
+        <li>El proyector debe estar conectado por <strong>USB</strong> ademas del cable de video: por ahi viaja el reporte HID del lapiz/dedo.</li>
+        <li>Debe estar <strong>calibrado</strong> con el software oficial del fabricante para el area exacta de proyeccion.</li>
+        <li>El sistema operativo debe reconocerlo como dispositivo de puntero (mouse, touch o pen) — se ve en <em>Dispositivos</em> de Windows/macOS.</li>
+        <li><code>pointerType</code> puede llegar como <code>"pen"</code>, <code>"touch"</code> o incluso <code>"mouse"</code> segun el driver: el codigo debe aceptar cualquiera.</li>
+        <li>La pagina necesita <code>touch-action: none</code> en la zona interactiva (ya incluido aqui) para que el navegador no intente hacer scroll/zoom con los trazos.</li>
+      </ul>
+
+      <p class="intro__flujo">Usa la rejilla de calibracion para verificar que el trazo cae exactamente donde toca el lapiz en cada esquina y el centro.</p>
+
+      <button class="intro__btn" id="btn-start" type="button">ENTENDIDO</button>
+    </div>
+  </div>
+
+  <script src="js/puntero.js"></script>
+</body>
+</html>

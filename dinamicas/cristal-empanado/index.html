@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cristal Empanado</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main class="calle">
+    <div class="ventana">
+      <div class="cristal" id="cristal">
+        <div class="escena" aria-hidden="true">
+          <div class="lampara"></div>
+          <div class="pizarron">
+            <p class="pizarron__titulo">CAFE LA VENTANA</p>
+            <p class="pizarron__sub">- desde 1962 -</p>
+            <ul class="pizarron__menu">
+              <li><span>CAFE DE OLLA</span><span>$35</span></li>
+              <li><span>CHOCOLATE CALIENTE</span><span>$48</span></li>
+              <li><span>PAN DE ELOTE</span><span>$30</span></li>
+              <li><span>TAMAL DE RAJAS</span><span>$28</span></li>
+              <li><span>CHAMPURRADO</span><span>$32</span></li>
+            </ul>
+            <p class="pizarron__especial">HOY: BUNUELOS CON MIEL $25</p>
+          </div>
+          <div class="mostrador"></div>
+        </div>
+        <canvas id="vaho"></canvas>
+      </div>
+      <div class="repisa" aria-hidden="true">
+        <div class="maceta"><span class="planta"></span></div>
+      </div>
+    </div>
+    <p class="pista">Limpia el vaho con el dedo o el mouse para asomarte</p>
+  </main>
+
+  <div class="hud">
+    <button class="hud__btn" id="btn-aliento" type="button">ALIENTO [B]</button>
+    <button class="hud__btn hud__btn--ayuda" id="btn-ayuda" type="button" aria-label="Instrucciones">?</button>
+  </div>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-titulo">
+    <div class="overlay__caja">
+      <h1 id="overlay-titulo">CRISTAL EMPANADO</h1>
+      <p class="overlay__intro">Experimento de revelado: el contenido no se muestra, se descubre limpiando una ventana con condensacion.</p>
+      <ul>
+        <li><strong>Arrastra sobre el cristal</strong> para limpiar el vaho y leer el menu del cafe.</li>
+        <li>Donde limpias, a veces <strong>escurre una gota</strong> que deja su rastro.</li>
+        <li>El cristal <strong>se vuelve a empanar solo</strong>, poco a poco.</li>
+        <li>Con <strong>ALIENTO</strong> (o la tecla B) empanas una zona de golpe: perfecta para dibujar encima con el dedo.</li>
+      </ul>
+      <button class="overlay__btn" id="btn-entendido" type="button">ENTENDIDO</button>
+    </div>
+  </div>
+
+  <script src="js/cristal.js"></script>
+</body>
+</html>

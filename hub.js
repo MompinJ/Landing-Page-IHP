@@ -5,6 +5,8 @@
   const tplCount = document.getElementById('tpl-count');
   const dynGrid = document.getElementById('dyn-grid');
   const dynCount = document.getElementById('dyn-count');
+  const expGrid = document.getElementById('exp-grid');
+  const expCount = document.getElementById('exp-count');
   const tickerTrack = document.getElementById('ticker-track');
 
   const buildTicker = (list) => {
@@ -72,6 +74,10 @@
       dynGrid.innerHTML = '<p class="hub-empty">Sin manifest no hay dinamicas.</p>';
       dynCount.textContent = 'error';
     }
+    if (expGrid) {
+      expGrid.innerHTML = '<p class="hub-empty">Sin manifest no hay experimentos.</p>';
+      expCount.textContent = 'error';
+    }
   };
 
   const sortByDateDesc = (a, b) => String(b.date ?? '').localeCompare(String(a.date ?? ''));
@@ -115,6 +121,18 @@
         } else {
           dynGrid.innerHTML = dyns.map(renderCard).join('');
           dynCount.textContent = `${String(dyns.length).padStart(2, '0')} // ${dyns.length === 1 ? 'juego' : 'juegos'}`;
+        }
+      }
+
+      // ---- experimental (cuarta seccion) ----
+      if (expGrid) {
+        const exps = Array.isArray(data?.experimental) ? data.experimental : [];
+        if (exps.length === 0) {
+          expGrid.innerHTML = '<p class="hub-empty">Aun no hay experimentos registrados.</p>';
+          expCount.textContent = '0';
+        } else {
+          expGrid.innerHTML = exps.map(renderCard).join('');
+          expCount.textContent = `${String(exps.length).padStart(2, '0')} // ${exps.length === 1 ? 'experimento' : 'experimentos'}`;
         }
       }
     })

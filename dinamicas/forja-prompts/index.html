@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXO-IA: Forja de Prompts</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="cab">
+    <p class="cab__sistema">NEXO-IA // MODULO DE ADIESTRAMIENTO</p>
+    <h1 class="cab__titulo">FORJA DE PROMPTS</h1>
+    <p class="cab__sub">Ensambla la instruccion y observa la senal</p>
+  </header>
+
+  <main class="tablero">
+    <section class="panel panel--banco" aria-label="Banco de modulos">
+      <h2 class="panel__titulo">BANCO DE MODULOS</h2>
+      <div id="banco"></div>
+    </section>
+
+    <section class="panel panel--forja" aria-label="Camara de forja">
+      <h2 class="panel__titulo">CAMARA DE FORJA</h2>
+      <div id="forja"></div>
+      <button class="transmitir" id="btn-transmitir" type="button" disabled>TRANSMITIR A GAMMA</button>
+    </section>
+
+    <section class="panel panel--salida" aria-label="Senal y respuesta">
+      <h2 class="panel__titulo">SENAL DE PRECISION</h2>
+      <div class="medidor">
+        <svg viewBox="0 0 120 70" aria-hidden="true">
+          <path class="medidor__fondo" d="M 12 62 A 48 48 0 0 1 108 62" />
+          <path class="medidor__arco" id="arco" d="M 12 62 A 48 48 0 0 1 108 62" />
+        </svg>
+        <p class="medidor__valor"><span id="senal">0</span>%</p>
+      </div>
+      <div class="respuesta">
+        <p class="respuesta__rotulo">[GAMMA] &middot; RESPUESTA PROYECTADA</p>
+        <p class="respuesta__texto" id="respuesta"></p>
+      </div>
+      <p class="consejo" id="consejo"><span class="consejo__quien">[EVA]</span> <span id="consejo-txt"></span></p>
+    </section>
+  </main>
+
+  <div class="hud">
+    <button class="hud__btn" id="btn-ayuda" type="button" aria-label="Instrucciones">?</button>
+  </div>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-titulo">
+    <div class="overlay__caja">
+      <h1 id="overlay-titulo">FORJA DE PROMPTS</h1>
+      <p class="overlay__intro">Un buen prompt no se escribe: se ensambla. Cada modulo que colocas cambia la respuesta de GAMMA en tiempo real.</p>
+      <ul>
+        <li>Toca una ficha del <strong>banco de modulos</strong> para montarla en su ranura de la camara de forja. Tocala de nuevo en la ranura para retirarla.</li>
+        <li>Hay fichas debiles y fuertes: la <strong>senal de precision</strong> sube con rol, contexto, tarea y formato bien definidos.</li>
+        <li>La <strong>respuesta proyectada</strong> de GAMMA mejora o empeora al instante con cada cambio.</li>
+        <li>Con senal suficiente se habilita <strong>TRANSMITIR</strong> para sellar la instruccion.</li>
+      </ul>
+      <button class="overlay__btn" id="btn-entendido" type="button">ENTENDIDO</button>
+    </div>
+  </div>
+
+  <script src="js/forja.js"></script>
+</body>
+</html>

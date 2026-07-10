@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NEXO-IA - Astillero, Escudo de Datos</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <main id="stage">
+    <img id="fondo" src="assets/base-holografica.png" alt="Vista holografica del astillero TNG" draggable="false">
+    <div id="capa-sockets"></div>
+  </main>
+
+  <main id="stage-mapa">
+    <img id="fondo-mapa" src="assets/mapa-cenital.png" alt="Mapa cenital del puerto" draggable="false">
+    <div id="capa-nodos"></div>
+    <p class="mapa-titulo">MAPA DEL PUERTO &mdash; SELECCIONE TERMINAL</p>
+  </main>
+
+  <header id="hud">
+    <button class="boton" id="btn-mapa" hidden>&lt; MAPA</button>
+    <div class="pill pill-barra">
+      <span class="pill-etiqueta">ESCUDO / SEGURIDAD</span>
+      <div class="barra"><div class="barra-relleno" id="barra-escudo"></div></div>
+      <span class="pill-valor" id="hud-escudo">0</span>
+    </div>
+    <div class="pill pill-barra naranja">
+      <span class="pill-etiqueta">OPTIMIZACION</span>
+      <div class="barra"><div class="barra-relleno" id="barra-optimizacion"></div></div>
+      <span class="pill-valor" id="hud-optimizacion">0</span>
+    </div>
+    <div class="pill">
+      <span class="pill-etiqueta">DATOS</span>
+      <span class="pill-valor" id="hud-datos">0</span>
+    </div>
+    <div class="pill">
+      <span class="pill-etiqueta">LECCIONES</span>
+      <span class="pill-valor" id="hud-lecciones">0/6</span>
+    </div>
+    <div class="separador"></div>
+    <span class="hint">[C] CALIBRACION</span>
+    <button class="boton boton-ayuda" id="btn-ayuda" aria-label="Instrucciones">?</button>
+  </header>
+
+  <aside id="panel">
+    <div id="panel-contenido"></div>
+  </aside>
+
+  <div id="overlay-leccion" hidden>
+    <div class="leccion-marco">
+      <button class="panel-cerrar leccion-cerrar" id="leccion-cerrar">[X]</button>
+      <p class="leccion-subtema" id="leccion-subtema"></p>
+      <h2 class="leccion-titulo" id="leccion-titulo"></h2>
+      <div class="mentor-zona" id="mentor-zona"></div>
+      <p class="mentor-subtitulo" id="mentor-subtitulo"></p>
+      <div id="leccion-contenedor"></div>
+    </div>
+  </div>
+
+  <div id="barra-calibracion">
+    <span class="titulo-calib">MODO CALIBRACION &mdash; ARRASTRA LOS SOCKETS SOBRE LA IMAGEN</span>
+    <div class="separador"></div>
+    <button class="boton primario" id="calib-exportar">EXPORTAR</button>
+    <button class="boton" id="calib-limpiar">RESTAURAR</button>
+    <button class="boton" id="calib-salir">SALIR [C]</button>
+  </div>
+
+  <div id="toast"></div>
+
+  <div id="overlay-instrucciones" hidden>
+    <div class="tarjeta-instrucciones">
+      <p class="tarjeta-sub">NEXO-IA &mdash; NIVEL 3: ESCUDO DE DATOS</p>
+      <h1 class="tarjeta-titulo">ASTILLERO</h1>
+      <p class="tarjeta-parrafo">
+        Operador: esta terminal se construye aprendiendo. Cada instalacion del
+        astillero es una leccion de seguridad de datos; completarla la enciende.
+        Reconstruya la terminal completa y el nivel quedara asegurado.
+      </p>
+      <ul class="tarjeta-lista">
+        <li><b>CLICK</b> en un socket vacio <b>[+]</b> abre su leccion.</li>
+        <li>Completar la leccion <b>construye el modulo</b> y sube las barras.</li>
+        <li><b>ESCUDO</b> (cian) la alimenta el Comandante; <b>OPTIMIZACION</b> (naranja), la IA virtual.</li>
+        <li>Los <b>DATOS</b> ganados sirven para reforzar modulos ya construidos.</li>
+        <li>El <b>HUB</b> central se enciende solo al completar las 6 lecciones.</li>
+        <li>Desde el <b>MAPA</b> se entra a cada terminal del puerto; el progreso lo acompana a todas partes.</li>
+        <li><b>[C]</b> modo calibracion: arrastre sockets y exporte coordenadas.</li>
+        <li><b>[ESC]</b> cierra paneles y lecciones. <b>[?]</b> reabre estas instrucciones.</li>
+      </ul>
+      <div class="tarjeta-acciones">
+        <button class="boton primario" id="btn-empezar">ENTRAR AL MANDO</button>
+        <button class="boton" id="btn-reiniciar">REINICIAR PROGRESO</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/datos.js"></script>
+  <script src="js/terminales.js"></script>
+  <script src="js/lecciones.js"></script>
+  <script src="js/estado.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/flujo.js"></script>
+  <script src="js/mapa.js"></script>
+  <script src="js/pantallas.js"></script>
+  <script src="js/calibracion.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

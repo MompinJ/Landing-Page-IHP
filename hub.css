@@ -154,6 +154,7 @@ code {
 }
 .hub-section__title--tpl { background: var(--zap); color: #fff; transform: rotate(0.8deg); }
 .hub-section__title--dyn { background: #FFC627; color: var(--ink); transform: rotate(-0.8deg); }
+.hub-section__title--exp { background: #7c3aed; color: #fff; transform: rotate(0.6deg); }
 .hub-section__note {
   font-size: 0.92rem;
   color: var(--ink-soft);

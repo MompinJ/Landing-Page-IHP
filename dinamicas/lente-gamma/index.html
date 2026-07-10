@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXO-IA: Lente GAMMA</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="cab">
+    <p class="cab__sistema">NEXO-IA // AUDITORIA DE SALIDAS DE IA</p>
+    <h1 class="cab__titulo">LENTE GAMMA</h1>
+    <p class="cab__sub">Este borrador lo escribio una IA generica. Antes de enviarlo, auditalo.</p>
+  </header>
+
+  <main class="tablero">
+    <section class="panel documento" id="documento" aria-label="Documento bajo auditoria">
+      <div class="doc doc--base" id="doc-base"></div>
+      <div class="doc doc--scan" id="doc-scan" aria-hidden="true"></div>
+      <div class="lente" id="lente" aria-hidden="true">
+        <span class="lente__cruz"></span>
+      </div>
+    </section>
+
+    <aside class="panel lateral" aria-label="Hallazgos">
+      <h2 class="lateral__titulo">ANOMALIAS <span id="conteo">0/5</span></h2>
+      <div class="precision">
+        <p class="precision__rotulo">PRECISION</p>
+        <div class="precision__barra"><div class="precision__nivel" id="precision-nivel"></div></div>
+        <p class="precision__valor" id="precision-valor">100%</p>
+      </div>
+      <ul class="hallazgos" id="hallazgos"></ul>
+      <p class="mensaje" id="mensaje"><span class="quien quien--gamma">[GAMMA]</span> <span id="mensaje-txt">Mueve mi lente sobre el texto: donde yo veo algo raro, lo subrayo. Tu decides si lo marcas.</span></p>
+    </aside>
+  </main>
+
+  <div class="hud">
+    <button class="hud__btn" id="btn-reiniciar" type="button">REINICIAR</button>
+    <button class="hud__btn hud__btn--ayuda" id="btn-ayuda" type="button" aria-label="Instrucciones">?</button>
+  </div>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-titulo">
+    <div class="overlay__caja">
+      <h1 id="overlay-titulo">LENTE GAMMA</h1>
+      <p class="overlay__intro">Una IA generica redacto un correo para un cliente. GAMMA ya lo analizo, pero su capa de analisis solo se ve a traves de su lente. La decision final es humana.</p>
+      <ul>
+        <li><strong>Mueve la lente</strong> (mouse o dedo) sobre el documento: dentro del circulo se revela lo que GAMMA detecto.</li>
+        <li>Hay <strong>5 anomalias reales</strong>: datos inventados, informacion confidencial, instrucciones riesgosas y algun sesgo.</li>
+        <li><strong>Toca un fragmento subrayado</strong> mientras lo ves con la lente para marcarlo como hallazgo y leer la explicacion.</li>
+        <li>Cuidado: tambien hay <strong>falsos positivos</strong>. Marcar texto sano baja tu precision.</li>
+      </ul>
+      <button class="overlay__btn" id="btn-entendido" type="button">ENTENDIDO</button>
+    </div>
+  </div>
+
+  <div class="final" id="final" hidden>
+    <div class="final__caja">
+      <h2>AUDITORIA COMPLETA</h2>
+      <p id="final-detalle"></p>
+      <button class="overlay__btn" id="btn-otra" type="button">AUDITAR DE NUEVO</button>
+    </div>
+  </div>
+
+  <script src="js/lente.js"></script>
+</body>
+</html>

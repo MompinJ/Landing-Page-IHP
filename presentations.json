@@ -601,6 +601,120 @@
       "accent": "#ff9b3a",
       "theme": "dyn-mapa-tactico-3d",
       "path": "dinamicas/mapa-tactico-3d/index.html"
+    },
+    {
+      "slug": "recibo-rasgado",
+      "title": "Recibo Rasgado",
+      "subtitle": "Borrar de la lista es rasgar el papel",
+      "description": "Capsula de microinteraccion: una cuenta de cafeteria impresa en ticket termico donde cada renglon se elimina rasgandolo lateralmente con el dedo o el mouse. El papel opone resistencia, cede con un borde dentado generado al vuelo y el trozo cae con gravedad mientras el total se recalcula rodando. El sello CUENTA SALDADA aparece al vaciar el ticket. Tambien operable con teclado (Tab + Supr). Renglones editables en js/recibo.js.",
+      "tags": [
+        "Capsula",
+        "Experimento",
+        "Gesto",
+        "Listas"
+      ],
+      "accent": "#b45309",
+      "path": "dinamicas/recibo-rasgado/index.html"
+    },
+    {
+      "slug": "dial-boveda",
+      "title": "Dial de Boveda",
+      "subtitle": "Captura numeros girando una caja fuerte",
+      "description": "Capsula de input alternativo: en lugar de teclear una clave, se gira el dial de una caja de seguridad de 1957. Tres numeros con direccion de giro obligada (derecha, izquierda, derecha); al detenerse medio segundo sobre el numero correcto el seguro cae solo, con lampara y clunk. Girar al reves hace parpadear el paso en rojo. Con los tres seguros abiertos aparece la manija: al girarla se retraen los pernos y la puerta se abre en 3D revelando el interior. Combinacion aleatoria en cada intento, accesible con flechas del teclado.",
+      "tags": [
+        "Capsula",
+        "Experimento",
+        "Input",
+        "Formularios"
+      ],
+      "accent": "#c9a227",
+      "path": "dinamicas/dial-boveda/index.html"
+    },
+    {
+      "slug": "cristal-empanado",
+      "title": "Cristal Empanado",
+      "subtitle": "Limpia el vaho para descubrir el contenido",
+      "description": "Capsula de revelado progresivo: el menu de un cafe nocturno se esconde tras una ventana con condensacion real en canvas. Se limpia el vaho arrastrando el dedo o el mouse; donde limpias a veces escurre una gota que deja rastro, y el cristal se vuelve a empanar solo poco a poco. El boton ALIENTO (tecla B) empana una zona de golpe para dibujar encima con el dedo, como en una ventana de verdad. Sin imagenes ni librerias: niebla, ruido y gotas generados por codigo.",
+      "tags": [
+        "Capsula",
+        "Experimento",
+        "Canvas",
+        "Revelado"
+      ],
+      "accent": "#7dd3fc",
+      "path": "dinamicas/cristal-empanado/index.html"
+    },
+    {
+      "slug": "forja-prompts",
+      "title": "NEXO-IA: Forja de Prompts",
+      "subtitle": "Ensambla la instruccion y mira la senal subir",
+      "description": "Capsula NEXO-IA para ensenar prompt engineering sin teoria: el prompt se arma montando fichas holograficas en cuatro ranuras (rol, contexto, tarea, formato). Cada ficha, debil o fuerte, mueve en vivo el medidor de senal de precision y la respuesta proyectada de GAMMA, que va de un parrafo vago a un plan operativo con tabla. EVA aconseja sobre la ranura mas debil y con senal suficiente se habilita TRANSMITIR. Fichas y respuestas editables en js/forja.js.",
+      "tags": [
+        "Capsula",
+        "Instituto",
+        "IA",
+        "Prompts"
+      ],
+      "accent": "#38e1ff",
+      "path": "dinamicas/forja-prompts/index.html"
+    },
+    {
+      "slug": "eco-temporal",
+      "title": "NEXO-IA: Eco Temporal",
+      "subtitle": "Frota el tiempo y compara dos futuros",
+      "description": "Capsula NEXO-IA para evaluar decisiones en el tiempo: ante un pico de arribos eliges entre el plan de reasignacion por IA de GAMMA o el procedimiento manual conocido, y arrastras una perilla temporal de T+0 a T+72 horas. Tres metricas (rendimiento, saturacion, riesgo) se interpolan en vivo, los eventos se escriben en la bitacora al pasarlos y una marca ambar fantasma muestra el eco: lo que estaria pasando con el otro plan a esa misma hora. Curvas y eventos editables en js/eco.js.",
+      "tags": [
+        "Capsula",
+        "Instituto",
+        "IA",
+        "Decision"
+      ],
+      "accent": "#ffb84d",
+      "path": "dinamicas/eco-temporal/index.html"
+    },
+    {
+      "slug": "lente-gamma",
+      "title": "NEXO-IA: Lente GAMMA",
+      "subtitle": "Audita con la lente lo que escribio la IA",
+      "description": "Capsula NEXO-IA de pensamiento critico: una IA generica redacto un correo para un cliente y hay que auditarlo antes de enviarlo. La capa de analisis de GAMMA (subrayados que laten) solo se revela dentro de una lente circular que sigue al dedo o al mouse; bajo la lente se marcan los hallazgos: cifra alucinada, fuga de tarifas, instruccion riesgosa, IA sin supervision y sesgo. Tres falsos positivos castigan la precision. Documento y fragmentos editables en js/lente.js.",
+      "tags": [
+        "Capsula",
+        "Instituto",
+        "IA",
+        "Auditoria"
+      ],
+      "accent": "#6fe3a1",
+      "path": "dinamicas/lente-gamma/index.html"
+    },
+    {
+      "slug": "sendero-bienestar",
+      "title": "Sendero del Bienestar",
+      "subtitle": "Relevo NOM-035: traza el camino entre todos",
+      "description": "Camino serpenteante en pantalla completa con 7 estaciones: los 6 factores de riesgo psicosocial de la NOM-035 mas la meta de Bienestar Laboral. En relevos rapidos, cada participante toca el punto que parpadea y traza con el dedo, el lapiz del proyector o el mouse (Pointer Events con presion y trazos coalescentes) el tramo hasta el siguiente punto siguiendo una guia punteada, en 9 segundos. Al llegar (o acabarse el tiempo) se revela el factor de esa estacion con su descripcion real y un puntaje de precision segun que tan cerca se mantuvo de la guia; el trazo queda pintado permanentemente formando un mural colectivo. Al completar el sendero se revela el recorrido completo y la precision promedio del grupo. Pensado para el lapiz HID de un proyector interactivo de tiro ultracorto, pero funciona igual con touch o mouse.",
+      "tags": [
+        "Dinamica",
+        "NOM-035",
+        "Pointer Events",
+        "Relevo"
+      ],
+      "accent": "#009BDE",
+      "path": "dinamicas/sendero-bienestar/index.html"
+    }
+  ],
+  "experimental": [
+    {
+      "slug": "puntero-proyector",
+      "title": "Puntero de Proyector",
+      "subtitle": "Diagnostico de lapiz/dedo via Pointer Events",
+      "description": "Prueba si el lapiz o el dedo de un proyector interactivo de tiro ultracorto (Epson BrightLink, BenQ...) funciona como puntero estandar en el navegador via USB HID. Pantalla completa para dibujar con canvas; panel lateral y bitacora en vivo con pointerType, presion, tilt, tamano de contacto y punteros simultaneos activos. Incluye rejilla de calibracion con marcas en esquinas y centro para verificar que el trazo cae exacto donde toca el lapiz. Checklist de requisitos (USB, calibracion del fabricante, touch-action: none) en la pantalla de instrucciones.",
+      "tags": [
+        "Experimento",
+        "Pointer Events",
+        "Hardware",
+        "Diagnostico"
+      ],
+      "accent": "#38e1ff",
+      "path": "experimental/puntero-proyector/index.html"
     }
   ]
 }

@@ -8,6 +8,25 @@ import { TRANSITIONS } from './catalog/transitions.js';
 import { SLIDE_CLASS, SlideBody } from './components/slides.js';
 import { NavContext } from './nav.js';
 
+// --- STAGE: canvas fijo 1920x1080 escalado (modo "cover") para verse
+// identico en cualquier resolucion/proporcion de proyector -----------
+const STAGE_W = 1920, STAGE_H = 1080;
+
+function useStageScale() {
+  const [t, setT] = useState({ s: 1, x: 0, y: 0 });
+  useEffect(() => {
+    const calc = () => {
+      const w = window.innerWidth, h = window.innerHeight;
+      const s = Math.max(w / STAGE_W, h / STAGE_H);
+      setT({ s, x: (w - STAGE_W * s) / 2, y: (h - STAGE_H * s) / 2 });
+    };
+    calc();
+    window.addEventListener('resize', calc);
+    return () => window.removeEventListener('resize', calc);
+  }, []);
+  return t;
+}
+
 function SlideView({ slide, extra }) {
   const cls = `slide ${SLIDE_CLASS[slide.type] || ''} is-active ${extra || ''}`;
   return html`<section class=${cls}><${SlideBody} slide=${slide} /></section>`;
@@ -76,6 +95,8 @@ export function Deck({ deck }) {
   const [cur, setCur] = useState(initial);
   const [prev, setPrev] = useState(null);       // slide saliente (solo fundido)
   const [menuOpen, setMenuOpen] = useState(false);  // indice de slides abierto
+
+  const { s: stageS, x: stageX, y: stageY } = useStageScale();
 
   const menuRef = useRef(false);
   menuRef.current = menuOpen;
@@ -208,23 +229,27 @@ export function Deck({ deck }) {
 
   return html`
     <${NavContext.Provider} value=${nav}>
-      <div class="fx" aria-hidden="true">
-        <div class="fx-wipe2" ref=${wipe2}></div>
-        <div class="fx-wipe" ref=${wipe}></div>
-        <div class="fx-cv fx-cv--white" ref=${cvW}></div>
-        <div class="fx-cv fx-cv--sky" ref=${cvA}></div>
-        <div class="fx-cv fx-cv--navy" ref=${cvB}></div>
-        <div class="fx-wave" ref=${wave}>
-          <div class="fx-wave__l fx-wave__l--back"></div>
-          <div class="fx-wave__l fx-wave__l--mid"></div>
-          <div class="fx-wave__l fx-wave__l--front"></div>
-          <div class="fx-wave__foam"></div>
+      <div class="stage-outer">
+        <div class="fx" aria-hidden="true">
+          <div class="fx-wipe2" ref=${wipe2}></div>
+          <div class="fx-wipe" ref=${wipe}></div>
+          <div class="fx-cv fx-cv--white" ref=${cvW}></div>
+          <div class="fx-cv fx-cv--sky" ref=${cvA}></div>
+          <div class="fx-cv fx-cv--navy" ref=${cvB}></div>
+          <div class="fx-wave" ref=${wave}>
+            <div class="fx-wave__l fx-wave__l--back"></div>
+            <div class="fx-wave__l fx-wave__l--mid"></div>
+            <div class="fx-wave__l fx-wave__l--front"></div>
+            <div class="fx-wave__foam"></div>
+          </div>
+        </div>
+        <div class="stage" style=${{ transform: `translate(${stageX}px, ${stageY}px) scale(${stageS})` }}>
+          <main class="deck">
+            ${prev != null ? html`<${SlideView} key=${'p' + prev} slide=${deck[prev]} extra="fx-out" />` : null}
+            <${SlideView} key=${cur} slide=${deck[cur]} extra="enter" />
+          </main>
         </div>
       </div>
-      <main class="deck">
-        ${prev != null ? html`<${SlideView} key=${'p' + prev} slide=${deck[prev]} extra="fx-out" />` : null}
-        <${SlideView} key=${cur} slide=${deck[cur]} extra="enter" />
-      </main>
 
       <button class="idx-btn" onClick=${() => setMenuOpen(true)} title="Índice de slides (I)" aria-label="Abrir índice de slides">
         <span class="idx-btn-bars" aria-hidden="true"><i></i><i></i><i></i></span>

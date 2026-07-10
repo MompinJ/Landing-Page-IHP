@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recibo Rasgado</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main class="mesa">
+    <section class="ticket" aria-label="Cuenta de cafeteria">
+      <header class="ticket__cab">
+        <p class="ticket__logo">CAFETERIA EL MUELLE</p>
+        <p class="ticket__sub">MUELLE 4 &middot; TERMINAL DE PASAJEROS</p>
+        <p class="ticket__meta"><span id="folio">FOLIO 000000</span><span id="fecha"></span></p>
+        <p class="ticket__linea" aria-hidden="true"></p>
+      </header>
+
+      <div class="ticket__items" id="items"></div>
+
+      <footer class="ticket__pie">
+        <p class="ticket__linea" aria-hidden="true"></p>
+        <p class="ticket__total"><span>TOTAL</span><span id="total">$0.00</span></p>
+        <p class="ticket__gracias">GRACIAS POR SU VISITA</p>
+        <p class="ticket__codigo" aria-hidden="true"></p>
+      </footer>
+
+      <div class="sello" id="sello" hidden>CUENTA SALDADA</div>
+    </section>
+  </main>
+
+  <div class="hud">
+    <button class="hud__btn" id="btn-reset" type="button">NUEVA CUENTA</button>
+    <button class="hud__btn hud__btn--ayuda" id="btn-ayuda" type="button" aria-label="Instrucciones">?</button>
+  </div>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-titulo">
+    <div class="overlay__caja">
+      <h1 id="overlay-titulo">RECIBO RASGADO</h1>
+      <p class="overlay__intro">Experimento de microinteraccion: borrar no es un boton, es rasgar papel.</p>
+      <ul>
+        <li><strong>Arrastra un renglon</strong> hacia un lado. El papel se resiste un poco y luego cede con un borde dentado.</li>
+        <li>Si lo sueltas antes de la mitad, <strong>regresa a su lugar</strong>. Si lo pasas, el trozo cae y el total se recalcula.</li>
+        <li>Con teclado: navega con <strong>Tab</strong> y rasga con <strong>Supr</strong> o <strong>Retroceso</strong>.</li>
+        <li><strong>NUEVA CUENTA</strong> imprime el ticket otra vez.</li>
+      </ul>
+      <button class="overlay__btn" id="btn-entendido" type="button">ENTENDIDO</button>
+    </div>
+  </div>
+
+  <script src="js/recibo.js"></script>
+</body>
+</html>

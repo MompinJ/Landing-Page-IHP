@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Sendero del Bienestar // NOM-035</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <canvas id="ink"></canvas>
+  <canvas id="overlay"></canvas>
+
+  <header class="hud hud--top">
+    <h1>SENDERO DEL BIENESTAR</h1>
+    <p class="hud__hint">Relevo NOM-035 — un tramo a la vez, entre todos</p>
+  </header>
+
+  <button class="help-btn" id="btn-help" type="button" aria-label="Ver instrucciones">?</button>
+
+  <aside class="hud hud--panel">
+    <h2>Progreso</h2>
+    <dl>
+      <div><dt>Tramo</dt><dd id="hud-segment">1 / 7</dd></div>
+      <div><dt>Relevos</dt><dd id="hud-turns">0</dd></div>
+      <div><dt>Precision promedio</dt><dd id="hud-avg">--</dd></div>
+    </dl>
+
+    <h2>Factores NOM-035</h2>
+    <ul class="factor-list" id="factor-list">
+      <li data-idx="1"><span class="dot" style="--c:#F2C230"></span>Condiciones del ambiente</li>
+      <li data-idx="2"><span class="dot" style="--c:#4FB8E0"></span>Carga de trabajo excesiva</li>
+      <li data-idx="3"><span class="dot" style="--c:#66C07A"></span>Falta de control</li>
+      <li data-idx="4"><span class="dot" style="--c:#E2574C"></span>Liderazgo negativo</li>
+      <li data-idx="5"><span class="dot" style="--c:#B588D9"></span>Relaciones negativas</li>
+      <li data-idx="6"><span class="dot" style="--c:#EE9A3A"></span>Violencia laboral</li>
+      <li data-idx="7" class="is-meta"><span class="dot" style="--c:#54BBAB"></span>Bienestar Laboral</li>
+    </ul>
+  </aside>
+
+  <p class="hud hud--cue" id="hud-cue">Toca el punto que parpadea para iniciar tu turno</p>
+
+  <div class="intro" id="intro">
+    <div class="intro__panel">
+      <span class="intro__kicker">DINAMICA · RELEVO</span>
+      <h2>Sendero del Bienestar</h2>
+      <p class="intro__mission">
+        Recorran juntos, en relevos, el camino hacia un ambiente de trabajo sano: cada persona traza
+        un tramo con el dedo, el lapiz del proyector o el mouse.
+      </p>
+      <p class="intro__flow">
+        Toca el punto que parpadea &rarr; traza hasta el siguiente punto siguiendo la guia punteada &rarr;
+        al llegar (o acabarse el tiempo) se revela el factor de riesgo de esa estacion &rarr; pasa el turno.
+      </p>
+      <ul class="intro__rules">
+        <li>Un tramo por persona: entre mas cerca te mantengas de la guia, mejor tu precision.</li>
+        <li>Tienes 9 segundos por tramo; si no llegas, el trazo se queda como esta y el relevo sigue.</li>
+        <li>Cada estacion revela uno de los 6 factores de riesgo psicosocial de la NOM-035.</li>
+        <li>Al llegar a la meta se revela el sendero completo y la precision promedio del grupo.</li>
+      </ul>
+      <button class="intro__btn" id="btn-start" type="button">INICIAR RELEVO</button>
+    </div>
+  </div>
+
+  <div class="modal" id="modal" hidden>
+    <div class="modal__sheet">
+      <span class="modal__kicker" id="modal-kicker">LLEGASTE</span>
+      <span class="modal__badge" id="modal-badge"></span>
+      <h2 class="modal__title" id="modal-title"></h2>
+      <p class="modal__desc" id="modal-desc"></p>
+      <p class="modal__score">Precision de tu trazo: <strong id="modal-score">--</strong></p>
+      <button class="modal__ok" id="modal-ok" type="button">SIGUIENTE RELEVO [ENTER]</button>
+    </div>
+  </div>
+
+  <div class="finale" id="finale" hidden>
+    <div class="finale__sheet">
+      <span class="finale__kicker">SENDERO COMPLETO</span>
+      <h2>Bienestar Laboral</h2>
+      <p class="finale__msg">Reconocer estas 6 senales a tiempo es el primer paso para un ambiente de trabajo sano.</p>
+      <div class="finale__stats">
+        <div><span id="finale-turns">0</span><small>relevos</small></div>
+        <div><span id="finale-avg">0%</span><small>precision promedio</small></div>
+      </div>
+      <button class="finale__ok" id="finale-reset" type="button">REINICIAR [R]</button>
+    </div>
+  </div>
+
+  <script src="js/sendero.js"></script>
+</body>
+</html>

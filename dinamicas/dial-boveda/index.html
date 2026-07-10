@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dial de Boveda</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main class="camara">
+    <div class="marco">
+      <div class="interior" aria-hidden="true">
+        <div class="interior__luz"></div>
+        <div class="interior__repisa">
+          <div class="lingote"></div>
+          <div class="lingote"></div>
+          <div class="lingote lingote--arriba"></div>
+        </div>
+        <p class="interior__placa">COMBINACION CORRECTA</p>
+        <button class="interior__btn" id="btn-reiniciar" type="button">CERRAR Y CAMBIAR CLAVE</button>
+      </div>
+
+      <section class="puerta" id="puerta" aria-label="Puerta de la boveda">
+        <span class="remache remache--tl"></span>
+        <span class="remache remache--tr"></span>
+        <span class="remache remache--bl"></span>
+        <span class="remache remache--br"></span>
+
+        <p class="puerta__rotulo">CAJA DE SEGURIDAD &middot; MODELO 1957</p>
+
+        <div class="mision" id="mision" aria-live="polite"></div>
+
+        <div class="lector">
+          <span class="lector__marco"></span>
+          <span id="lector-num">00</span>
+        </div>
+
+        <div class="dial-zona">
+          <span class="aguja" id="aguja" aria-hidden="true"></span>
+          <div class="dial" id="dial" tabindex="0" role="slider"
+               aria-label="Dial de combinacion, usa flechas izquierda y derecha"
+               aria-valuemin="0" aria-valuemax="99" aria-valuenow="0"></div>
+          <button class="manija" id="manija" type="button" hidden aria-label="Girar la manija para abrir">
+            <span class="manija__brazo"></span>
+            <span class="manija__brazo"></span>
+            <span class="manija__brazo"></span>
+            <span class="manija__eje"></span>
+          </button>
+        </div>
+
+        <div class="lamparas" aria-hidden="true">
+          <span class="lampara" id="lamp-0"></span>
+          <span class="lampara" id="lamp-1"></span>
+          <span class="lampara" id="lamp-2"></span>
+        </div>
+
+        <div class="pernos" aria-hidden="true">
+          <span class="perno"></span>
+          <span class="perno"></span>
+          <span class="perno"></span>
+        </div>
+      </section>
+    </div>
+
+    <p class="pista" id="pista">Gira el dial en la direccion indicada y detente en el numero</p>
+  </main>
+
+  <div class="hud">
+    <button class="hud__btn" id="btn-ayuda" type="button" aria-label="Instrucciones">?</button>
+  </div>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-titulo">
+    <div class="overlay__caja">
+      <h1 id="overlay-titulo">DIAL DE BOVEDA</h1>
+      <p class="overlay__intro">Experimento de input: teclear un numero es aburrido; girarlo en una caja fuerte, no.</p>
+      <ul>
+        <li>Arriba se muestra la <strong>clave de hoy</strong>: tres numeros, cada uno con su direccion de giro.</li>
+        <li><strong>Arrastra el dial</strong> (o usa las flechas del teclado) y detente sobre el numero: medio segundo quieto y el seguro cae solo.</li>
+        <li>Si giras al reves, el paso actual <strong>parpadea en rojo</strong> para avisarte.</li>
+        <li>Con los tres seguros abajo aparece la <strong>manija</strong>: girala y la puerta se abre.</li>
+      </ul>
+      <button class="overlay__btn" id="btn-entendido" type="button">ENTENDIDO</button>
+    </div>
+  </div>
+
+  <script src="js/boveda.js"></script>
+</body>
+</html>
