@@ -11,6 +11,7 @@ import S06Campus from './S06Campus.jsx'
 import S07Reportes from './S07Reportes.jsx'
 import S07bCronograma from './S07bCronograma.jsx'
 import S07cBeneficios from './S07cBeneficios.jsx'
+import S07dVersatilidad from './S07dVersatilidad.jsx'
 import S08Demo from './S08Demo.jsx'
 import S09Gracias from './S09Gracias.jsx'
 
@@ -34,7 +35,8 @@ export const slides = [
   { id: 's06', title: 'Campus HP',      component: S06Campus,     transition: 'wipe',  transitionColor: '#54BBAB' }, // barrido verde 6->7
   { id: 's07', title: 'Reportes HP',    component: S07Reportes,   transition: 'fade' },
   { id: 's07b', title: 'Cronograma',    component: S07bCronograma, transition: 'fade' },  // 7b -> 7c: fundido
-  { id: 's07c', title: 'Beneficios',    component: S07cBeneficios, transition: 'split' },
+  { id: 's07c', title: 'Beneficios',    component: S07cBeneficios, transition: 'fade' },  // 7c -> 7d: fundido
+  { id: 's07d', title: 'Versatilidad',  component: S07dVersatilidad, transition: 'split' },
   // Video final: corre solo y al terminar pasa automaticamente a gracias
   { id: 's08', title: 'Video demo',     component: S08Demo,       transition: 'split' },
   { id: 's09', title: 'Gracias',        component: S09Gracias,    transition: 'fade' },

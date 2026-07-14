@@ -2,10 +2,10 @@ import { Eyebrow } from '../components/SuperGraphic.jsx'
 import logoHP from '../../assets/hutchisonports-color.png'
 import logoInstituto from '../../assets/LogoInstitutoHP-azul.png'
 
-// Beneficios esperados en dos alturas: arriba las tres apuestas estrategicas
-// (soberania, independencia, cultura) como tarjetas con filo de color, y
-// abajo una banda con los cuatro beneficios operativos concretos. Misma
-// familia visual que las tarjetas de objetivos SMART.
+// Beneficios esperados, estilo editorial (sin tarjetas ni cajas): arriba
+// las tres apuestas estrategicas como numero fantasma + titulo, abajo una
+// fila con los cuatro beneficios operativos. Misma familia visual que el
+// Gantt (S07b) y el reto (S02): tipografia, marcas skew a 30.3°, sin bordes.
 
 const SEA    = '#002E6D'
 const SKY    = '#009BDE'
@@ -60,39 +60,25 @@ const OPERATIVE = [
   },
 ]
 
-function StrategicCard({ s, i }) {
-  const base = 420 + i * 150
+function StrategicColumn({ s, i }) {
+  const base = 380 + i * 150
   return (
-    <div className="r" style={{
-      '--d': base,
-      width: 533, height: 316,
-      background: '#fff',
-      border: '1.5px solid rgba(0,46,109,0.16)', borderRadius: 14,
-      position: 'relative', overflow: 'hidden',
-      padding: '36px 36px 30px',
-    }}>
-      {/* filo superior con el color de la apuesta, cortado a la marca */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: 9,
-        background: s.accent,
-        clipPath: 'polygon(0 0, 100% 0, 100% 100%, 16px 100%)',
-      }} />
-
-      <div className="r" style={{ '--d': base + 100, display: 'flex', alignItems: 'baseline', gap: 16 }}>
-        <span style={{ color: 'rgba(0,46,109,0.16)', fontWeight: 800, fontSize: 50, lineHeight: 1 }}>
+    <div>
+      <div className="r" style={{ '--d': base, display: 'flex', alignItems: 'baseline', gap: 16 }}>
+        <span style={{ color: 'rgba(0,46,109,0.16)', fontWeight: 800, fontSize: 48, lineHeight: 1, flexShrink: 0 }}>
           {s.num}
         </span>
-        <span style={{ color: SEA, fontWeight: 800, fontSize: 27, letterSpacing: '-0.6px' }}>
+        <span style={{ color: SEA, fontWeight: 800, fontSize: 25, lineHeight: 1.15, letterSpacing: '-0.5px' }}>
           {s.title}
         </span>
       </div>
 
-      <div className="r" style={{ '--d': base + 200, marginTop: 22, display: 'flex', gap: 14 }}>
+      <div className="r" style={{ '--d': base + 140, marginTop: 20, display: 'flex', gap: 14 }}>
         <span style={{
           width: 13, height: 13, flexShrink: 0, marginTop: 7,
           background: s.accent, transform: 'skewX(-30.3deg)',
         }} />
-        <p style={{ margin: 0, color: BODY, fontWeight: 500, fontSize: 17.5, lineHeight: 1.5 }}>
+        <p style={{ margin: 0, color: BODY, fontWeight: 500, fontSize: 17, lineHeight: 1.5 }}>
           {s.text}
         </p>
       </div>
@@ -127,28 +113,25 @@ export default function S07cBeneficios() {
 
       {/* ----- Apuestas estrategicas ----- */}
       <div style={{
-        position: 'absolute', left: 112, top: 280, zIndex: 5,
-        display: 'flex', gap: 40,
+        position: 'absolute', left: 112, top: 320, width: 1679, zIndex: 5,
+        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 56,
       }}>
-        {STRATEGIC.map((s, i) => <StrategicCard key={s.num} s={s} i={i} />)}
+        {STRATEGIC.map((s, i) => <StrategicColumn key={s.num} s={s} i={i} />)}
       </div>
 
-      {/* ----- Banda operativa: en que se traduce ----- */}
-      <div className="r" style={{
-        '--d': 900,
-        position: 'absolute', left: 112, top: 646, width: 1679, zIndex: 5,
-        background: 'rgba(0,46,109,0.04)', borderRadius: 14,
-        padding: '30px 36px 32px',
-      }}>
-        <div style={{
-          fontSize: 13, fontWeight: 700, letterSpacing: '2.5px',
+      {/* ----- En que se traduce (fila operativa, sin caja) ----- */}
+      <div style={{ position: 'absolute', left: 112, top: 660, width: 1679, zIndex: 5 }}>
+        <div className="r" style={{
+          '--d': 900, fontSize: 13, fontWeight: 700, letterSpacing: '2.5px',
           textTransform: 'uppercase', color: AQUAD,
         }}>
           En la operación, esto se traduce en
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 36, marginTop: 22 }}>
+        <div className="r" style={{ '--d': 960, marginTop: 16, height: 1.5, background: 'rgba(0,46,109,0.12)' }} />
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 40, marginTop: 28 }}>
           {OPERATIVE.map((o, i) => (
-            <div key={o.lead} className="r" style={{ '--d': 1000 + i * 90 }}>
+            <div key={o.lead} className="r" style={{ '--d': 1040 + i * 90 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span style={{
                   width: 12, height: 12, flexShrink: 0,
