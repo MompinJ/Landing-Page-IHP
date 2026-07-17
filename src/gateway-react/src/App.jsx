@@ -54,6 +54,37 @@ function SlideView({ entry, extra, style }) {
   )
 }
 
+// Tarjeta del carrusel del indice: miniatura con la slide real renderizada a
+// escala (clase .thumb en index.css la muestra completa, sin animar) + numero
+// y titulo. La de video (s08) no se monta en miniatura para no autoreproducirla.
+function IndexCard({ sl, i, isCurrent, isFocused, cardRef, onSelect }) {
+  const Comp = sl.component
+  return (
+    <button ref={cardRef}
+      className={`index-card${isCurrent ? ' current' : ''}${isFocused ? ' focused' : ''}`}
+      style={{ '--d': `${i * 35}ms` }}
+      onClick={onSelect}>
+      <div className="index-thumb">
+        {sl.id === 's08' ? (
+          <div className="index-thumb-fallback" aria-hidden="true">▶</div>
+        ) : (
+          <div className="index-thumb-stage">
+            {/* fuera del grid del .deck, .slide no recibe tamano por grid-area:
+                se fija explicito para que el 100%/100% interno de la slide resuelva */}
+            <section className="slide is-active enter thumb" style={{ width: 1920, height: 1080 }}>
+              <Comp />
+            </section>
+          </div>
+        )}
+      </div>
+      <div className="index-card-label">
+        <span className="index-num">{String(i + 1).padStart(2, '0')}</span>
+        <span className="index-title">{sl.title}</span>
+      </div>
+    </button>
+  )
+}
+
 export default function App() {
   const { s, x, y } = useScale()
   const count = slides.length
@@ -62,9 +93,15 @@ export default function App() {
   const [prev, setPrev]     = useState(null)   // slide saliente (fundido / portal)
   const [portal, setPortal] = useState(false)  // transicion especial Gateway
   const [menu, setMenu]     = useState(false)  // indice de navegacion (boton oculto)
+  const [focus, setFocus]   = useState(0)      // tarjeta resaltada dentro del carrusel del indice
 
   const menuRef = useRef(false)
   menuRef.current = menu
+
+  const focusRef = useRef(focus)
+  focusRef.current = focus
+
+  const cardRefs = useRef([])
 
   // Persistir la slide actual en el hash (sin ensuciar el historial)
   useEffect(() => {
@@ -78,6 +115,18 @@ export default function App() {
   const cvB     = useRef(null)
   const curRef  = useRef(cur)
   curRef.current = cur
+
+  // Abre el indice con el carrusel enfocado en la slide actual
+  const openMenu = useCallback(() => {
+    setFocus(curRef.current)
+    setMenu(true)
+  }, [])
+
+  // Centra la tarjeta enfocada del carrusel al abrir el indice o moverse con flechas
+  useEffect(() => {
+    if (!menu) return
+    cardRefs.current[focus]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+  }, [menu, focus])
 
   const setMs   = (ms) => document.documentElement.style.setProperty('--ms', `${ms}ms`)
   const restart = (el, cls) => { if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls) }
@@ -129,10 +178,19 @@ export default function App() {
     const onKey = (e) => {
       // Si el foco esta en el video de la demo, el teclado controla el video
       if (e.target && e.target.tagName === 'VIDEO') return
-      // Con el indice abierto solo se cierra (Esc / i); no se navega detras
+      // Con el indice abierto, las flechas mueven el foco del carrusel y
+      // Enter/Espacio saltan a esa slide; Esc / i cierran sin navegar.
       if (menuRef.current) {
-        if (e.key === 'Escape' || e.key === 'i' || e.key === 'I') {
-          e.preventDefault(); setMenu(false)
+        switch (e.key) {
+          case 'Escape': case 'i': case 'I':
+            e.preventDefault(); setMenu(false); break
+          case 'ArrowRight':
+            e.preventDefault(); setFocus((f) => Math.min(f + 1, count - 1)); break
+          case 'ArrowLeft':
+            e.preventDefault(); setFocus((f) => Math.max(f - 1, 0)); break
+          case 'Enter': case ' ':
+            e.preventDefault(); setMenu(false); goTo(focusRef.current); break
+          default: break
         }
         return
       }
@@ -143,13 +201,13 @@ export default function App() {
           e.preventDefault(); goTo(curRef.current - 1); break
         case 'Home': e.preventDefault(); goTo(0); break
         case 'End':  e.preventDefault(); goTo(count - 1); break
-        case 'i': case 'I': setMenu(true); break
+        case 'i': case 'I': openMenu(); break
         default: break
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [goTo, count])
+  }, [goTo, count, openMenu])
 
   // rueda
   useEffect(() => {
@@ -178,14 +236,6 @@ export default function App() {
     window.addEventListener('touchstart', start, { passive: true })
     window.addEventListener('touchend', end, { passive: true })
     return () => { window.removeEventListener('touchstart', start); window.removeEventListener('touchend', end) }
-  }, [goTo])
-
-  // Auto-avance: cuando un video de demo termina, la slide dispara este
-  // evento y el deck pasa solo a la siguiente.
-  useEffect(() => {
-    const onEnded = () => goTo(curRef.current + 1)
-    window.addEventListener('gw-video-ended', onEnded)
-    return () => window.removeEventListener('gw-video-ended', onEnded)
   }, [goTo])
 
   return (
@@ -237,26 +287,32 @@ export default function App() {
 
       {/* Boton oculto (esquina superior izquierda) que abre el indice */}
       <button className="index-btn" aria-label="Índice de slides"
-        onClick={() => setMenu(true)} />
+        onClick={openMenu} />
 
-      {/* Indice de navegacion */}
+      {/* Indice de navegacion: carrusel con vista previa en vivo de cada slide */}
       {menu && (
         <div className="index-overlay" onClick={() => setMenu(false)}>
           <div className="index-panel" onClick={(e) => e.stopPropagation()}>
             <div className="index-head">
               <span className="index-eyebrow">Índice</span>
-              <span className="index-count">{cur + 1} / {count}</span>
+              <span className="index-count">{focus + 1} / {count}</span>
             </div>
-            <div className="index-grid">
-              {slides.map((sl, i) => (
-                <button key={sl.id}
-                  className={`index-item${i === cur ? ' current' : ''}`}
-                  style={{ '--d': `${i * 35}ms` }}
-                  onClick={() => { setMenu(false); goTo(i) }}>
-                  <span className="index-num">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="index-title">{sl.title}</span>
-                </button>
-              ))}
+
+            <div className="index-carousel-wrap">
+              <button className="index-nav-btn" aria-label="Anterior"
+                onClick={() => setFocus((f) => Math.max(f - 1, 0))}>‹</button>
+
+              <div className="index-carousel">
+                {slides.map((sl, i) => (
+                  <IndexCard key={sl.id} sl={sl} i={i}
+                    isCurrent={i === cur} isFocused={i === focus}
+                    cardRef={(el) => { cardRefs.current[i] = el }}
+                    onSelect={() => { setMenu(false); goTo(i) }} />
+                ))}
+              </div>
+
+              <button className="index-nav-btn" aria-label="Siguiente"
+                onClick={() => setFocus((f) => Math.min(f + 1, count - 1))}>›</button>
             </div>
           </div>
         </div>

@@ -1,6 +1,4 @@
 import { Eyebrow } from '../components/SuperGraphic.jsx'
-import logoHP from '../../assets/hutchisonports-color.png'
-import logoInstituto from '../../assets/LogoInstitutoHP-azul.png'
 
 // Diagrama de flujo del caos de comunicacion: un usuario con una duda dispara
 // multiples vias (correos, llamada, chat, RH) que triangulan y sobrecargan al
@@ -211,17 +209,6 @@ export default function S02bComunicacion() {
           fill={ORANGE} stroke={ORANGE} textFill="#fff" size={16}
           lines={['Desplazamiento', 'digital', 'ineficiente']} />
       </svg>
-
-      {/* ----- Logos (esquina inferior derecha, area libre bajo el rombo) ----- */}
-      <div className="r" style={{
-        position: 'absolute', zIndex: 6, bottom: 48, right: 104,
-        display: 'flex', alignItems: 'center', gap: 30, '--d': 2000,
-      }}>
-        <img src={logoInstituto} alt="Instituto Hutchison Ports"
-          style={{ height: 40, objectFit: 'contain', display: 'block' }} />
-        <img src={logoHP} alt="Hutchison Ports"
-          style={{ height: 78, objectFit: 'contain', display: 'block' }} />
-      </div>
 
     </div>
   )

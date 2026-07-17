@@ -1,6 +1,4 @@
 import { Eyebrow } from '../components/SuperGraphic.jsx'
-import logoHP from '../../assets/hutchisonports-color.png'
-import logoInstituto from '../../assets/LogoInstitutoHP-azul.png'
 
 // Matriz 4W + 2H: el diagnostico del reto pregunta por pregunta.
 // Cada fila es un dolor detectado; las columnas responden Que / Quien /
@@ -257,17 +255,6 @@ export default function S02cMatriz() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
           {ROWS.map((r, i) => <Row key={r.que} r={r} i={i} />)}
         </div>
-      </div>
-
-      {/* ----- Logos (esquina inferior derecha, compactos bajo la matriz) ----- */}
-      <div className="r" style={{
-        position: 'absolute', zIndex: 6, bottom: 22, right: 104,
-        display: 'flex', alignItems: 'center', gap: 26, '--d': 1500,
-      }}>
-        <img src={logoInstituto} alt="Instituto Hutchison Ports"
-          style={{ height: 34, objectFit: 'contain', display: 'block' }} />
-        <img src={logoHP} alt="Hutchison Ports"
-          style={{ height: 64, objectFit: 'contain', display: 'block' }} />
       </div>
 
     </div>

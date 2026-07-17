@@ -1,20 +1,16 @@
 import { DiagonalPanelRight, Eyebrow } from '../components/SuperGraphic.jsx'
-import logoHP from '../../assets/hutchisonports-color.png'
-import logoInstituto from '../../assets/LogoInstitutoHP-azul.png'
 
 const SEA     = '#002E6D'
 const SKY     = '#009BDE'
 const AQUA    = '#54BBAB'
 const AQUAD   = '#2BA697'
 const HORIZON = '#9ACAEB'
-const BODY    = '#41607F'
 const MUTE    = '#7E96B6'
 const DIM     = '#5B7291'   // texto del estado "hoy" (apagado a proposito)
 
-// La problematica = dos frentes que desembocan en dos modulos de la plataforma.
-// Cada columna cuenta la misma historia: PROBLEMA (la carencia de raiz) ->
-// HOY (como se ve ese problema, en tono apagado) -> RESPUESTA (el modulo).
-// El color de cada modulo anticipa su slide: Comunidad = Sky, Campus = verde.
+// La problematica = dos frentes, sin adelantar todavia la respuesta (eso se
+// revela mas adelante en el deck). Cada columna cuenta: PROBLEMA (la carencia
+// de raiz) -> HOY (como se ve ese problema, en tono apagado).
 const FRONTS = [
   {
     num: '01',
@@ -22,12 +18,10 @@ const FRONTS = [
     accent: SKY,
     problem: 'No hay un canal oficial y eficiente.',
     today: [
-      'Los comunicados no llegan',
-      'La información se repite',
-      'Se retrabajan tickets ya resueltos',
+      'No hay comunidad entre unidades de negocio',
+      'La educación no se fomenta bien',
+      'Faltan espacios para difundir y expresarse',
     ],
-    module: 'Comunidad HP',
-    brings: 'Difusión · publicaciones · dinámicas · gamificación',
   },
   {
     num: '02',
@@ -35,12 +29,10 @@ const FRONTS = [
     accent: AQUA,
     problem: 'No hay un entorno propio y moldeable.',
     today: [
-      'Cornerstone: aprendizaje solo en SCORM',
-      'Recabado de datos limitado',
-      'Errores de sesión y demoras',
+      'Una sola forma de aprender',
+      'Aprendizaje lento y difícil de medir',
+      'No se puede repasar lo ya visto',
     ],
-    module: 'Campus HP',
-    brings: 'Flexibilidad · experiencia · interacción · datos',
   },
 ]
 
@@ -54,16 +46,6 @@ function Bullet({ color, children }) {
       }} />
       <span style={{ color: DIM, fontWeight: 500, fontSize: 21 }}>{children}</span>
     </div>
-  )
-}
-
-// Flecha descendente: el problema "baja" hacia su respuesta.
-function DownArrow({ color }) {
-  return (
-    <svg width="30" height="36" viewBox="0 0 30 36" aria-hidden style={{ display: 'block' }}>
-      <path d="M15 2 V27 M6 19 L15 28 L24 19" stroke={color} strokeWidth="3"
-        fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   )
 }
 
@@ -95,27 +77,6 @@ function Front({ f, i }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
           {f.today.map((t) => <Bullet key={t} color={MUTE}>{t}</Bullet>)}
         </div>
-      </div>
-
-      {/* baja hacia la respuesta */}
-      <div className="r" style={{ margin: '26px 0 14px', paddingLeft: 130, '--d': base + 320 }}>
-        <DownArrow color={f.accent} />
-      </div>
-
-      {/* RESPUESTA: el modulo (chip solido de marca con borde diagonal 30.3°) */}
-      <div className="r" style={{ '--d': base + 400 }}>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center',
-          background: f.accent, color: '#fff',
-          fontWeight: 800, fontSize: 33, letterSpacing: '-0.5px',
-          padding: '15px 32px 15px 36px',
-          clipPath: 'polygon(35px 0, 100% 0, 100% 100%, 0 100%)',
-        }}>
-          {f.module}
-        </div>
-        <p style={{ margin: '16px 0 0', color: BODY, fontWeight: 500, fontSize: 20 }}>
-          {f.brings}
-        </p>
       </div>
     </div>
   )
@@ -151,7 +112,7 @@ export default function S02Reto() {
           letterSpacing: '-2.5px', textTransform: 'uppercase',
           '--d': 240,
         }}>
-          Dos frentes, una plataforma
+          2 frentes
         </h1>
       </div>
 
@@ -161,17 +122,6 @@ export default function S02Reto() {
         display: 'flex', gap: 84,
       }}>
         {FRONTS.map((f, i) => <Front key={f.num} f={f} i={i} />)}
-      </div>
-
-      {/* ----- Logos (esquina inferior derecha) ----- */}
-      <div className="r" style={{
-        position: 'absolute', zIndex: 9, bottom: 50, right: 104,
-        display: 'flex', alignItems: 'center', gap: 30, '--d': 1120,
-      }}>
-        <img src={logoInstituto} alt="Instituto Hutchison Ports"
-          style={{ height: 40, objectFit: 'contain', display: 'block' }} />
-        <img src={logoHP} alt="Hutchison Ports"
-          style={{ height: 78, objectFit: 'contain', display: 'block' }} />
       </div>
 
     </div>

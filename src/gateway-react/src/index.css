@@ -213,7 +213,7 @@ html, body, #root {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(0, 21, 48, 0.94);
+  background: #001530;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -222,7 +222,7 @@ html, body, #root {
 @keyframes idx-fade { from { opacity: 0; } to { opacity: 1; } }
 
 .index-panel {
-  width: min(880px, 90vw);
+  width: min(1400px, 92vw);
   font-family: var(--font);
 }
 
@@ -258,47 +258,111 @@ html, body, #root {
   letter-spacing: 1px;
 }
 
-.index-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 44px;
-}
-
-.index-item {
+.index-carousel-wrap {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.index-carousel {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding: 6px 4px 16px;
+  scrollbar-width: thin;
+}
+.index-carousel::-webkit-scrollbar { height: 6px; }
+.index-carousel::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+
+.index-nav-btn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.index-nav-btn:hover { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.45); }
+
+.index-card {
+  flex-shrink: 0;
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   background: none;
   border: none;
-  border-left: 3px solid transparent;
   cursor: pointer;
-  padding: 11px 16px;
+  padding: 0;
   text-align: left;
-  transition: background 0.2s, border-color 0.2s;
   animation: idx-item 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: var(--d, 0ms);
-}
-.index-item:hover { background: rgba(255, 255, 255, 0.07); }
-.index-item.current {
-  border-left-color: var(--sky);
-  background: rgba(0, 155, 222, 0.14);
 }
 @keyframes idx-item {
   from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
+.index-thumb {
+  width: 300px;
+  height: 168.75px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  transition: border-color 0.2s, transform 0.2s;
+}
+.index-card:hover .index-thumb { border-color: rgba(255, 255, 255, 0.4); }
+.index-card.focused .index-thumb { border-color: var(--sky); transform: scale(1.04); }
+.index-card.current .index-thumb { border-color: var(--aqua); }
+
+.index-thumb-stage {
+  width: 1920px;
+  height: 1080px;
+  transform: scale(0.15625); /* 300 / 1920 */
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.index-thumb-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sea);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 34px;
+}
+
+.index-card-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 2px;
+}
+
 .index-num {
   color: var(--sky);
   font-weight: 800;
-  font-size: 15px;
+  font-size: 14px;
   letter-spacing: 1px;
+  flex-shrink: 0;
 }
 
 .index-title {
   color: #fff;
   font-weight: 600;
-  font-size: 17px;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ============================================================
@@ -411,3 +475,21 @@ html, body, #root {
   animation-delay: calc(var(--d, 0) * 1ms);
 }
 @keyframes flow-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
+/* Miniaturas del indice (.thumb): el contenido se muestra completo de
+   inmediato, sin repetir la animacion de entrada de la slide real. */
+.slide.thumb .r,
+.slide.thumb .rs,
+.slide.thumb .rf,
+.slide.thumb .sg,
+.slide.thumb .fig-in,
+.slide.thumb .photo-wrap,
+.slide.thumb .ribbon {
+  opacity: 1 !important;
+  animation: none !important;
+  transform: none !important;
+}
+.slide.thumb .flow {
+  stroke-dashoffset: 0 !important;
+  animation: none !important;
+}

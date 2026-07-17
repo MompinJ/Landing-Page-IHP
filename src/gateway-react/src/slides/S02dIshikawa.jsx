@@ -1,6 +1,4 @@
 import { Eyebrow } from '../components/SuperGraphic.jsx'
-import logoHP from '../../assets/hutchisonports-color.png'
-import logoInstituto from '../../assets/LogoInstitutoHP-azul.png'
 
 // Diagrama de Ishikawa (espina de pescado) con las 6M: las causas raiz del
 // problema de formacion y comunicacion. Mismo lenguaje que el diagrama de
@@ -34,36 +32,28 @@ const ROWS_TOP = [400, 490, 580]
 const ROWS_BOT = [710, 800, 890]
 
 // Las 6M. Cada causa viene pre-partida en lineas para el <text> SVG.
+// `bold: true` marca las causas mas relevantes de cada hueso.
 const BONES = [
   { cat: 'Mano de obra', xj: 640, side: 'top', causes: [
-    ['Sobrecarga', 'administrativa'],
-    ['Roles poco', 'definidos'],
-    ['Dependencia de', 'procesos manuales'],
+    { lines: ['Sobrecarga', 'administrativa'], bold: true },
+    { lines: ['Roles poco', 'definidos'] },
+    { lines: ['Dependencia de', 'procesos manuales'] },
   ]},
   { cat: 'Maquinaria', xj: 1030, side: 'top', causes: [
-    ['Sin plataforma / LMS', 'centralizado'],
-    ['Sistemas dispersos', 'no integrados'],
-    ['Sin soporte SCORM', 'ni aulas virtuales'],
+    { lines: ['Sin plataforma / LMS', 'centralizado'] },
+    { lines: ['Limitados a', 'solo SCORM'], bold: true },
   ]},
   { cat: 'Medición', xj: 1420, side: 'top', causes: [
-    ['Sin indicadores', 'de aprendizaje'],
-    ['Asistencia y progreso', 'registrados a mano'],
-    ['Sin trazabilidad ni', 'auditoría de avance'],
+    { lines: ['Sin indicadores', 'de aprendizaje'], bold: true },
+    { lines: ['Asistencia y progreso', 'registrados a mano'] },
   ]},
-  { cat: 'Métodos', xj: 640, side: 'bot', causes: [
-    ['Inscripción y', 'registro manual'],
-    ['Capacitación', 'duplicada por grupo'],
-    ['Comunicación', 'informal y dispersa'],
+  { cat: 'Métodos', xj: 830, side: 'bot', causes: [
+    { lines: ['Inscripción y', 'registro manual'] },
+    { lines: ['Capacitación', 'duplicada por grupo'] },
+    { lines: ['Comunicación', 'informal y dispersa'], bold: true },
   ]},
-  { cat: 'Materiales', xj: 1030, side: 'bot', causes: [
-    ['Material en papel', 'y archivos sueltos'],
-    ['Normativa sin', 'repositorio central'],
-    ['Contenido desactualizado', 'e inconsistente'],
-  ]},
-  { cat: 'Medio ambiente', xj: 1420, side: 'bot', causes: [
-    ['Sedes dispersas', 'geográficamente'],
-    ['Traslados para', 'capacitación presencial'],
-    ['Cultura dependiente', 'del papel'],
+  { cat: 'Materiales', xj: 1230, side: 'bot', causes: [
+    { lines: ['Contenido desactualizado', 'e inconsistente'], bold: true },
   ]},
 ]
 
@@ -92,12 +82,14 @@ function CatChip({ cx, cy, label, delay }) {
 }
 
 // Causa: tick horizontal hacia el hueso + punto Sky + texto a la izquierda.
-function Cause({ bx, y, lines, delay }) {
+// Las causas `bold` se destacan en Sea y peso 800 (el resto, en tono apagado).
+function Cause({ bx, y, lines, bold, delay }) {
   return (
     <g className="rf" style={{ '--d': delay }}>
       <line x1={bx} y1={y} x2={bx - 26} y2={y} stroke={TICK_LINE} strokeWidth={1.5} />
       <circle cx={bx} cy={y} r={3.5} fill={SKY} />
-      <text textAnchor="end" fontFamily={FONT} fontSize={15} fontWeight={600} fill={BODY}>
+      <text textAnchor="end" fontFamily={FONT} fontSize={15}
+        fontWeight={bold ? 800 : 600} fill={bold ? SEA : BODY}>
         {lines.map((ln, i) => (
           <tspan key={i} x={bx - 34} y={y + (i - (lines.length - 1) / 2) * 19}
             dominantBaseline="central">{ln}</tspan>
@@ -134,7 +126,7 @@ export default function S02dIshikawa() {
           letterSpacing: '-2px', textTransform: 'uppercase',
           '--d': 160,
         }}>
-          Seis emes, una misma raíz
+          Una misma raíz
         </h1>
       </div>
 
@@ -195,8 +187,8 @@ export default function S02dIshikawa() {
                 </circle>
               </g>
 
-              {b.causes.map((lines, k) => (
-                <Cause key={k} bx={boneX(b.xj, rows[k])} y={rows[k]} lines={lines}
+              {b.causes.map((c, k) => (
+                <Cause key={k} bx={boneX(b.xj, rows[k])} y={rows[k]} lines={c.lines} bold={c.bold}
                   delay={760 + i * 90 + k * 110} />
               ))}
             </g>
@@ -218,17 +210,6 @@ export default function S02dIshikawa() {
           </text>
         </g>
       </svg>
-
-      {/* ----- Logos (compactos abajo a la derecha, libres del chip inferior) ----- */}
-      <div className="r" style={{
-        position: 'absolute', zIndex: 6, bottom: 22, right: 104,
-        display: 'flex', alignItems: 'center', gap: 26, '--d': 2000,
-      }}>
-        <img src={logoInstituto} alt="Instituto Hutchison Ports"
-          style={{ height: 34, objectFit: 'contain', display: 'block' }} />
-        <img src={logoHP} alt="Hutchison Ports"
-          style={{ height: 64, objectFit: 'contain', display: 'block' }} />
-      </div>
 
     </div>
   )

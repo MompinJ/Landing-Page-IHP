@@ -3,33 +3,60 @@ import { GatewayWordmark } from '../components/GatewayMark.jsx'
 import { GatewayHero } from '../components/GatewayHero.jsx'
 
 const SEA   = '#002E6D'
+const SKY   = '#009BDE'
 const AQUA  = '#54BBAB'
 const AQUAD = '#2BA697'
 const AQUAL = '#6FCBBC'
-const BODY  = '#41607F'
 
-// Los modulos que Gateway reune en un solo acceso
-const PILLARS = [
-  { name: 'Capacitación', desc: 'presencial, virtual o híbrida' },
-  { name: 'Comunidad',    desc: 'un solo canal para todos' },
-  { name: 'Reportes',     desc: 'tu progreso, centralizado' },
-  { name: 'Dudas',        desc: 'atendidas más fácilmente' },
+const LINE = 'rgba(0,46,109,0.38)'
+
+// Los tres modulos a los que Gateway redirige (punto de entrada unico)
+const MODULES = [
+  { name: 'Reportes HP', color: AQUAD },
+  { name: 'Comunidad HP', color: SKY },
+  { name: 'Campus HP', color: AQUA },
 ]
 
-// Pilar: vinneta diagonal a 30.3° (angulo de marca) + nombre + descriptor
-function Pillar({ name, desc, d }) {
+// Diagrama: Gateway (arriba, el wordmark) se ramifica hacia sus tres modulos.
+// Coordenadas x (127 / 380 / 633) = centros de las 3 columnas de un grid de
+// 760px; el tronco baja del wordmark y se reparte en las tres ramas.
+function GatewayDiagram() {
   return (
-    <div className="r" style={{ display: 'flex', alignItems: 'center', gap: 16, '--d': d }}>
-      <span style={{
-        width: 16, height: 16, flexShrink: 0,
-        background: AQUA, transform: 'skewX(-30.3deg)',
-      }} />
-      <span style={{ color: SEA, fontWeight: 800, fontSize: 28, letterSpacing: '-0.3px' }}>
-        {name}
-      </span>
-      <span style={{ color: BODY, fontWeight: 500, fontSize: 22 }}>
-        — {desc}
-      </span>
+    <div className="r" style={{ '--d': 480, marginTop: 34, width: 760 }}>
+      <svg viewBox="0 0 760 72" width={760} height={72} aria-hidden style={{ display: 'block' }}>
+        <defs>
+          <marker id="s03-arw" viewBox="0 0 10 10" refX="8.5" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill={LINE} />
+          </marker>
+        </defs>
+        <path className="flow" style={{ '--d': 540 }} pathLength={1}
+          d="M 380 0 L 380 26" fill="none" stroke={LINE} strokeWidth={2.5} strokeLinecap="round" />
+        <path className="flow" style={{ '--d': 620 }} pathLength={1}
+          d="M 127 26 L 633 26" fill="none" stroke={LINE} strokeWidth={2.5} strokeLinecap="round" />
+        {[127, 380, 633].map((cx) => (
+          <path key={cx} className="flow" style={{ '--d': 680 }} pathLength={1}
+            d={`M ${cx} 26 L ${cx} 58`} fill="none" stroke={LINE} strokeWidth={2.5}
+            strokeLinecap="round" markerEnd="url(#s03-arw)" />
+        ))}
+      </svg>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)' }}>
+        {MODULES.map((m, i) => (
+          <div key={m.name} className="r" style={{ '--d': 800 + i * 90, display: 'flex', justifyContent: 'center' }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center',
+              background: m.color, color: '#fff',
+              fontWeight: 800, fontSize: 17, letterSpacing: '-0.2px',
+              padding: '10px 20px 10px 24px',
+              clipPath: 'polygon(11px 0, 100% 0, calc(100% - 11px) 100%, 0 100%)',
+              whiteSpace: 'nowrap',
+            }}>
+              {m.name}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -76,32 +103,22 @@ export default function S03Solucion() {
           <Eyebrow color={AQUAD} size={22}>La solución</Eyebrow>
         </div>
 
-        <div className="r" style={{ marginTop: 22, '--d': 240 }}>
+        <div className="r" style={{ marginTop: 22, display: 'flex', justifyContent: 'center', '--d': 240 }}>
           <GatewayWordmark gateColor={SEA} wayColor={AQUA} fontSize={116} />
         </div>
 
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <GatewayDiagram />
+        </div>
+
         <h2 className="r" style={{
-          margin: '24px 0 0',
+          margin: '34px 0 0', textAlign: 'center',
           color: SEA, fontWeight: 800, fontSize: 40,
           lineHeight: 1.1, letterSpacing: '-0.8px',
-          '--d': 360,
+          '--d': 900,
         }}>
           Una sola puerta a todo el Instituto.
         </h2>
-
-        <p className="r" style={{
-          margin: '22px 0 30px', maxWidth: 760,
-          color: BODY, fontWeight: 500, fontSize: 24, lineHeight: 1.5,
-          '--d': 460,
-        }}>
-          Un único inicio de sesión que reúne, en un solo lugar:
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {PILLARS.map((p, i) => (
-            <Pillar key={p.name} name={p.name} desc={p.desc} d={580 + i * 120} />
-          ))}
-        </div>
       </div>
 
 

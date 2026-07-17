@@ -1,12 +1,9 @@
 import { Eyebrow } from '../components/SuperGraphic.jsx'
-import logoHP from '../../assets/hutchisonports-color.png'
-import logoInstituto from '../../assets/LogoInstitutoHP-azul.png'
 
-// Objetivos SMART: tres tarjetas-objetivo que cierran el capitulo del reto.
-// Cada tarjeta ancla la vista en su meta numerica (50 / 90 / 30 %) y recorre
-// el objetivo, que mide, en donde (chips con el color de cada modulo:
-// Campus HP = verde, Comunidad HP = Sky, como en S02Reto) y para cuando.
-// Arriba a la derecha, la leyenda S-M-A-R-T deletrea la metodologia.
+// Objetivos SMART: dos tarjetas-objetivo que cierran el capitulo del reto.
+// Cada tarjeta ancla la vista en su meta numerica y recorre el objetivo,
+// su proposito y para cuando. Arriba a la derecha, la leyenda S-M-A-R-T
+// deletrea la metodologia.
 
 const SEA   = '#002E6D'
 const SKY   = '#009BDE'
@@ -15,8 +12,6 @@ const AQUAD = '#2BA697'
 const BODY  = '#41607F'
 const MUTE  = '#7E96B6'
 const FONT  = "'Montserrat', Arial, sans-serif"
-
-const CHIP_CLIP = 'polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%)'
 
 const SMART = [
   { l: 'S', word: 'Específico' },
@@ -30,37 +25,19 @@ const GOALS = [
   {
     num: '01',
     accent: AQUA,
-    title: 'Centralizar y reutilizar el contenido de capacitación',
-    purpose: 'Eliminar la duplicación de materiales',
-    value: '50%',
-    meta: 'de módulos y recursos de capacitación reutilizados',
-    mide: 'Módulos y recursos reutilizados en varios grupos sin rehacerse',
-    donde: [{ label: 'Campus HP', color: AQUA }],
-    cuando: 'Primeros 6 meses tras el lanzamiento',
+    title: 'Diseñar un entorno adaptado a las necesidades académicas del Instituto',
+    purpose: 'Un entorno propio y moldeable a los cursos',
+    value: '20%',
+    meta: 'de módulos nuevos y experimentales migrados al inicio',
+    cuando: 'Durante la fase de desarrollo',
   },
   {
     num: '02',
-    accent: AQUA,
-    title: 'Digitalizar asistencia, entregas y progreso',
-    purpose: 'Eliminar el control manual en papel',
-    value: '90%',
-    meta: 'de los registros capturados de forma automática',
-    mide: 'Sesiones, tareas y asistencia registradas en plataforma vs. manual',
-    donde: [{ label: 'Campus HP', color: AQUA }],
-    cuando: 'Primeros 6 meses tras el lanzamiento',
-  },
-  {
-    num: '03',
     accent: SKY,
-    title: 'Unificar la comunicación interna y la información de capacitación',
-    purpose: 'Fomentar comunidad y capacitación en un solo lugar',
+    title: 'Lanzar la primera versión de un entorno de comunicación y comunidad',
+    purpose: 'Fomentar la comunicación y la comunidad del grupo',
     value: '30%',
-    meta: 'de concentración de herramientas de comunidad y capacitación',
-    mide: 'Comunicados, publicaciones, noticias, dinámicas y módulos realizados',
-    donde: [
-      { label: 'Comunidad HP', color: SKY },
-      { label: 'Campus HP', color: AQUA },
-    ],
+    meta: 'de adopción del nuevo entorno de comunicación',
     cuando: 'Primer trimestre de implementación',
   },
 ]
@@ -82,7 +59,7 @@ function GoalCard({ g, i }) {
   return (
     <div className="r" style={{
       '--d': base,
-      width: 533, height: 600,
+      width: 533,
       background: '#fff',
       border: '1.5px solid rgba(0,46,109,0.16)', borderRadius: 14,
       position: 'relative', overflow: 'hidden',
@@ -131,30 +108,8 @@ function GoalCard({ g, i }) {
 
       <div style={{ height: 1.5, background: 'rgba(0,46,109,0.10)', margin: '18px 0' }} />
 
-      {/* que mide */}
-      <div className="r" style={{ '--d': base + 340 }}>
-        <Mini>Qué mide</Mini>
-        <p style={{ margin: '8px 0 0', minHeight: 60, color: BODY, fontWeight: 500, fontSize: 15.5, lineHeight: 1.3 }}>
-          {g.mide}
-        </p>
-      </div>
-
-      {/* en donde: chips de modulo */}
-      <div className="r" style={{ '--d': base + 420, display: 'flex', gap: 12, marginTop: 12 }}>
-        {g.donde.map((m) => (
-          <div key={m.label} style={{
-            display: 'inline-flex', alignItems: 'center',
-            background: m.color, color: '#fff',
-            fontWeight: 800, fontSize: 18, letterSpacing: '-0.3px',
-            padding: '9px 24px 9px 28px', clipPath: CHIP_CLIP,
-          }}>
-            {m.label}
-          </div>
-        ))}
-      </div>
-
       {/* para cuando */}
-      <div className="r" style={{ '--d': base + 500, marginTop: 18 }}>
+      <div className="r" style={{ '--d': base + 340 }}>
         <Mini>Para cuándo</Mini>
         <p style={{ margin: '8px 0 0', color: SEA, fontWeight: 600, fontSize: 15.5 }}>
           {g.cuando}
@@ -185,7 +140,7 @@ export default function S02eObjetivos() {
           letterSpacing: '-2px', textTransform: 'uppercase',
           '--d': 160,
         }}>
-          Tres metas, un mismo rumbo
+          Dos metas, un mismo rumbo
         </h1>
       </div>
 
@@ -216,21 +171,10 @@ export default function S02eObjetivos() {
 
       {/* ----- Tarjetas de objetivo ----- */}
       <div style={{
-        position: 'absolute', left: 112, top: 310, zIndex: 5,
-        display: 'flex', gap: 40,
+        position: 'absolute', left: 112, top: 310, width: 1696, zIndex: 5,
+        display: 'flex', justifyContent: 'center', gap: 40,
       }}>
         {GOALS.map((g, i) => <GoalCard key={g.num} g={g} i={i} />)}
-      </div>
-
-      {/* ----- Logos (compactos abajo a la derecha) ----- */}
-      <div className="r" style={{
-        position: 'absolute', zIndex: 6, bottom: 22, right: 104,
-        display: 'flex', alignItems: 'center', gap: 26, '--d': 1500,
-      }}>
-        <img src={logoInstituto} alt="Instituto Hutchison Ports"
-          style={{ height: 34, objectFit: 'contain', display: 'block' }} />
-        <img src={logoHP} alt="Hutchison Ports"
-          style={{ height: 64, objectFit: 'contain', display: 'block' }} />
       </div>
 
     </div>
