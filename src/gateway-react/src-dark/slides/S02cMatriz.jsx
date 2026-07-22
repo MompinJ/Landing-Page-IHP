@@ -139,7 +139,7 @@ function Row({ r, i }) {
         background: 'rgba(154,202,235,0.06)',
         borderRight: '1.5px solid rgba(154,202,235,0.12)',
       }}>
-        <span style={{ color: 'rgba(154,202,235,0.28)', fontWeight: 800, fontSize: 26, lineHeight: 1, flexShrink: 0 }}>
+        <span style={{ color: '#9ACAEB', fontWeight: 800, fontSize: 26, lineHeight: 1, flexShrink: 0 }}>
           {num}
         </span>
         <span style={{ color: TXT, fontWeight: 700, fontSize: 17, lineHeight: 1.2, letterSpacing: '-0.2px' }}>

@@ -1,7 +1,7 @@
 import { GatewayMark, GatewayWordmark } from '../../src/components/GatewayMark.jsx'
 import { SLIDE_BG, SKY, AQUA, BODY, TXT, FONT } from '../theme.js'
-import logoHP from '../../assets/hutchisonports-color.png'
-import logoInstituto from '../../assets/LogoInstitutoHP-azul.png'
+import logoHP from '../../assets/hutchisonports-blanco.png'
+import logoInstituto from '../../assets/LogoInstitutoHP-blanco.png'
 
 // Espejo Navy de S09Gracias: cierra con la misma imagen que la portada
 // (bandas de luz diagonales, isotipo con glow) — mismo contenido.
@@ -53,22 +53,17 @@ export default function S09Gracias() {
         </div>
       </div>
 
-      {/* Logos, como en la portada, sobre placa blanca */}
+      {/* Logos, version negativa directo sobre la tinta (como en la portada) */}
       <div className="r" style={{
         position: 'absolute', zIndex: 9,
         bottom: 68, left: 60,
         '--d': 760,
+        display: 'flex', alignItems: 'center', gap: 40,
       }}>
-        <div style={{
-          background: 'rgba(255,255,255,0.97)', borderRadius: 14, padding: '14px 26px',
-          display: 'flex', alignItems: 'center', gap: 40,
-          boxShadow: '0 14px 40px rgba(0,0,0,0.45)',
-        }}>
-          <img src={logoInstituto} alt="Instituto Hutchison Ports"
-            style={{ height: 54, objectFit: 'contain', display: 'block' }} />
-          <img src={logoHP} alt="Hutchison Ports"
-            style={{ height: 86, objectFit: 'contain', display: 'block' }} />
-        </div>
+        <img src={logoInstituto} alt="Instituto Hutchison Ports"
+          style={{ height: 54, objectFit: 'contain', display: 'block' }} />
+        <img src={logoHP} alt="Hutchison Ports"
+          style={{ height: 86, objectFit: 'contain', display: 'block' }} />
       </div>
 
     </div>

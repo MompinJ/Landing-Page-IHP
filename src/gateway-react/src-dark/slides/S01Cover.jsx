@@ -1,14 +1,15 @@
 import { GatewayMark, GatewayWordmark } from '../../src/components/GatewayMark.jsx'
 import { OrbitRing } from '../../src/components/OrbitDots.jsx'
 import { SLIDE_BG, SKY, AQUA, AQUA_L, HORIZON, BODY, FONT } from '../theme.js'
-import logoHP from '../../assets/hutchisonports-color.png'
-import logoInstituto from '../../assets/LogoInstitutoHP-azul.png'
+import logoHP from '../../assets/hutchisonports-blanco.png'
+import logoInstituto from '../../assets/LogoInstitutoHP-blanco.png'
 import logoInternship from '../../assets/LogoInternShip.png'
 
 // Espejo Navy de S01Cover: mismo contenido (logos, isotipo, wordmark), otro
 // lenguaje: tinta profunda, bandas diagonales luminosas en vez de shapes
-// solidos, isotipo con orbitas y glow. Los logotipos institucionales (arte
-// azul sobre transparente) van sobre placas blancas para conservar contraste.
+// solidos, isotipo con orbitas y glow. Instituto/HP usan su version negativa
+// (blanco sobre transparente) directo sobre la tinta. InternShip solo existe
+// en version color, asi que ese si va sobre placa blanca.
 
 function LogoPlate({ children, pad = '14px 26px' }) {
   return (
@@ -88,20 +89,17 @@ export default function S01Cover() {
         <div className="r" style={{ '--d': 720, height: 3, width: 190, background: AQUA, boxShadow: `0 0 14px ${AQUA}AA` }} />
       </div>
 
-      {/* Logos institucionales abajo, sobre placa blanca */}
+      {/* Logos institucionales abajo, version negativa directo sobre la tinta */}
       <div className="r" style={{
         position: 'absolute', zIndex: 9,
         bottom: 68, left: 60,
         '--d': 800,
+        display: 'flex', alignItems: 'center', gap: 40,
       }}>
-        <LogoPlate>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
-            <img src={logoInstituto} alt="Instituto Hutchison Ports"
-              style={{ height: 54, objectFit: 'contain', display: 'block' }} />
-            <img src={logoHP} alt="Hutchison Ports"
-              style={{ height: 86, objectFit: 'contain', display: 'block' }} />
-          </div>
-        </LogoPlate>
+        <img src={logoInstituto} alt="Instituto Hutchison Ports"
+          style={{ height: 54, objectFit: 'contain', display: 'block' }} />
+        <img src={logoHP} alt="Hutchison Ports"
+          style={{ height: 86, objectFit: 'contain', display: 'block' }} />
       </div>
     </div>
   )

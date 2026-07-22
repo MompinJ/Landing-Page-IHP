@@ -15,9 +15,9 @@ export const ORANGE  = '#EE7523'
 export const INK     = '#041226'   // papel oscuro (fondo de toda slide)
 export const INK_2   = '#072448'   // tinta iluminada (paneles, gradientes)
 
-export const TXT     = '#F4F9FE'   // titulos
-export const BODY    = '#A6C1DC'   // texto de cuerpo
-export const MUTE    = '#5F7C9E'   // texto apagado
+export const TXT     = '#FFFFFF'   // titulos
+export const BODY    = '#FFFFFF'   // texto de cuerpo, blanco solido (nada de tintes ni transparencias)
+export const MUTE    = '#FFFFFF'   // texto secundario, blanco solido tambien
 
 export const LINE    = 'rgba(154,202,235,0.25)'  // lineas / bordes
 export const LINE_S  = 'rgba(154,202,235,0.12)'  // lineas mas sutiles

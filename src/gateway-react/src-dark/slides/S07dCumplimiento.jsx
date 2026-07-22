@@ -80,7 +80,7 @@ function Row({ r, i }) {
       border: '1.5px solid rgba(154,202,235,0.16)', borderRadius: 14,
       borderLeft: `4px solid ${r.accent}`,
     }}>
-      <span style={{ color: 'rgba(154,202,235,0.22)', fontWeight: 800, fontSize: 44, lineHeight: 1 }}>
+      <span style={{ color: '#9ACAEB', fontWeight: 800, fontSize: 44, lineHeight: 1 }}>
         {r.num}
       </span>
 

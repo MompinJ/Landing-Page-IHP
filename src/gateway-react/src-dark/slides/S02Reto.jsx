@@ -1,10 +1,10 @@
 import { DiagonalBand, Eyebrow } from '../../src/components/SuperGraphic.jsx'
-import { SLIDE_BG, SKY, AQUA, HORIZON, TXT, BODY, MUTE, FONT } from '../theme.js'
+import { SLIDE_BG, SKY, AQUA, HORIZON, TXT, BODY, FONT } from '../theme.js'
 
 // Espejo Navy de S02Reto: mismos dos frentes, sobre tinta. Los slivers
 // diagonales solidos se vuelven bandas de luz al borde derecho.
 
-const DIM = MUTE   // texto del estado "hoy" (apagado a proposito)
+const DIM = BODY   // texto del estado "hoy" (mismo tono que el resto del cuerpo: legible)
 
 const FRONTS = [
   {
@@ -49,7 +49,7 @@ function Front({ f, i }) {
     <div style={{ flex: 1, maxWidth: 700 }}>
       {/* numero + frente */}
       <div className="r" style={{ display: 'flex', alignItems: 'baseline', gap: 16, '--d': base }}>
-        <span style={{ color: 'rgba(154,202,235,0.18)', fontWeight: 800, fontSize: 52, lineHeight: 1 }}>
+        <span style={{ color: '#9ACAEB', fontWeight: 800, fontSize: 52, lineHeight: 1 }}>
           {f.num}
         </span>
         <span style={{ color: TXT, fontWeight: 800, fontSize: 40, letterSpacing: '-1px' }}>
@@ -67,9 +67,9 @@ function Front({ f, i }) {
 
       {/* HOY: como se ve ese problema */}
       <div className="r" style={{ marginTop: 26, '--d': base + 220 }}>
-        <Eyebrow color={MUTE} size={16}>Hoy se ve así</Eyebrow>
+        <Eyebrow color={HORIZON} size={16}>Hoy se ve así</Eyebrow>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
-          {f.today.map((t) => <Bullet key={t} color={MUTE}>{t}</Bullet>)}
+          {f.today.map((t) => <Bullet key={t} color={HORIZON}>{t}</Bullet>)}
         </div>
       </div>
     </div>

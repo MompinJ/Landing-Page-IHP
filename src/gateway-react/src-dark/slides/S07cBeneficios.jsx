@@ -44,7 +44,7 @@ function StrategicColumn({ s, i }) {
   return (
     <div>
       <div className="r" style={{ '--d': base, display: 'flex', alignItems: 'baseline', gap: 16 }}>
-        <span style={{ color: 'rgba(154,202,235,0.18)', fontWeight: 800, fontSize: 48, lineHeight: 1, flexShrink: 0 }}>
+        <span style={{ color: '#9ACAEB', fontWeight: 800, fontSize: 48, lineHeight: 1, flexShrink: 0 }}>
           {s.num}
         </span>
         <span style={{ color: TXT, fontWeight: 800, fontSize: 27, lineHeight: 1.15, letterSpacing: '-0.5px' }}>

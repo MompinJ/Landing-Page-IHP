@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { DiagonalBand } from '../../src/components/SuperGraphic.jsx'
-import { SLIDE_BG, TXT, BODY, MUTE, FONT } from '../theme.js'
+import { SLIDE_BG, TXT, BODY, FONT } from '../theme.js'
 import emojiLove from '../../assets/ports-emojis/love.webp'
 import emojiLaugh from '../../assets/ports-emojis/laugh.webp'
 import emojiWow from '../../assets/ports-emojis/wow.webp'
@@ -26,7 +26,7 @@ export function Action({ lead, children }) {
     <>
       <strong style={{ color: 'var(--fs-accent)', fontWeight: 700 }}>{lead}</strong>
       {' — '}
-      <span style={{ color: MUTE, fontWeight: 500 }}>{children}</span>
+      <span style={{ color: BODY, fontWeight: 500 }}>{children}</span>
     </>
   )
 }

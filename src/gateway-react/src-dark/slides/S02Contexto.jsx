@@ -1,38 +1,32 @@
 import { Eyebrow } from '../../src/components/SuperGraphic.jsx'
-import { SLIDE_BG, SKY, AQUA, AQUA_D, TXT, BODY, LINE_S, FONT } from '../theme.js'
+import { SLIDE_BG, AQUA, TXT, BODY, LINE_S, FONT } from '../theme.js'
 
 // Espejo Navy de S02Contexto: mismo contenido editorial, sobre tinta.
 
-function Bullet({ color, children, delay }) {
+function Bullet({ children, delay }) {
   return (
-    <div className="r" style={{ '--d': delay, display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-      <span style={{
-        width: 10, height: 10, marginTop: 5, flexShrink: 0,
-        background: color, transform: 'skewX(-30.3deg)',
-        boxShadow: `0 0 8px ${color}77`,
-      }} />
-      <span style={{ color: TXT, fontWeight: 600, fontSize: 19.5, lineHeight: 1.4 }}>{children}</span>
-    </div>
+    <p className="r" style={{
+      '--d': delay, margin: 0,
+      color: TXT, fontWeight: 700, fontSize: 34, lineHeight: 1.3, letterSpacing: '-0.5px',
+    }}>
+      {children}
+    </p>
   )
 }
 
 const BLOCKS = [
   {
     key: 'hoy',
-    accent: AQUA,
     items: [
       'Aprendizaje personalizado para cada colaborador.',
       'Menos carga administrativa, procesos más ágiles.',
-      'Formación con mayor alcance, siempre disponible.',
     ],
   },
   {
     key: 'horizonte',
-    accent: SKY,
     items: [
       'Mayor cobertura y participación de los colaboradores.',
       'Competencias críticas desarrolladas más rápido.',
-      'Conocimiento estandarizado entre unidades de negocio.',
     ],
   },
 ]
@@ -40,9 +34,9 @@ const BLOCKS = [
 function Block({ b, i }) {
   const base = 620 + i * 100
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 34 }}>
       {b.items.map((it, k) => (
-        <Bullet key={it} color={b.accent} delay={base + k * 70}>{it}</Bullet>
+        <Bullet key={it} delay={base + k * 90}>{it}</Bullet>
       ))}
     </div>
   )
@@ -84,7 +78,7 @@ export default function S02Contexto() {
 
         <p className="r" style={{
           '--d': 380, margin: '20px 0 0', maxWidth: 1550,
-          color: BODY, fontWeight: 500, fontSize: 19, lineHeight: 1.5,
+          color: BODY, fontWeight: 500, fontSize: 24, lineHeight: 1.5,
         }}>
           Además, busca recolectar todo el <strong style={{ color: TXT }}>conocimiento</strong> y{' '}
           <strong style={{ color: TXT }}>experiencia</strong> que los colaboradores han adquirido a lo

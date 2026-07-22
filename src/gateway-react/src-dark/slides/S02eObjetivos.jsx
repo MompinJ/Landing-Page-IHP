@@ -56,7 +56,7 @@ function GoalCard({ g, i }) {
       }} />
 
       <div className="r" style={{ '--d': base + 90, display: 'flex', alignItems: 'baseline', gap: 12 }}>
-        <span style={{ color: 'rgba(154,202,235,0.22)', fontWeight: 800, fontSize: 42, lineHeight: 1, flexShrink: 0 }}>
+        <span style={{ color: '#9ACAEB', fontWeight: 800, fontSize: 42, lineHeight: 1, flexShrink: 0 }}>
           {g.num}
         </span>
         <span style={{ color: TXT, fontWeight: 800, fontSize: 27, letterSpacing: '-0.5px', whiteSpace: 'nowrap' }}>
