@@ -1,25 +1,20 @@
-import { DiagonalPanelRight, Eyebrow } from '../components/SuperGraphic.jsx'
-import { GatewayWordmark } from '../components/GatewayMark.jsx'
-import { GatewayHero } from '../components/GatewayHero.jsx'
+import { DiagonalBand, Eyebrow } from '../../src/components/SuperGraphic.jsx'
+import { GatewayWordmark } from '../../src/components/GatewayMark.jsx'
+import { GatewayHero } from '../../src/components/GatewayHero.jsx'
+import { SLIDE_BG, SKY, AQUA, AQUA_D, HORIZON, TXT, FONT } from '../theme.js'
 
-const SEA   = '#002E6D'
-const SKY   = '#009BDE'
-const AQUA  = '#54BBAB'
-const AQUAD = '#2BA697'
-const AQUAL = '#6FCBBC'
+// Espejo Navy de S03Solucion: mismo contenido y el mismo portal (el isotipo
+// queda en las mismas coordenadas para que el zoom del portal calce). El panel
+// diagonal solido se vuelve banda de luz aqua + isotipo con glow.
 
-const LINE = 'rgba(0,46,109,0.38)'
+const LINE = 'rgba(154,202,235,0.4)'
 
-// Los tres modulos a los que Gateway redirige (punto de entrada unico)
 const MODULES = [
-  { name: 'Reportes HP', color: AQUAD },
+  { name: 'Reportes HP', color: AQUA_D },
   { name: 'Comunidad HP', color: SKY },
   { name: 'Campus HP', color: AQUA },
 ]
 
-// Diagrama: Gateway (arriba, el wordmark) se ramifica hacia sus tres modulos.
-// Coordenadas x (127 / 380 / 633) = centros de las 3 columnas de un grid de
-// 760px; el tronco baja del wordmark y se reparte en las tres ramas.
 function GatewayDiagram() {
   return (
     <div className="r" style={{ '--d': 480, marginTop: 34, width: 760 }}>
@@ -46,11 +41,12 @@ function GatewayDiagram() {
           <div key={m.name} className="r" style={{ '--d': 800 + i * 90, display: 'flex', justifyContent: 'center' }}>
             <span style={{
               display: 'inline-flex', alignItems: 'center',
-              background: m.color, color: '#fff',
+              background: m.color, color: '#04122B',
               fontWeight: 800, fontSize: 18, letterSpacing: '-0.2px',
               padding: '10px 20px 10px 24px',
               clipPath: 'polygon(11px 0, 100% 0, calc(100% - 11px) 100%, 0 100%)',
               whiteSpace: 'nowrap',
+              boxShadow: `0 0 22px ${m.color}55`,
             }}>
               {m.name}
             </span>
@@ -65,46 +61,46 @@ export default function S03Solucion() {
   return (
     <div style={{
       width: '100%', height: '100%',
-      background: 'var(--paper)',
+      background: SLIDE_BG,
       position: 'relative', overflow: 'hidden',
-      fontFamily: "'Montserrat', Arial, sans-serif",
+      fontFamily: FONT,
     }}>
 
-      {/* Figura de marca: panel diagonal Sea Blue (con borde aqua) que aloja el
-          isotipo en negativo. Sin texto encima -> contraste seguro. */}
-      <div className="fig-in" style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
-        <DiagonalPanelRight color={AQUA} bottomX={840} />
+      {/* Banda de luz aqua a la derecha (eco del panel diagonal solido) */}
+      <div className="fig-in" style={{ position: 'absolute', inset: 0, zIndex: 1, opacity: 0.14 }}>
+        <DiagonalBand color={AQUA} topX={1520} width={520} />
       </div>
       <div className="fig-in" style={{ position: 'absolute', inset: 0, zIndex: 2, '--d': 150 }}>
-        <DiagonalPanelRight color={SEA} bottomX={950} />
+        <DiagonalBand color={AQUA} topX={1500} width={5} />
       </div>
 
-      {/* Isotipo heroico (negativo) — auto-dibujo + orbita, centrado en el panel */}
-      <div style={{ position: 'absolute', left: 1640, top: 540, zIndex: 3 }}>
+      {/* Isotipo heroico — auto-dibujo + orbita, MISMA posicion que la version
+          clara (el portal hace zoom sobre este punto: 1640px 600px) */}
+      <div style={{ position: 'absolute', left: 1640, top: 540, zIndex: 3, filter: `drop-shadow(0 0 36px ${AQUA}66)` }}>
         <GatewayHero
           markSize={230}
           innerRadius={170}
           outerRadius={220}
           markColor="#ffffff"
-          innerColor={AQUA}
-          outerColor={AQUAL}
+          innerColor="#FFFFFF"
+          outerColor={HORIZON}
           markStroke={2.3}
           showHalo={false}
           animDelay={0.7}
         />
       </div>
 
-      {/* ----- Mensaje (sobre blanco) ----- */}
+      {/* ----- Mensaje ----- */}
       <div style={{
         position: 'absolute', left: 112, top: '50%',
         transform: 'translateY(-50%)', zIndex: 5, width: 980,
       }}>
         <div className="r" style={{ '--d': 120 }}>
-          <Eyebrow color={AQUAD} size={22}>La solución</Eyebrow>
+          <Eyebrow color={AQUA} size={22}>La solución</Eyebrow>
         </div>
 
         <div className="r" style={{ marginTop: 22, display: 'flex', justifyContent: 'center', '--d': 240 }}>
-          <GatewayWordmark gateColor={SEA} wayColor={AQUA} fontSize={116} />
+          <GatewayWordmark gateColor="#FFFFFF" wayColor={AQUA} fontSize={116} />
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -113,14 +109,13 @@ export default function S03Solucion() {
 
         <h2 className="r" style={{
           margin: '34px 0 0', textAlign: 'center',
-          color: SEA, fontWeight: 800, fontSize: 44,
+          color: TXT, fontWeight: 800, fontSize: 44,
           lineHeight: 1.1, letterSpacing: '-0.8px',
           '--d': 900,
         }}>
           Una sola puerta a todo el Instituto.
         </h2>
       </div>
-
 
     </div>
   )

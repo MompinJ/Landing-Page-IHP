@@ -25,6 +25,7 @@ import S07dCumplimiento from './S07dCumplimiento.jsx'
 import S07eCierre from './S07eCierre.jsx'
 import S09Gracias from './S09Gracias.jsx'
 
+// Espejo Navy de src/slides/index.jsx: mismo orden, ids y transiciones.
 // `transition` = transicion al AVANZAR desde esta slide (se reusa al retroceder
 // hacia ella). Ids: 'split' (cortina HP), 'wipe' (barrido), 'fade' (fundido).
 // `portalExit` = transicion especial Gateway (solo hacia adelante).

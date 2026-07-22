@@ -100,6 +100,7 @@ Juegos interactivos para la audiencia, en `dinamicas/<slug>/` (clave `dinamicas`
 | `caza-fugas` | Ambiente: variante de la Caza de Riesgos con 11 fugas y derroches (descarga al mar, ralenti, tambo sin charola, manguera abierta, mala segregacion, clima con puerta abierta...) entre buenas practicas senuelo. Mismo motor de point-and-click: escena editable via grupos `.hz` del SVG |
 | `linea-fuego` | Seguridad: 6 maniobras cenitales (grua girando, reversa, snap-back de cabo, pasillo de montacargas, izaje con viento, apertura de contenedor) con 4 posiciones marcadas; hay que elegir la UNICA segura contra reloj. Al responder se revelan las zonas de peligro y la regla. Rondas editables como grupos `.round` del SVG |
 | `flujo-terminal` | Pieza VISUAL (no juego): el ciclo de descarga animado en CSS 3D — STS toma del buque, tractores en circuito, RTG estiba en pilas que crecen. Tira de flujo en vivo, camara cinematica automatica (arrastra para orbitar, 1-4 vistas, espacio pausa) y reinicio al vaciar la cubierta. Ritmo y layout en `js/flujo.js` |
+| `tronco-runner` | Endless runner 3D estilo Subway Surfers (React Three Fiber): corre por 3 carriles recolectando los valores del Tronco Comun (+10) y esquivando riesgos (-10) durante 60 segundos, mientras el escenario rota entre patio de contenedores, buque, vias de tren y crucero. Swipe/tap/teclado, salto, rangos por puntaje y TOP 10 en localStorage para el stand. Fuente en `src/tronco-runner` (compilar y copiar `dist/` como en gateway-react) |
 
 ## Experimental
 
@@ -134,7 +135,8 @@ Campos `subtitle`, `description`, `date`, `tags`, `accent`, `theme` son opcional
 | Slug | Titulo |
 |---|---|
 | `gateway-tecnica` | Gateway — Arquitectura Tecnica, HUB Digital IHP para el area de TI (microservicios tras el API Gateway + capitulo tecnico), identidad Hutchison Ports (13 slides, React) |
-| `gateway-react` | Gateway by Hutchison Ports — version React de la ejecutiva (9 slides), sucesora de la vanilla `gateway` |
+| `gateway-react` | Gateway by Hutchison Ports — version React de la ejecutiva (25 slides con recorrido en video modulo por modulo), sucesora de la vanilla `gateway` |
+| `gateway-navy` | Gateway — Navy Edition: espejo oscuro de `gateway-react` (mismo contenido, transiciones y videos; rediseño navy/glass para salas oscuras). Misma app Vite, pagina `dark.html` |
 | `nom-035` | NOM-035 — Modulo 0, factores de riesgo psicosocial, identidad Hutchison Ports v4.1 (en construccion) |
 | `check-eat` | Check-Eat — Nutricion Estudiantil UCC (10 slides) |
 | `infra-azure-hub` | Infraestructura Azure — HUB Hutchison Ports, Fase 1 economica (11 slides, React) |

@@ -7,7 +7,7 @@ export default function S01Cover() {
   return (
     <div style={{
       width: '100%', height: '100%',
-      background: '#ffffff',
+      background: 'var(--paper)',
       position: 'relative', overflow: 'hidden',
       fontFamily: "'Montserrat', Arial, sans-serif",
     }}>

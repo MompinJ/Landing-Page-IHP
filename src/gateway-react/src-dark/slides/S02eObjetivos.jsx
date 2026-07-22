@@ -1,20 +1,14 @@
-import { Eyebrow } from '../components/SuperGraphic.jsx'
+import { Eyebrow } from '../../src/components/SuperGraphic.jsx'
+import { SLIDE_BG, SEA_L, SKY, AQUA, AQUA_D, TXT, BODY, PANEL, FONT } from '../theme.js'
 
-// Los 4 objetivos planteados al inicio del periodo de practicas (6 meses),
-// uno por pieza del ecosistema. Sin estado de cumplimiento a proposito: eso
-// se revela al final del deck (S07dCumplimiento).
-
-const SEA   = '#002E6D'
-const SKY   = '#009BDE'
-const AQUA  = '#54BBAB'
-const AQUAD = '#2BA697'
-const BODY  = '#41607F'
-const FONT  = "'Montserrat', Arial, sans-serif"
+// Espejo Navy de S02eObjetivos: los 4 objetivos planteados al inicio del
+// periodo de practicas (6 meses), uno por pieza del ecosistema. Sin estado de
+// cumplimiento a proposito: eso se revela al final del deck (S07dCumplimiento).
 
 const GOALS = [
   {
     num: '01',
-    accent: SEA,
+    accent: SEA_L,
     module: 'Gateway',
     kicker: 'La puerta única',
     text: 'Construir un punto de entrada único: un solo inicio de sesión que integre comunidad, capacitación y reportes.',
@@ -35,7 +29,7 @@ const GOALS = [
   },
   {
     num: '04',
-    accent: AQUAD,
+    accent: AQUA_D,
     module: 'Reportes HP',
     kicker: 'Integración',
     text: 'Readaptar el proyecto existente de reportes para vivir dentro del ecosistema Gateway.',
@@ -47,23 +41,25 @@ function GoalCard({ g, i }) {
   return (
     <div className="r" style={{
       '--d': base,
-      background: '#fff',
-      border: '1.5px solid rgba(0,46,109,0.16)', borderRadius: 14,
+      background: PANEL,
+      border: '1.5px solid rgba(154,202,235,0.18)', borderRadius: 14,
       position: 'relative', overflow: 'hidden',
       padding: '30px 30px 28px',
+      boxShadow: `0 0 46px ${g.accent}14`,
     }}>
       {/* filo superior con el color del modulo, cortado a la marca */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, height: 8,
         background: g.accent,
         clipPath: 'polygon(0 0, 100% 0, 100% 100%, 16px 100%)',
+        boxShadow: `0 0 16px ${g.accent}88`,
       }} />
 
       <div className="r" style={{ '--d': base + 90, display: 'flex', alignItems: 'baseline', gap: 12 }}>
-        <span style={{ color: 'rgba(0,46,109,0.16)', fontWeight: 800, fontSize: 42, lineHeight: 1, flexShrink: 0 }}>
+        <span style={{ color: 'rgba(154,202,235,0.22)', fontWeight: 800, fontSize: 42, lineHeight: 1, flexShrink: 0 }}>
           {g.num}
         </span>
-        <span style={{ color: SEA, fontWeight: 800, fontSize: 27, letterSpacing: '-0.5px', whiteSpace: 'nowrap' }}>
+        <span style={{ color: TXT, fontWeight: 800, fontSize: 27, letterSpacing: '-0.5px', whiteSpace: 'nowrap' }}>
           {g.module}
         </span>
       </div>
@@ -86,7 +82,7 @@ export default function S02eObjetivos() {
   return (
     <div style={{
       width: '100%', height: '100%',
-      background: 'var(--paper)',
+      background: SLIDE_BG,
       position: 'relative', overflow: 'hidden',
       fontFamily: FONT,
     }}>
@@ -94,11 +90,11 @@ export default function S02eObjetivos() {
       {/* ----- Encabezado ----- */}
       <div style={{ position: 'absolute', left: 112, top: 92, zIndex: 5, width: 1696 }}>
         <div className="r" style={{ '--d': 60 }}>
-          <Eyebrow color={AQUAD} size={22}>Del reto a la solución · Objetivos del periodo (6 meses)</Eyebrow>
+          <Eyebrow color={AQUA} size={22}>Del reto a la solución · Objetivos del periodo (6 meses)</Eyebrow>
         </div>
         <h1 className="r" style={{
           margin: '22px 0 0',
-          color: SEA, fontWeight: 800,
+          color: TXT, fontWeight: 800,
           fontSize: 62, lineHeight: 1.0,
           letterSpacing: '-2px', textTransform: 'uppercase',
           '--d': 160,

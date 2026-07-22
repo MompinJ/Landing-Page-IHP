@@ -1,19 +1,9 @@
-import { Eyebrow } from '../components/SuperGraphic.jsx'
+import { Eyebrow } from '../../src/components/SuperGraphic.jsx'
+import { SLIDE_BG, SKY, AQUA, AQUA_D, ORANGE, TXT, BODY, FONT } from '../theme.js'
 
-// Matriz 4W + 2H: el diagnostico del reto pregunta por pregunta.
-// Cada fila es un dolor detectado; las columnas responden Que / Quien /
-// Cuando / Donde (4W, en Sea) y Como / Cuantas veces (2H, en Aqua).
-// La ultima columna (frecuencia) lleva tinte naranja: es donde vive el
-// dolor cuantificado (7,540 errores, 4,547 tickets), igual que los
-// CostNode del diagrama de flujo anterior.
+// Espejo Navy de S02cMatriz: misma matriz 4W+2H, con filas glass sobre tinta,
+// chips Sky (4W) / Aqua (2H) y la columna de frecuencia en naranja.
 
-const SEA    = '#002E6D'
-const AQUAD  = '#2BA697'
-const ORANGE = '#EE7523'
-const BODY   = '#41607F'
-const FONT   = "'Montserrat', Arial, sans-serif"
-
-// Geometria de la matriz: 6 columnas (la primera mas ancha) x 7 filas.
 const COLS    = '336px 260px 260px 260px 260px 260px'
 const COL_GAP = 12
 const ROW_H   = 82
@@ -87,10 +77,8 @@ const ROWS = [
   },
 ]
 
-// Paralelogramo a la manera de la marca (bordes laterales inclinados).
 const CHIP_CLIP = 'polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%)'
 
-// Banda de grupo: agrupa las columnas 4W y las 2H sobre los encabezados.
 function GroupBand({ children, color, bg, delay }) {
   return (
     <div className="r" style={{
@@ -105,21 +93,21 @@ function GroupBand({ children, color, bg, delay }) {
   )
 }
 
-// Encabezado de columna: chip solido (Sea para las 4W, Aqua para las 2H).
+// Encabezado de columna: chip solido (Sky para las 4W, Aqua para las 2H)
+// con texto tinta — los chips son la luz de la slide.
 function HeaderChip({ label, w, delay }) {
   return (
     <div className="r" style={{
       '--d': delay,
-      height: 46, background: w ? SEA : AQUAD, clipPath: CHIP_CLIP,
+      height: 46, background: w ? SKY : AQUA_D, clipPath: CHIP_CLIP,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: '#fff', fontWeight: 700, fontSize: 17, letterSpacing: '-0.2px',
+      color: '#04122B', fontWeight: 700, fontSize: 17, letterSpacing: '-0.2px',
     }}>
       {label}
     </div>
   )
 }
 
-// Celda estandar de respuesta.
 function Cell({ children, style }) {
   return (
     <div style={{
@@ -140,21 +128,21 @@ function Row({ r, i }) {
       '--d': 520 + i * 100,
       display: 'grid', gridTemplateColumns: COLS, columnGap: COL_GAP,
       height: ROW_H,
-      background: '#fff',
-      border: '1.5px solid rgba(0,46,109,0.16)', borderRadius: 12,
+      background: 'rgba(154,202,235,0.05)',
+      border: '1.5px solid rgba(154,202,235,0.16)', borderRadius: 12,
       overflow: 'hidden',
     }}>
-      {/* Que sucede: la celda lider, numerada y en Sea */}
+      {/* Que sucede: la celda lider, numerada */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 13,
         padding: '6px 14px 6px 16px',
-        background: 'rgba(0,46,109,0.045)',
-        borderRight: '1.5px solid rgba(0,46,109,0.10)',
+        background: 'rgba(154,202,235,0.06)',
+        borderRight: '1.5px solid rgba(154,202,235,0.12)',
       }}>
-        <span style={{ color: 'rgba(0,46,109,0.22)', fontWeight: 800, fontSize: 26, lineHeight: 1, flexShrink: 0 }}>
+        <span style={{ color: 'rgba(154,202,235,0.28)', fontWeight: 800, fontSize: 26, lineHeight: 1, flexShrink: 0 }}>
           {num}
         </span>
-        <span style={{ color: SEA, fontWeight: 700, fontSize: 17, lineHeight: 1.2, letterSpacing: '-0.2px' }}>
+        <span style={{ color: TXT, fontWeight: 700, fontSize: 17, lineHeight: 1.2, letterSpacing: '-0.2px' }}>
           {r.que}
         </span>
       </div>
@@ -168,15 +156,15 @@ function Row({ r, i }) {
       <div style={{
         display: 'flex', alignItems: 'center', gap: 12,
         padding: '6px 14px 6px 16px',
-        background: 'rgba(238,117,35,0.07)',
-        borderLeft: '1.5px solid rgba(238,117,35,0.35)',
+        background: 'rgba(238,117,35,0.12)',
+        borderLeft: '1.5px solid rgba(238,117,35,0.45)',
       }}>
         <span style={{
           width: 11, height: 11, flexShrink: 0,
           background: ORANGE, transform: 'skewX(-30.3deg)',
         }} />
         <span style={{
-          color: SEA, fontWeight: r.figura ? 800 : 700,
+          color: TXT, fontWeight: r.figura ? 800 : 700,
           fontSize: 16, lineHeight: 1.24,
         }}>
           {r.cuantas}
@@ -187,14 +175,13 @@ function Row({ r, i }) {
 }
 
 export default function S02cMatriz() {
-  // Anchos de las bandas 4W / 2H: 4 columnas (336 + 3x260 + 3 gaps) y 2 (260x2 + 1 gap)
   const w4 = 336 + 260 * 3 + COL_GAP * 3
   const w2 = 260 * 2 + COL_GAP
 
   return (
     <div style={{
       width: '100%', height: '100%',
-      background: 'var(--paper)',
+      background: SLIDE_BG,
       position: 'relative', overflow: 'hidden',
       fontFamily: FONT,
     }}>
@@ -204,7 +191,7 @@ export default function S02cMatriz() {
         style={{ position: 'absolute', inset: 0, zIndex: 1, display: 'block' }} aria-hidden>
         <defs>
           <pattern id="s02c-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M40 0 H0 V40" fill="none" stroke="rgba(0,46,109,0.05)" strokeWidth="1" />
+            <path d="M40 0 H0 V40" fill="none" stroke="rgba(154,202,235,0.06)" strokeWidth="1" />
           </pattern>
         </defs>
         <g className="rf" style={{ '--d': 0 }}>
@@ -215,11 +202,11 @@ export default function S02cMatriz() {
       {/* ----- Encabezado ----- */}
       <div style={{ position: 'absolute', left: 112, top: 92, zIndex: 5, width: 1500 }}>
         <div className="r" style={{ '--d': 60 }}>
-          <Eyebrow color={AQUAD} size={22}>El reto · Matriz 4W + 2H</Eyebrow>
+          <Eyebrow color={AQUA} size={22}>El reto · Matriz 4W + 2H</Eyebrow>
         </div>
         <h1 className="r" style={{
           margin: '22px 0 0',
-          color: SEA, fontWeight: 800,
+          color: TXT, fontWeight: 800,
           fontSize: 62, lineHeight: 1.0,
           letterSpacing: '-2px', textTransform: 'uppercase',
           '--d': 160,
@@ -233,10 +220,10 @@ export default function S02cMatriz() {
 
         {/* Bandas de grupo: 4W / 2H */}
         <div style={{ display: 'grid', gridTemplateColumns: `${w4}px ${w2}px`, columnGap: COL_GAP }}>
-          <GroupBand color={SEA} bg="rgba(0,46,109,0.08)" delay={240}>
+          <GroupBand color={SKY} bg="rgba(0,155,222,0.14)" delay={240}>
             4W · El problema y su contexto
           </GroupBand>
-          <GroupBand color={AQUAD} bg="rgba(43,166,151,0.13)" delay={300}>
+          <GroupBand color={AQUA} bg="rgba(43,166,151,0.18)" delay={300}>
             2H · Mecánica y frecuencia
           </GroupBand>
         </div>

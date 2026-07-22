@@ -36,6 +36,24 @@
       "path": "presentations/gateway-react/index.html"
     },
     {
+      "slug": "gateway-navy",
+      "title": "Gateway — Navy Edition",
+      "subtitle": "El ecosistema digital del colaborador (tema oscuro)",
+      "description": "Espejo de la presentacion ejecutiva de Gateway en React con rediseño completo para salas oscuras: mismo contenido, orden, transiciones (cortina HP, barrido, fundido y portal al isotipo) y videos de demostracion, pero sobre tinta navy profunda con la paleta Hutchison Ports como luz (Sky, Aqua, Horizon), paneles glass, bandas diagonales a 30.3 y acentos con glow. 25 slides; comparte bundle y videos con gateway-react (misma app Vite, segunda pagina dark.html).",
+      "date": "2026-07",
+      "tags": [
+        "Hutchison Ports",
+        "Gateway",
+        "Ejecutiva",
+        "Producto",
+        "React",
+        "Dark"
+      ],
+      "accent": "#54BBAB",
+      "theme": "gateway",
+      "path": "presentations/gateway-react/dark.html"
+    },
+    {
       "slug": "nom-035",
       "title": "NOM-035",
       "subtitle": "Capacitacion interactiva - Factores de riesgo psicosocial",
@@ -699,6 +717,22 @@
       ],
       "accent": "#009BDE",
       "path": "dinamicas/sendero-bienestar/index.html"
+    },
+    {
+      "slug": "tronco-runner",
+      "title": "Tronco Comun Runner",
+      "subtitle": "Corre hacia lo correcto. Evita los riesgos.",
+      "description": "Endless runner 3D (React Three Fiber) para stand de congreso: un colaborador con casco corre por 3 carriles recolectando hexagonos verdes con los valores del Tronco Comun (Integridad, Seguridad, Innovacion, Trabajo en equipo, Excelencia, +10) y esquivando los rojos con los riesgos (Desinformacion, Riesgo, Datos erroneos, Accidentes, -10), con salto incluido. El escenario cambia solo durante los 60 segundos de partida: patio de contenedores con porticos, cubierta de buque entre el mar, vias de ferrocarril con senales y cubierta de crucero con botes salvavidas y alberca. Controles por deslizamiento tactil, tap o teclado; cuenta regresiva, rangos segun puntaje (hasta Guardian de la Cultura) y TOP 10 persistente en localStorage para competir en el stand. Fuente en src/tronco-runner (Vite + React 19 + three).",
+      "tags": [
+        "Dinamica",
+        "Tronco Comun",
+        "3D",
+        "React",
+        "Stand"
+      ],
+      "accent": "#35d3ff",
+      "theme": "dyn-tronco-runner",
+      "path": "dinamicas/tronco-runner/index.html"
     }
   ],
   "experimental": [

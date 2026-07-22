@@ -2,19 +2,11 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { slides } from './slides/index.jsx'
 import { TRANSITIONS } from '../transitions.js'
 
+// Espejo de src/App.jsx (Navy Edition): misma navegacion, transiciones,
+// indice y portal; sin el sistema de tono de papel (aqui el fondo ya es tinta).
+
 const PORTAL_MS = 2000
 const DEFAULT_TRANSITION = 'fade'
-
-// Presets de color de papel (fondo de slides) para el menu del indice
-const PAPERS = [
-  ['#FFFFFF', 'Blanco'],
-  ['#F5F1E8', 'Hueso'],
-  ['#EFE7D8', 'Crema'],
-  ['#F0F2F4', 'Gris claro'],
-  ['#E4E9ED', 'Gris azulado'],
-  ['#C7CFD6', 'Gris medio'],
-  ['#E8F1F8', 'Sky palido'],
-]
 
 const W = 1920
 const H = 1080
@@ -66,8 +58,7 @@ function SlideView({ entry, extra, style }) {
 }
 
 // Tarjeta del carrusel del indice: miniatura con la slide real renderizada a
-// escala (clase .thumb en index.css la muestra completa, sin animar) + numero
-// y titulo. La de video (s08) no se monta en miniatura para no autoreproducirla.
+// escala + numero y titulo.
 function IndexCard({ sl, i, isCurrent, isFocused, cardRef, onSelect }) {
   const Comp = sl.component
   return (
@@ -80,8 +71,6 @@ function IndexCard({ sl, i, isCurrent, isFocused, cardRef, onSelect }) {
           <div className="index-thumb-fallback" aria-hidden="true">▶</div>
         ) : (
           <div className="index-thumb-stage">
-            {/* fuera del grid del .deck, .slide no recibe tamano por grid-area:
-                se fija explicito para que el 100%/100% interno de la slide resuelva */}
             <section className="slide is-active enter thumb" style={{ width: 1920, height: 1080 }}>
               <Comp />
             </section>
@@ -105,49 +94,6 @@ export default function App() {
   const [portal, setPortal] = useState(false)  // transicion especial Gateway
   const [menu, setMenu]     = useState(false)  // indice de navegacion (boton oculto)
   const [focus, setFocus]   = useState(0)      // tarjeta resaltada dentro del carrusel del indice
-
-  // Tono de papel: atenua los fondos blancos para salas oscuras. 0 = blanco
-  // puro, 1 = gris azulado suave. Se ajusta con teclas en vivo y persiste.
-  const [dim, setDim] = useState(() => {
-    const v = parseFloat(localStorage.getItem('gw-dim'))
-    return Number.isFinite(v) ? Math.min(Math.max(v, 0), 1) : 0
-  })
-  const [dimHud, setDimHud] = useState(false)
-  const dimHudTimer = useRef(null)
-
-  // Color de papel elegido a mano en el menu del indice; '' = usar la rampa
-  // de las teclas (dim). Elegir color fija; ajustar con teclas vuelve a rampa.
-  const [paper, setPaper] = useState(() => localStorage.getItem('gw-paper') || '')
-
-  const adjustDim = useCallback((delta) => {
-    setPaper('')
-    localStorage.removeItem('gw-paper')
-    setDim((d) => {
-      const next = Math.min(Math.max(Math.round((d + delta) * 100) / 100, 0), 1)
-      localStorage.setItem('gw-dim', String(next))
-      return next
-    })
-    setDimHud(true)
-    clearTimeout(dimHudTimer.current)
-    dimHudTimer.current = setTimeout(() => setDimHud(false), 1400)
-  }, [])
-
-  const pickPaper = useCallback((c) => {
-    setPaper(c)
-    localStorage.setItem('gw-paper', c)
-  }, [])
-
-  // Publica --paper: color fijo elegido, o interpolacion blanco -> gris
-  // azulado (#C7CFD6) segun dim. Fondos de slide y cortina blanca lo usan.
-  useEffect(() => {
-    if (paper) {
-      document.documentElement.style.setProperty('--paper', paper)
-      return
-    }
-    const ch = (to) => Math.round(255 + (to - 255) * dim)
-    document.documentElement.style.setProperty(
-      '--paper', `rgb(${ch(199)}, ${ch(207)}, ${ch(214)})`)
-  }, [dim, paper])
 
   const menuRef = useRef(false)
   menuRef.current = menu
@@ -256,15 +202,12 @@ export default function App() {
         case 'Home': e.preventDefault(); goTo(0); break
         case 'End':  e.preventDefault(); goTo(count - 1); break
         case 'i': case 'I': openMenu(); break
-        case '-': case '_': case 'u': case 'U': e.preventDefault(); adjustDim(+0.05); break
-        case '+': case '=': case 'y': case 'Y': e.preventDefault(); adjustDim(-0.05); break
-        case '0': e.preventDefault(); adjustDim(-1); break
         default: break
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [goTo, count, openMenu, adjustDim])
+  }, [goTo, count, openMenu])
 
   // rueda
   useEffect(() => {
@@ -342,10 +285,6 @@ export default function App() {
         style={{ width: `${((cur + 1) / count) * 100}%` }}
       />
 
-      {dimHud && (
-        <div className="dimmer-hud">Fondo {Math.round((1 - dim) * 100)}%</div>
-      )}
-
       {/* Boton oculto (esquina superior izquierda) que abre el indice */}
       <button className="index-btn" aria-label="Índice de slides"
         onClick={openMenu} />
@@ -374,20 +313,6 @@ export default function App() {
 
               <button className="index-nav-btn" aria-label="Siguiente"
                 onClick={() => setFocus((f) => Math.min(f + 1, count - 1))}>›</button>
-            </div>
-
-            {/* Color de papel: presets + picker libre, para probar en sala */}
-            <div className="paper-row">
-              <span className="paper-label">Fondo</span>
-              {PAPERS.map(([hex, name]) => (
-                <button key={hex} title={name}
-                  className={`paper-swatch${paper.toUpperCase() === hex ? ' active' : ''}`}
-                  style={{ background: hex }}
-                  onClick={() => pickPaper(hex)} />
-              ))}
-              <input type="color" className="paper-picker" title="Color libre"
-                value={/^#[0-9a-fA-F]{6}$/.test(paper) ? paper : '#ffffff'}
-                onChange={(e) => pickPaper(e.target.value)} />
             </div>
           </div>
         </div>

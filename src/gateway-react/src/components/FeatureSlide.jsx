@@ -45,7 +45,7 @@ function Bullet({ color, children }) {
         width: 12, height: 12, flexShrink: 0,
         background: color, transform: 'skewX(-30.3deg)',
       }} />
-      <span style={{ color: SEA, fontWeight: 600, fontSize: 18 }}>{children}</span>
+      <span style={{ color: SEA, fontWeight: 600, fontSize: 20 }}>{children}</span>
     </div>
   )
 }
@@ -63,7 +63,7 @@ export function FeatureSlide({ moduleTitle, accent, subtitle, description, actio
 
   return (
     <div style={{
-      width: '100%', height: '100%', background: '#ffffff',
+      width: '100%', height: '100%', background: 'var(--paper)',
       position: 'relative', overflow: 'hidden', fontFamily: FONT,
     }}>
 
@@ -123,7 +123,7 @@ export function FeatureSlide({ moduleTitle, accent, subtitle, description, actio
         transform: 'translateY(-50%)', zIndex: 5, width: 980,
       }}>
         <h1 className="r" style={{
-          margin: 0, color: SEA, fontWeight: 800, fontSize: 58, lineHeight: 1.0,
+          margin: 0, color: SEA, fontWeight: 800, fontSize: 62, lineHeight: 1.0,
           letterSpacing: '-2px', textTransform: 'uppercase', '--d': 100,
         }}>
           {moduleTitle}
@@ -131,7 +131,7 @@ export function FeatureSlide({ moduleTitle, accent, subtitle, description, actio
 
         {subtitle && (
           <p className="r" style={{
-            margin: '18px 0 0', color: SEA, fontWeight: 700, fontSize: 26,
+            margin: '18px 0 0', color: SEA, fontWeight: 700, fontSize: 28,
             letterSpacing: '-0.3px', '--d': 200,
           }}>
             {subtitle}
@@ -141,7 +141,7 @@ export function FeatureSlide({ moduleTitle, accent, subtitle, description, actio
         {description && (
           <p className="r" style={{
             margin: '20px 0 0', maxWidth: 620, color: BODY, fontWeight: 500,
-            fontSize: 18, lineHeight: 1.55, '--d': 280,
+            fontSize: 20, lineHeight: 1.55, '--d': 280,
           }}>
             {description}
           </p>

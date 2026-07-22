@@ -6,7 +6,7 @@
 
 :root {
   --sea:      #002E6D;
-  --sea-alt:  #06376E;
+  --sea-l:    #0A4D9E;
   --sky:      #009BDE;
   --aqua:     #54BBAB;
   --aqua-d:   #2BA697;
@@ -14,7 +14,8 @@
   --horizon:  #9ACAEB;
   --yellow:   #FFC627;
   --orange:   #EE7523;
-  --paper:    #ffffff;
+  --ink:      #041226;
+  --paper:    #ffffff;  /* costura blanca de la cortina HP (bandera) */
   --font:     'Montserrat', Arial, sans-serif;
   --ms:       1300ms;   /* duracion de transicion; el JS la fija por preset */
 }
@@ -58,13 +59,16 @@ html, body, #root {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.3);
+  background: rgba(154,202,235,0.28);
   cursor: pointer;
   border: none;
   padding: 0;
-  transition: background 0.25s;
+  transition: background 0.25s, box-shadow 0.25s;
 }
-.nav-dot.active { background: #fff; }
+.nav-dot.active {
+  background: var(--aqua);
+  box-shadow: 0 0 8px rgba(84,187,171,0.8);
+}
 
 /* Orbit animations */
 @keyframes orbit-cw  { to { transform: rotate(360deg);  } }
@@ -90,13 +94,13 @@ html, body, #root {
   left: 0;
   height: 3px;
   background: var(--aqua);
+  box-shadow: 0 0 10px rgba(84,187,171,0.65);
   transition: width 0.45s ease;
   z-index: 999;
 }
 
 /* ============================================================
-   DECK / SLIDES  (portado de nom-035-react)
-   Las slides viven en una grilla 1/1; se cruzan via overlays .fx
+   DECK / SLIDES — espejo estructural de la version clara
    ============================================================ */
 .deck {
   position: absolute;
@@ -108,21 +112,20 @@ html, body, #root {
   grid-area: 1 / 1;
   position: relative;
   overflow: hidden;
-  background: var(--paper);
+  background: var(--ink);
   visibility: hidden;
 }
 .slide.is-active { visibility: visible; }
 
 /* ============================================================
-   TRANSICIONES (3 estilos; --ms lo fija el JS por preset)
+   TRANSICIONES (identicas en motor y timing a la version clara)
    ============================================================ */
 .fx { position: absolute; inset: 0; z-index: 50; pointer-events: none; overflow: hidden; }
 
-/* --- 1. BARRIDO: overlay del tamano del stage, revelado por un clip-path
-       diagonal a la marca. --- */
+/* --- 1. BARRIDO --- */
 .fx-wipe {
   position: absolute; inset: 0;
-  background: var(--fx-color, var(--sea));
+  background: var(--fx-color, var(--sky));
   clip-path: polygon(-5% 0, -5% 0, -33% 100%, -33% 100%);
 }
 .fx-wipe.run { animation: fx-wipe var(--ms, 1900ms) cubic-bezier(0.74, 0.02, 0.16, 1) both; }
@@ -132,9 +135,7 @@ html, body, #root {
   100% { clip-path: polygon(135% 0, 135% 0, 107% 100%, 107% 100%); }
 }
 
-/* --- 2. CORTINA HP = isotipo bandera (Sky arriba-izq, Navy abajo-der,
-       costura blanca diagonal). 3 overlays revelados por clip-path con
-       una PAUSA central (38-62%) donde se cambia la slide bien tapada. --- */
+/* --- 2. CORTINA HP (bandera: sky arriba-izq, navy abajo-der, costura blanca) --- */
 .fx-cv { position: absolute; inset: 0; }
 .fx-cv--white { background: var(--paper); clip-path: polygon(-3% -50%, 3% -50%, -50% 3%, -50% -3%); }
 .fx-cv--sky   { background: var(--sky);   clip-path: polygon(10% -50%, -50% 10%, -50% -50%); }
@@ -163,27 +164,22 @@ html, body, #root {
   100% { clip-path: polygon(-3% -50%, 3% -50%, -50% 3%, -50% -3%); }
 }
 
-/* --- 3. FUNDIDO: la slide saliente se desvanece --- */
+/* --- 3. FUNDIDO --- */
 .slide.fx-out { z-index: 6; animation: fx-fade var(--ms, 1400ms) ease both; }
 @keyframes fx-fade { from { opacity: 1; } to { opacity: 0; } }
 
-/* --- PORTAL Gateway: la slide saliente hace ZOOM IN sobre su propio isotipo
-       (transform-origin = posicion del icono, via style) y "entramos" por la
-       puerta hasta revelar la siguiente slide --- */
+/* --- PORTAL Gateway (zoom al isotipo, flecha sale disparada) --- */
 .slide.fx-portal {
   z-index: 12;
   animation: portal-zoom-out 2000ms cubic-bezier(0.5, 0, 0.85, 1) both;
 }
 @keyframes portal-zoom-out {
-  /* fase 1 (0-30%): el icono se centra con poco zoom */
   0%   { transform: translate(0, 0) scale(1); opacity: 1; }
   30%  { transform: translate(var(--pdx, 0), var(--pdy, 0)) scale(4); opacity: 1; }
-  /* fase 2 (30-100%): zoom de lleno sobre el icono ya centrado */
   72%  { opacity: 1; }
   100% { transform: translate(var(--pdx, 0), var(--pdy, 0)) scale(24); opacity: 0; }
 }
 
-/* Solo la FLECHA del isotipo sale disparada hacia arriba durante el portal */
 .slide.fx-portal .gw-arrow {
   animation: gw-arrow-rise 2000ms cubic-bezier(0.5, 0, 0.7, 1) both;
 }
@@ -194,7 +190,7 @@ html, body, #root {
 }
 
 /* ============================================================
-   INDICE DE NAVEGACION (boton oculto en la esquina sup. izq.)
+   INDICE DE NAVEGACION
    ============================================================ */
 .index-btn {
   position: fixed;
@@ -213,7 +209,7 @@ html, body, #root {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: #001530;
+  background: #010A18;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -314,11 +310,11 @@ html, body, #root {
   height: 168.75px;
   overflow: hidden;
   border-radius: 8px;
-  background: #fff;
-  border: 2px solid rgba(255, 255, 255, 0.14);
+  background: var(--ink);
+  border: 2px solid rgba(154, 202, 235, 0.16);
   transition: border-color 0.2s, transform 0.2s;
 }
-.index-card:hover .index-thumb { border-color: rgba(255, 255, 255, 0.4); }
+.index-card:hover .index-thumb { border-color: rgba(154, 202, 235, 0.45); }
 .index-card.focused .index-thumb { border-color: var(--sky); transform: scale(1.04); }
 .index-card.current .index-thumb { border-color: var(--aqua); }
 
@@ -366,36 +362,7 @@ html, body, #root {
 }
 
 /* ============================================================
-   SLIDE DEMO (S08): el rotulo aparece y se desvanece a los 4s
-   ============================================================ */
-.demo-overlay {
-  animation: demo-fade 4.5s ease both;
-}
-@keyframes demo-fade {
-  0%   { opacity: 0; transform: translateY(-12px); }
-  8%   { opacity: 1; transform: translateY(0); }
-  75%  { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-/* aviso de transicion */
-.toast {
-  position: fixed; left: 50%; bottom: 1.4rem;
-  transform: translateX(-50%) translateY(14px);
-  display: flex; align-items: center; gap: 0.6rem;
-  background: var(--sea); color: #fff;
-  font-family: var(--font);
-  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 0.6rem 1.05rem;
-  opacity: 0; z-index: 1000; pointer-events: none;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-.toast::before { content: ""; width: 13px; height: 13px; background: linear-gradient(-30.3deg, var(--sky) 0 50%, #fff 50% 100%); }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* ============================================================
-   ENTRADA DE ELEMENTOS (solo cuando la slide tiene .enter)
-   El contenido entra con la slide; escalonable con --d (ms).
+   ENTRADA DE ELEMENTOS (identica a la version clara)
    ============================================================ */
 .slide .r,
 .slide .rs,
@@ -447,7 +414,6 @@ html, body, #root {
   to   { opacity: 1; }
 }
 
-/* Reveal diagonal a 30.3°: la cinta se "dibuja" de izq a der (borde inclinado) */
 .slide.enter .ribbon {
   animation: ribbon-reveal 1.3s cubic-bezier(0.7, 0, 0.3, 1) both;
   animation-delay: 150ms;
@@ -457,11 +423,7 @@ html, body, #root {
   to   { clip-path: polygon(-40% 0, 140% 0, 107.2% 100%, -40% 100%); }
 }
 
-/* ============================================================
-   DIAGRAMA DE FLUJO (S02b) — fade de piezas + dibujado de rutas
-   .rf   = aparicion por opacidad (nodos/etiquetas del diagrama)
-   .flow = la ruta se "traza" de origen a destino (path con pathLength=1)
-   ============================================================ */
+/* Diagramas (S02b/S02d): fade de piezas + trazado de rutas */
 .slide .rf { opacity: 0; }
 .slide.enter .rf {
   animation: rf-in 0.7s ease both;
@@ -476,8 +438,7 @@ html, body, #root {
 }
 @keyframes flow-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 
-/* Miniaturas del indice (.thumb): el contenido se muestra completo de
-   inmediato, sin repetir la animacion de entrada de la slide real. */
+/* Miniaturas del indice (.thumb): contenido completo sin animar */
 .slide.thumb .r,
 .slide.thumb .rs,
 .slide.thumb .rf,
@@ -492,59 +453,4 @@ html, body, #root {
 .slide.thumb .flow {
   stroke-dashoffset: 0 !important;
   animation: none !important;
-}
-
-/* Selector de color de papel en el menu del indice */
-.paper-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 26px;
-}
-.paper-label {
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-right: 4px;
-}
-.paper-swatch {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  cursor: pointer;
-  padding: 0;
-  transition: transform 0.15s ease, border-color 0.15s ease;
-}
-.paper-swatch:hover { transform: scale(1.15); }
-.paper-swatch.active {
-  border-color: var(--aqua);
-  box-shadow: 0 0 0 3px rgba(84, 187, 171, 0.35);
-}
-.paper-picker {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 2px dashed rgba(255, 255, 255, 0.4);
-  background: transparent;
-  cursor: pointer;
-  padding: 2px;
-}
-
-/* Tono de papel para salas oscuras: App.jsx interpola --paper de blanco puro
-   a gris azulado. Teclas: -/u atenua, +/y aclara, 0 restaura blanco. */
-.dimmer-hud {
-  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
-  padding: 8px 18px; border-radius: 999px;
-  background: rgba(10, 25, 41, 0.85); color: #fff;
-  font: 600 15px/1 var(--font);
-  letter-spacing: 0.04em;
-  z-index: 2001; pointer-events: none;
-  animation: dimmer-hud-in 160ms ease both;
-}
-@keyframes dimmer-hud-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }

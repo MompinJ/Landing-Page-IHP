@@ -1,20 +1,8 @@
-import { Eyebrow } from '../components/SuperGraphic.jsx'
+import { Eyebrow } from '../../src/components/SuperGraphic.jsx'
+import { SLIDE_BG, SKY, AQUA, ORANGE, TXT, BODY, MUTE, LINE_S, FONT } from '../theme.js'
 
-// Alternativas evaluadas antes de construir un entorno propio: HUMAND (la red
-// social corporativa que ya usa el grupo) y Cornerstone (el LMS que usamos
-// hoy). Mismo lenguaje editorial que Contexto/Beneficios (S02Contexto/S07c):
-// dos columnas, sin cajas, marcas skew a 30.3. Cada columna resuelve un
-// frente (comunicacion vs. aprendizaje) pero ninguna cubre ambos ni esta
-// hecha para el sector portuario/naval — el vacio que cierra la slide.
-
-const SEA    = '#002E6D'
-const SKY    = '#009BDE'
-const AQUA   = '#54BBAB'
-const AQUAD  = '#2BA697'
-const ORANGE = '#EE7523'
-const BODY   = '#41607F'
-const MUTE   = '#7E96B6'
-const FONT   = "'Montserrat', Arial, sans-serif"
+// Espejo Navy de S02fAlternativas: mismas dos alternativas (HUMAND y
+// Cornerstone) y el vacio de mercado, en editorial sobre tinta.
 
 function Mini({ children, color = MUTE }) {
   return (
@@ -33,8 +21,9 @@ function Bullet({ color, children }) {
       <span style={{
         width: 12, height: 12, flexShrink: 0,
         background: color, transform: 'skewX(-30.3deg)',
+        boxShadow: `0 0 8px ${color}66`,
       }} />
-      <span style={{ color: SEA, fontWeight: 600, fontSize: 19 }}>{children}</span>
+      <span style={{ color: TXT, fontWeight: 600, fontSize: 19 }}>{children}</span>
     </div>
   )
 }
@@ -81,7 +70,7 @@ function OptionColumn({ o, i }) {
       </div>
       <p className="r" style={{
         '--d': base + 80, margin: '14px 0 0',
-        color: SEA, fontWeight: 800, fontSize: 35, letterSpacing: '-0.6px',
+        color: TXT, fontWeight: 800, fontSize: 35, letterSpacing: '-0.6px',
       }}>
         {o.name}
       </p>
@@ -118,7 +107,7 @@ export default function S02fAlternativas() {
   return (
     <div style={{
       width: '100%', height: '100%',
-      background: 'var(--paper)',
+      background: SLIDE_BG,
       position: 'relative', overflow: 'hidden',
       fontFamily: FONT,
     }}>
@@ -126,11 +115,11 @@ export default function S02fAlternativas() {
       {/* ----- Encabezado ----- */}
       <div style={{ position: 'absolute', left: 112, top: 92, zIndex: 5, width: 1696 }}>
         <div className="r" style={{ '--d': 60 }}>
-          <Eyebrow color={AQUAD} size={22}>Antes de la solución · Alternativas evaluadas</Eyebrow>
+          <Eyebrow color={AQUA} size={22}>Antes de la solución · Alternativas evaluadas</Eyebrow>
         </div>
         <h1 className="r" style={{
           margin: '22px 0 0',
-          color: SEA, fontWeight: 800,
+          color: TXT, fontWeight: 800,
           fontSize: 62, lineHeight: 1.0,
           letterSpacing: '-2px', textTransform: 'uppercase',
           '--d': 160,
@@ -155,10 +144,10 @@ export default function S02fAlternativas() {
 
       {/* ----- Conclusion: el vacio de mercado ----- */}
       <div style={{ position: 'absolute', left: 112, top: 950, width: 1696, zIndex: 5 }}>
-        <div className="r" style={{ '--d': 1000, height: 1.5, background: 'rgba(0,46,109,0.12)' }} />
+        <div className="r" style={{ '--d': 1000, height: 1.5, background: LINE_S }} />
         <p className="r" style={{
           '--d': 1060, margin: '24px 0 0', maxWidth: 1500,
-          color: SEA, fontWeight: 700, fontSize: 24, lineHeight: 1.4,
+          color: TXT, fontWeight: 700, fontSize: 24, lineHeight: 1.4,
         }}>
           Ni las que ya usamos, ni las que existen en el mercado, unen capacitación y comunidad adaptadas al mundo portuario y naval.
         </p>

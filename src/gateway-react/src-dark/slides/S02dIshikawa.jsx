@@ -1,38 +1,25 @@
-import { Eyebrow } from '../components/SuperGraphic.jsx'
+import { Eyebrow } from '../../src/components/SuperGraphic.jsx'
+import { SLIDE_BG, SKY, AQUA, ORANGE, TXT, BODY, FONT } from '../theme.js'
 
-// Diagrama de Ishikawa (espina de pescado) con las 6M: las causas raiz del
-// problema de formacion y comunicacion. Mismo lenguaje que el diagrama de
-// flujo (S02b): lineas que se trazan solas, puntos de flujo Sky viajando de
-// las causas hacia la espina y de la espina a la cabeza, chips planos de
-// marca y el problema como nodo naranja (el color del dolor en este deck).
+// Espejo Navy de S02dIshikawa: misma espina de pescado 6M, con lineas
+// Horizon luminosas, chips Sky y la cabeza naranja (el color del dolor).
 
-const SEA    = '#002E6D'
-const SKY    = '#009BDE'
-const AQUAD  = '#2BA697'
-const ORANGE = '#EE7523'
-const BODY   = '#41607F'
-const FONT   = "'Montserrat', Arial, sans-serif"
+const SPINE_LINE = 'rgba(154,202,235,0.6)'
+const BONE_LINE  = 'rgba(154,202,235,0.45)'
+const TICK_LINE  = 'rgba(154,202,235,0.32)'
 
-const SPINE_LINE = 'rgba(0,46,109,0.55)'
-const BONE_LINE  = 'rgba(0,46,109,0.42)'
-const TICK_LINE  = 'rgba(0,46,109,0.30)'
-
-// Geometria: huesos inclinados 30.3 desde la vertical (59.7 desde la
-// horizontal), el angulo de marca. ANG = tan(59.7) para proyectar.
+// Geometria identica a la version clara (angulo de marca 30.3).
 const ANG     = 1.711
 const SPINE_Y = 640
-const TOP_Y   = 310   // centro de los chips de categoria superiores
-const BOT_Y   = 980   // centro de los chips inferiores
+const TOP_Y   = 310
+const BOT_Y   = 980
 const CHIP_W  = 236
 const CHIP_H  = 50
-const SLANT   = 14    // inclinacion de los chips (misma familia que la matriz)
+const SLANT   = 14
 
-// Filas de causas: distancia vertical a la espina identica arriba y abajo.
 const ROWS_TOP = [400, 490, 580]
 const ROWS_BOT = [710, 800, 890]
 
-// Las 6M. Cada causa viene pre-partida en lineas para el <text> SVG.
-// `bold: true` marca las causas mas relevantes de cada hueso.
 const BONES = [
   { cat: 'Mano de obra', xj: 640, side: 'top', causes: [
     { lines: ['Sobrecarga', 'administrativa'], bold: true },
@@ -57,23 +44,20 @@ const BONES = [
   ]},
 ]
 
-// Cabeza del pescado: panel naranja en paralelogramo (slant proporcional
-// al de los chips) donde desemboca la espina.
 const HEAD = { x: 1470, y: 545, w: 350, h: 200, slant: 56 }
 
-// x del hueso a una altura dada (el hueso se inclina hacia la cabeza).
 const boneX = (xj, y) => xj - Math.abs(SPINE_Y - y) / ANG
 
-// Chip de categoria: paralelogramo solido Sea con el rotulo de la M.
+// Chip de categoria: paralelogramo Sky (en la version clara era Sea).
 function CatChip({ cx, cy, label, delay }) {
   const x0 = cx - CHIP_W / 2, x1 = cx + CHIP_W / 2
   const y0 = cy - CHIP_H / 2, y1 = cy + CHIP_H / 2
   const pts = `${x0 + SLANT},${y0} ${x1},${y0} ${x1 - SLANT},${y1} ${x0},${y1}`
   return (
     <g className="r" style={{ '--d': delay }}>
-      <polygon points={pts} fill={SEA} />
+      <polygon points={pts} fill={SKY} />
       <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central"
-        fontFamily={FONT} fontSize={20} fontWeight={800} fill="#fff"
+        fontFamily={FONT} fontSize={19} fontWeight={800} fill="#04122B"
         letterSpacing="1.5" style={{ textTransform: 'uppercase' }}>
         {label.toUpperCase()}
       </text>
@@ -82,14 +66,13 @@ function CatChip({ cx, cy, label, delay }) {
 }
 
 // Causa: tick horizontal hacia el hueso + punto Sky + texto a la izquierda.
-// Las causas `bold` se destacan en Sea y peso 800 (el resto, en tono apagado).
 function Cause({ bx, y, lines, bold, delay }) {
   return (
     <g className="rf" style={{ '--d': delay }}>
       <line x1={bx} y1={y} x2={bx - 26} y2={y} stroke={TICK_LINE} strokeWidth={1.5} />
       <circle cx={bx} cy={y} r={3.5} fill={SKY} />
       <text textAnchor="end" fontFamily={FONT} fontSize={17}
-        fontWeight={bold ? 800 : 600} fill={bold ? SEA : BODY}>
+        fontWeight={bold ? 800 : 600} fill={bold ? TXT : BODY}>
         {lines.map((ln, i) => (
           <tspan key={i} x={bx - 34} y={y + (i - (lines.length - 1) / 2) * 21}
             dominantBaseline="central">{ln}</tspan>
@@ -100,16 +83,15 @@ function Cause({ bx, y, lines, bold, delay }) {
 }
 
 export default function S02dIshikawa() {
-  // Cabeza: bordes laterales inclinados; la espina entra al centro del borde izq.
   const h = HEAD
   const headPts = `${h.x + h.slant},${h.y} ${h.x + h.w},${h.y} ${h.x + h.w - h.slant},${h.y + h.h} ${h.x},${h.y + h.h}`
-  const headCx = h.x + h.w / 2               // centro horizontal (ancho constante)
-  const spineEnd = h.x + h.slant / 2 - 12    // la flecha toca el borde izquierdo
+  const headCx = h.x + h.w / 2
+  const spineEnd = h.x + h.slant / 2 - 12
 
   return (
     <div style={{
       width: '100%', height: '100%',
-      background: 'var(--paper)',
+      background: SLIDE_BG,
       position: 'relative', overflow: 'hidden',
       fontFamily: FONT,
     }}>
@@ -117,11 +99,11 @@ export default function S02dIshikawa() {
       {/* ----- Encabezado ----- */}
       <div style={{ position: 'absolute', left: 112, top: 92, zIndex: 5, width: 1500 }}>
         <div className="r" style={{ '--d': 60 }}>
-          <Eyebrow color={AQUAD} size={22}>El reto · Diagrama de Ishikawa</Eyebrow>
+          <Eyebrow color={AQUA} size={22}>El reto · Diagrama de Ishikawa</Eyebrow>
         </div>
         <h1 className="r" style={{
           margin: '22px 0 0',
-          color: SEA, fontWeight: 800,
+          color: TXT, fontWeight: 800,
           fontSize: 62, lineHeight: 1.0,
           letterSpacing: '-2px', textTransform: 'uppercase',
           '--d': 160,
@@ -135,7 +117,7 @@ export default function S02dIshikawa() {
         style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'block' }} aria-hidden>
         <defs>
           <pattern id="s02d-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M40 0 H0 V40" fill="none" stroke="rgba(0,46,109,0.05)" strokeWidth="1" />
+            <path d="M40 0 H0 V40" fill="none" stroke="rgba(154,202,235,0.06)" strokeWidth="1" />
           </pattern>
           <marker id="s02d-arw" viewBox="0 0 10 10" refX="8.5" refY="5"
             markerWidth="8" markerHeight="8" orient="auto-start-reverse">
@@ -155,7 +137,7 @@ export default function S02dIshikawa() {
             fill="none" stroke={SPINE_LINE} strokeWidth={3}
             strokeLinecap="round" markerEnd="url(#s02d-arw)" />
           {[2300, 3500].map((b) => (
-            <circle key={b} r={5} fill={SKY}>
+            <circle key={b} r={5} fill={SKY} style={{ filter: 'drop-shadow(0 0 6px rgba(0,155,222,0.9))' }}>
               <animateMotion dur="2.6s" begin={`${b}ms`} repeatCount="indefinite">
                 <mpath href="#s02d-spine" />
               </animateMotion>
@@ -170,8 +152,8 @@ export default function S02dIshikawa() {
           const y0    = top ? chipY + CHIP_H / 2 + 3 : chipY - CHIP_H / 2 - 3
           const x0    = boneX(b.xj, y0)
           const rows  = top ? ROWS_TOP : ROWS_BOT
-          const cd    = 420 + i * 90     // delay del chip
-          const bd    = cd + 120         // delay del hueso
+          const cd    = 420 + i * 90
+          const bd    = cd + 120
           return (
             <g key={b.cat}>
               <CatChip cx={x0} cy={chipY} label={b.cat} delay={cd} />
@@ -180,7 +162,7 @@ export default function S02dIshikawa() {
                 <path id={`s02d-b${i}`} className="flow" style={{ '--d': bd }}
                   d={`M ${x0} ${y0} L ${b.xj} ${SPINE_Y}`} pathLength={1}
                   fill="none" stroke={BONE_LINE} strokeWidth={2.5} strokeLinecap="round" />
-                <circle r={4.5} fill={SKY}>
+                <circle r={4.5} fill={SKY} style={{ filter: 'drop-shadow(0 0 5px rgba(0,155,222,0.9))' }}>
                   <animateMotion dur="1.5s" begin={`${bd + 700}ms`} repeatCount="indefinite">
                     <mpath href={`#s02d-b${i}`} />
                   </animateMotion>

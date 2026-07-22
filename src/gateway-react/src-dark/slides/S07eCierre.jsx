@@ -1,23 +1,14 @@
-import { Eyebrow } from '../components/SuperGraphic.jsx'
-import { GatewayMark } from '../components/GatewayMark.jsx'
+import { Eyebrow } from '../../src/components/SuperGraphic.jsx'
+import { GatewayMark } from '../../src/components/GatewayMark.jsx'
+import { SLIDE_BG, AQUA, TXT, BODY, MUTE, FONT } from '../theme.js'
 
-// Cierre del cuerpo del deck, antes de Gracias: vuelve a hablar del Instituto
-// (eco de S02Contexto: "Instituto Hutchison Ports · el ecosistema digital del
-// colaborador", el mismo cierre de S09Gracias) y remata con el "por que
-// importa" de todo el proyecto. Un solo bloque editorial, sin cajas.
-
-const SEA   = '#002E6D'
-const AQUA  = '#54BBAB'
-const AQUAD = '#2BA697'
-const BODY  = '#41607F'
-const MUTE  = '#7E96B6'
-const FONT  = "'Montserrat', Arial, sans-serif"
+// Espejo Navy de S07eCierre: mismo mensaje de cierre, editorial sobre tinta.
 
 export default function S07eCierre() {
   return (
     <div style={{
       width: '100%', height: '100%',
-      background: 'var(--paper)',
+      background: SLIDE_BG,
       position: 'relative', overflow: 'hidden',
       fontFamily: FONT,
     }}>
@@ -27,7 +18,7 @@ export default function S07eCierre() {
         transform: 'translateY(-50%)', zIndex: 5, width: 1550,
       }}>
         <div className="r" style={{ '--d': 60 }}>
-          <Eyebrow color={AQUAD} size={22}>Cierre · Por qué importa</Eyebrow>
+          <Eyebrow color={AQUA} size={22}>Cierre · Por qué importa</Eyebrow>
         </div>
 
         <p className="r" style={{
@@ -39,16 +30,16 @@ export default function S07eCierre() {
 
         <p className="r" style={{
           '--d': 280, margin: '20px 0 0', maxWidth: 1350,
-          color: SEA, fontWeight: 700, fontSize: 34, lineHeight: 1.35, letterSpacing: '-0.5px',
+          color: BODY, fontWeight: 700, fontSize: 34, lineHeight: 1.35, letterSpacing: '-0.5px',
         }}>
           Hablamos de dejar de ver la capacitación como un requisito aislado — para convertirla en una comunidad digital.
         </p>
 
-        <div className="r" style={{ '--d': 420, marginTop: 36, height: 1.5, width: 120, background: AQUA }} />
+        <div className="r" style={{ '--d': 420, marginTop: 36, height: 1.5, width: 120, background: AQUA, boxShadow: `0 0 12px ${AQUA}AA` }} />
 
         <p className="r" style={{
           '--d': 480, margin: '34px 0 0', maxWidth: 1450,
-          color: SEA, fontWeight: 800, fontSize: 46, lineHeight: 1.28, letterSpacing: '-1.2px',
+          color: TXT, fontWeight: 800, fontSize: 46, lineHeight: 1.28, letterSpacing: '-1.2px',
         }}>
           El mejor ecosistema no es el que tiene más módulos obligatorios.
           <br />

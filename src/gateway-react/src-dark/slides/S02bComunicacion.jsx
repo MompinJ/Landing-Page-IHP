@@ -1,20 +1,13 @@
-import { Eyebrow } from '../components/SuperGraphic.jsx'
+import { Eyebrow } from '../../src/components/SuperGraphic.jsx'
+import { SLIDE_BG, SKY, AQUA, ORANGE, TXT, BODY, FONT } from '../theme.js'
 
-// Diagrama de flujo del caos de comunicacion: un usuario con una duda dispara
-// multiples vias (correos, llamada, chat, RH) que triangulan y sobrecargan al
-// equipo administrador -> 4,547 tickets y 165 h de retrabajo -> desplazamiento
-// digital ineficiente. Todo en lenguaje HP: paneles planos, paleta de marca,
-// rutas que se trazan y puntos de "flujo" viajando de origen a destino.
+// Espejo Navy de S02bComunicacion: mismo diagrama de flujo del caos de
+// comunicacion (nodos, rutas, cifras), recableado a paneles glass sobre tinta
+// con lineas Horizon y puntos de flujo Sky luminosos.
 
-const SEA     = '#002E6D'
-const SKY     = '#009BDE'
-const AQUAD   = '#2BA697'
-const ORANGE  = '#EE7523'
-const BODY    = '#41607F'
-const FONT    = "'Montserrat', Arial, sans-serif"
-
-const NODE_LINE = 'rgba(0,46,109,0.42)'
-const LINE      = 'rgba(0,46,109,0.30)'
+const NODE_LINE = 'rgba(154,202,235,0.45)'
+const LINE      = 'rgba(154,202,235,0.32)'
+const NODE_FILL = 'rgba(7,36,72,0.85)'
 
 // --- Generadores de ruta (bezier suave, orientacion horizontal / vertical) ---
 const H = (x1, y1, x2, y2, k = 0.5) =>
@@ -22,8 +15,6 @@ const H = (x1, y1, x2, y2, k = 0.5) =>
 const V = (x1, y1, x2, y2, k = 0.5) =>
   `M ${x1} ${y1} C ${x1} ${y1 + (y2 - y1) * k} ${x2} ${y2 - (y2 - y1) * k} ${x2} ${y2}`
 
-// Conectores: id (para el mpath del punto), ruta, retraso de entrada y duracion
-// del recorrido del punto (mayor = ruta mas larga, para velocidad pareja).
 const CONN = [
   { id: 'c1',  d: H(292.5, 560, 346, 560),        delay: 250,  dur: 1.3 },
   { id: 'c2',  d: H(570, 560, 680, 300, 0.55),    delay: 560,  dur: 2.4 },
@@ -44,7 +35,7 @@ const CONN = [
 ]
 
 // Texto centrado multilinea dentro de una figura SVG.
-function ML({ cx, cy, lines, size, weight = 600, fill = SEA }) {
+function ML({ cx, cy, lines, size, weight = 600, fill = TXT }) {
   const lh = size * 1.15
   const start = cy - (lines.length - 1) * lh / 2
   return (
@@ -56,8 +47,8 @@ function ML({ cx, cy, lines, size, weight = 600, fill = SEA }) {
   )
 }
 
-// Nodo-proceso: panel plano redondeado (sin sombra).
-function RNode({ x, y, w, h, lines, size = 21, delay, stroke = NODE_LINE, strokeW = 2, fill = '#fff', textFill = SEA, rx = 14 }) {
+// Nodo-proceso: panel glass redondeado.
+function RNode({ x, y, w, h, lines, size = 21, delay, stroke = NODE_LINE, strokeW = 2, fill = NODE_FILL, textFill = TXT, rx = 14 }) {
   return (
     <g className="r" style={{ '--d': delay }}>
       <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={rx}
@@ -68,7 +59,7 @@ function RNode({ x, y, w, h, lines, size = 21, delay, stroke = NODE_LINE, stroke
 }
 
 // Nodo-decision / resultado: rombo a la manera de un flujo clasico.
-function Diamond({ x, y, hw, hh, lines, size = 22, delay, stroke = NODE_LINE, strokeW = 2, fill = '#fff', textFill = SEA }) {
+function Diamond({ x, y, hw, hh, lines, size = 22, delay, stroke = NODE_LINE, strokeW = 2, fill = NODE_FILL, textFill = TXT }) {
   const pts = `${x},${y - hh} ${x + hw},${y} ${x},${y + hh} ${x - hw},${y}`
   return (
     <g className="r" style={{ '--d': delay }}>
@@ -84,7 +75,7 @@ function Tag({ cx, cy, text, delay }) {
   return (
     <g className="rf" style={{ '--d': delay }}>
       <rect x={cx - w / 2} y={cy - 15} width={w} height={30} rx={15}
-        fill="#fff" stroke={LINE} strokeWidth={1} />
+        fill="rgba(7,36,72,0.9)" stroke={LINE} strokeWidth={1} />
       <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central"
         fontFamily={FONT} fontSize={17} fontWeight={600} fill={BODY}>{text}</text>
     </g>
@@ -97,7 +88,7 @@ function CostNode({ x, y, value, label, delay }) {
   return (
     <g className="r" style={{ '--d': delay }}>
       <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={14}
-        fill="rgba(238,117,35,0.06)" stroke="rgba(238,117,35,0.55)" strokeWidth={2} />
+        fill="rgba(238,117,35,0.12)" stroke="rgba(238,117,35,0.65)" strokeWidth={2} />
       <text x={x} y={y - 12} textAnchor="middle" dominantBaseline="central"
         fontFamily={FONT} fontSize={40} fontWeight={800} fill={ORANGE}>{value}</text>
       <text x={x} y={y + 22} textAnchor="middle" dominantBaseline="central"
@@ -110,7 +101,7 @@ export default function S02bComunicacion() {
   return (
     <div style={{
       width: '100%', height: '100%',
-      background: 'var(--paper)',
+      background: SLIDE_BG,
       position: 'relative', overflow: 'hidden',
       fontFamily: FONT,
     }}>
@@ -118,11 +109,11 @@ export default function S02bComunicacion() {
       {/* ----- Encabezado ----- */}
       <div style={{ position: 'absolute', left: 112, top: 92, zIndex: 5, width: 1500 }}>
         <div className="r" style={{ '--d': 60 }}>
-          <Eyebrow color={AQUAD} size={22}>El reto · Soporte al usuario</Eyebrow>
+          <Eyebrow color={AQUA} size={22}>El reto · Soporte al usuario</Eyebrow>
         </div>
         <h1 className="r" style={{
           margin: '22px 0 0',
-          color: SEA, fontWeight: 800,
+          color: TXT, fontWeight: 800,
           fontSize: 62, lineHeight: 1.0,
           letterSpacing: '-2px', textTransform: 'uppercase',
           '--d': 160,
@@ -136,11 +127,11 @@ export default function S02bComunicacion() {
         style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'block' }} aria-hidden>
         <defs>
           <pattern id="s02b-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M40 0 H0 V40" fill="none" stroke="rgba(0,46,109,0.05)" strokeWidth="1" />
+            <path d="M40 0 H0 V40" fill="none" stroke="rgba(154,202,235,0.06)" strokeWidth="1" />
           </pattern>
           <marker id="s02b-arw" viewBox="0 0 10 10" refX="8.5" refY="5"
             markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" fill="rgba(0,46,109,0.5)" />
+            <path d="M0,0 L10,5 L0,10 z" fill="rgba(154,202,235,0.55)" />
           </marker>
         </defs>
 
@@ -155,7 +146,7 @@ export default function S02bComunicacion() {
             <path id={c.id} className="flow" style={{ '--d': c.delay }} d={c.d} pathLength={1}
               fill="none" stroke={LINE} strokeWidth={2.5} strokeLinecap="round"
               markerEnd="url(#s02b-arw)" />
-            <circle r={4.5} fill={SKY}>
+            <circle r={4.5} fill={SKY} style={{ filter: 'drop-shadow(0 0 5px rgba(0,155,222,0.9))' }}>
               <animateMotion dur={`${c.dur}s`} begin={`${c.delay + 600}ms`} repeatCount="indefinite">
                 <mpath href={`#${c.id}`} />
               </animateMotion>
@@ -174,7 +165,7 @@ export default function S02bComunicacion() {
         {/* --- Nodos --- */}
         {/* Origen */}
         <RNode x={185} y={560} w={235} h={116} rx={58} delay={140}
-          stroke={AQUAD} strokeW={2.5} textFill={SEA}
+          stroke={AQUA} strokeW={2.5} textFill={TXT}
           lines={['Usuario con duda o', 'problema de acceso']} size={21} />
 
         {/* Decision */}
@@ -197,7 +188,7 @@ export default function S02bComunicacion() {
 
         {/* Convergencia: sobrecarga */}
         <RNode x={1306} y={560} w={270} h={156} delay={1300}
-          stroke={ORANGE} strokeW={3} fill="rgba(238,117,35,0.05)"
+          stroke={ORANGE} strokeW={3} fill="rgba(238,117,35,0.10)"
           lines={['Sobrecarga al equipo', 'administrador']} size={22} />
 
         {/* Consecuencias */}
