@@ -1,4 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { useGame } from '../store'
 import { scroll } from '../runtime'
@@ -6,6 +7,17 @@ import { SEGMENT_LENGTH as L, NUM_SEGMENTS, THEME_METERS, LANES, COLORS } from '
 import { ZONES, cruStage, astStage, deckAt, DECK_Y, DOCK_Y, SHIP_FROM, SHIP_TO } from '../course'
 import { useGameTextures, tiledTexture } from '../textures'
 import { roundedBox } from '../geo'
+import { sharedWater } from '../detail'
+
+// Oleaje de la lamina de mar de la travesia del crucero. Se pide una sola vez
+// para todas las franjas: la textura es compartida y la avanza el bucle
+// principal junto con la del mar lejano, asi que las dos van sincronizadas.
+// 12 x 3 sobre una caja de 96 x 30 m deja ondas de unos 8 m, como en el disco.
+const WATER = sharedWater(32, 10)
+const WATER_SCALE = new THREE.Vector2(0.85, 0.85)
+// el agua ya trae su propio relieve y su reflejo: el acabado de escena no debe
+// colgarle encima el grano de superficie ni la capa de suciedad del puerto
+const WATER_UD = { noDress: true }
 
 const START = 16 // borde frontal del segmento k=0 cuando scroll=0
 
@@ -990,19 +1002,17 @@ function buildProps(theme, seed) {
     const dSeg = seed * L
     const dAt = (z) => dSeg - z // metro del recorrido que corresponde a un z local
     const STEP = 2
-    const SEA = -0.95
 
     // El agua esta al mismo nivel en toda la zona: lo que cambia de altura es
     // por lo que se corre, no el mar. La lancha va casi a ras y la cubierta del
     // crucero queda cuatro metros por encima.
-    box([0, SEA, 0], [96, 0.12, L], '#4a7d99', {
-      tex: 'water',
-      repeat: [16, L / 8],
-      emissive: '#16324a',
-      emissiveIntensity: 0.4,
-      roughness: 0.55,
-      metalness: 0.1,
-    })
+    // AQUI NO SE DIBUJA AGUA. La lamina de la travesia es el disco de mar de
+    // Game (FarSea), que en esta zona sube justo a SEA_LEVEL. Antes habia
+    // ademas una caja de agua por franja, 11 cm por encima del disco, y eso es
+    // la misma trampa que ya documentaba la espuma del corredor: el disco mide
+    // 200 m de radio y a esa escala el buffer de profundidad no distingue diez
+    // centimetros, asi que las dos superficies se peleaban pixel a pixel. Segun
+    // el cuadro ganaba una u otra y el mar cambiaba de aspecto solo.
 
     for (let z = -L / 2; z < L / 2; z += STEP) {
       const cz = z + STEP / 2
@@ -1132,9 +1142,12 @@ function PropMesh({ p, maps }) {
   // recta, porque la caja redondeada reparte las UV de otra forma y el
   // corrugado del contenedor o las juntas del asfalto saldrian curvados en los
   // bordes.
-  const bevel = p.geo === 'box' && !p.tex ? roundedBox(p.size) : null
+  // El agua nunca lleva bisel: la caja redondeada reparte las UV de otra forma
+  // y el oleaje sale aplanado, que fue justo lo que dejo la lamina del crucero
+  // como una chapa lisa reflejando el cielo.
+  const bevel = p.geo === 'box' && !p.tex && !p.water ? roundedBox(p.size) : null
   return (
-    <mesh position={p.pos} rotation={p.rot || [0, 0, 0]}>
+    <mesh position={p.pos} rotation={p.rot || [0, 0, 0]} userData={p.water ? WATER_UD : undefined}>
       {bevel ? (
         <primitive object={bevel} attach="geometry" dispose={null} />
       ) : p.geo === 'box' ? (
@@ -1151,6 +1164,9 @@ function PropMesh({ p, maps }) {
         emissiveIntensity={p.emissiveIntensity || 0}
         metalness={p.metalness || 0.1}
         roughness={p.roughness ?? 0.85}
+        normalMap={p.water ? WATER : null}
+        normalScale={p.water ? WATER_SCALE : undefined}
+        envMapIntensity={p.water ? 2.1 : 1}
       />
     </mesh>
   )

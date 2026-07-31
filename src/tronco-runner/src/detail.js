@@ -108,6 +108,32 @@ export function waveMap() {
   return waves
 }
 
+// Laminas de agua del juego (el disco de mar lejano y la lamina de la travesia
+// del crucero). Comparten el mismo oleaje y el mismo reloj: si cada una moviera
+// su textura por su cuenta, en la costura entre las dos se veria una corriendo
+// contra la otra. Las registra sharedWater y las avanza tickWater desde el
+// bucle principal.
+const sheets = []
+
+export function sharedWater(rx, ry) {
+  const t = waveMap().clone()
+  t.wrapS = t.wrapT = THREE.RepeatWrapping
+  t.repeat.set(rx, ry)
+  t.anisotropy = QUALITY.aniso
+  t.needsUpdate = true
+  sheets.push(t)
+  return t
+}
+
+export function tickWater(dt) {
+  for (const t of sheets) {
+    // dos velocidades distintas en x e y: con la misma se lee como una foto
+    // deslizandose, y con dos como oleaje
+    t.offset.x += dt * 0.004
+    t.offset.y += dt * 0.011
+  }
+}
+
 let cached = null
 
 export function detailMaps() {
@@ -149,25 +175,27 @@ export function detailMaps() {
 // una chapa pintada de verdad (que lleva veinte anos de sal y grua encima) de
 // un color plano de render.
 //
-// Los chorreones se estiran en vertical porque asi cae el agua: un ruido
-// isotropo se lee como camuflaje, no como suciedad.
+// La mancha es ISOTROPA a proposito, aunque la suciedad real chorree hacia
+// abajo. Una caja reparte UV de 0 a 1 en cada cara, asi que un casco de 30 x 3 m
+// estira la textura cien veces mas en un eje que en el otro: cualquier rasgo
+// con direccion (un chorreon) sale convertido en bandas horizontales, y eso fue
+// exactamente lo que aparecio en el casco del astillero. Sin direccion, el
+// estirado solo se lee como manchas mas anchas.
 function grungeField() {
   const blotch = valueNoise(SIZE, 7, 17)
   const grain = valueNoise(SIZE, 31, 404)
-  const streakN = valueNoise(SIZE, 19, 88)
+  const spot = valueNoise(SIZE, 13, 88)
   const px = new Uint8ClampedArray(SIZE * SIZE * 4)
   for (let y = 0; y < SIZE; y++) {
     for (let x = 0; x < SIZE; x++) {
       const i = y * SIZE + x
-      // el chorreon se muestrea con la coordenada vertical comprimida, o sea
-      // que la misma mancha se repite hacia abajo y forma una raya
-      const sy = Math.floor(y / 5) % SIZE
-      const streak = streakN[sy * SIZE + x]
       // Amplitudes cortas a proposito. La suciedad tiene que notarse al mirar
       // una pieza de cerca y desaparecer al mirar la escena: con contraste alto
       // el mosaico canta y todo el puerto se ve de mimbre.
       let v = 0.96 + (blotch[i] - 0.5) * 0.1 + (grain[i] - 0.5) * 0.05
-      if (streak > 0.78) v -= (streak - 0.78) * 0.5
+      // las manchas oscuras son escasas y aisladas: es donde se acumula la
+      // roña, no un patron continuo
+      if (spot[i] > 0.8) v -= (spot[i] - 0.8) * 0.45
       const c = Math.max(0.7, Math.min(1.04, v)) * 255
       px[i * 4] = c
       px[i * 4 + 1] = c * 0.995
@@ -200,7 +228,7 @@ export function detailFor(meters) {
       t.wrapS = t.wrapT = THREE.RepeatWrapping
       // la suciedad va muy por debajo de la frecuencia del grano: las manchas
       // son de varios metros, y a mas frecuencia el mosaico canta
-      const r = key === 'wear' ? Math.max(1, rep / 12) : rep
+      const r = key === 'wear' ? Math.max(1, rep / 4) : rep
       t.repeat.set(r, r)
       t.anisotropy = QUALITY.aniso
       t.needsUpdate = true

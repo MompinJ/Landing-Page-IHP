@@ -15,7 +15,7 @@ export function Fx() {
 
   return (
     <EffectComposer multisampling={QUALITY.ao ? 4 : 2} enableNormalPass={QUALITY.ao}>
-      {QUALITY.ao ? (
+      {QUALITY.ao && (
         // La oclusion ambiental es lo que le quita el aire de maqueta a un
         // escenario hecho de cajas: sin ella todo apoya sobre el suelo sin
         // tocarlo. Se usa N8AO y no el SSAO clasico porque este trabaja en
@@ -32,16 +32,12 @@ export function Fx() {
           denoiseRadius={12}
           color="#0b1526"
         />
-      ) : (
-        <></>
       )}
-      {QUALITY.bloom ? (
+      {QUALITY.bloom && (
         // Umbral alto: solo florecen el sol, los reflejos especulares y las
         // luces, no las chapas claras. Con umbral bajo el patio entero brilla y
         // se pierde el contraste que acaban de dar las sombras.
         <Bloom mipmapBlur intensity={0.55} luminanceThreshold={0.82} luminanceSmoothing={0.25} radius={0.72} />
-      ) : (
-        <></>
       )}
       {/* medio punto de saturacion: el atardecer del panorama pide color, y la
           curva filmica se lo come si no se compensa */}

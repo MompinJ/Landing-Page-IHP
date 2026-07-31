@@ -20,7 +20,7 @@ import {
 } from '../constants'
 import { TEX_FILES } from '../textures'
 import { QUALITY } from '../quality'
-import { detailFor, waveMap } from '../detail'
+import { detailFor, sharedWater, tickWater } from '../detail'
 import { World } from './World'
 import { Player } from './Player'
 import { Items } from './Items'
@@ -38,12 +38,20 @@ function Loop() {
   const gl = useThree((s) => s.gl)
   // con ?skip= se esta depurando: el renderer a mano permite leer llamadas de
   // dibujo y triangulos por zona desde una prueba headless
-  if (SKIP) window.__gl = gl
+  const dbgScene = useThree((s) => s.scene)
+  if (SKIP) {
+    window.__gl = gl
+    // con ?skip= tambien se expone la escena: sin ella, comprobar desde una
+    // captura headless que material acabo teniendo una pieza es imposible
+    window.__scene = dbgScene
+  }
   useFrame((_, dt0) => {
     const dt = Math.min(dt0, 0.05)
     // el curso avanza siempre: en intro y gameover el escenario sigue corriendo
     // de fondo, por eso el scroll no vive dentro del if de 'playing'
     scroll.s += scrollSpeed(useGame.getState().phase) * dt
+    // el oleaje de todas las laminas de agua avanza aqui, con un solo reloj
+    tickWater(dt)
     const phase = useGame.getState().phase
     if (phase !== 'playing') {
       // Fuera de partida el mundo sigue corriendo de fondo y nadie calcula el
@@ -225,7 +233,12 @@ function dressMaterial(mesh) {
   if (!m.normalMap) {
     m.normalMap = d.normal
     // el relieve se nota mas en lo pulido (chapa pintada, casco) que en lo mate
-    const k = 0.3 + (1 - Math.min(1, m.roughness ?? 0.85)) * 0.45
+    let k = 0.3 + (1 - Math.min(1, m.roughness ?? 0.85)) * 0.45
+    // Y se rebaja en las piezas grandes. Una caja reparte UV de 0 a 1 por cara,
+    // asi que en un casco de 30 x 3 m el grano sale estirado diez veces mas en
+    // un eje que en el otro y se lee como tejido de arpillera. Con el relieve
+    // bajo, el mismo estirado solo se nota como acabado.
+    k *= Math.max(0.3, Math.min(1, 1.25 - meters * 0.035))
     m.normalScale = new THREE.Vector2(k, k)
   }
   if (!m.roughnessMap) m.roughnessMap = d.rough
@@ -301,20 +314,10 @@ function FarSea() {
   // basta con dar relieve de ola y rugosidad baja para que el sol se derrame
   // sobre la lamina; la foto de agua que habia aqui antes competia con ese
   // reflejo y aplanaba el mar a color liso.
-  const wave = useMemo(() => {
-    const t = waveMap().clone()
-    t.wrapS = t.wrapT = THREE.RepeatWrapping
-    // el disco mide 400 m de diametro: 55 repeticiones son ondas de ~7 m, que
-    // es lo que hace falta para que el reflejo del sol se rompa en escamas
-    t.repeat.set(55, 55)
-    t.needsUpdate = true
-    return t
-  }, [])
-  useFrame((_, dt) => {
-    // dos velocidades distintas en x e y: con la misma se lee como una foto
-    // deslizandose, y con dos como oleaje
-    wave.offset.x += dt * 0.004
-    wave.offset.y += dt * 0.011
+  // el disco mide 400 m de diametro: 55 repeticiones son ondas de ~7 m, que es
+  // lo que hace falta para que el reflejo del sol se rompa en escamas
+  const wave = useMemo(() => sharedWater(55, 55), [])
+  useFrame(() => {
     // La altura del mar la decide el curso (seaLevelAt): en la travesia del
     // crucero el mar ES el suelo y sube al nivel del casco de las lanchas; en el
     // resto es fondo lejano y se queda por debajo del terreno.
