@@ -5,6 +5,7 @@ import { runtime } from '../runtime'
 import { supportAt, platformUnder, ceilingAt, inSeaAt, SEA_FLOOR, SEA_LEVEL, SCAF_BONUS } from '../course'
 import { sfx } from '../audio'
 import { QUALITY } from '../quality'
+import { approach } from '../smooth'
 import {
   LANES,
   PLAYER_Z,
@@ -43,8 +44,10 @@ export function Player() {
     const active = phase === 'playing'
 
     if (active) {
-      const targetX = LANES[runtime.targetLane]
-      runtime.x += (targetX - runtime.x) * Math.min(1, dt * 13)
+      // El desplazamiento de carril tambien va en tiempo real y no por cuadro:
+      // con la forma antigua, a 30 fps el corredor cruzaba el carril de dos
+      // zancadas de golpe, y esa era la mitad de la sensacion de tiron.
+      runtime.x = approach(runtime.x, LANES[runtime.targetLane], 13, dt)
       const grounded = runtime.y <= 0.001
 
       if (runtime.slideCd > 0) runtime.slideCd = Math.max(0, runtime.slideCd - dt)

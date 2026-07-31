@@ -21,6 +21,7 @@ import {
 import { TEX_FILES } from '../textures'
 import { QUALITY } from '../quality'
 import { detailFor, sharedWater, tickWater } from '../detail'
+import { approach, smoothDamp } from '../smooth'
 import { World } from './World'
 import { Player } from './Player'
 import { Items } from './Items'
@@ -82,23 +83,41 @@ function Loop() {
 const FOV_BASE = 58
 const FOV_MAX = 67
 
+// Tiempos de la camara, en segundos. Se piensan en tiempo y no en "rate"
+// porque asi se leen: el paneo tarda 0.28 s en plantarse en el carril nuevo.
+const PAN_TIME = 0.22
+const ROLL_TIME = 0.3
+// Grados de alabeo por cada metro por segundo que se desplaza la camara de
+// lado. El alabeo sale de la VELOCIDAD de la camara, no de lo que le falta al
+// corredor: asi nace y muere con el propio movimiento en vez de saltar al
+// pulsar y quedarse colgado mientras el corredor termina de llegar.
+const ROLL_PER_SPEED = 0.03
+const ROLL_MAX = 0.06
+
 function CameraRig() {
   const tilt = useRef(0)
+  const tiltV = useRef({ v: 0 })
+  const panV = useRef({ v: 0 })
   const dip = useRef(0)
   const ground = useRef(0)
 
   useFrame((state, dt0) => {
     const dt = Math.min(dt0, 0.05)
     const cam = state.camera
+    // con ?skip= la camara queda a mano para comprobar el paneo desde fuera
+    if (SKIP) window.__camera = cam
     // El suelo puede cambiar de golpe: al salirse del tablero de un andamio
     // baja 2.7 m en un frame. La camara lo sigue amortiguado para que sea una
     // caida y no un corte; el salto conserva su propio amortiguado aparte.
-    ground.current += (runtime.deck - ground.current) * Math.min(1, dt * 7)
-    const tx = runtime.x * 0.45
-    cam.position.x += (tx - cam.position.x) * Math.min(1, dt * 6)
+    ground.current = approach(ground.current, runtime.deck, 7, dt)
+    // Paneo lateral con muelle amortiguado en vez de persecucion exponencial.
+    // La exponencial arranca a velocidad maxima: el cambio de carril empezaba
+    // con un tiron seco y luego se arrastraba. El muelle acelera y frena, que
+    // es como se mueve una camara de verdad.
+    cam.position.x = smoothDamp(cam.position.x, runtime.x * 0.45, panV.current, PAN_TIME, dt)
     // al deslizarse la camara baja y se acerca: el suelo pasa mas cerca del
     // ojo y el agachado se siente rapido en vez de solo verse
-    dip.current += ((runtime.slide > 0 ? 1 : 0) - dip.current) * Math.min(1, dt * 9)
+    dip.current = approach(dip.current, runtime.slide > 0 ? 1 : 0, 9, dt)
     // la camara sigue el salto amortiguada: da peso sin marear
     cam.position.y = 4.3 + ground.current + runtime.y * 0.28 - dip.current * 0.85
     cam.position.z = PLAYER_Z + 6.5 - dip.current * 0.7
@@ -107,7 +126,7 @@ function CameraRig() {
     const k = (runtime.speed - BASE_SPEED) / (MAX_SPEED - BASE_SPEED)
     const fov = FOV_BASE + (FOV_MAX - FOV_BASE) * Math.max(0, Math.min(1, k))
     if (Math.abs(cam.fov - fov) > 0.02) {
-      cam.fov += (fov - cam.fov) * Math.min(1, dt * 2.5)
+      cam.fov = approach(cam.fov, fov, 2.5, dt)
       cam.updateProjectionMatrix()
     }
     if (runtime.shake > 0) {
@@ -116,11 +135,13 @@ function CameraRig() {
       cam.position.y += (Math.random() - 0.5) * 0.22 * runtime.shake
     }
     cam.lookAt(runtime.x * 0.4, 1.3 + ground.current - dip.current * 0.35, PLAYER_Z - 9)
-    // Alabeo al cambiar de carril. Se calcula sobre lo que le falta al corredor
-    // para llegar al carril destino, asi que nace y muere con el movimiento.
-    // Va despues de lookAt porque lookAt reescribe la rotacion entera.
-    const lead = LANES[runtime.targetLane] - runtime.x
-    tilt.current += (lead * -0.075 - tilt.current) * Math.min(1, dt * 9)
+    // Alabeo al cambiar de carril. Va despues de lookAt porque lookAt reescribe
+    // la rotacion entera. El objetivo sale de lo rapido que se esta moviendo la
+    // camara de lado (panV), no de lo que le falta al corredor: con lo segundo
+    // el alabeo aparecia de golpe al pulsar, cuando la camara todavia no se
+    // habia movido, y se quedaba puesto hasta el final del desplazamiento.
+    const want = Math.max(-ROLL_MAX, Math.min(ROLL_MAX, -panV.current.v * ROLL_PER_SPEED))
+    tilt.current = smoothDamp(tilt.current, want, tiltV.current, ROLL_TIME, dt)
     cam.rotation.z += tilt.current
   })
   return null
