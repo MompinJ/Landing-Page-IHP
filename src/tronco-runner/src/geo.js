@@ -26,6 +26,11 @@ export function roundedBox(size) {
   if (cache.size >= MAX) return null
 
   const min = Math.min(q[0], q[1], q[2])
+  const max = Math.max(q[0], q[1], q[2])
+  // Solo las piezas con presencia. Un bisel de 5 cm en un tornillo o en un
+  // travesano de 20 cm no se ve, y en cambio multiplica por veinte los
+  // triangulos de la pieza mas repetida del escenario.
+  if (max < QUALITY.bevelMin) return null
   // el radio nunca puede llegar a la mitad del lado mas corto: en una chapa de
   // 4 cm de grueso un radio de 2 cm la convertiria en un cilindro
   const r = Math.min(0.05, min * 0.24)

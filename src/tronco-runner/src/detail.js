@@ -206,6 +206,32 @@ function grungeField() {
   return px
 }
 
+// Version para la geometria FUSIONADA del escenario. Ahi no vale una textura
+// por tamano de pieza: en una malla que junta doscientas piezas de medidas
+// distintas no hay un solo "cada cuantos metros repite". Lo que se hace es al
+// reves: al fusionar se hornea en un segundo juego de coordenadas (uv1) la
+// escala de cada pieza, y estas texturas leen ESE juego con repeticion fija.
+// Asi el grano mide lo mismo en metros en un tornillo y en una nave.
+let baked = null
+
+export function bakedDetail() {
+  if (baked) return baked
+  const base = detailMaps()
+  const mk = (src, rep) => {
+    const t = src.clone()
+    t.wrapS = t.wrapT = THREE.RepeatWrapping
+    t.channel = 1 // lee uv1, no uv: uv sigue siendo la del mapa de color
+    t.repeat.set(rep, rep)
+    t.anisotropy = QUALITY.aniso
+    t.needsUpdate = true
+    return t
+  }
+  // la suciedad va a un cuarto de la frecuencia del grano: manchas de metro
+  // largo, no de treinta centimetros
+  baked = { normal: mk(base.normal, 1), rough: mk(base.rough, 1), wear: mk(base.wear, 0.25) }
+  return baked
+}
+
 // Un clon por escala de repeticion. El mapa se quiere ver SIEMPRE del mismo
 // tamano en metros (un tramo de medio metro), asi que la repeticion depende de
 // lo grande que sea la pieza: si no, el grano de un contenedor de seis metros y

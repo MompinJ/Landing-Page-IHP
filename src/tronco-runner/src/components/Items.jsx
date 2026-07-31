@@ -88,11 +88,13 @@ function Hexagon({ item }) {
   const glow = item.good ? COLORS.good : COLORS.bad
   const long = item.label.length > 10
   return (
-    // Las fichas no se ensucian: son senal de juego, no decorado. El acabado de
-    // escena (SceneSweep) les pondria manchas y chorreones como al resto del
-    // puerto, y a 30 m lo unico que el jugador tiene que leer aqui es verde o
-    // rojo. El relieve y la sombra si les tocan.
-    <group ref={group} userData={{ noDress: true }}>
+    // Las fichas no se ensucian NI entran en el juego de sombras: son senal de
+    // juego, no decorado. A 30 m lo unico que el jugador tiene que leer aqui es
+    // verde o rojo, y en cambio son la pieza mas numerosa de la pantalla (seis
+    // mallas por ficha, veinte fichas a la vista): metidas en la pasada de
+    // sombra costaban mas de cien llamadas de dibujo por cuadro para producir
+    // sombras de hexagonos flotantes que nadie mira.
+    <group ref={group} userData={{ noDress: true, noShadow: true }}>
       {/* bisel metalico exterior */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[1.05, 1.05, 0.14, 6]} />

@@ -6,18 +6,9 @@ import { scroll } from '../runtime'
 import { SEGMENT_LENGTH as L, NUM_SEGMENTS, THEME_METERS, LANES, COLORS } from '../constants'
 import { ZONES, cruStage, astStage, deckAt, DECK_Y, DOCK_Y, SHIP_FROM, SHIP_TO } from '../course'
 import { useGameTextures, tiledTexture } from '../textures'
-import { roundedBox } from '../geo'
-import { sharedWater } from '../detail'
-
-// Oleaje de la lamina de mar de la travesia del crucero. Se pide una sola vez
-// para todas las franjas: la textura es compartida y la avanza el bucle
-// principal junto con la del mar lejano, asi que las dos van sincronizadas.
-// 12 x 3 sobre una caja de 96 x 30 m deja ondas de unos 8 m, como en el disco.
-const WATER = sharedWater(32, 10)
-const WATER_SCALE = new THREE.Vector2(0.85, 0.85)
-// el agua ya trae su propio relieve y su reflejo: el acabado de escena no debe
-// colgarle encima el grano de superficie ni la capa de suciedad del puerto
-const WATER_UD = { noDress: true }
+import { QUALITY } from '../quality'
+import { mergeParts } from '../merge'
+import { bakedDetail } from '../detail'
 
 const START = 16 // borde frontal del segmento k=0 cuando scroll=0
 
@@ -1135,49 +1126,50 @@ function buildProps(theme, seed) {
   return out
 }
 
-function PropMesh({ p, maps }) {
-  const map = p.tex ? tiledTexture(maps[p.tex], p.tex, p.repeat?.[0] ?? 1, p.repeat?.[1] ?? 1) : null
-  // Caja con el canto matado cuando la pieza no lleva textura: el bisel engancha
-  // una linea de luz en la arista. En las piezas con textura se deja la caja
-  // recta, porque la caja redondeada reparte las UV de otra forma y el
-  // corrugado del contenedor o las juntas del asfalto saldrian curvados en los
-  // bordes.
-  // El agua nunca lleva bisel: la caja redondeada reparte las UV de otra forma
-  // y el oleaje sale aplanado, que fue justo lo que dejo la lamina del crucero
-  // como una chapa lisa reflejando el cielo.
-  const bevel = p.geo === 'box' && !p.tex && !p.water ? roundedBox(p.size) : null
+// La franja se fusiona por familia de material (ver merge.js): de ~150 llamadas
+// de dibujo por franja a menos de diez, que era el verdadero cuello del juego.
+
+function SegmentMesh({ part, maps }) {
+  const p = part.p
+  const d = bakedDetail()
+  const map = p.tex ? tiledTexture(maps[p.tex], p.tex, p.repeat?.[0] ?? 1, p.repeat?.[1] ?? 1) : d.wear
+  // las balizas y luces no se ensucian ni proyectan sombra de si mismas
+  const lamp = (p.emissiveIntensity || 0) >= 1
   return (
-    <mesh position={p.pos} rotation={p.rot || [0, 0, 0]} userData={p.water ? WATER_UD : undefined}>
-      {bevel ? (
-        <primitive object={bevel} attach="geometry" dispose={null} />
-      ) : p.geo === 'box' ? (
-        <boxGeometry args={p.size} />
-      ) : p.geo === 'cyl' ? (
-        <cylinderGeometry args={p.args} />
-      ) : (
-        <sphereGeometry args={p.args} />
-      )}
+    // sh: 1 marca la malla como ya acabada para el barrido de escena, que si no
+    // le colgaria encima el juego de texturas de las piezas sueltas
+    <mesh
+      geometry={part.geometry}
+      castShadow={QUALITY.shadows && !lamp}
+      receiveShadow={QUALITY.shadows}
+      userData={DONE}
+    >
       <meshStandardMaterial
-        map={map}
-        color={p.color}
+        vertexColors
+        map={lamp ? null : map}
         emissive={p.emissive || '#000000'}
         emissiveIntensity={p.emissiveIntensity || 0}
         metalness={p.metalness || 0.1}
         roughness={p.roughness ?? 0.85}
-        normalMap={p.water ? WATER : null}
-        normalScale={p.water ? WATER_SCALE : undefined}
-        envMapIntensity={p.water ? 2.1 : 1}
+        normalMap={lamp ? null : d.normal}
+        roughnessMap={lamp ? null : d.rough}
+        envMapIntensity={1.15}
       />
     </mesh>
   )
 }
 
+const DONE = { sh: 1 }
+
 const Segment = memo(function Segment({ theme, seed, maps }) {
-  const props = useMemo(() => buildProps(theme, seed), [theme, seed])
+  const parts = useMemo(() => mergeParts(buildProps(theme, seed)), [theme, seed])
+  // la franja se recicla cada pocos segundos: sin esto se quedarian en la GPU
+  // las mallas fusionadas de todas las franjas que han pasado
+  useEffect(() => () => parts.forEach((x) => x.geometry.dispose()), [parts])
   return (
     <group>
-      {props.map((p, i) => (
-        <PropMesh key={i} p={p} maps={maps} />
+      {parts.map((part) => (
+        <SegmentMesh key={part.key} part={part} maps={maps} />
       ))}
     </group>
   )

@@ -27,6 +27,7 @@ import { Items } from './Items'
 import { Obstacles } from './Obstacles'
 import { Gates } from './Gates'
 import { Fx } from './Fx'
+import { Perf, PERF } from './Perf'
 
 // Bruma. El azul frio de antes recortaba las siluetas lejanas contra un cielo
 // naranja: se veia que el fondo estaba pegado. Un tono templado, a medio camino
@@ -200,15 +201,44 @@ function SceneSweep() {
       if (!o.isMesh || o.userData.sh) return
       o.userData.sh = 1
       const lamp = o.geometry?.type === 'SphereGeometry' && (o.material?.emissiveIntensity || 0) >= 1
-      if (QUALITY.shadows) {
-        o.castShadow = !lamp && !o.userData.noShadow && !o.userData.noCast
-        o.receiveShadow = !o.userData.noShadow
+      // Los vetos se heredan del grupo: una ficha o un bote lo declaran una vez
+      // y no malla por malla. Son cuatro saltos de padre y se miran una sola vez
+      // en la vida de cada malla.
+      let noShadow = false
+      let noCast = false
+      let noDress = false
+      for (let a = o; a; a = a.parent) {
+        if (a.userData.noShadow) noShadow = true
+        if (a.userData.noCast) noCast = true
+        if (a.userData.noDress) noDress = true
       }
-      if (!lamp) dressMaterial(o)
+      if (QUALITY.shadows) {
+        // El tamano manda: el puerto esta lleno de tornillos, barandillas,
+        // travesanos y balizas, y meterlos en la pasada de sombra duplicaba las
+        // llamadas de dibujo para producir sombras que no se ven. Solo proyecta
+        // lo que tiene silueta propia, y solo recibe lo que tiene superficie
+        // donde se note (el suelo, un contenedor, un casco).
+        const m = sizeOf(o)
+        o.castShadow = !lamp && !noShadow && !noCast && m >= QUALITY.shadowMin
+        o.receiveShadow = !noShadow && m >= QUALITY.receiveMin
+      }
+      if (!lamp && !noDress) dressMaterial(o)
     })
   })
 
   return null
+}
+
+// Lado mayor de una pieza en metros, sin contar la escala del grupo (todo el
+// escenario va a escala 1). Se calcula una sola vez por malla y se guarda,
+// porque lo piden tanto el filtro de sombras como el microrrelieve.
+function sizeOf(mesh) {
+  if (mesh.userData.m === undefined) {
+    if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox()
+    const bb = mesh.geometry.boundingBox
+    mesh.userData.m = Math.max(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z)
+  }
+  return mesh.userData.m
 }
 
 // Cuelga el microrrelieve de un material: relieve de normales y variacion de
@@ -216,18 +246,12 @@ function SceneSweep() {
 // tocar un material obliga a recompilar su programa.
 function dressMaterial(mesh) {
   const m = mesh.material
-  // El veto se hereda: los grupos (una ficha, un bote) lo declaran una vez y no
-  // malla por malla. Son cuatro saltos de padre como mucho y se mira una sola
-  // vez en la vida de cada malla.
-  for (let o = mesh; o; o = o.parent) if (o.userData.noDress) return
   if (!m || Array.isArray(m) || !m.isMeshStandardMaterial || m.userData.det) return
   m.userData.det = 1
 
   // Tamano real de la pieza en metros: de ahi sale cada cuantos metros repite
   // el grano. Sin esto una nave de 20 m y un tornillo tendrian el mismo grano.
-  if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox()
-  const bb = mesh.geometry.boundingBox
-  const meters = Math.max(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z)
+  const meters = sizeOf(mesh)
   const d = detailFor(meters)
 
   if (!m.normalMap) {
@@ -445,7 +469,10 @@ export function Game() {
       dpr={QUALITY.dpr}
       shadows={QUALITY.shadows ? { type: THREE.PCFSoftShadowMap } : false}
       camera={{ fov: 58, position: [0, 4.3, PLAYER_Z + 6.5], near: 0.1, far: 300 }}
-      gl={{ antialias: true, powerPreference: 'high-performance' }}
+      // El antialias del canvas se apaga cuando hay postproceso: la imagen no
+      // sale por el buffer por defecto sino por la cadena de efectos, que
+      // termina en SMAA, asi que el MSAA del canvas se paga y se tira.
+      gl={{ antialias: !QUALITY.bloom && !QUALITY.ao, powerPreference: 'high-performance' }}
       onCreated={({ gl }) => {
         // Rango dinamico de pelicula. Sin esto los blancos del casco y de los
         // reflejos del atardecer se recortan en plano y todo se lee a plastico;
@@ -479,6 +506,7 @@ export function Game() {
       <Player />
       <Items />
       <Fx />
+      {PERF && <Perf />}
     </Canvas>
   )
 }

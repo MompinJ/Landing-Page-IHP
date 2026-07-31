@@ -14,7 +14,10 @@ export function Fx() {
   if (!QUALITY.bloom && !QUALITY.ao) return null
 
   return (
-    <EffectComposer multisampling={QUALITY.ao ? 4 : 2} enableNormalPass={QUALITY.ao}>
+    // multisampling 0: el suavizado lo hace SMAA al final. El MSAA del
+    // composer obliga a resolver un buffer multimuestra por cuadro, y con
+    // pasada de normales encima era de lo mas caro del cuadro entero.
+    <EffectComposer multisampling={0} enableNormalPass={QUALITY.ao}>
       {QUALITY.ao && (
         // La oclusion ambiental es lo que le quita el aire de maqueta a un
         // escenario hecho de cajas: sin ella todo apoya sobre el suelo sin
@@ -27,8 +30,8 @@ export function Fx() {
           aoRadius={1.1}
           distanceFalloff={0.9}
           intensity={2.6}
-          aoSamples={16}
-          denoiseSamples={8}
+          aoSamples={QUALITY.aoSamples}
+          denoiseSamples={4}
           denoiseRadius={12}
           color="#0b1526"
         />
