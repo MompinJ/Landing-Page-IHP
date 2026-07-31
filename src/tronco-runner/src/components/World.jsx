@@ -608,6 +608,21 @@ function buildProps(theme, seed) {
     // detalles: con rebanadas de 3 m los centros caen en +-1.5, +-4.5, +-7.5...
     // y ese modulo nunca vale 0, asi que la helice, el timon, los picaderos y
     // las gruas de cubierta no se dibujaban NUNCA.
+    // Cajas largas en vez de una por rebanada. Esta zona salia a ~2400 llamadas
+    // de dibujo, cuatro veces la primera, y casi todas eran suelo y muros
+    // troceados en rebanadas de 3 m sin necesidad: dentro del dique el perfil es
+    // plano y el casco tiene manga constante en todo el cuerpo cilindrico, asi
+    // que ahi una franja entera es UNA caja de 30 m. Solo se trocea donde algo
+    // cambia de verdad: las rampas de bajada y subida, y la popa y la proa.
+    const dBack = dAt(L / 2)
+    const dFront = dAt(-L / 2)
+    const stageA = astStage(dBack) || 'borde'
+    const uni = stageA === (astStage(dFront) || 'borde') && stageA !== 'bajada' && stageA !== 'subida'
+    const shipA = shipAt(dBack)
+    const shipB = shipAt(dFront)
+    const uniShip =
+      uni && shipA && shipB && shipA.w === shipB.w && shipA.deck === shipB.deck && shipA.bottom === shipB.bottom
+
     let si = 0
     for (let z = -L / 2; z < L / 2; z += STEP, si++) {
       const cz = z + STEP / 2
@@ -615,81 +630,101 @@ function buildProps(theme, seed) {
       const stage = astStage(d) || 'borde'
       const y = deckAt(d)
       const enDique = stage !== 'grada'
+      // z y profundidad de lo que no cambia a lo largo de la franja
+      const lz = uni ? 0 : cz
+      const ld = uni ? L : STEP
+      const largo = !uni || si === 0
+      const hz = uniShip ? 0 : cz
+      const hd = uniShip ? L : STEP
+      const casco = !uniShip || si === 0
 
-      // suelo por el que se corre
-      box([0, y - 0.11, cz], [12, 0.22, STEP], '#b9bab4', {
-        tex: 'asphalt',
-        repeat: [3, 1],
-        roughness: 0.95,
-      })
-      box([-1.15, y + 0.03, cz], [0.07, 0.02, STEP], COLORS.neon, {
-        emissive: COLORS.neon,
-        emissiveIntensity: 1.4,
-      })
-      box([1.15, y + 0.03, cz], [0.07, 0.02, STEP], COLORS.neon, {
-        emissive: COLORS.neon,
-        emissiveIntensity: 1.4,
-      })
-
-      if (enDique) {
-        // Solera del dique de pared a pared. El piso del corredor solo mide
-        // 12 m, asi que sin esto el buque y sus picaderos quedaban flotando
-        // sobre el vacio a diez metros del carril.
-        box([-6.5, DOCK_Y - 0.24, cz], [27, 0.3, STEP], '#a9aaa3', {
+      // Suelo por el que se corre. En las rampas cada rebanada baja 0.4 m
+      // respecto a la anterior y la losa solo tiene 0.22 de canto: quedaban
+      // placas sueltas flotando con hueco entre ellas. La losa se alarga hacia
+      // abajo lo que caiga el tramo, asi que se solapan y la rampa se lee como
+      // un escalonado macizo. En lo llano dY es 0 y no cambia nada.
+      const dY = Math.abs(deckAt(dAt(z)) - deckAt(dAt(z + STEP)))
+      if (largo) {
+        box([0, y - 0.11 - dY / 2, lz], [12, 0.22 + dY, ld], '#b9bab4', {
           tex: 'asphalt',
-          repeat: [7, 1],
+          repeat: [3, ld / STEP],
           roughness: 0.95,
         })
-        // canal de desague en el eje del dique
-        box([-13.4, DOCK_Y - 0.06, cz], [0.7, 0.12, STEP], '#8f9089', { roughness: 0.9 })
-        // Pared del dique a estribor: altares escalonados del fondo al muelle
-        for (let i = 0; i < 3; i++) {
-          const ty = DOCK_Y + 1.6 + i * 1.6
-          if (ty > 0) break
-          box([7.4 + i * 1.1, (ty + DOCK_Y) / 2, cz], [2.2, ty - DOCK_Y, STEP], '#c3c4bd', {
+        box([-1.15, y + 0.03, lz], [0.07, 0.02, ld], COLORS.neon, {
+          emissive: COLORS.neon,
+          emissiveIntensity: 1.4,
+        })
+        box([1.15, y + 0.03, lz], [0.07, 0.02, ld], COLORS.neon, {
+          emissive: COLORS.neon,
+          emissiveIntensity: 1.4,
+        })
+      }
+
+      if (enDique) {
+        if (largo) {
+          // Solera del dique de pared a pared. El piso del corredor solo mide
+          // 12 m, asi que sin esto el buque y sus picaderos quedaban flotando
+          // sobre el vacio a diez metros del carril.
+          box([-6.5, DOCK_Y - 0.24, lz], [27, 0.3, ld], '#a9aaa3', {
+            tex: 'asphalt',
+            repeat: [7, ld / STEP],
             roughness: 0.95,
           })
+          // canal de desague en el eje del dique
+          box([-13.4, DOCK_Y - 0.06, lz], [0.7, 0.12, ld], '#8f9089', { roughness: 0.9 })
+          // Pared del dique a estribor: altares escalonados del fondo al muelle
+          for (let i = 0; i < 3; i++) {
+            const ty = DOCK_Y + 1.6 + i * 1.6
+            if (ty > 0) break
+            box([7.4 + i * 1.1, (ty + DOCK_Y) / 2, lz], [2.2, ty - DOCK_Y, ld], '#c3c4bd', {
+              roughness: 0.95,
+            })
+          }
+          // macizos del muelle a los dos lados: cierran el canon y sostienen gruas
+          box([16, DOCK_Y / 2 - 0.2, lz], [16, Math.abs(DOCK_Y) + 0.4, ld], '#adaea7', { roughness: 0.95 })
+          box([16, 0.06, lz], [16, 0.2, ld], '#c9ccc6', { tex: 'asphalt', repeat: [4, ld / STEP], roughness: 0.95 })
+          box([-25, DOCK_Y / 2 - 0.2, lz], [14, Math.abs(DOCK_Y) + 0.4, ld], '#adaea7', { roughness: 0.95 })
+          box([-25, 0.06, lz], [14, 0.2, ld], '#c9ccc6', { tex: 'asphalt', repeat: [4, ld / STEP], roughness: 0.95 })
+          box([9.2, 0.2, lz], [0.16, 0.14, ld], '#b9c4cc', { metalness: 0.9, roughness: 0.3 })
         }
-        // macizos del muelle a los dos lados: cierran el canon y sostienen gruas
-        box([16, DOCK_Y / 2 - 0.2, cz], [16, Math.abs(DOCK_Y) + 0.4, STEP], '#adaea7', { roughness: 0.95 })
-        box([16, 0.06, cz], [16, 0.2, STEP], '#c9ccc6', { tex: 'asphalt', repeat: [4, 1], roughness: 0.95 })
-        box([-25, DOCK_Y / 2 - 0.2, cz], [14, Math.abs(DOCK_Y) + 0.4, STEP], '#adaea7', { roughness: 0.95 })
-        box([-25, 0.06, cz], [14, 0.2, STEP], '#c9ccc6', { tex: 'asphalt', repeat: [4, 1], roughness: 0.95 })
-        box([9.2, 0.2, cz], [0.16, 0.14, STEP], '#b9c4cc', { metalness: 0.9, roughness: 0.3 })
 
         // ---- EL BUQUE ----
         const s = shipAt(d)
         if (s) {
           const hullTop = KEEL + s.deck
           const wl = KEEL + 1.9 // linea de flotacion
-          // obra viva: rojo antiincrustante, con el pantoque en chaflan
-          box([SHIP_X, (s.bottom + wl) / 2, cz], [s.w * 2, wl - s.bottom, STEP], '#8f3a2c', {
-            roughness: 0.8,
-          })
-          // Pantoque: solo un chaflan pequeno en la esquina inferior de estribor.
-          // Antes era una cuna de 3.5 m repetida cada 3 m y el casco se leia como
-          // una estanteria de tablas en vez de como un barco.
-          box([SHIP_X + s.w - 0.32, s.bottom + 0.32, cz], [0.9, 0.9, STEP], '#8f3a2c', {
-            rot: [0, 0, 0.78],
-            roughness: 0.8,
-          })
-          // boot-top negro y obra muerta
-          box([SHIP_X, wl + 0.22, cz], [s.w * 2 + 0.06, 0.44, STEP], '#20242a', { roughness: 0.9 })
-          box([SHIP_X, (wl + 0.44 + hullTop) / 2, cz], [s.w * 2, hullTop - wl - 0.44, STEP], '#1f4f63', {
-            roughness: 0.7,
-            metalness: 0.25,
-          })
-          // trancanil y regala de cubierta
-          box([SHIP_X, hullTop, cz], [s.w * 2 + 0.1, 0.3, STEP], '#c3c4bd', { roughness: 0.7 })
-          box([SHIP_X, hullTop + 0.55, cz], [s.w * 2 - 0.3, 0.8, STEP], '#1f4f63', { roughness: 0.7 })
+          if (casco) {
+            // obra viva: rojo antiincrustante, con el pantoque en chaflan
+            box([SHIP_X, (s.bottom + wl) / 2, hz], [s.w * 2, wl - s.bottom, hd], '#8f3a2c', {
+              roughness: 0.8,
+            })
+            // Pantoque: solo un chaflan pequeno en la esquina inferior de estribor.
+            // Antes era una cuna de 3.5 m repetida cada 3 m y el casco se leia como
+            // una estanteria de tablas en vez de como un barco.
+            box([SHIP_X + s.w - 0.32, s.bottom + 0.32, hz], [0.9, 0.9, hd], '#8f3a2c', {
+              rot: [0, 0, 0.78],
+              roughness: 0.8,
+            })
+            // boot-top negro y obra muerta
+            box([SHIP_X, wl + 0.22, hz], [s.w * 2 + 0.06, 0.44, hd], '#20242a', { roughness: 0.9 })
+            box([SHIP_X, (wl + 0.44 + hullTop) / 2, hz], [s.w * 2, hullTop - wl - 0.44, hd], '#1f4f63', {
+              roughness: 0.7,
+              metalness: 0.25,
+            })
+            // trancanil y regala de cubierta
+            box([SHIP_X, hullTop, hz], [s.w * 2 + 0.1, 0.3, hd], '#c3c4bd', { roughness: 0.7 })
+            box([SHIP_X, hullTop + 0.55, hz], [s.w * 2 - 0.3, 0.8, hd], '#1f4f63', { roughness: 0.7 })
+          }
           // Costuras de las planchas y marcas de calado: son lo que da escala.
           // Sin ellas, catorce metros de casco liso no se leen como grandes.
           if (si % 3 === 0) {
             box([SHIP_X + s.w, (wl + hullTop) / 2, cz], [0.12, hullTop - wl, 0.3], '#173d4d', { roughness: 0.85 })
           }
-          for (const hy of [wl + 2.6, wl + 6.0, wl + 9.4]) {
-            if (hy < hullTop - 0.6) {
-              box([SHIP_X + s.w, hy, cz], [0.1, 0.12, STEP], '#173d4d', { roughness: 0.85 })
+          if (casco) {
+            for (const hy of [wl + 2.6, wl + 6.0, wl + 9.4]) {
+              if (hy < hullTop - 0.6) {
+                box([SHIP_X + s.w, hy, hz], [0.1, 0.12, hd], '#173d4d', { roughness: 0.85 })
+              }
             }
           }
           if (si % 5 === 0 && s.u < 0.5) {
@@ -757,8 +792,10 @@ function buildProps(theme, seed) {
           const sx = SHIP_X + s.w + 1.0
           for (let i = 0; i < 2; i++) {
             const py = KEEL + 1.4 + i * 3.3
-            box([sx, py, cz], [1.7, 0.1, STEP], '#9a7a4e', { roughness: 0.9 })
-            box([sx, py + 1.05, cz], [0.06, 0.06, STEP], '#e0b32e')
+            if (casco) {
+              box([sx, py, hz], [1.7, 0.1, hd], '#9a7a4e', { roughness: 0.9 })
+              box([sx, py + 1.05, hz], [0.06, 0.06, hd], '#e0b32e')
+            }
             if (si % 3 === 0) box([sx + 0.78, py + 1.6, cz], [0.09, 3.2, 0.09], '#e0b32e')
           }
           if (si % 6 < 3) {
