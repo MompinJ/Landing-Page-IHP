@@ -42,6 +42,9 @@ export const sfx = {
   jump() {
     tone(330, 0, 0.12, { type: 'square', gain: 0.06, slideTo: 540 })
   },
+  slide() {
+    tone(520, 0, 0.18, { type: 'square', gain: 0.05, slideTo: 150 })
+  },
   count() {
     tone(440, 0, 0.12, { type: 'triangle', gain: 0.15 })
   },

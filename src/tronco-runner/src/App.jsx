@@ -6,6 +6,7 @@ export function App() {
   return (
     <div className="app">
       <Game />
+      <div className="vignette" />
       <Hud />
       <Overlays />
     </div>

@@ -13,13 +13,27 @@ function Rules() {
         <span className="key-hint">Desliza arriba / Espacio</span> para saltar.
       </li>
       <li>
+        <span className="key-hint">Desliza abajo / Flecha abajo</span> para rodar por debajo.
+      </li>
+      <li>
         Recoge los hexagonos <b className="txt-good">verdes</b>: valores del Tronco Comun <b>(+10)</b>.
       </li>
       <li>
         Esquiva los <b className="txt-bad">rojos</b>: riesgos que danan nuestra cultura <b>(-10)</b>.
       </li>
       <li>
-        Tienes <b>60 segundos</b>. Boton <span className="key-hint">?</span> o tecla <span className="key-hint">H</span> para pausa y ayuda.
+        Cuidado con los <b>obstaculos</b> <b>(-15)</b>: salta las barreras, rueda bajo los spreaders y cambia de carril
+        ante los contenedores.
+      </li>
+      <li>
+        En <b>Cruceros</b> se acaba el suelo: salta de lancha en lancha, porque caer al agua cuesta <b>-15</b>.
+      </li>
+      <li>
+        En el <b>Astillero</b> los andamios se suben por su escalera: si aguantas arriba toda la cadena saltando de
+        tablero en tablero, hay <b>bono</b>.
+      </li>
+      <li>
+        Tienes <b>2 minutos</b> para cruzar las <b>5 terminales</b>. Boton <span className="key-hint">?</span> o tecla <span className="key-hint">H</span> para pausa y ayuda.
       </li>
     </ul>
   )
@@ -57,8 +71,8 @@ function Intro() {
         </h1>
         <p className="subtitle">Corre hacia lo correcto. Evita los riesgos.</p>
         <p className="mission">
-          Recorre la terminal: patio de contenedores, buque, vias de ferrocarril y crucero, recolectando los valores
-          del Tronco Comun y esquivando los riesgos.
+          Cruza las cinco terminales del grupo &mdash; Usos Multiples, Contenedores, Astillero, Cruceros e Intermodal
+          &mdash; recolectando los valores del Tronco Comun y esquivando los riesgos.
         </p>
         <Rules />
         <Legend />
@@ -127,6 +141,7 @@ function GameOver() {
   const score = useGame((s) => s.score)
   const goods = useGame((s) => s.goods)
   const bads = useGame((s) => s.bads)
+  const crashes = useGame((s) => s.crashes)
   const distShown = useGame((s) => s.distShown)
   const startCountdown = useGame((s) => s.startCountdown)
   const goIntro = useGame((s) => s.goIntro)
@@ -162,6 +177,9 @@ function GameOver() {
           </span>
           <span>
             Riesgos: <b className="txt-bad">{bads}</b>
+          </span>
+          <span>
+            Choques: <b className="txt-bad">{crashes}</b>
           </span>
           <span>
             Distancia: <b>{distShown} m</b>
