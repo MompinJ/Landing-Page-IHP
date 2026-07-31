@@ -6,8 +6,26 @@ function ac() {
     if (!AC) return null
     ctx = new AC()
   }
-  if (ctx.state === 'suspended') ctx.resume()
+  // resume() solo lo concede el navegador si viene de un gesto de usuario real.
+  // Pulsar un boton del mando NO cuenta como tal en ningun navegador, asi que
+  // aqui se rechaza a menudo y hay que tragarse el rechazo: sin el catch cada
+  // sonido intentado con el mando dejaba una promesa sin manejar en consola.
+  if (ctx.state === 'suspended') ctx.resume().catch(() => {})
   return ctx
+}
+
+// Por lo anterior, el audio se desbloquea con el primer gesto real que pase por
+// la pagina, sea cual sea. En el stand basta con que quien atiende toque la
+// pantalla o el teclado una vez y ya hay sonido para toda la sesion, aunque
+// despues se juegue solo con mando.
+if (typeof window !== 'undefined') {
+  const prime = () => {
+    ac()
+    window.removeEventListener('pointerdown', prime)
+    window.removeEventListener('keydown', prime)
+  }
+  window.addEventListener('pointerdown', prime)
+  window.addEventListener('keydown', prime)
 }
 
 function tone(freq, delay, dur, { type = 'sine', gain = 0.14, slideTo = null } = {}) {

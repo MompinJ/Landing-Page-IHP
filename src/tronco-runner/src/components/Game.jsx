@@ -1,9 +1,10 @@
 import { Suspense, useEffect, useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import { useGame } from '../store'
-import { runtime, scroll, scrollSpeed } from '../runtime'
+import { useGamepadAction } from '../useGamepad'
+import { runtime, scroll, scrollSpeed, SKIP } from '../runtime'
 import { zoneIndexAt, deckAt, seaLevelAt } from '../course'
 import { Boats } from './Boats'
 import { Scaffolds } from './Scaffolds'
@@ -27,6 +28,10 @@ import { Gates } from './Gates'
 const FOG_COLOR = '#2b3352'
 
 function Loop() {
+  const gl = useThree((s) => s.gl)
+  // con ?skip= se esta depurando: el renderer a mano permite leer llamadas de
+  // dibujo y triangulos por zona desde una prueba headless
+  if (SKIP) window.__gl = gl
   useFrame((_, dt0) => {
     const dt = Math.min(dt0, 0.05)
     // el curso avanza siempre: en intro y gameover el escenario sigue corriendo
@@ -215,6 +220,30 @@ function useInputs() {
       window.removeEventListener('pointerup', onUp)
     }
   }, [])
+
+  // Mando. Las acciones llegan ya resueltas desde gamepad.js, asi que aqui no
+  // hay indices de boton ni ejes: solo la misma traduccion a move/jump/slide
+  // que hace el teclado.
+  useGamepadAction((action, repeat) => {
+    const { phase, pause, resume } = useGame.getState()
+    // START alterna pausa y es lo unico que actua fuera de partida; el resto de
+    // fases las gobiernan los menus, que escuchan por su cuenta.
+    if (action === 'pause') {
+      if (phase === 'playing') pause()
+      else if (phase === 'paused') resume()
+      return
+    }
+    if (phase !== 'playing') return
+    // mantener la cruceta repite, y en un juego de tres carriles eso vaciaria
+    // el carril de un golpe: en partida solo cuenta el flanco, igual que el
+    // e.repeat del teclado
+    if (repeat) return
+    if (action === 'left') move(-1)
+    else if (action === 'right') move(1)
+    // A y arriba saltan; B, X y abajo ruedan
+    else if (action === 'up' || action === 'confirm') jump()
+    else if (action === 'down' || action === 'back') slide()
+  })
 }
 
 export function Game() {

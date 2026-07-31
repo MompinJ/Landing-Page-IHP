@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useGame } from '../store'
 import { runtime, scroll } from '../runtime'
 import { sfx } from '../audio'
-import { LANES, PLAYER_Z, VIEW_AHEAD, OBSTACLE_LEN } from '../constants'
+import { LANES, PLAYER_Z, VIEW_AHEAD, OBSTACLE_LEN, COLORS } from '../constants'
 import { COURSE } from '../course'
 import { useGameTextures, tiledTexture } from '../textures'
 
@@ -1196,6 +1196,112 @@ function Spmt({ tint }) {
   )
 }
 
+// ---------- Aviso de accion ----------
+//
+// Cada zona viste los obstaculos con su propio equipo, asi que la silueta
+// cambia cinco veces en dos minutos y no da tiempo a aprender cual se salta y
+// cual se pasa rodando: en las pruebas del stand la gente no los distinguia.
+// El aviso es lo unico que NO cambia de zona a zona: misma flecha, mismo color,
+// misma altura, encima de la pieza.
+//
+//   flecha arriba, ambar  -> saltar
+//   flecha abajo, cian    -> rodar
+//
+// Las piezas macizas no llevan aviso: cierran el carril entero y eso ya se lee
+// solo, y ponerselo llenaria el pasillo de flechas.
+const CUE = {
+  low: { y: 2.3, dir: 1, color: COLORS.amber, glow: '#7a5200' },
+  high: { y: 2.85, dir: -1, color: COLORS.neon, glow: '#0a4a63' },
+}
+CUE.pipe = CUE.high
+CUE.hook = CUE.high
+
+function Cue({ type }) {
+  const c = CUE[type]
+  const ref = useRef()
+  useFrame(({ clock }) => {
+    if (!ref.current) return
+    // sube y baja un poco: en un pasillo lleno de piezas quietas, lo que se
+    // mueve es lo primero que coge el ojo
+    ref.current.position.y = c.y + Math.sin(clock.elapsedTime * 3) * 0.12
+    // Se apaga al acercarse. La senal sirve de lejos, que es cuando hay que
+    // decidir; encima del corredor ya no informa de nada y es justo donde mas
+    // cuadro tapa. El z del padre es el del obstaculo, que ya lo calcula el
+    // scroll cada frame.
+    const z = ref.current.parent ? ref.current.parent.position.z : -50
+    const k = Math.max(0, Math.min(1, (-1 - z) / 7))
+    ref.current.visible = k > 0.02
+    if (k > 0.02) {
+      ref.current.traverse((o) => {
+        if (o.material && o.material.userData.base) o.material.opacity = o.material.userData.base * k
+      })
+    }
+  })
+  if (!c) return null
+  return (
+    <group ref={ref} position={[0, c.y, 0]}>
+      {/* Placa de senal. La flecha suelta se perdia contra el escenario a
+          treinta metros, que es justo donde hay que leerla; sobre una placa
+          oscura con canto de color se recorta contra cualquier fondo.
+          Va translucida y algo mas chica que la primera version: opaca comia
+          demasiado cuadro justo cuando el obstaculo esta cerca. La flecha si se
+          queda casi solida, porque es la que hay que leer. Los materiales se
+          declaran transparentes de fabrica y nunca se cambia esa bandera en
+          caliente: eso obliga a recompilar el material. */}
+      <mesh position={[0, 0, -0.12]}>
+        <boxGeometry args={[1.34, 1.52, 0.06]} />
+        <meshStandardMaterial
+          transparent
+          userData={{ base: 0.5 }}
+          opacity={0.5}
+          depthWrite={false}
+          color={c.color}
+          emissive={c.glow}
+          emissiveIntensity={0.8}
+          roughness={0.5}
+        />
+      </mesh>
+      <mesh position={[0, 0, -0.07]}>
+        <boxGeometry args={[1.14, 1.32, 0.06]} />
+        <meshStandardMaterial
+          transparent
+          userData={{ base: 0.4 }}
+          opacity={0.4}
+          depthWrite={false}
+          color="#04122b"
+          roughness={0.6}
+        />
+      </mesh>
+      {/* punta */}
+      <mesh position={[0, c.dir * 0.28, 0]} rotation={[0, Math.PI / 4, c.dir > 0 ? 0 : Math.PI]}>
+        <coneGeometry args={[0.5, 0.66, 4]} />
+        <meshStandardMaterial
+          transparent
+          userData={{ base: 0.92 }}
+          opacity={0.92}
+          color={c.color}
+          emissive={c.glow}
+          emissiveIntensity={1.3}
+          roughness={0.4}
+        />
+      </mesh>
+      {/* astil */}
+      <mesh position={[0, -c.dir * 0.26, 0]}>
+        <boxGeometry args={[0.27, 0.5, 0.18]} />
+        <meshStandardMaterial
+          transparent
+          userData={{ base: 0.92 }}
+          opacity={0.92}
+          color={c.color}
+          emissive={c.glow}
+          emissiveIntensity={1.3}
+          roughness={0.4}
+        />
+      </mesh>
+    </group>
+  )
+}
+
 function Obstacle({ ob, maps }) {
   const group = useRef()
   const local = useRef({ hit: false, t: 0, dir: 1 })
@@ -1265,6 +1371,7 @@ function Obstacle({ ob, maps }) {
   return (
     <group ref={group}>
       <Skin ob={ob} maps={maps} />
+      {CUE[ob.type] && <Cue type={ob.type} />}
     </group>
   )
 }

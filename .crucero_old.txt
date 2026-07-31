@@ -1,0 +1,69 @@
+  } else {
+    // ----- Cubierta de crucero -----
+    // la teca ya viene muy naranja de la textura: el tinte la baja a madera clara
+    box([0, -0.11, 0], [13, 0.22, L], '#9a9182', { tex: 'teak', repeat: [4, L / 4], roughness: 0.6 })
+    laneLines('#0aa8d6')
+    // casco blanco cayendo al mar: sin el, la cubierta parecia flotar
+    for (const sx of [-1, 1]) {
+      box([sx * 6.6, -1.0, 0], [0.25, 2.6, L], '#eef2f5', { rot: [0, 0, -sx * 0.14], roughness: 0.5 })
+      box([sx * 6.9, -2.15, 0], [0.24, 0.5, L], '#123a6b', { rot: [0, 0, -sx * 0.14] })
+      box([sx * 7.2, -2.4, 0], [0.5, 0.06, L], '#dff3ff', { emissive: '#bfe9ff', emissiveIntensity: 0.5 })
+      // ojos de buey iluminados en el costado
+      for (let z = -L / 2 + 2; z <= L / 2 - 2; z += 3) {
+        sph([sx * 6.5, -0.5, z], [0.11, 8, 8], '#ffe9a0', { emissiveIntensity: 1.6 })
+      }
+    }
+    box([-17, -2.55, 0], [20, 0.1, L], '#4a7d99', { tex: 'water', repeat: [4, L / 8], emissive: '#16324a', emissiveIntensity: 0.4, roughness: 0.55, metalness: 0.1 })
+    box([17, -2.55, 0], [20, 0.1, L], '#4a7d99', { tex: 'water', repeat: [4, L / 8], emissive: '#16324a', emissiveIntensity: 0.4, roughness: 0.55, metalness: 0.1 })
+    // barandales blancos con guirnalda de luces al ras del pasamanos
+    // (antes iba a 3.1 m y en perspectiva cruzaba toda la pantalla)
+    for (let z = -L / 2 + 1.5; z <= L / 2 - 1.5; z += 3) {
+      box([-4.6, 0.55, z], [0.08, 1.1, 0.08], '#ffffff')
+      box([4.6, 0.55, z], [0.08, 1.1, 0.08], '#ffffff')
+    }
+    box([-4.6, 1.12, 0], [0.06, 0.06, L], '#ffffff')
+    box([4.6, 1.12, 0], [0.06, 0.06, L], '#ffffff')
+    box([-4.6, 1.34, 0], [0.04, 0.04, L], '#ffd98a', { emissive: '#ffd98a', emissiveIntensity: 1.3 })
+    box([4.6, 1.34, 0], [0.04, 0.04, L], '#ffd98a', { emissive: '#ffd98a', emissiveIntensity: 1.3 })
+    for (let z = -L / 2 + 2; z <= L / 2 - 2; z += 4) {
+      sph([-4.6, 1.34, z], [0.07, 6, 6], '#ffe9a0')
+      sph([4.6, 1.34, z], [0.07, 6, 6], '#ffe9a0')
+    }
+    // botes salvavidas: pequenos y pegados al costado. Grandes y hacia dentro
+    // tapaban el carril lateral y el jugador no veia lo que venia.
+    for (let z = -L / 2 + 5; z <= L / 2 - 5; z += 13) {
+      for (const sx of [-1, 1]) {
+        if (rnd() < 0.7) continue
+        box([sx * 6.0, 1.1, z - 0.7], [0.09, 2.2, 0.09], '#ffffff')
+        box([sx * 6.0, 1.1, z + 0.7], [0.09, 2.2, 0.09], '#ffffff')
+        box([sx * 6.0, 2.15, z], [0.09, 0.09, 1.6], '#ffffff')
+        cyl([sx * 6.0, 1.62, z], [0.26, 0.26, 1.5, 10], '#e67e22', { rot: [Math.PI / 2, 0, 0] })
+        box([sx * 6.0, 1.79, z], [0.34, 0.1, 0.95], '#f4f6f8')
+      }
+    }
+    // camastros de cubierta
+    for (let z = -L / 2 + 3; z <= L / 2 - 3; z += 5.5) {
+      if (rnd() < 0.7) {
+        const sx = rnd() < 0.5 ? -1 : 1
+        const x = sx * (4.2 + rnd() * 0.5)
+        box([x, 0.28, z], [0.6, 0.1, 1.5], '#f4f6f8')
+        box([x, 0.55, z - 0.55], [0.6, 0.5, 0.1], '#f4f6f8', { rot: [-0.5, 0, 0] })
+        box([x, 0.15, z], [0.5, 0.2, 1.3], COLORS.sky)
+      }
+    }
+    // alberca iluminada al centro (decorativa, se puede pisar)
+    if (seed % 3 === 0) {
+      const z = (rnd() - 0.5) * L * 0.5
+      box([0, 0.03, z], [2.2, 0.06, 4.6], '#22b7e0', { tex: 'water', repeat: [1, 2], emissive: '#0aa8d6', emissiveIntensity: 0.8 })
+      box([0, 0.05, z - 2.45], [2.4, 0.08, 0.18], '#ffffff')
+      box([0, 0.05, z + 2.45], [2.4, 0.08, 0.18], '#ffffff')
+      box([-1.25, 0.05, z], [0.18, 0.08, 5], '#ffffff')
+      box([1.25, 0.05, z], [0.18, 0.08, 5], '#ffffff')
+    }
+    // chimenea del crucero
+    if (seed % 2 === 1) {
+      const z = (rnd() - 0.5) * L * 0.5
+      cyl([5.9, 4.1, z], [1.15, 1.5, 5.4, 14], '#c0392b')
+      cyl([5.9, 6.9, z], [1.17, 1.17, 0.55, 14], '#20242c')
+      sph([5.9, 7.5, z], [0.12, 8, 8], '#ff5d4d')
+    }
