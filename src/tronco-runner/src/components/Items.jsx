@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
 import fontBold from '@fontsource/montserrat/files/montserrat-latin-800-normal.woff'
@@ -17,7 +17,10 @@ const SYMBOL = '#04122b'
 // profundos a proposito: con esa luz encima terminan en el verde/rojo de marca.
 const FACE = { good: '#12934e', bad: '#c01f31' }
 
-function Hexagon({ item }) {
+// memo, por lo mismo que los obstaculos: la ventana de fichas avanza varias
+// veces por segundo y sin esto se reconciliaban las veinte fichas vivas enteras
+// en cada avance.
+const Hexagon = memo(function Hexagon({ item }) {
   const group = useRef()
   const ring = useRef()
   const label = useRef()
@@ -155,7 +158,7 @@ function Hexagon({ item }) {
       </Text>
     </group>
   )
-}
+})
 
 const LIST = COURSE.items
 

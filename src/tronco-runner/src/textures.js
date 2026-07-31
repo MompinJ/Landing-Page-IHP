@@ -35,10 +35,21 @@ export function tiledTexture(base, key, rx, ry) {
   return t
 }
 
+// El objeto de texturas se guarda a nivel de modulo y se devuelve SIEMPRE el
+// mismo. useTexture construye uno nuevo en cada render, y como este objeto va
+// como prop a los obstaculos, esa identidad nueva rompia su memo: cada vez que
+// avanzaba la ventana se volvian a reconciliar los diecisiete obstaculos vivos
+// enteros. Las texturas no cambian nunca despues de cargar, asi que cachearlas
+// aqui es ademas lo unico que tiene sentido.
+let cached = null
+
 export function useGameTextures() {
   const maps = useTexture({ ...TEX_FILES })
-  for (const k of Object.keys(maps)) {
-    maps[k].colorSpace = THREE.SRGBColorSpace
+  if (!cached) {
+    for (const k of Object.keys(maps)) {
+      maps[k].colorSpace = THREE.SRGBColorSpace
+    }
+    cached = maps
   }
-  return maps
+  return cached
 }

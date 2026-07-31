@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGame } from '../store'
 import { runtime, scroll } from '../runtime'
@@ -1302,7 +1302,11 @@ function Cue({ type }) {
   )
 }
 
-function Obstacle({ ob, maps }) {
+// memo: la ventana de obstaculos avanza varias veces por segundo, y sin esto
+// cada avance volvia a reconciliar los diecisiete obstaculos vivos enteros
+// (unas diez mallas cada uno) aunque ninguno hubiera cambiado. Los props son
+// estables: ob viene del curso, que es fijo, y maps de la cache de texturas.
+const Obstacle = memo(function Obstacle({ ob, maps }) {
   const group = useRef()
   const local = useRef({ hit: false, t: 0, dir: 1 })
 
@@ -1374,7 +1378,7 @@ function Obstacle({ ob, maps }) {
       {CUE[ob.type] && <Cue type={ob.type} />}
     </group>
   )
-}
+})
 
 // Vestuario por zona. La mecanica no cambia nunca (low se salta, high se pasa
 // rodando, tall se esquiva); lo unico que cambia es la pieza, que es el equipo

@@ -28,7 +28,7 @@ import { Items } from './Items'
 import { Obstacles } from './Obstacles'
 import { Gates } from './Gates'
 import { Fx } from './Fx'
-import { Perf, PERF } from './Perf'
+import { Perf, PerfStart, PERF } from './Perf'
 
 // Bruma. El azul frio de antes recortaba las siluetas lejanas contra un cielo
 // naranja: se veia que el fondo estaba pegado. Un tono templado, a medio camino
@@ -510,6 +510,7 @@ export function Game() {
           contraluz. Subir el ambiente aplana justo lo que las sombras aportan. */}
       <hemisphereLight args={['#7fa6e0', '#33405a', 1.05]} />
       <directionalLight position={[6, 10, 16]} intensity={0.45} color="#ffe2c2" />
+      {PERF && <PerfStart />}
       <Loop />
       <CameraRig />
       <SceneSweep />
