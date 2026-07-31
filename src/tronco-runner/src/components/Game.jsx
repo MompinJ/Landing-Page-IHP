@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
@@ -19,13 +19,20 @@ import {
   JUMP_BUFFER,
 } from '../constants'
 import { TEX_FILES } from '../textures'
+import { QUALITY } from '../quality'
+import { detailFor, waveMap } from '../detail'
 import { World } from './World'
 import { Player } from './Player'
 import { Items } from './Items'
 import { Obstacles } from './Obstacles'
 import { Gates } from './Gates'
+import { Fx } from './Fx'
 
-const FOG_COLOR = '#2b3352'
+// Bruma. El azul frio de antes recortaba las siluetas lejanas contra un cielo
+// naranja: se veia que el fondo estaba pegado. Un tono templado, a medio camino
+// entre el naranja del horizonte y el gris del cenit, funde el puerto lejano
+// con el atardecer, que es lo que hace una foto de verdad a esa hora.
+const FOG_COLOR = '#4a4059'
 
 function Loop() {
   const gl = useThree((s) => s.gl)
@@ -117,24 +124,197 @@ function SkyDome() {
   const sky = useTexture(TEX_FILES.sky)
   sky.colorSpace = THREE.SRGBColorSpace
   return (
-    <mesh rotation={[0, Math.PI, 0]}>
+    // El domo NO entra en el juego de sombras: es una esfera de 220 m que
+    // envuelve la escena entera, asi que si proyectara dejaria todo a oscuras.
+    <mesh rotation={[0, Math.PI, 0]} userData={{ noShadow: true }}>
       <sphereGeometry args={[220, 48, 32]} />
       <meshBasicMaterial map={sky} side={THREE.BackSide} fog={false} />
     </mesh>
   )
 }
 
+// Iluminacion basada en imagen: el mismo panorama del domo, convolucionado con
+// PMREM, se cuelga como scene.environment. Es lo que hace que el acero y el
+// agua reflejen el atardecer en vez de ser color plano, y lo que rellena las
+// sombras con luz de cielo en vez de con un ambient gris.
+//
+// La rotacion tiene que ser la MISMA que la del domo (PI), si no el reflejo del
+// sol cae por un lado y el sol pintado esta en el otro.
+function Ibl() {
+  const gl = useThree((s) => s.gl)
+  const scene = useThree((s) => s.scene)
+  const sky = useTexture(TEX_FILES.sky)
+
+  useEffect(() => {
+    const src = sky.clone()
+    src.mapping = THREE.EquirectangularReflectionMapping
+    src.colorSpace = THREE.SRGBColorSpace
+    src.needsUpdate = true
+    const pmrem = new THREE.PMREMGenerator(gl)
+    const rt = pmrem.fromEquirectangular(src)
+    scene.environment = rt.texture
+    // Al 100% el panorama naranja tinta el puerto entero y se pierde de que
+    // esta hecha cada cosa; a 0.6 el entorno da reflejo y direccion, y el color
+    // propio de los materiales sigue leyendose.
+    scene.environmentIntensity = 0.75
+    scene.environmentRotation = new THREE.Euler(0, Math.PI, 0)
+    pmrem.dispose()
+    src.dispose()
+    return () => {
+      scene.environment = null
+      rt.dispose()
+    }
+  }, [gl, scene, sky])
+
+  return null
+}
+
+// Acabado de escena: quien proyecta sombra, quien la recibe y que microrrelieve
+// lleva cada material se decide aqui, barriendo el grafo, y no malla por malla.
+// El escenario, los obstaculos y el corredor suman mas de cuatrocientas mallas
+// escritas a mano, y ademas nacen y mueren solas al reciclarse las franjas, asi
+// que un flag en el JSX habria que ponerlo en cuatrocientos sitios y aun asi se
+// escaparian las nuevas.
+//
+// Cada malla se toca UNA vez (userData.sh la marca) y el barrido corre cada
+// pocos frames, no cada frame: recorrer el grafo entero es barato pero no
+// gratis, y las mallas nuevas pueden esperar cuatro cuadros a 100 m de la
+// camara. Excepciones: las esferas emisivas son balizas y semaforos, o sea
+// lamparas, y una lampara que proyecta sombra de si misma se ve mal ademas de
+// costar; userData.noShadow deja la puerta abierta a excluir cualquier otra.
+function SceneSweep() {
+  const scene = useThree((s) => s.scene)
+  const tick = useRef(0)
+
+  useFrame(() => {
+    if (tick.current++ % 5 !== 0) return
+    scene.traverse((o) => {
+      if (!o.isMesh || o.userData.sh) return
+      o.userData.sh = 1
+      const lamp = o.geometry?.type === 'SphereGeometry' && (o.material?.emissiveIntensity || 0) >= 1
+      if (QUALITY.shadows) {
+        o.castShadow = !lamp && !o.userData.noShadow && !o.userData.noCast
+        o.receiveShadow = !o.userData.noShadow
+      }
+      if (!lamp) dressMaterial(o)
+    })
+  })
+
+  return null
+}
+
+// Cuelga el microrrelieve de un material: relieve de normales y variacion de
+// rugosidad, a escala de la pieza. El material se marca para no repetir, porque
+// tocar un material obliga a recompilar su programa.
+function dressMaterial(mesh) {
+  const m = mesh.material
+  // El veto se hereda: los grupos (una ficha, un bote) lo declaran una vez y no
+  // malla por malla. Son cuatro saltos de padre como mucho y se mira una sola
+  // vez en la vida de cada malla.
+  for (let o = mesh; o; o = o.parent) if (o.userData.noDress) return
+  if (!m || Array.isArray(m) || !m.isMeshStandardMaterial || m.userData.det) return
+  m.userData.det = 1
+
+  // Tamano real de la pieza en metros: de ahi sale cada cuantos metros repite
+  // el grano. Sin esto una nave de 20 m y un tornillo tendrian el mismo grano.
+  if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox()
+  const bb = mesh.geometry.boundingBox
+  const meters = Math.max(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z)
+  const d = detailFor(meters)
+
+  if (!m.normalMap) {
+    m.normalMap = d.normal
+    // el relieve se nota mas en lo pulido (chapa pintada, casco) que en lo mate
+    const k = 0.3 + (1 - Math.min(1, m.roughness ?? 0.85)) * 0.45
+    m.normalScale = new THREE.Vector2(k, k)
+  }
+  if (!m.roughnessMap) m.roughnessMap = d.rough
+  // Suciedad solo donde no hay textura propia y solo en lo que no es luz: una
+  // baliza o un hexagono de valor son senal, y una senal sucia no se lee.
+  if (!m.map && (m.emissiveIntensity || 0) < 1) m.map = d.wear
+  // El entorno es la unica fuente de reflejo del juego: subirlo un punto sobre
+  // uno es lo que hace que el acero parezca acero bajo el atardecer.
+  m.envMapIntensity = 1.15
+  m.needsUpdate = true
+}
+
+// Sol con sombra proyectada. La camara de sombra es ortografica y sigue al
+// corredor: cubrir los 2340 m del curso con un solo mapa daria texels de metro
+// y medio, asi que lo que se hace es pasear una caja de ~34 m con el.
+//
+// El objetivo se ancla en pasos enteros de texel (SNAP): sin eso la sombra
+// hierve al moverse, porque cada frame los mismos bordes caen en otro texel.
+function Sun() {
+  const light = useRef()
+  const target = useRef()
+  const span = QUALITY.shadowSpan
+
+  useFrame(() => {
+    if (!light.current || !target.current) return
+    // el target se engancha aqui y no por prop: en el primer render la ref
+    // todavia es null y three se quedaria apuntando a su Object3D por defecto
+    if (light.current.target !== target.current) light.current.target = target.current
+    const texel = (span * 2) / QUALITY.shadowMap
+    const snap = (v) => Math.round(v / texel) * texel
+    const tx = snap(runtime.x * 0.4)
+    const ty = snap(runtime.deck)
+    const tz = snap(PLAYER_Z - 26)
+    target.current.position.set(tx, ty, tz)
+    target.current.updateMatrixWorld()
+    // el sol vive relativo al objetivo: la direccion de la luz no cambia nunca,
+    // solo se traslada, que es justo lo que necesita una sombra estable
+    // Sol BAJO (unos 27 grados): es un atardecer, y una luz cenital con un
+    // cielo naranja se nota falsa enseguida. Mas bajo aun estiraria las sombras
+    // fuera de la caja del mapa y aparecerian cortadas por la mitad.
+    light.current.position.set(tx - 28, ty + 26, tz - 32)
+  })
+
+  return (
+    <>
+      <object3D ref={target} />
+      <directionalLight
+        ref={light}
+        castShadow={QUALITY.shadows}
+        intensity={2.9}
+        color="#ffd2a1"
+        shadow-mapSize-width={QUALITY.shadowMap}
+        shadow-mapSize-height={QUALITY.shadowMap}
+        shadow-camera-left={-span}
+        shadow-camera-right={span}
+        shadow-camera-top={span}
+        shadow-camera-bottom={-span}
+        shadow-camera-near={1}
+        shadow-camera-far={130}
+        shadow-bias={-0.0004}
+        shadow-normalBias={0.035}
+      />
+    </>
+  )
+}
+
 // Mar cercano animado bajo el nivel del muelle; disco para quedar siempre
 // dentro del domo. A lo lejos se funde con el agua del propio panorama.
 function FarSea() {
-  const water = useTexture(TEX_FILES.water)
   const ref = useRef()
-  water.colorSpace = THREE.SRGBColorSpace
-  water.wrapS = water.wrapT = THREE.RepeatWrapping
-  water.repeat.set(36, 36)
+  // El agua no lleva textura de color: un mar es un espejo rugoso, y lo que se
+  // ve en el es el cielo. Con el panorama del atardecer colgado de la escena,
+  // basta con dar relieve de ola y rugosidad baja para que el sol se derrame
+  // sobre la lamina; la foto de agua que habia aqui antes competia con ese
+  // reflejo y aplanaba el mar a color liso.
+  const wave = useMemo(() => {
+    const t = waveMap().clone()
+    t.wrapS = t.wrapT = THREE.RepeatWrapping
+    // el disco mide 400 m de diametro: 55 repeticiones son ondas de ~7 m, que
+    // es lo que hace falta para que el reflejo del sol se rompa en escamas
+    t.repeat.set(55, 55)
+    t.needsUpdate = true
+    return t
+  }, [])
   useFrame((_, dt) => {
-    water.offset.x += dt * 0.008
-    water.offset.y += dt * 0.004
+    // dos velocidades distintas en x e y: con la misma se lee como una foto
+    // deslizandose, y con dos como oleaje
+    wave.offset.x += dt * 0.004
+    wave.offset.y += dt * 0.011
     // La altura del mar la decide el curso (seaLevelAt): en la travesia del
     // crucero el mar ES el suelo y sube al nivel del casco de las lanchas; en el
     // resto es fondo lejano y se queda por debajo del terreno.
@@ -146,9 +326,18 @@ function FarSea() {
     if (ref.current) ref.current.position.y = seaLevelAt(scroll.s)
   })
   return (
-    <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.6, 0]}>
-      <circleGeometry args={[200, 48]} />
-      <meshStandardMaterial map={water} color="#5d8aa8" emissive="#1d3a52" emissiveIntensity={0.45} roughness={0.5} metalness={0.1} />
+    // El disco de mar recibe sombra (el casco del crucero se apoya en ella)
+    // pero no proyecta: mide 200 m de radio y llenaria el mapa de sombras.
+    <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.6, 0]} userData={{ noCast: true, noDress: true }}>
+      <circleGeometry args={[200, 64]} />
+      <meshStandardMaterial
+        color="#1b4257"
+        roughness={0.13}
+        metalness={0.02}
+        envMapIntensity={2.1}
+        normalMap={wave}
+        normalScale={new THREE.Vector2(0.85, 0.85)}
+      />
     </mesh>
   )
 }
@@ -250,21 +439,32 @@ export function Game() {
   useInputs()
   return (
     <Canvas
-      dpr={[1, 1.75]}
+      dpr={QUALITY.dpr}
+      shadows={QUALITY.shadows ? { type: THREE.PCFSoftShadowMap } : false}
       camera={{ fov: 58, position: [0, 4.3, PLAYER_Z + 6.5], near: 0.1, far: 300 }}
       gl={{ antialias: true, powerPreference: 'high-performance' }}
+      onCreated={({ gl }) => {
+        // Rango dinamico de pelicula. Sin esto los blancos del casco y de los
+        // reflejos del atardecer se recortan en plano y todo se lee a plastico;
+        // con ACES el sol quema con transicion y las sombras conservan color.
+        gl.toneMapping = THREE.ACESFilmicToneMapping
+        gl.toneMappingExposure = 1.15
+      }}
     >
       <color attach="background" args={[FOG_COLOR]} />
-      <fog attach="fog" args={[FOG_COLOR, 42, 150]} />
-      {/* atardecer: rim calido al frente + relleno fuerte desde la camara
-          para que las caras visibles no queden a contraluz */}
-      <ambientLight intensity={0.75} color="#b8c4d8" />
-      <hemisphereLight args={['#93aacb', '#2c3548', 1.5]} />
-      <directionalLight position={[-6, 11, -18]} intensity={1.6} color="#ffcf9e" />
-      <directionalLight position={[6, 10, 16]} intensity={1.7} color="#ffe2c2" />
+      <fog attach="fog" args={[FOG_COLOR, 55, 185]} />
+      {/* Atardecer: el relleno lo pone el mapa de entorno (Ibl), asi que aqui
+          solo queda el sol con sombra, un hemisferico corto de cielo/suelo y un
+          rebote tibio desde la camara para que las caras visibles no queden a
+          contraluz. Subir el ambiente aplana justo lo que las sombras aportan. */}
+      <hemisphereLight args={['#7fa6e0', '#33405a', 1.05]} />
+      <directionalLight position={[6, 10, 16]} intensity={0.45} color="#ffe2c2" />
       <Loop />
       <CameraRig />
+      <SceneSweep />
       <Suspense fallback={null}>
+        <Ibl />
+        <Sun />
         <SkyDome />
         <FarSea />
         <World />
@@ -275,6 +475,7 @@ export function Game() {
       </Suspense>
       <Player />
       <Items />
+      <Fx />
     </Canvas>
   )
 }

@@ -88,7 +88,11 @@ function Hexagon({ item }) {
   const glow = item.good ? COLORS.good : COLORS.bad
   const long = item.label.length > 10
   return (
-    <group ref={group}>
+    // Las fichas no se ensucian: son senal de juego, no decorado. El acabado de
+    // escena (SceneSweep) les pondria manchas y chorreones como al resto del
+    // puerto, y a 30 m lo unico que el jugador tiene que leer aqui es verde o
+    // rojo. El relieve y la sombra si les tocan.
+    <group ref={group} userData={{ noDress: true }}>
       {/* bisel metalico exterior */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[1.05, 1.05, 0.14, 6]} />

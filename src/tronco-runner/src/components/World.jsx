@@ -5,6 +5,7 @@ import { scroll } from '../runtime'
 import { SEGMENT_LENGTH as L, NUM_SEGMENTS, THEME_METERS, LANES, COLORS } from '../constants'
 import { ZONES, cruStage, astStage, deckAt, DECK_Y, DOCK_Y, SHIP_FROM, SHIP_TO } from '../course'
 import { useGameTextures, tiledTexture } from '../textures'
+import { roundedBox } from '../geo'
 
 const START = 16 // borde frontal del segmento k=0 cuando scroll=0
 
@@ -1126,9 +1127,17 @@ function buildProps(theme, seed) {
 
 function PropMesh({ p, maps }) {
   const map = p.tex ? tiledTexture(maps[p.tex], p.tex, p.repeat?.[0] ?? 1, p.repeat?.[1] ?? 1) : null
+  // Caja con el canto matado cuando la pieza no lleva textura: el bisel engancha
+  // una linea de luz en la arista. En las piezas con textura se deja la caja
+  // recta, porque la caja redondeada reparte las UV de otra forma y el
+  // corrugado del contenedor o las juntas del asfalto saldrian curvados en los
+  // bordes.
+  const bevel = p.geo === 'box' && !p.tex ? roundedBox(p.size) : null
   return (
     <mesh position={p.pos} rotation={p.rot || [0, 0, 0]}>
-      {p.geo === 'box' ? (
+      {bevel ? (
+        <primitive object={bevel} attach="geometry" dispose={null} />
+      ) : p.geo === 'box' ? (
         <boxGeometry args={p.size} />
       ) : p.geo === 'cyl' ? (
         <cylinderGeometry args={p.args} />

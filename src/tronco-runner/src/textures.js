@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { useTexture } from '@react-three/drei'
+import { QUALITY } from './quality'
 
 // Texturas generadas con Higgsfield (GPT Image 2), servidas desde public/tex.
 export const TEX_FILES = {
@@ -24,7 +25,10 @@ export function tiledTexture(base, key, rx, ry) {
     t = base.clone()
     t.wrapS = t.wrapT = THREE.RepeatWrapping
     t.repeat.set(rx, ry)
-    t.anisotropy = 4
+    // El suelo se ve casi de canto y es lo que mas superficie ocupa: sin
+    // filtrado anisotropico el asfalto y el balasto se convierten en una papilla
+    // gris a diez metros. Es de lo mas barato que se puede pedir a la GPU.
+    t.anisotropy = QUALITY.aniso
     t.needsUpdate = true
     tiled.set(id, t)
   }

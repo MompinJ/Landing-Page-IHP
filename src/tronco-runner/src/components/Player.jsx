@@ -4,6 +4,7 @@ import { useGame } from '../store'
 import { runtime } from '../runtime'
 import { supportAt, platformUnder, ceilingAt, inSeaAt, SEA_FLOOR, SEA_LEVEL, SCAF_BONUS } from '../course'
 import { sfx } from '../audio'
+import { QUALITY } from '../quality'
 import {
   LANES,
   PLAYER_Z,
@@ -216,7 +217,10 @@ export function Player() {
     if (shadow.current) {
       const k = Math.max(0.25, 1 - runtime.y * 0.55)
       shadow.current.scale.set(k, k, k * (1 + tuck * 0.3))
-      shadow.current.material.opacity = runtime.wet ? 0 : 0.35 * k
+      // Con sombra de sol la mancha se queda solo como referencia de aterrizaje
+      // (en un runner hace falta saber sobre que carril se va a caer), asi que
+      // baja a la mitad: sumada a la sombra real quedaba una mancha negra doble.
+      shadow.current.material.opacity = runtime.wet ? 0 : (QUALITY.shadows ? 0.18 : 0.35) * k
       shadow.current.position.set(runtime.x, runtime.deck + 0.01, PLAYER_Z)
     }
 
@@ -235,7 +239,7 @@ export function Player() {
 
   return (
     <>
-      <mesh ref={shadow} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, PLAYER_Z]}>
+      <mesh ref={shadow} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, PLAYER_Z]} userData={{ noShadow: true }}>
         <circleGeometry args={[0.42, 20]} />
         <meshBasicMaterial color="#000000" transparent opacity={0.35} />
       </mesh>
@@ -245,7 +249,12 @@ export function Player() {
             (mojado, el suelo es siempre SEA_FLOOR), y un palmo POR ENCIMA de la
             lamina: a ras del mar desaparecia, porque el disco de agua mide 200 m
             de radio y a esa escala la profundidad no distingue diez centimetros. */}
-        <mesh ref={splash} rotation={[-Math.PI / 2, 0, 0]} position={[0, SEA_LEVEL - SEA_FLOOR + 0.25, 0]}>
+        <mesh
+          ref={splash}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, SEA_LEVEL - SEA_FLOOR + 0.25, 0]}
+          userData={{ noShadow: true }}
+        >
           <ringGeometry args={[0.38, 0.92, 20]} />
           <meshBasicMaterial color="#dff3ff" transparent opacity={0.8} />
         </mesh>
@@ -256,20 +265,20 @@ export function Player() {
             {/* torso: overol azul marino redondeado */}
             <mesh position={[0, 1.02, 0]}>
               <capsuleGeometry args={[0.27, 0.42, 6, 14]} />
-              <meshStandardMaterial color={NAVY} roughness={0.7} />
+              <meshStandardMaterial color={NAVY} roughness={0.92} />
             </mesh>
             {/* chaleco de seguridad con franjas reflejantes */}
             <mesh position={[0, 1.1, 0]}>
               <capsuleGeometry args={[0.29, 0.26, 6, 14]} />
-              <meshStandardMaterial color="#ff8c1a" roughness={0.65} />
+              <meshStandardMaterial color="#ff8c1a" roughness={0.82} />
             </mesh>
             <mesh position={[0, 1.18, 0]}>
               <cylinderGeometry args={[0.305, 0.305, 0.07, 16]} />
-              <meshStandardMaterial color="#d9dfe4" emissive="#aebfca" emissiveIntensity={0.7} />
+              <meshStandardMaterial color="#d9dfe4" emissive="#aebfca" emissiveIntensity={0.55} roughness={0.28} metalness={0.15} />
             </mesh>
             <mesh position={[0, 1.0, 0]}>
               <cylinderGeometry args={[0.3, 0.3, 0.07, 16]} />
-              <meshStandardMaterial color="#d9dfe4" emissive="#aebfca" emissiveIntensity={0.7} />
+              <meshStandardMaterial color="#d9dfe4" emissive="#aebfca" emissiveIntensity={0.55} roughness={0.28} metalness={0.15} />
             </mesh>
             {/* cabeza con cara */}
             <mesh position={[0, 1.62, 0]}>
@@ -284,14 +293,17 @@ export function Player() {
               <sphereGeometry args={[0.028, 8, 8]} />
               <meshStandardMaterial color="#1c1c22" />
             </mesh>
-            {/* casco blanco con visera y lampara */}
+            {/* Casco blanco con visera y lampara. Lleva barniz (clearcoat): un
+                casco es plastico brillante sobre pintura mate, y esa capa es lo
+                que le pone la lengua de sol encima que se ve en cualquier foto
+                de obra. Sin ella el casco se lee como yeso. */}
             <mesh position={[0, 1.73, 0]}>
-              <sphereGeometry args={[0.225, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
-              <meshStandardMaterial color="#f4f6f8" roughness={0.35} />
+              <sphereGeometry args={[0.225, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
+              <meshPhysicalMaterial color="#f4f6f8" roughness={0.5} clearcoat={1} clearcoatRoughness={0.12} />
             </mesh>
             <mesh position={[0, 1.72, -0.05]}>
-              <cylinderGeometry args={[0.265, 0.265, 0.035, 18]} />
-              <meshStandardMaterial color="#f4f6f8" roughness={0.35} />
+              <cylinderGeometry args={[0.265, 0.265, 0.035, 24]} />
+              <meshPhysicalMaterial color="#f4f6f8" roughness={0.5} clearcoat={1} clearcoatRoughness={0.12} />
             </mesh>
             <mesh position={[0, 1.79, -0.2]}>
               <boxGeometry args={[0.08, 0.06, 0.05]} />
@@ -301,42 +313,42 @@ export function Player() {
             <group ref={armL} position={[-0.36, 1.3, 0]}>
               <mesh position={[0, -0.24, 0]}>
                 <capsuleGeometry args={[0.085, 0.34, 4, 10]} />
-                <meshStandardMaterial color={NAVY} roughness={0.7} />
+                <meshStandardMaterial color={NAVY} roughness={0.92} />
               </mesh>
               <mesh position={[0, -0.48, 0]}>
                 <sphereGeometry args={[0.085, 10, 10]} />
-                <meshStandardMaterial color="#e0b32e" roughness={0.6} />
+                <meshStandardMaterial color="#e0b32e" roughness={0.88} />
               </mesh>
             </group>
             <group ref={armR} position={[0.36, 1.3, 0]}>
               <mesh position={[0, -0.24, 0]}>
                 <capsuleGeometry args={[0.085, 0.34, 4, 10]} />
-                <meshStandardMaterial color={NAVY} roughness={0.7} />
+                <meshStandardMaterial color={NAVY} roughness={0.92} />
               </mesh>
               <mesh position={[0, -0.48, 0]}>
                 <sphereGeometry args={[0.085, 10, 10]} />
-                <meshStandardMaterial color="#e0b32e" roughness={0.6} />
+                <meshStandardMaterial color="#e0b32e" roughness={0.88} />
               </mesh>
             </group>
             {/* piernas y botas */}
             <group ref={legL} position={[-0.14, 0.72, 0]}>
               <mesh position={[0, -0.3, 0]}>
                 <capsuleGeometry args={[0.095, 0.42, 4, 10]} />
-                <meshStandardMaterial color={NAVY_DARK} roughness={0.75} />
+                <meshStandardMaterial color={NAVY_DARK} roughness={0.94} />
               </mesh>
               <mesh position={[0, -0.62, -0.05]}>
                 <boxGeometry args={[0.17, 0.12, 0.3]} />
-                <meshStandardMaterial color="#2c2c34" roughness={0.5} />
+                <meshStandardMaterial color="#2c2c34" roughness={0.42} />
               </mesh>
             </group>
             <group ref={legR} position={[0.14, 0.72, 0]}>
               <mesh position={[0, -0.3, 0]}>
                 <capsuleGeometry args={[0.095, 0.42, 4, 10]} />
-                <meshStandardMaterial color={NAVY_DARK} roughness={0.75} />
+                <meshStandardMaterial color={NAVY_DARK} roughness={0.94} />
               </mesh>
               <mesh position={[0, -0.62, -0.05]}>
                 <boxGeometry args={[0.17, 0.12, 0.3]} />
-                <meshStandardMaterial color="#2c2c34" roughness={0.5} />
+                <meshStandardMaterial color="#2c2c34" roughness={0.42} />
               </mesh>
             </group>
           </group>
