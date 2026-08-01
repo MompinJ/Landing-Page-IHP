@@ -11,7 +11,7 @@ import { QUALITY } from '../quality'
 // imagen sale cruda y quemada. Por eso mismo el bloom trabaja todavia en HDR,
 // que es lo que hace que el sol y las balizas florezcan en vez de recortarse.
 export function Fx() {
-  if (!QUALITY.bloom && !QUALITY.ao) return null
+  if (!QUALITY.fx) return null
 
   return (
     // multisampling 0: el suavizado lo hace SMAA al final. El MSAA del

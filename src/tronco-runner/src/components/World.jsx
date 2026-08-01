@@ -1151,8 +1151,8 @@ function SegmentMesh({ part, maps }) {
         emissiveIntensity={p.emissiveIntensity || 0}
         metalness={p.metalness || 0.1}
         roughness={p.roughness ?? 0.85}
-        normalMap={lamp ? null : d.normal}
-        roughnessMap={lamp ? null : d.rough}
+        normalMap={lamp || !QUALITY.normalMap ? null : d.normal}
+        roughnessMap={lamp || !QUALITY.roughMap ? null : d.rough}
         envMapIntensity={1.15}
       />
     </mesh>

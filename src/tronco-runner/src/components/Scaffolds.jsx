@@ -134,8 +134,8 @@ function ScaffoldMesh({ part }) {
         transparent
         vertexColors
         map={d.wear}
-        normalMap={d.normal}
-        roughnessMap={d.rough}
+        normalMap={QUALITY.normalMap ? d.normal : null}
+        roughnessMap={QUALITY.roughMap ? d.rough : null}
         emissive={p.emissive || '#000000'}
         emissiveIntensity={p.emissiveIntensity || 0}
         metalness={p.metalness || 0.1}

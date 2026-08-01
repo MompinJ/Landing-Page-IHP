@@ -19,7 +19,7 @@ import {
   JUMP_BUFFER,
 } from '../constants'
 import { TEX_FILES } from '../textures'
-import { QUALITY } from '../quality'
+import { QUALITY, DPR } from '../quality'
 import { detailFor, sharedWater, tickWater } from '../detail'
 import { approach, smoothDamp } from '../smooth'
 import { World } from './World'
@@ -275,7 +275,7 @@ function dressMaterial(mesh) {
   const meters = sizeOf(mesh)
   const d = detailFor(meters)
 
-  if (!m.normalMap) {
+  if (!m.normalMap && QUALITY.normalMap) {
     m.normalMap = d.normal
     // el relieve se nota mas en lo pulido (chapa pintada, casco) que en lo mate
     let k = 0.3 + (1 - Math.min(1, m.roughness ?? 0.85)) * 0.45
@@ -286,7 +286,10 @@ function dressMaterial(mesh) {
     k *= Math.max(0.3, Math.min(1, 1.25 - meters * 0.035))
     m.normalScale = new THREE.Vector2(k, k)
   }
-  if (!m.roughnessMap) m.roughnessMap = d.rough
+  // Cada mapa es una lectura de textura mas POR PIXEL dibujado, y en una GPU
+  // integrada eso es lo que decide los fps, no el numero de piezas. Por eso en
+  // los niveles bajos el material adelgaza.
+  if (!m.roughnessMap && QUALITY.roughMap) m.roughnessMap = d.rough
   // Suciedad solo donde no hay textura propia y solo en lo que no es luz: una
   // baliza o un hexagono de valor son senal, y una senal sucia no se lee.
   if (!m.map && (m.emissiveIntensity || 0) < 1) m.map = d.wear
@@ -487,13 +490,15 @@ export function Game() {
   useInputs()
   return (
     <Canvas
-      dpr={QUALITY.dpr}
-      shadows={QUALITY.shadows ? { type: THREE.PCFSoftShadowMap } : false}
+      dpr={DPR}
+      shadows={
+        QUALITY.shadows ? { type: QUALITY.softShadows ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap } : false
+      }
       camera={{ fov: 58, position: [0, 4.3, PLAYER_Z + 6.5], near: 0.1, far: 300 }}
-      // El antialias del canvas se apaga cuando hay postproceso: la imagen no
-      // sale por el buffer por defecto sino por la cadena de efectos, que
-      // termina en SMAA, asi que el MSAA del canvas se paga y se tira.
-      gl={{ antialias: !QUALITY.bloom && !QUALITY.ao, powerPreference: 'high-performance' }}
+      // El antialias del canvas solo se enciende cuando NO hay cadena de
+      // efectos: con cadena la imagen no sale por el buffer por defecto sino
+      // por los efectos, que terminan en SMAA, y el MSAA se pagaria para nada.
+      gl={{ antialias: QUALITY.msaa, powerPreference: 'high-performance' }}
       onCreated={({ gl }) => {
         // Rango dinamico de pelicula. Sin esto los blancos del casco y de los
         // reflejos del atardecer se recortan en plano y todo se lee a plastico;
