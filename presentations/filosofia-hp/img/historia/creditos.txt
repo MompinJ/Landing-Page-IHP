@@ -1,0 +1,20 @@
+Imagenes de la linea del tiempo (G02Historia) — todas de internet.
+
+Wikimedia Commons (licencia libre):
+  1869.jpg — recorte de "File:Tcitp d201 hong kong and whampoa dock co.jpg"
+             (~1908) — Dominio publico
+  1994.jpg — "File:Kwai Tsing Container Terminals in Hong Kong.jpg" — CC BY-SA 4.0
+  2016.jpg — "File:Euromax terminal - Maasvlakte - Port of Rotterdam" — CC BY 2.0
+             (terminal del grupo Hutchison en Rotterdam)
+
+Sitios oficiales del Grupo (material corporativo propio, uso interno):
+  1969.jpg — hutchisonports.com (banner "Milestone": buque bajo porticos)
+  1991.jpg — hutchisonports.com (banner aereo de gruas)
+  1995.jpg — hutchisonportsicave.com (patio de ICAVE Veracruz al atardecer)
+  1998.jpg — foto de prensa de Container Care (elceo.com, nota de los 25 años)
+  1999-2000.jpg — hutchisonportseit.com (aerea de la terminal de Ensenada)
+  2001.jpg — hutchisonportsicave.com (buque llegando a Veracruz)
+  2003.jpg — hutchisonportslct.com (aerea de Lazaro Cardenas)
+  2006.jpg — hutchisonportstng.com (banner del dique seco del astillero)
+
+Si se sustituye alguna imagen, mantener la ruta que declara historia.data.ts.

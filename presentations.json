@@ -1,6 +1,24 @@
 {
   "presentations": [
     {
+      "slug": "filosofia-hp",
+      "title": "Introducción a la Filosofía Hutchison Ports",
+      "subtitle": "Módulo 1 — Fundamentos de la cultura organizacional",
+      "description": "Deck de 30 láminas en React con la identidad Hutchison Ports (Verlag + Montserrat, paleta Sea/Sky, ángulo 30.3): la cultura organizacional, el orgullo HP, los 10 fundamentos, la clasificación de terminales, la historia del Grupo como juego interactivo de línea del tiempo (colocar cada hito en su lugar), los 5 valores UNITY una letra por lámina y tres videos institucionales (bienvenida, cultura y valores). Transición de Cortina HP entre láminas. Ver TUTORIAL.md en la carpeta para los controles y la guía de facilitación.",
+      "date": "2026-08",
+      "tags": [
+        "Hutchison Ports",
+        "Filosofía",
+        "Cultura organizacional",
+        "UNITY",
+        "Interactiva",
+        "React"
+      ],
+      "accent": "#002E6D",
+      "theme": "hp",
+      "path": "presentations/filosofia-hp/index.html"
+    },
+    {
       "slug": "gateway-tecnica",
       "title": "Gateway — Arquitectura Tecnica",
       "subtitle": "HUB Digital IHP para el area de TI",
