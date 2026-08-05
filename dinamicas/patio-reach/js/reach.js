@@ -105,6 +105,11 @@
     'L': { nombre: 'PATA DE LA GRUA STS',   solido: true },
     'p': { nombre: 'RACK DE TUBERIA',       solido: true },
     'K': { nombre: 'NAVE DE TALLER',        solido: true },
+    'g': { nombre: 'GARITA DE CONTROL',     solido: true },
+    'F': { nombre: 'TANQUE DE COMBUSTIBLE', solido: true },
+    'n': { nombre: 'GRUPO ELECTROGENO',     solido: true },
+    'j': { nombre: 'CHASIS APARCADO',       solido: true },
+    'y': { nombre: 'BIDONES Y PALES',       solido: true },
     '#': { nombre: 'VALLA',                 solido: true },
     'H': { nombre: 'CASETA',                solido: true },
     'o': { nombre: 'CONO',                  solido: true },
@@ -151,15 +156,15 @@
         '#..AAAAAA....BBBBBB....................#',
         '#..AAAAAA....BBBBBB....................#',
         '#..======....======....................#',
-        '#...o........o..........o..............#',
-        '#......................................#',
-        '#..VVVVV...KKKK......WWW...............#',
-        '#..VVVVV...KKKK......WWW...............#',
-        '#......................................#',
+        '#...o........o......j...o..............#',
+        '#..........................y...........#',
+        '#..VVVVV..KKKKKK....WWW...F............#',
+        '#..VVVVV..KKKKKK....WWW...F............#',
+        '#................n.....................#',
         '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
         '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
         '#......................................#',
-        '#.HHH..................GGGGGG..........#',
+        '#.HHHH................gGGGGGGg.........#',
         '#......................................#',
         '########################################',
       ],
@@ -205,15 +210,15 @@
         '#...AAAAAA...BBBBBB...EEEE.............#',
         '#...======...======....................#',
         '#......................................#',
-        '#..o..........o...........o............#',
-        '#......................................#',
+        '#..o..........o......j....o............#',
+        '#..............................y.......#',
+        '#..VVVVVV....IIII.....F.F..............#',
         '#..VVVVVV....IIII......................#',
-        '#..VVVVVV....IIII......................#',
+        '#....................n.................#',
+        '#..KKKKKK.............WWW..............#',
+        '#..KKKKKK..............................#',
         '#......................................#',
-        '#..KKKKK..............WWW..............#',
-        '#..KKKKK...............................#',
-        '#......................................#',
-        '#.HHH....................GGGGGG........#',
+        '#.HHHH.................gGGGGGGg........#',
         '########################################',
       ],
       cajas: [
@@ -262,12 +267,12 @@
         '#..AAAAA...BBBBB...EEEE................#',
         '#..AAAAA...BBBBB.......................#',
         '#......................................#',
-        '#..o............o.........o............#',
-        '#......................................#',
-        '#..WWWW.....KKKKKK.....................#',
-        '#..WWWW.....KKKKKK.....................#',
-        '#......................................#',
-        '#.HHH................GGGGGG............#',
+        '#..o............o.....j...o............#',
+        '#........................y.............#',
+        '#..WWWW....KKKKKKK.....F.F.............#',
+        '#..WWWW....KKKKKKK.....................#',
+        '#..............n.......................#',
+        '#.HHHH..............gGGGGGGg...........#',
         '#......................................#',
         '########################################',
       ],
@@ -316,13 +321,13 @@
         '#.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.#',
         '#.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.#',
         '#......................................#',
-        '#..o.........p........o........p.......#',
-        '#......................................#',
-        '#..VVVVVV...VVVVVV.....WWW.............#',
-        '#..VVVVVV...VVVVVV.....WWW.............#',
-        '#......................................#',
-        '#..KKKKKK............o.................#',
-        '#.HHH..................GGGGGGGG........#',
+        '#..o.........p.....j.o........p........#',
+        '#....................y.................#',
+        '#..VVVVVV...VVVVVV....WWW..F.F.........#',
+        '#..VVVVVV...VVVVVV....WWW..............#',
+        '#............n.........................#',
+        '#..KKKKKKK...........o.................#',
+        '#.HHHH...............gGGGGGGGGg........#',
         '########################################',
       ],
       cajas: [
@@ -653,67 +658,325 @@
     rc(g, x + 6, base, 12, 1, M.k);
   };
 
+  // TORRE DE ILUMINACION: celosia de verdad con su bateria de focos,
+  // no un palito con una bombilla. Es lo que marca la escala vertical
+  // del patio.
   const dibujarPoste = (g, x, base) => {
-    rc(g, x + 9, base - 2, 7, 3, COL.sombra);
-    caja(g, x + 10, base - 34, 4, 6, '#ffe08a', '#fff6d8');   // luminaria
-    rc(g, x + 11, base - 28, 2, 25, '#5a636d');               // mastil
-    rc(g, x + 11, base - 28, 1, 25, M.k);
-    caja(g, x + 8, base - 5, 8, 5, '#2b323a', '#3f4750');     // base
+    const ALTO = 52;
+    const y = base - ALTO;
+    rc(g, x + 6, base - 2, 12, 3, COL.sombra);
+    // fuste de celosia: dos montantes y diagonales
+    for (let k = 0; k < ALTO - 10; k += 6) {
+      const a = 3 + Math.round(k * 0.06), b = 3 + Math.round((k + 6) * 0.06);
+      rc(g, x + 12 - a, y + 12 + k, a * 2, 1, '#4a525c');
+      rc(g, x + 12 - a, y + 12 + k, 1, 6, '#5f6a75');
+      rc(g, x + 11 + a, y + 12 + k, 1, 6, '#5f6a75');
+      rc(g, x + 12 - b, y + 12 + k + 3, b * 2, 1, '#3f4750');
+    }
+    // cabeza con la bateria de focos
+    rc(g, x + 5, y + 6, 14, 3, '#4a525c');
+    for (let k = 0; k < 4; k++) {
+      caja(g, x + 5 + k * 4, y + 1, 4, 6, '#2b323a', '#3f4750');
+      rc(g, x + 6 + k * 4, y + 5, 2, 2, '#ffe9a8');
+    }
+    rc(g, x + 4, y + 9, 16, 1, 'rgba(255,233,168,0.28)');    // derrame de luz
+    caja(g, x + 7, base - 6, 10, 6, '#2b323a', '#454f59');   // dado de cimentacion
   };
 
-  const dibujarCaseta = (g, x, base, vecinos) => {
-    const y = base - 30;
-    rc(g, x + 1, base - 2, TILE - 2, 3, COL.sombra);
-    rc(g, x, y, TILE, 10, '#5b6570');
-    rc(g, x, y, TILE, 2, '#78848f');
-    rc(g, x, y + 10, TILE, 22, '#c6ced6');
-    rc(g, x, y + 10, TILE, 1, '#e2e8ee');
-    if (!vecinos.izq) rc(g, x, y, 1, 32, '#7c848d');
-    if (!vecinos.der) rc(g, x + TILE - 1, y, 1, 32, '#7c848d');
-    rc(g, x, y + 31, TILE, 1, M.k);
-    caja(g, x + 4, y + 15, 7, 8, '#3d5a6b', '#527588');
-    caja(g, x + 14, y + 15, 7, 8, '#3d5a6b', '#527588');
+  // GARITA DE GATE: caseta de control con barrera levadiza y semaforo.
+  const dibujarGarita = (g, x, base) => {
+    rc(g, x + 3, base - 2, 18, 3, COL.sombra);
+    rc(g, x + 3, base - 26, 13, 26, '#c6ced6');             // caseta
+    rc(g, x + 3, base - 26, 13, 2, '#e2e8ee');
+    rc(g, x + 2, base - 30, 15, 5, '#5f6b76');              // marquesina
+    rc(g, x + 2, base - 30, 15, 2, '#7b8892');
+    caja(g, x + 5, base - 22, 9, 9, '#26404f', '#4f7f96');  // ventanilla
+    rc(g, x + 6, base - 10, 7, 10, '#8d97a1');
+    rc(g, x + 17, base - 20, 2, 20, '#4a525c');             // poste del semaforo
+    caja(g, x + 15, base - 30, 6, 11, '#2b323a', '#3f4750');
+    rc(g, x + 17, base - 28, 2, 2, '#ff5a3c');
+    rc(g, x + 17, base - 25, 2, 2, '#3d7a5f');
+    // barrera levadiza, alzada
+    rc(g, x + 19, base - 14, 3, 14, '#8d97a1');
+    for (let k = 0; k < 5; k++) rc(g, x + 21 + k * 3, base - 15 - k * 2, 3, 2, k % 2 ? '#e8e8e8' : '#d0342c');
   };
 
-  // ---------- lo nautico ----------
-  const dibujarBolardo = (g, x, base) => {
-    rc(g, x + 8, base - 2, 9, 3, COL.sombra);
-    caja(g, x + 9, base - 11, 7, 5, '#4a525c', '#69737e');    // cabeza
-    caja(g, x + 10, base - 7, 5, 6, '#39424c', '#525d69');    // fuste
-    caja(g, x + 7, base - 2, 11, 3, '#2b323a', '#414a54');    // base
-  };
-
-  const dibujarPataSTS = (g, x, base) => {
-    rc(g, x + 4, base - 2, 16, 3, COL.sombra);
-    caja(g, x + 5, base - 34, 6, 34, '#5a636d', '#7d8791');
-    caja(g, x + 14, base - 34, 6, 34, '#5a636d', '#7d8791');
-    for (let i = 4; i < 30; i += 7) rc(g, x + 11, base - 34 + i, 3, 2, '#4a525c');
-    caja(g, x + 3, base - 6, 19, 6, '#39424c', '#525d69');    // zapata
-    rc(g, x + 6, base - 40, 4, 6, M.a);                        // baliza
-  };
-
-  const dibujarTuberia = (g, x, base) => {
+  // TANQUE DE COMBUSTIBLE: cilindro sobre cuna, con escalera y
+  // valvuleria. Lo mas alto del patio despues de las torres.
+  const dibujarTanque = (g, x, base) => {
     rc(g, x + 2, base - 2, 20, 3, COL.sombra);
-    for (let i = 0; i < 3; i++) {
-      caja(g, x + 3, base - 6 - i * 5, 18, 5, '#6b7078', '#878d96');
-      rc(g, x + 4, base - 5 - i * 5, 2, 3, '#4a4f56');
-      rc(g, x + 18, base - 5 - i * 5, 2, 3, '#4a4f56');
+    const y = base - 34;
+    rc(g, x + 3, y + 3, 18, 28, '#9aa4ad');                 // virola
+    rc(g, x + 3, y + 3, 18, 3, '#bcc5cc');
+    rc(g, x + 3, y, 18, 4, '#8d97a1');                      // casquete
+    rc(g, x + 5, y - 2, 14, 3, '#7b8892');
+    for (let k = 0; k < 3; k++) rc(g, x + 3, y + 10 + k * 7, 18, 1, '#7f8991');
+    rc(g, x + 3, y + 3, 1, 28, '#c6ced6');                  // brillo del cilindro
+    rc(g, x + 19, y + 3, 2, 28, '#7f8991');
+    rc(g, x + 8, y + 12, 8, 5, '#d0342c');                  // franja de producto
+    for (let k = 0; k < 6; k++) rc(g, x + 20, y + 8 + k * 4, 4, 1, '#5f6a75');  // escalera
+    rc(g, x + 23, y + 6, 1, 26, '#5f6a75');
+    rc(g, x + 4, base - 5, 16, 5, '#3f4750');               // cuna
+    rc(g, x + 2, base - 3, 20, 3, '#2b323a');
+  };
+
+  // GRUPO ELECTROGENO en contenedor, con rejillas y escape.
+  // GRUPO ELECTROGENO: en cabina insonorizada, con la reja del
+  // radiador, el cuadro de mandos y el escape alto. En verde liso se
+  // confundia con un contenedor cualquiera.
+  const dibujarGenerador = (g, x, base) => {
+    rc(g, x + 1, base - 2, 22, 4, COL.sombra);
+    const y = base - 24;
+    caja(g, x + 1, y, 22, 24, '#6f7883', '#949daa');
+    rc(g, x + 2, y + 2, 20, 2, '#ffd23d');                    // franja de aviso
+    rc(g, x + 2, y + 4, 20, 1, '#2b323a');
+    // reja del radiador
+    rc(g, x + 3, y + 7, 9, 12, '#2f373f');
+    for (let k = 0; k < 5; k++) rc(g, x + 4, y + 8 + k * 2, 7, 1, '#59636d');
+    // cuadro de mandos con pilotos
+    caja(g, x + 14, y + 7, 7, 8, '#2b323a', '#454f59');
+    rc(g, x + 15, y + 9, 2, 2, '#3d7a5f');
+    rc(g, x + 18, y + 9, 2, 2, '#ff5a3c');
+    rc(g, x + 15, y + 12, 5, 1, '#8d97a1');
+    // puerta de servicio y patines
+    rc(g, x + 14, y + 16, 7, 6, '#59636d');
+    rc(g, x + 19, y + 18, 2, 2, '#2b323a');
+    rc(g, x + 2, base - 3, 20, 3, '#3f4750');
+    rc(g, x + 4, base - 1, 5, 2, '#2b323a');
+    rc(g, x + 15, base - 1, 5, 2, '#2b323a');
+    // escape con capucha
+    rc(g, x + 17, y - 11, 4, 12, '#4a525c');
+    rc(g, x + 16, y - 13, 6, 3, '#2b323a');
+    rc(g, x + 17, y - 11, 1, 12, '#69737e');
+  };
+
+  // CHASIS de camion aparcado: la plataforma sin tractora.
+  const dibujarChasis = (g, x, base) => {
+    rc(g, x + 1, base - 2, 22, 3, COL.sombra);
+    const y = base - 12;
+    rc(g, x + 1, y, 22, 6, '#5a636d');                      // larguero
+    rc(g, x + 1, y, 22, 2, '#78838e');
+    for (let k = 0; k < 4; k++) rc(g, x + 3 + k * 5, y + 6, 3, 2, '#3f4750');
+    rc(g, x + 3, y + 8, 5, 4, M.t); rc(g, x + 15, y + 8, 5, 4, M.t);
+    rc(g, x + 1, y - 3, 3, 4, '#3f4750');                   // pata de apoyo
+    rc(g, x + 20, y - 2, 3, 3, '#d0342c');
+  };
+
+  // BIDONES Y PALES: el desorden normal de cualquier patio.
+  const dibujarBidones = (g, x, base) => {
+    rc(g, x + 2, base - 2, 20, 3, COL.sombra);
+    const pal = ['#a8483d', '#2f6a9e', '#c9a227'];
+    for (let k = 0; k < 3; k++) {
+      const bx = x + 3 + (k % 2) * 8, by = base - 13 - Math.floor(k / 2) * 6;
+      rc(g, bx, by, 7, 12, pal[k]);
+      rc(g, bx, by, 7, 2, '#e8e8e8');
+      rc(g, bx, by + 5, 7, 1, '#00000033');
+      rc(g, bx, by + 9, 7, 1, '#00000033');
+      rc(g, bx + 6, by, 1, 12, '#00000044');
+    }
+    for (let k = 0; k < 2; k++) {                            // pale
+      rc(g, x + 13, base - 6 + k * 3, 10, 2, '#8a6a3f');
+      rc(g, x + 14, base - 5 + k * 3, 1, 2, '#6d5231');
+      rc(g, x + 20, base - 5 + k * 3, 1, 2, '#6d5231');
     }
   };
 
-  const dibujarNave = (g, x, base, vecinos) => {
-    const y = base - 34;
+  // Los edificios de varias casillas se dibujan como UNA pieza: cada
+  // modulo sabe que lugar ocupa en la fachada (i de n) y pinta lo que
+  // le toca -- porton, ventanal, rotulo. Repetir el mismo modulo en
+  // todas las casillas era lo que los dejaba como cajas de lego.
+  const racha = (col, fil, ch) => {
+    let a = col; while (charEn(a - 1, fil) === ch) a--;
+    let b = col; while (charEn(b + 1, fil) === ch) b++;
+    return { i: col - a, n: b - a + 1 };
+  };
+
+  // OFICINA DE TERMINAL: dos plantas, ventanal corrido arriba, puerta
+  // y escalera exterior en un extremo, y en la cubierta la antena y
+  // el equipo de clima.
+  const dibujarOficina = (g, x, base, i, n) => {
+    const ALTO = 40;
+    const y = base - ALTO;
+    const izq = i === 0, der = i === n - 1;
     rc(g, x + 1, base - 2, TILE - 2, 3, COL.sombra);
-    rc(g, x, y, TILE, 12, '#3f4a54');                          // techo a dos aguas
-    for (let i = 0; i < TILE; i += 4) rc(g, x + i, y, 2, 12, '#485460');
-    rc(g, x, y, TILE, 2, '#5c6b78');
-    rc(g, x, y + 12, TILE, 24, '#8c949c');                     // muro
-    rc(g, x, y + 12, TILE, 1, '#a8b0b8');
-    if (!vecinos.izq) rc(g, x, y, 1, 36, '#666e76');
-    if (!vecinos.der) rc(g, x + TILE - 1, y, 1, 36, '#666e76');
-    rc(g, x, y + 35, TILE, 1, M.k);
-    if (!vecinos.izq) { caja(g, x + 4, y + 20, 10, 15, '#2b323a', '#3f4750'); }  // porton
-    else { for (let i = 2; i < TILE - 2; i += 5) rc(g, x + i, y + 18, 3, 6, '#5c6570'); }
+
+    rc(g, x, y + 6, TILE, ALTO - 6, '#b9c2ca');            // cuerpo
+    rc(g, x, y + 6, TILE, 2, '#d6dde3');
+    rc(g, x, y + 21, TILE, 2, '#8d97a1');                  // forjado entre plantas
+    rc(g, x, y, TILE, 7, '#5f6b76');                       // pretil de cubierta
+    rc(g, x, y, TILE, 2, '#7b8892');
+    rc(g, x, y + 5, TILE, 2, '#454f59');
+
+    // ventanal corrido de la planta alta
+    rc(g, x + (izq ? 3 : 0), y + 10, TILE - (izq ? 3 : 0) - (der ? 3 : 0), 9, '#26404f');
+    for (let k = (izq ? 4 : 0); k < TILE - (der ? 3 : 0); k += 6) {
+      rc(g, x + k, y + 11, 4, 7, '#4f7f96');
+      rc(g, x + k, y + 11, 4, 2, '#7fb3c8');
+    }
+
+    if (izq) {                                             // acceso
+      caja(g, x + 4, y + 26, 9, 14, '#2f3a44', '#48545f');
+      rc(g, x + 10, y + 32, 2, 2, '#ffd23d');
+      rc(g, x + 2, y + 24, 13, 2, '#7b8892');              // marquesina
+    } else if (der) {                                      // escalera exterior
+      for (let k = 0; k < 5; k++) rc(g, x + 12, y + 27 + k * 3, 9, 2, '#6d7783');
+      rc(g, x + 11, y + 25, 2, 16, '#525d69');
+      rc(g, x + 20, y + 25, 2, 16, '#525d69');
+    } else {                                               // ventanas de planta baja
+      for (let k = 2; k < TILE - 4; k += 8) caja(g, x + k, y + 27, 6, 8, '#26404f', '#4f7f96');
+    }
+
+    // rotulo en la fachada, una vez por edificio
+    if (i === Math.floor(n / 2)) {
+      rc(g, x + 2, y + 23, TILE - 4, 4, '#1d5878');
+      rc(g, x + 4, y + 24, TILE - 8, 2, '#8fd0ee');
+    }
+    if (izq) rc(g, x, y, 1, ALTO, '#79838d');
+    if (der) rc(g, x + TILE - 1, y, 1, ALTO, '#79838d');
+    rc(g, x, base - 1, TILE, 1, M.k);
+
+    // equipo de cubierta
+    if (i === 1 % n) {
+      rc(g, x + 5, y - 8, 9, 8, '#6d7783');
+      rc(g, x + 5, y - 8, 9, 2, '#8d97a1');
+      for (let k = 0; k < 3; k++) rc(g, x + 6 + k * 3, y - 6, 2, 5, '#3f4750');
+    }
+    if (der) {
+      rc(g, x + 14, y - 18, 2, 18, '#8d97a1');             // antena
+      rc(g, x + 11, y - 18, 8, 2, '#8d97a1');
+      rc(g, x + 14, y - 21, 2, 3, '#ff5a3c');
+    }
+  };
+
+  // ---------- lo nautico ----------
+  // BITA DE AMARRE: el noray de fundicion donde muerde el cabo del
+  // buque. Va con su cabo dado vuelta, que es lo que dice para que
+  // sirve; sin el se lee como una seta.
+  const dibujarBolardo = (g, x, base) => {
+    rc(g, x + 4, base - 2, 17, 4, COL.sombra);
+    caja(g, x + 6, base - 20, 13, 7, '#5b6570', '#7d8791');   // cabeza acampanada
+    rc(g, x + 5, base - 15, 15, 2, '#454f59');
+    caja(g, x + 8, base - 14, 9, 11, '#4a525c', '#69737e');   // fuste
+    rc(g, x + 9, base - 13, 2, 9, '#7d8791');
+    caja(g, x + 4, base - 4, 17, 5, '#2f3841', '#48525c');    // placa de anclaje
+    for (let k = 0; k < 3; k++) rc(g, x + 6 + k * 5, base - 3, 2, 2, '#1d232a');
+    // cabo dado vuelta a la bita
+    rc(g, x + 6, base - 12, 13, 2, '#c9b184');
+    rc(g, x + 6, base - 10, 13, 2, '#9d8a63');
+    rc(g, x + 18, base - 11, 6, 2, '#c9b184');
+  };
+
+  // PATA DE LA GRUA STS: un porticado en A de celosia, con su
+  // arriostramiento en cruz, la escalera de gato y el bogie sobre el
+  // carril. Dos columnas lisas no se leian como parte de una grua.
+  const dibujarPataSTS = (g, x, base) => {
+    const ALTO = 44;
+    const y = base - ALTO;
+    rc(g, x + 1, base - 2, 22, 4, COL.sombra);
+    // montantes, mas separados abajo que arriba
+    for (let k = 0; k < ALTO - 8; k++) {
+      const sep = 3 + Math.round(k * 0.13);
+      rc(g, x + 12 - sep - 2, y + k, 3, 1, '#5f6a75');
+      rc(g, x + 11 + sep, y + k, 3, 1, '#5f6a75');
+    }
+    // cruces de san andres entre montantes
+    for (let k = 0; k < 5; k++) {
+      const y0 = y + 4 + k * 7;
+      const s0 = 3 + Math.round((k * 7) * 0.13), s1 = 3 + Math.round(((k + 1) * 7) * 0.13);
+      for (let t = 0; t <= 7; t++) {
+        const p = t / 7;
+        rc(g, Math.round(x + 12 - s0 + (s0 + s1) * p), y0 + t, 1, 1, '#4a525c');
+        rc(g, Math.round(x + 12 + s0 - (s0 + s1) * p), y0 + t, 1, 1, '#4a525c');
+      }
+    }
+    // escalera de gato en el montante de la izquierda
+    for (let k = 6; k < ALTO - 12; k += 4) rc(g, x + 4, y + k, 5, 1, '#8d97a1');
+    // cabezal y bogie sobre el carril
+    rc(g, x + 4, y - 3, 16, 4, '#6f7883');
+    rc(g, x + 4, y - 3, 16, 1, '#949daa');
+    caja(g, x + 1, base - 9, 22, 9, '#39424c', '#525d69');
+    for (let k = 0; k < 3; k++) disco(g, x + 6 + k * 6, base - 3, 2, '#15181c');
+    rc(g, x + 1, base - 1, 22, 1, M.k);
+    caja(g, x + 9, y - 9, 6, 6, M.a, '#ffd08a');               // baliza de aviso
+  };
+
+  // RACK DE TUBERIA: tubos de verdad, con su curvatura marcada por el
+  // brillo y la sombra, apilados en piramide sobre calzos de madera.
+  const dibujarTuberia = (g, x, base) => {
+    rc(g, x + 1, base - 2, 22, 4, COL.sombra);
+    rc(g, x + 2, base - 4, 20, 3, '#6d5231');                 // calzos
+    rc(g, x + 2, base - 4, 20, 1, '#8a6a3f');
+    const tubo1 = (tx, ty, w) => {
+      rc(g, tx, ty, w, 7, '#3f4750');                         // contorno
+      rc(g, tx, ty + 1, w, 5, '#7c848d');
+      rc(g, tx, ty + 1, w, 2, '#a2aab2');                     // brillo de arriba
+      rc(g, tx, ty + 5, w, 1, '#565e66');                     // sombra de abajo
+      rc(g, tx, ty + 1, 2, 5, '#4a525c');                     // boca del tubo
+      rc(g, tx + 1, ty + 2, 1, 3, '#2b323a');
+    };
+    tubo1(x + 2, base - 11, 20);
+    tubo1(x + 12, base - 11, 10);
+    tubo1(x + 6, base - 18, 14);
+    tubo1(x + 9, base - 25, 9);
+  };
+
+  // NAVE DE TALLER: chapa nervada, cercha vista bajo el alero, lucer-
+  // narios y extractores en cubierta, y portones de bahia numerados.
+  // Es el edificio alto de la terminal, no una caja del alto de un
+  // contenedor.
+  const dibujarNave = (g, x, base, i, n) => {
+    const ALTO = 52;
+    const y = base - ALTO;
+    const izq = i === 0, der = i === n - 1;
+    rc(g, x + 1, base - 2, TILE - 2, 3, COL.sombra);
+
+    // cubierta: faldon con lucernarios y canalon
+    rc(g, x, y + 4, TILE, 12, '#414c57');
+    for (let k = 0; k < TILE; k += 3) rc(g, x + k, y + 4, 1, 12, '#4b5763');
+    if (i % 2 === 0) {                                     // lucernario
+      rc(g, x + 5, y + 6, 13, 5, '#7fa6bd');
+      rc(g, x + 5, y + 6, 13, 2, '#a9cfe2');
+      rc(g, x + 5, y + 5, 13, 1, '#2f3941');
+    }
+    rc(g, x, y + 16, TILE, 3, '#5c6874');                  // canalon
+    rc(g, x, y + 16, TILE, 1, '#79848f');
+
+    // cuerpo de chapa nervada
+    rc(g, x, y + 19, TILE, ALTO - 19, '#98a1a9');
+    for (let k = 1; k < TILE; k += 3) rc(g, x + k, y + 19, 1, ALTO - 20, '#889199');
+    rc(g, x, y + 19, TILE, 1, '#b6bfc6');
+    rc(g, x, y + 34, TILE, 2, '#6f7982');                  // zocalo intermedio
+
+    // portones de bahia en los modulos pares, ventanas en los impares
+    if (i % 2 === 1) {
+      rc(g, x + 2, y + 30, TILE - 4, 21, '#2c353d');       // hueco del porton
+      rc(g, x + 3, y + 31, TILE - 6, 19, '#4a5560');
+      for (let k = 0; k < 5; k++) rc(g, x + 3, y + 32 + k * 4, TILE - 6, 2, '#3a444e');
+      rc(g, x + 2, y + 28, TILE - 4, 2, '#ffd23d');        // dintel senalizado
+      rc(g, x + 9, y + 24, 6, 4, '#2c353d');               // numero de bahia
+      rc(g, x + 10, y + 25, 4, 2, '#ffd23d');
+    } else {
+      for (let k = 3; k < TILE - 5; k += 8) {
+        caja(g, x + k, y + 24, 6, 7, '#26404f', '#4f7f96');
+      }
+      if (izq) {                                           // puerta de personal
+        caja(g, x + 4, y + 38, 7, 13, '#2f3a44', '#48545f');
+        rc(g, x + 9, y + 44, 2, 2, '#ffd23d');
+      }
+      rc(g, x + 2, y + 46, TILE - 4, 3, '#6f7982');        // banco de trabajo fuera
+    }
+
+    if (izq) rc(g, x, y + 4, 1, ALTO - 4, '#6b747d');
+    if (der) rc(g, x + TILE - 1, y + 4, 1, ALTO - 4, '#6b747d');
+    rc(g, x, base - 1, TILE, 1, M.k);
+
+    // extractores y bajante
+    if (i % 3 === 1) {
+      rc(g, x + 8, y - 5, 8, 6, '#6d7783');
+      rc(g, x + 7, y - 7, 10, 2, '#8d97a1');
+      rc(g, x + 10, y - 10, 4, 3, '#4a525c');
+    }
+    if (der) rc(g, x + TILE - 4, y + 19, 2, ALTO - 20, '#71797f');
   };
 
   // El buque: la fila de arriba es la banda de estribor, que se ve de
@@ -817,13 +1080,14 @@
     SPR.bolardo = cocer(TILE, 14, (g) => dibujarBolardo(g, 0, 11));
     SPR.pata = cocer(TILE, 44, (g) => dibujarPataSTS(g, 0, 41));
     SPR.tuberia = cocer(TILE, 22, (g) => dibujarTuberia(g, 0, 19));
-    SPR.caseta = {};
-    SPR.nave = {};
+    SPR.garita = cocer(TILE + 4, 34, (g) => dibujarGarita(g, 0, 31));
+    SPR.tanque = cocer(TILE + 4, 40, (g) => dibujarTanque(g, 0, 37));
+    SPR.generador = cocer(TILE, 32, (g) => dibujarGenerador(g, 0, 29));
+    SPR.chasis = cocer(TILE, 20, (g) => dibujarChasis(g, 0, 17));
+    SPR.bidones = cocer(TILE, 22, (g) => dibujarBidones(g, 0, 19));
     SPR.casco = {};
     [0, 1, 2, 3].forEach((n) => {
       const v = { izq: !!(n & 1), der: !!(n & 2) };
-      SPR.caseta[n] = cocer(TILE, 34, (g) => dibujarCaseta(g, 0, 31, v));
-      SPR.nave[n] = cocer(TILE, 38, (g) => dibujarNave(g, 0, 35, v));
       SPR.casco['cerca' + n] = cocer(TILE, 24, (g) => dibujarCasco(g, 0, 22, v, 'cerca'));
       SPR.casco['popa' + n] = cocer(TILE, 62, (g) => dibujarCasco(g, 0, 60, v, 'popa'));
       SPR.casco['lejos' + n] = cocer(TILE, 16, (g) => dibujarCasco(g, 0, 14, v, 'lejos'));
@@ -947,7 +1211,7 @@
   // Todo lo que levanta del piso es entidad y se ordena por
   // profundidad. Los del mapa no cambian dentro de un turno, asi que
   // se listan al arrancarlo.
-  const CON_ALTURA = '#HoPbLpKSd';
+  const CON_ALTURA = '#HoPbLpKSdgFnjy';
   let OBJETOS = [];
   const listarObjetos = () => {
     OBJETOS = [];
@@ -1385,8 +1649,13 @@
       case 'b': g.drawImage(SPR.bolardo, x, base - 11); break;
       case 'L': g.drawImage(SPR.pata, x, base - 41); break;
       case 'p': g.drawImage(SPR.tuberia, x, base - 19); break;
-      case 'H': g.drawImage(SPR.caseta[vecinos(o, 'H')], x, base - 31); break;
-      case 'K': g.drawImage(SPR.nave[vecinos(o, 'K')], x, base - 35); break;
+      case 'H': { const r = racha(o.col, o.fil, 'H'); dibujarOficina(g, x, base, r.i, r.n); break; }
+      case 'K': { const r = racha(o.col, o.fil, 'K'); dibujarNave(g, x, base, r.i, r.n); break; }
+      case 'g': g.drawImage(SPR.garita, x, base - 31); break;
+      case 'F': g.drawImage(SPR.tanque, x, base - 37); break;
+      case 'n': g.drawImage(SPR.generador, x, base - 29); break;
+      case 'j': g.drawImage(SPR.chasis, x, base - 17); break;
+      case 'y': g.drawImage(SPR.bidones, x, base - 19); break;
       case 'd': g.drawImage(SPR.cubierta[o.col % 4], x, base - 31); break;
       case 'S': {
         const arriba = charEn(o.col, o.fil + 1) === 'd' || charEn(o.col, o.fil + 1) === 'S';
@@ -1747,7 +2016,8 @@
   // zona a la que te mandan.
   const MINI_COL = {
     '~': '#16303f', q: '#5c6570', b: '#8f9aa4', S: '#2b3a45', d: '#3d5566',
-    L: '#7d8791', p: '#5c6570', K: '#6b747d', H: '#8c949c', '#': '#39414a',
+    L: '#7d8791', p: '#5c6570', K: '#7d868f', H: '#a8b0b8', '#': '#39414a',
+    g: '#9aa4ad', F: '#9aa4ad', n: '#4f6b52', j: '#5a636d', y: '#a8483d',
     o: '#b3562a', P: '#6d7783', T: '#2a3037', r: '#4a4740', '=': '#5a4a12',
     A: '#2e5f57', B: '#1a5878', E: '#6b571a', M: '#7a3d26',
     V: '#454d55', I: '#7a651c', G: '#4e3d73', W: '#2e5f57', '.': '#2c3138'
