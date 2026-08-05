@@ -27,32 +27,37 @@
        EL BRAZO tiene dos ejes, como la maquina real:
        - ALCANCE  corto, medio o largo: a que casilla llega el
                   spreader, una, dos o tres por delante
-       - ALTURA   nivel 0 a 3: a que altura de la pila trabaja
+       - ALTURA   nivel 0 a 3 de la pila
        Y una curva de carga real: cuanto mas alargas, menos alto
        llegas. Corto alcanza los 3 niveles, medio 2, largo solo 1.
-       Por eso a veces hay que reposicionar la maquina en vez de
-       estirar el brazo.
 
-       SEGURIDAD
-       - Con la carga a nivel 2 o mas la maquina no arranca
-       - A nivel 1 circula, pero castiga el contenedor
-       - Con carga todo es mas lento, y los golpes cuentan doble
-       - El contenedor tiene integridad: se dana al golpear, al
-         soltarlo desde alto, al pasearlo izado y al zangolotearlo
+       EL TURNO son ordenes de trabajo con reloj y puntaje. Cada
+       orden pide llevar un contenedor concreto a una zona. Se
+       cobra por entrega, por como llega la caja y por lo limpio
+       que se opero; los golpes restan.
+
+       CONTENEDORES ESPECIALES
+       - REEFER      va enchufado: solo en casilla con toma
+       - IMO         peligroso: segregado, y no se apila encima
+       - OVERWEIGHT  solo al nivel 0, y frena mas la maquina
+
+       CLIMA: cada turno tiene el suyo. La lluvia moja el piso y
+       alarga las frenadas, la niebla come visibilidad y de noche
+       solo se ve lo que alumbran los faros y los postes.
 
        CONTROLES
        - Flechas o WASD: conducir
        - Q / E: arriar y izar el spreader
        - Z / X: recoger y alargar el boom
        - ESPACIO: twistlocks (enganchar y soltar)
-       - R reiniciar, H ayuda
+       - R reiniciar el turno, H ayuda
 
        PERSONALIZAR: el trazado del patio esta en la constante MAPA
-       de js/reach.js (un caracter por casilla) y las pilas de
-       contenedores en CARGA. La maquina son cuatro dibujos, uno por
-       rumbo, en maquinaPerfil, maquinaFrente y maquinaEspalda (el
-       oeste es el espejo del este); el boom y el spreader no van en
-       esos dibujos, se pintan aparte en dibujarBrazo.
+       de js/reach.js (un caracter por casilla) y los turnos, con
+       sus cajas, ordenes, clima y tiempo, en TURNOS. La maquina son
+       cuatro dibujos, uno por rumbo, en maquinaPerfil, maquinaFrente
+       y maquinaEspalda; el boom y el spreader se pintan aparte en
+       dibujarBoom y dibujarSpreader.
        ============================================================ -->
 
   <main class="app">
@@ -72,24 +77,32 @@
       <header class="panel__cab">
         <p class="panel__kicker">TERMINAL &middot; BLOQUE DE PATIO</p>
         <h1 class="panel__titulo">RS-04</h1>
-        <p class="panel__sub">REACHSTACKER &middot; TURNO DE PRACTICA</p>
+        <p class="panel__sub" id="panel-sub">REACHSTACKER &middot; TURNO 1</p>
       </header>
 
+      <section class="turno" aria-label="Turno en curso">
+        <div class="turno__fila">
+          <b class="turno__clima" id="turno-clima">DIA CLARO</b>
+          <b class="turno__reloj" id="turno-reloj">3:00</b>
+        </div>
+        <div class="turno__marcador">
+          <div><span>PUNTOS</span><b id="mk-puntos">0</b></div>
+          <div><span>ENTREGAS</span><b id="mk-entregas">0/0</b></div>
+          <div><span>GOLPES</span><b id="lec-golpes" class="lectura__mal">0</b></div>
+        </div>
+      </section>
+
+      <section class="ordenes" aria-label="Ordenes de trabajo">
+        <p class="bloque__nombre">ORDENES DE TRABAJO</p>
+        <ul class="ordenes__lista" id="ordenes-lista"></ul>
+      </section>
+
       <section class="lectura" aria-label="Lectura de instrumentos">
-        <div class="lectura__fila">
-          <span>POSICION</span><b id="lec-pos">--</b>
-        </div>
-        <div class="lectura__fila">
-          <span>RUMBO</span><b id="lec-rumbo">--</b>
-        </div>
         <div class="lectura__fila lectura__fila--ancha">
           <span>ZONA DE ALCANCE</span><b id="lec-alcance">--</b>
         </div>
-        <div class="lectura__fila">
-          <span>MANIOBRAS</span><b id="lec-pasos">0</b>
-        </div>
-        <div class="lectura__fila">
-          <span>GOLPES</span><b id="lec-golpes" class="lectura__mal">0</b>
+        <div class="lectura__fila lectura__fila--ancha lectura__fila--fina">
+          <span>POSICION</span><b id="lec-pos">--</b>
         </div>
       </section>
 
@@ -102,9 +115,9 @@
           <button class="cbtn cbtn--izq" type="button" data-cmd="izq">
             <i>&#9664;</i><b>GIRAR</b>
           </button>
-          <div class="brujula" aria-hidden="true">
-            <i id="brujula">&#9650;</i>
-            <small>RUMBO</small>
+          <div class="brujula">
+            <i id="brujula" aria-hidden="true">&#9650;</i>
+            <small id="lec-rumbo">N</small>
           </div>
           <button class="cbtn cbtn--der" type="button" data-cmd="der">
             <i>&#9654;</i><b>GIRAR</b>
@@ -152,19 +165,29 @@
         <p class="carga__estado" id="carga-estado">EL SPREADER VA VACIO</p>
       </section>
 
-      <section class="orden" aria-label="Orden de trabajo">
-        <p class="bloque__nombre">ORDEN DE TRABAJO</p>
-        <p class="orden__texto" id="orden-texto">Practica libre: mueve contenedores por el patio y apila hasta tres de alto. Las misiones llegan en la siguiente fase.</p>
-      </section>
-
       <footer class="panel__pie">
-        <button class="pbtn" type="button" id="btn-reiniciar">REINICIAR [R]</button>
+        <button class="pbtn" type="button" id="btn-reiniciar">REINICIAR TURNO [R]</button>
       </footer>
 
     </aside>
   </main>
 
   <button class="ayuda" id="btn-ayuda" type="button" aria-label="Instrucciones">?</button>
+
+  <!-- ============ CIERRE DE TURNO ============ -->
+  <div class="finale" id="finale" hidden>
+    <div class="finale__caja">
+      <p class="finale__kicker" id="fin-kicker">--</p>
+      <h2 id="fin-titulo">--</h2>
+      <p class="finale__score" id="fin-score">--</p>
+      <div class="finale__tabla" id="fin-tabla"></div>
+      <p class="finale__nota" id="fin-nota"></p>
+      <div class="finale__btns">
+        <button type="button" id="btn-seguir">SIGUIENTE TURNO</button>
+        <button type="button" id="btn-repetir">REPETIR TURNO [R]</button>
+      </div>
+    </div>
+  </div>
 
   <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-titulo">
     <div class="overlay__caja">
@@ -186,14 +209,21 @@
         <li><strong>ESPACIO</strong> cierra y abre los twistlocks. Para enganchar, el spreader tiene que estar <strong>justo al nivel</strong> de la caja de arriba de la pila; para soltar, al nivel del hueco donde va.</li>
       </ul>
 
+      <h2 class="overlay__sub">EL TURNO</h2>
+      <ul>
+        <li>Cada turno trae sus <strong>ordenes de trabajo</strong>: llevar tal contenedor a tal zona, con reloj corriendo. La caja que toca va marcada en el patio y su destino resaltado.</li>
+        <li>Se cobra por entrega, por <strong>como llega la caja</strong> y por lo limpio que operaste. Cada golpe resta.</li>
+        <li>Hay contenedores especiales: el <strong>REEFER</strong> va enchufado y solo se posa en casilla con toma; el <strong>IMO</strong> es peligroso, va segregado de otros IMO y no se le apila nada encima; el <strong>OVERWEIGHT</strong> solo va al nivel 0 y frena mas la maquina.</li>
+      </ul>
+
       <h2 class="overlay__sub">SEGURIDAD</h2>
       <ul>
         <li>Con la carga a <strong>nivel 2 o mas la maquina no arranca</strong>. A nivel 1 circula, pero va castigando el contenedor. Lo correcto es bajar a <strong>nivel 0</strong> para trasladar.</li>
         <li>El contenedor tiene <strong>integridad</strong>: se dana al golpear, al soltarlo desde arriba en vez de posarlo, al pasearlo izado y al zangolotearlo con maniobras a tirones.</li>
-        <li>Con carga la maquina es mas lenta y cada topetazo <strong>cuenta doble</strong>.</li>
+        <li>Con lluvia el piso resbala y las maniobras se alargan; con niebla y de noche se ve solo lo que tienes cerca o lo que alumbras.</li>
       </ul>
 
-      <p class="overlay__nota">Practica libre: no hay reloj y no se pierde. Las ordenes de trabajo, el puntaje y la dificultad avanzada llegan en la siguiente fase. <strong>R</strong> reinicia el turno, <strong>H</strong> abre esta ayuda.</p>
+      <p class="overlay__nota"><strong>R</strong> reinicia el turno, <strong>H</strong> abre esta ayuda.</p>
       <button class="overlay__btn" id="btn-entendido" type="button">SUBIR A LA MAQUINA</button>
     </div>
   </div>
