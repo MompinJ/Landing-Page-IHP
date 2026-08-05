@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Patio Reach: manejar la reachstacker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: PATIO REACH
+
+       Patio de contenedores en pixel art sobre una cuadricula de
+       20 x 14 casillas, en vista 3/4: el suelo se ve a plomo y todo
+       lo que levanta del piso se dibuja de frente, como en los RPG
+       de cuadricula. El participante ES la reachstacker RS-04.
+
+       CONDUCIR es vehicular, no de personaje:
+       - ARRIBA  avanza una casilla en el rumbo actual
+       - ABAJO   retrocede una casilla sin girar, mas lento
+       - IZQ/DER giran la maquina 90 grados en su sitio
+
+       EL BRAZO tiene dos ejes, como la maquina real:
+       - ALCANCE  corto, medio o largo: a que casilla llega el
+                  spreader, una, dos o tres por delante
+       - ALTURA   nivel 0 a 3: a que altura de la pila trabaja
+       Y una curva de carga real: cuanto mas alargas, menos alto
+       llegas. Corto alcanza los 3 niveles, medio 2, largo solo 1.
+       Por eso a veces hay que reposicionar la maquina en vez de
+       estirar el brazo.
+
+       SEGURIDAD
+       - Con la carga a nivel 2 o mas la maquina no arranca
+       - A nivel 1 circula, pero castiga el contenedor
+       - Con carga todo es mas lento, y los golpes cuentan doble
+       - El contenedor tiene integridad: se dana al golpear, al
+         soltarlo desde alto, al pasearlo izado y al zangolotearlo
+
+       CONTROLES
+       - Flechas o WASD: conducir
+       - Q / E: arriar y izar el spreader
+       - Z / X: recoger y alargar el boom
+       - ESPACIO: twistlocks (enganchar y soltar)
+       - R reiniciar, H ayuda
+
+       PERSONALIZAR: el trazado del patio esta en la constante MAPA
+       de js/reach.js (un caracter por casilla) y las pilas de
+       contenedores en CARGA. La maquina son cuatro dibujos, uno por
+       rumbo, en maquinaPerfil, maquinaFrente y maquinaEspalda (el
+       oeste es el espejo del este); el boom y el spreader no van en
+       esos dibujos, se pintan aparte en dibujarBrazo.
+       ============================================================ -->
+
+  <main class="app">
+
+    <section class="escena" id="escena">
+      <!-- el marco se ajusta al canvas, para que el aviso de
+           topetazo caiga sobre el patio y no al pie de la pagina -->
+      <div class="marco">
+        <canvas id="patio" class="patio" width="480" height="336"
+                aria-label="Patio de contenedores en vista 3/4"></canvas>
+        <div class="toast" id="toast" hidden></div>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="Controles de la reachstacker">
+
+      <header class="panel__cab">
+        <p class="panel__kicker">TERMINAL &middot; BLOQUE DE PATIO</p>
+        <h1 class="panel__titulo">RS-04</h1>
+        <p class="panel__sub">REACHSTACKER &middot; TURNO DE PRACTICA</p>
+      </header>
+
+      <section class="lectura" aria-label="Lectura de instrumentos">
+        <div class="lectura__fila">
+          <span>POSICION</span><b id="lec-pos">--</b>
+        </div>
+        <div class="lectura__fila">
+          <span>RUMBO</span><b id="lec-rumbo">--</b>
+        </div>
+        <div class="lectura__fila lectura__fila--ancha">
+          <span>ZONA DE ALCANCE</span><b id="lec-alcance">--</b>
+        </div>
+        <div class="lectura__fila">
+          <span>MANIOBRAS</span><b id="lec-pasos">0</b>
+        </div>
+        <div class="lectura__fila">
+          <span>GOLPES</span><b id="lec-golpes" class="lectura__mal">0</b>
+        </div>
+      </section>
+
+      <section class="mandos" aria-label="Botonera de conduccion">
+        <p class="bloque__nombre">CONDUCCION</p>
+        <div class="dpad">
+          <button class="cbtn cbtn--av" type="button" data-cmd="avanzar">
+            <i>&#9650;</i><b>AVANZAR</b>
+          </button>
+          <button class="cbtn cbtn--izq" type="button" data-cmd="izq">
+            <i>&#9664;</i><b>GIRAR</b>
+          </button>
+          <div class="brujula" aria-hidden="true">
+            <i id="brujula">&#9650;</i>
+            <small>RUMBO</small>
+          </div>
+          <button class="cbtn cbtn--der" type="button" data-cmd="der">
+            <i>&#9654;</i><b>GIRAR</b>
+          </button>
+          <button class="cbtn cbtn--rev" type="button" data-cmd="reversa">
+            <i>&#9660;</i><b>REVERSA</b>
+          </button>
+        </div>
+      </section>
+
+      <section class="brazo" aria-label="Control del brazo">
+        <p class="bloque__nombre">BRAZO</p>
+
+        <div class="eje">
+          <button class="ebtn" type="button" data-cmd="recoger" aria-label="Recoger boom">&#9664;</button>
+          <div class="eje__cuerpo">
+            <span class="eje__nombre">ALCANCE</span>
+            <div class="eje__niveles" id="niv-alcance" aria-hidden="true"></div>
+            <b class="eje__valor" id="txt-alcance">CORTO</b>
+          </div>
+          <button class="ebtn" type="button" data-cmd="alargar" aria-label="Alargar boom">&#9654;</button>
+        </div>
+
+        <div class="eje">
+          <button class="ebtn" type="button" data-cmd="arriar" aria-label="Arriar spreader">&#9660;</button>
+          <div class="eje__cuerpo">
+            <span class="eje__nombre">ALTURA</span>
+            <div class="eje__niveles" id="niv-altura" aria-hidden="true"></div>
+            <b class="eje__valor" id="txt-altura">NIVEL 0 &middot; SUELO</b>
+          </div>
+          <button class="ebtn" type="button" data-cmd="izar" aria-label="Izar spreader">&#9650;</button>
+        </div>
+
+        <p class="brazo__aviso" id="brazo-aviso">MAS ALCANCE ES MENOS ALTURA</p>
+
+        <button class="tbtn" type="button" id="btn-twist">
+          <b id="txt-twist">ENGANCHAR</b><small>ESPACIO</small>
+        </button>
+      </section>
+
+      <section class="carga" aria-label="Estado de la carga">
+        <p class="bloque__nombre">CARGA</p>
+        <p class="carga__que" id="carga-que">SIN CARGA</p>
+        <div class="barra" aria-hidden="true"><i id="carga-barra"></i></div>
+        <p class="carga__estado" id="carga-estado">EL SPREADER VA VACIO</p>
+      </section>
+
+      <section class="orden" aria-label="Orden de trabajo">
+        <p class="bloque__nombre">ORDEN DE TRABAJO</p>
+        <p class="orden__texto" id="orden-texto">Practica libre: mueve contenedores por el patio y apila hasta tres de alto. Las misiones llegan en la siguiente fase.</p>
+      </section>
+
+      <footer class="panel__pie">
+        <button class="pbtn" type="button" id="btn-reiniciar">REINICIAR [R]</button>
+      </footer>
+
+    </aside>
+  </main>
+
+  <button class="ayuda" id="btn-ayuda" type="button" aria-label="Instrucciones">?</button>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-titulo">
+    <div class="overlay__caja">
+      <p class="overlay__kicker">PATIO DE CONTENEDORES &middot; RS-04</p>
+      <h1 id="overlay-titulo">ERES LA REACHSTACKER</h1>
+      <p class="overlay__intro">No manejas a un operador: manejas la maquina. Pesa cuarenta y tantas toneladas y no se mueve de lado, asi que primero se <strong>encara</strong> y luego se avanza. Y lo que la hace especial es el brazo: <strong>alcanza por encima de la primera fila</strong>, que es justo para lo que sirve en un patio.</p>
+
+      <h2 class="overlay__sub">CONDUCIR</h2>
+      <ul>
+        <li><strong>ARRIBA</strong> avanza una casilla en el rumbo que llevas; <strong>ABAJO</strong> retrocede sin girar, mas lento.</li>
+        <li><strong>IZQUIERDA</strong> y <strong>DERECHA</strong> giran la maquina 90 grados <strong>en su sitio</strong>.</li>
+      </ul>
+
+      <h2 class="overlay__sub">EL BRAZO</h2>
+      <ul>
+        <li><strong>Z</strong> y <strong>X</strong> recogen y alargan el boom: el spreader trabaja a una, dos o tres casillas por delante. La casilla resaltada te dice a cual apunta.</li>
+        <li><strong>Q</strong> y <strong>E</strong> arrian e izan el spreader por niveles, del suelo al tercer piso de la pila.</li>
+        <li><strong>Cuanto mas alargas, menos alto llegas</strong>: corto alcanza los 3 niveles, medio 2 y largo solo 1. Es la curva de carga de la maquina real, y por eso a veces conviene reposicionarse en vez de estirar el brazo.</li>
+        <li><strong>ESPACIO</strong> cierra y abre los twistlocks. Para enganchar, el spreader tiene que estar <strong>justo al nivel</strong> de la caja de arriba de la pila; para soltar, al nivel del hueco donde va.</li>
+      </ul>
+
+      <h2 class="overlay__sub">SEGURIDAD</h2>
+      <ul>
+        <li>Con la carga a <strong>nivel 2 o mas la maquina no arranca</strong>. A nivel 1 circula, pero va castigando el contenedor. Lo correcto es bajar a <strong>nivel 0</strong> para trasladar.</li>
+        <li>El contenedor tiene <strong>integridad</strong>: se dana al golpear, al soltarlo desde arriba en vez de posarlo, al pasearlo izado y al zangolotearlo con maniobras a tirones.</li>
+        <li>Con carga la maquina es mas lenta y cada topetazo <strong>cuenta doble</strong>.</li>
+      </ul>
+
+      <p class="overlay__nota">Practica libre: no hay reloj y no se pierde. Las ordenes de trabajo, el puntaje y la dificultad avanzada llegan en la siguiente fase. <strong>R</strong> reinicia el turno, <strong>H</strong> abre esta ayuda.</p>
+      <button class="overlay__btn" id="btn-entendido" type="button">SUBIR A LA MAQUINA</button>
+    </div>
+  </div>
+
+  <script src="js/reach.js"></script>
+</body>
+</html>

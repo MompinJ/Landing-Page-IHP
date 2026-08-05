@@ -733,6 +733,36 @@
       "accent": "#35d3ff",
       "theme": "dyn-tronco-runner",
       "path": "dinamicas/tronco-runner/index.html"
+    },
+    {
+      "slug": "patio-rtg",
+      "title": "Patio RTG",
+      "subtitle": "Opera la grua y clasifica: que es cultura y que no",
+      "description": "Vista aerea de un bloque de patio de 8 bahias por 6 carriles donde el participante es el operador de una grua de patio sobre neumaticos (RTG). En la linea de inspeccion llegan 16 contenedores rotulados con conceptos (Historia y tradiciones, Seguridad, Liderazgo, Valores, Disciplina, Normas y comportamientos, Comunicacion, Amistad, Jerarquia, Entorno laboral, Identidad, Dinero, Clientes, Estructura organizacional, Tecnologia e innovacion, Presion externa y competencia) y hay que mandarlos al PATIO A si forman parte de la cultura organizacional o al PATIO B si no. Lo que se juega no es solo la clasificacion sino la maniobra: la consola en pantalla repite el ciclo real de la grua, simplificado — posicionar el portico (gantry) y el carro (trolley), bajar el spreader, cerrar los twistlocks, izar con la caja, trasladar, bajar sobre un hueco libre y liberar — y la grua no se traslada con el spreader abajo, igual que en la vida real. Luces de estado (spreader, twistlocks, gancho), guia de la siguiente maniobra en la consola, spreader que se ve mas grande y con sombra larga cuando esta arriba, balizas ambar en las patas y matricula de contenedor en cada caja. Modo taller: sin reloj. Cada caja depositada dice si acerto y explica por que ese concepto es o no es cultura, y cualquier caja se puede volver a levantar para corregir, incluidas las que ya estan en un patio. Al colocar las 16 aparece el cierre con el conteo, las que quedaron en el patio equivocado y la lista completa por patio para discutir en grupo. Se juega con la consola en pantalla, tocando directo la celda del patio (pensado para pantalla tactil o proyector interactivo) o con teclado: flechas o WASD mover, espacio bajar e izar, enter anclar y liberar, R otra ronda. Los 16 conceptos, su veredicto y su explicacion se editan en la constante CAJAS de js/rtg.js.",
+      "tags": [
+        "Dinamica",
+        "Cultura organizacional",
+        "Grua RTG",
+        "Taller",
+        "RH"
+      ],
+      "accent": "#FFC627",
+      "path": "dinamicas/patio-rtg/index.html"
+    },
+    {
+      "slug": "patio-reach",
+      "title": "Patio Reach",
+      "subtitle": "Maneja la reachstacker: encarar, alcanzar y apilar",
+      "description": "Patio de contenedores en pixel art sobre una cuadricula de 20 bahias por 14 carriles, en vista 3/4 (el suelo se ve a plomo y todo lo que levanta del piso se dibuja de frente, como en los RPG de cuadricula), donde el participante no maneja a un operador: ES la reachstacker RS-04. El movimiento es vehicular y no de personaje, que es justo lo que se viene a aprender: arriba avanza una casilla en el rumbo que se lleva, abajo retrocede sin girar y notablemente mas lento porque es marcha atras, e izquierda y derecha giran la maquina noventa grados EN SU SITIO sin desplazarla. Por eso hay que encarar antes de maniobrar, igual que con la maquina real, y por eso la casilla de enfrente va resaltada: esa es la ZONA DE ALCANCE, donde el boom podra enganchar la carga. El panel lateral repite los mandos en pantalla para tactil y proyector, y da la lectura que hace legible la conduccion: posicion en nomenclatura de patio (bahia y carril), rumbo, que hay en la zona de alcance, maniobras hechas y golpes. Contra la valla perimetral, la caseta, los conos, el poste de luz o un contenedor no se pasa, y cada topetazo se cuenta y se nombra. Sin reloj y sin perder: es una pista de practica. La maquina es una reachstacker de patio con detalle de chapa (rejilla de radiador, juntas remachadas, escalerilla, escape y boom en dos secciones telescopicas), dibujada a mano en los cuatro rumbos: de perfil se le ve el boom tendido con el spreader colgando por delante, de espaldas las luces traseras y de frente los faros, asi que hacia donde encara se lee sin mirar el panel. Lleva baliza ambar girando siempre, bocanada de humo por el escape al arrancar cada maniobra (mas fuerte en marcha atras) y luz derramada en el suelo de la casilla de enfrente, en rojo cuando retrocede. Todo el dibujo es procedural, sin un solo archivo de imagen: se pinta con primitivas de pixel sobre coordenadas enteras, el suelo se hornea una sola vez, lo que tiene altura se ordena por profundidad cada cuadro y el canvas se escala siempre a multiplos enteros para que el pixel quede cuadrado en proyector. Y ademas del volante esta el brazo, que es lo que hace unica a una reachstacker: alcanza por encima de la primera fila. Tiene dos ejes, como la maquina real. ALCANCE corto, medio o largo decide a que casilla llega el spreader, una, dos o tres por delante, asi que se puede sacar una caja de la segunda fila sin tocar las de adelante. ALTURA sube el spreader por niveles, del suelo al tercer piso de la pila, porque los contenedores se apilan hasta tres. Y las dos cosas estan atadas por la curva de carga de la maquina de verdad: cuanto mas se alarga el boom, menos alto llega, corto alcanza los 3 niveles, medio 2 y largo solo 1, de manera que muchas veces sale mas a cuenta reposicionar la maquina que estirar el brazo. Para enganchar hay que poner el spreader justo al nivel de la caja de arriba de la pila, y para soltar al nivel del hueco donde va. Todo esto se maneja con la botonera en pantalla, pensada para tactil y proyector, o con teclado. La operacion se juega con reglas de seguridad reales: con la carga a nivel 2 o mas la maquina no arranca, a nivel 1 circula pero va castigando el contenedor, con carga todo es mas lento y cada topetazo cuenta doble. Y el contenedor tiene INTEGRIDAD, que baja al golpear con carga, al soltarlo desde mas arriba del hueco en vez de posarlo, al pasearlo izado y al zangolotearlo con maniobras encadenadas a tirones; la caja se va viendo abollada y descolorida conforme se maltrata, y el panel lleva la barra de estado. Esta fase cubre conducir, alcanzar, enganchar, transportar y apilar; las ordenes de trabajo, el puntaje por eficiencia y seguridad y la dificultad avanzada (contenedores especiales, requisitos previos, efectos ambientales) llegan en la siguiente. Teclado: flechas o WASD conducir, Z y X recoger y alargar el boom, Q y E arriar e izar, ESPACIO twistlocks, R reinicia el turno, H abre la ayuda. El trazado del patio se edita en la constante MAPA de js/reach.js (un caracter por casilla), las pilas de contenedores en CARGA, la curva de carga en MAX_ALTURA y la maquina en las funciones maquinaPerfil, maquinaFrente y maquinaEspalda.",
+      "tags": [
+        "Dinamica",
+        "Reachstacker",
+        "Pixel art",
+        "Cuadricula",
+        "Operacion de patio"
+      ],
+      "accent": "#f0b91d",
+      "path": "dinamicas/patio-reach/index.html"
     }
   ],
   "experimental": [
@@ -740,7 +770,7 @@
       "slug": "puntero-proyector",
       "title": "Puntero de Proyector",
       "subtitle": "Diagnostico de lapiz/dedo via Pointer Events",
-      "description": "Prueba si el lapiz o el dedo de un proyector interactivo de tiro ultracorto (Epson BrightLink, BenQ...) funciona como puntero estandar en el navegador via USB HID. Pantalla completa para dibujar con canvas; panel lateral y bitacora en vivo con pointerType, presion, tilt, tamano de contacto y punteros simultaneos activos. Incluye rejilla de calibracion con marcas en esquinas y centro para verificar que el trazo cae exacto donde toca el lapiz. Checklist de requisitos (USB, calibracion del fabricante, touch-action: none) en la pantalla de instrucciones.",
+      "description": "Prueba si el lapiz o el dedo de un proyector interactivo de tiro ultracorto (Epson BrightLink, BenQ...) funciona como puntero estandar en el navegador via USB HID. Captura en la ventana entera y en fase de captura: ningun panel puede tragarse un evento. Cartel central legible a varios metros que anuncia si llego señal y de que tipo, panel en vivo con pointerType, presion, tilt, tamano de contacto, punteros activos y deteccion de saltos (delata un puntero absoluto frente a un trackpad), bitacora exportable a .txt y ronda de nueve dianas que mide en pixeles el desvio entre donde tocas y donde cae el evento. Las instrucciones traen la cadena real de la sala (Epson EB-760Wi + lapiz ELPPN05 + ClickShare de Barco + ThinkPad) y el orden de prueba, empezando por el cable USB que el ClickShare no puede sustituir.",
       "tags": [
         "Experimento",
         "Pointer Events",
