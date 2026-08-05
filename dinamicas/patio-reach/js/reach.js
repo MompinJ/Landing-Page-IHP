@@ -83,38 +83,38 @@
   const PT_GOLPE = 12;             // resta por topetazo
   const PT_SEGUNDO = 2;            // bonus por segundo que sobra al terminar
 
-  const MAPA = [
-    '####################',
-    '#TTTTTTTTTTTTTTTTTT#',
-    '#TTTTTTTTTTTTTTTTTT#',
-    '#..................#',
-    '#.AAAA......BBBB.EE#',
-    '#.AAAA......BBBB.EE#',
-    '#.AAAA......BBBB.EE#',
-    '#.====......====...#',
-    '#..................#',
-    '#....o........o....#',
-    '#...~~~............#',
-    '#..................#',
-    '#.HHH.........P....#',
-    '####################'
-  ];
-
+  // ---------- tiles del mundo ----------
   const TILES = {
     '.': { nombre: 'PISO LIBRE',            solido: false },
-    'T': { nombre: 'VIA DE CAMION',         solido: false },
+    'T': { nombre: 'VIA DE CAMION',         solido: false, via: true },
+    'r': { nombre: 'VIA DE TREN',           solido: false, riel: true },
     '=': { nombre: 'RAYADO DE SEGREGACION', solido: false },
     'A': { nombre: 'PATIO A',               solido: false, zona: 'A' },
     'B': { nombre: 'PATIO B',               solido: false, zona: 'B' },
-    'E': { nombre: 'TOMAS DE REEFER',       solido: false, zona: 'E', toma: true },
-    '~': { nombre: 'ENCHARCAMIENTO',        solido: false },
+    'E': { nombre: 'LINEA DE TOMAS',        solido: false, zona: 'E', toma: true },
+    'M': { nombre: 'PIE DE GRUA',           solido: false, zona: 'M' },
+    'V': { nombre: 'PATIO DE VACIOS',       solido: false, zona: 'V' },
+    'I': { nombre: 'CELDA DE PELIGROSOS',   solido: false, zona: 'I' },
+    'G': { nombre: 'GATE DE CAMIONES',      solido: false, zona: 'G' },
+    'W': { nombre: 'BASCULA',               solido: false, zona: 'W' },
+    '~': { nombre: 'AGUA',                  solido: true,  agua: true },
+    'q': { nombre: 'CANTIL DEL MUELLE',     solido: true },
+    'b': { nombre: 'BOLARDO',               solido: true },
+    'S': { nombre: 'CASCO DEL BUQUE',       solido: true },
+    'd': { nombre: 'CUBIERTA DEL BUQUE',    solido: true },
+    'L': { nombre: 'PATA DE LA GRUA STS',   solido: true },
+    'p': { nombre: 'RACK DE TUBERIA',       solido: true },
+    'K': { nombre: 'NAVE DE TALLER',        solido: true },
     '#': { nombre: 'VALLA',                 solido: true },
     'H': { nombre: 'CASETA',                solido: true },
     'o': { nombre: 'CONO',                  solido: true },
     'P': { nombre: 'POSTE DE LUZ',          solido: true }
   };
 
-  const ZONAS = { A: 'PATIO A', B: 'PATIO B', E: 'LINEA DE TOMAS' };
+  const ZONAS = {
+    A: 'PATIO A', B: 'PATIO B', E: 'LINEA DE TOMAS', M: 'PIE DE GRUA',
+    V: 'PATIO DE VACIOS', I: 'CELDA DE PELIGROSOS', G: 'GATE', W: 'BASCULA'
+  };
 
   const TIPOS = {
     normal: { sigla: 'GP',  nombre: 'ESTANDAR' },
@@ -124,83 +124,241 @@
   };
 
   // ---------- los turnos ----------
+  // Cada turno trae SU trazado de terminal, no solo otra carga: el
+  // mundo mide 40 x 28 casillas y la camara sigue a la maquina.
   // Cada caja lleva matricula para que las ordenes puedan nombrarla
-  // sin ambiguedad. Las ordenes piden llevar una matricula a una
-  // zona; el resto de cajas son el estorbo que hay que sortear.
+  // sin ambiguedad; el resto es el estorbo que hay que sortear.
   const TURNOS = [
     {
-      nombre: 'TURNO 1', clima: 'dia', segundos: 180,
-      lema: 'Dia claro. Tres movimientos limpios para agarrar el ritmo.',
+      nombre: 'TURNO 1', clima: 'dia', segundos: 200,
+      lema: 'Dia claro en el patio. Tres movimientos limpios para agarrar el ritmo y aprenderte la terminal.',
+      inicio: { col: 19, fil: 21 },
+      mapa: [
+        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        'qqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqq',
+        'MMMMMMMMMMMMMMMMMMMMMMMM................',
+        'MMMMMMMMMMMMMMMMMMMMMMMM.......P........',
+        '........................................',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#......................................#',
+        '#..AAAAAA....BBBBBB....EEEE............#',
+        '#..AAAAAA....BBBBBB....EEEE............#',
+        '#..AAAAAA....BBBBBB....EEEE............#',
+        '#..======....======....................#',
+        '#..AAAAAA....BBBBBB....................#',
+        '#..AAAAAA....BBBBBB....................#',
+        '#..AAAAAA....BBBBBB....................#',
+        '#..======....======....................#',
+        '#...o........o..........o..............#',
+        '#......................................#',
+        '#..VVVVV...KKKK......WWW...............#',
+        '#..VVVVV...KKKK......WWW...............#',
+        '#......................................#',
+        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
+        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
+        '#......................................#',
+        '#.HHH..................GGGGGG..........#',
+        '#......................................#',
+        '########################################',
+      ],
       cajas: [
-        { m: 'MSKU-201', col: 2,  fil: 4, color: 'rojo',  tipo: 'normal' },
-        { m: 'TGHU-118', col: 3,  fil: 4, color: 'azul',  tipo: 'normal' },
-        { m: 'CAIU-733', col: 5,  fil: 4, color: 'verde', tipo: 'normal' },
-        { m: 'HLXU-940', col: 14, fil: 4, color: 'gris',  tipo: 'normal' },
-        { m: 'OOLU-355', col: 15, fil: 6, color: 'azul',  tipo: 'normal' }
+        { m: 'MSKU-201', col: 3,  fil: 9,  color: 'rojo',  tipo: 'normal' },
+        { m: 'TGHU-118', col: 4,  fil: 9,  color: 'azul',  tipo: 'normal' },
+        { m: 'CAIU-733', col: 6,  fil: 10, color: 'verde', tipo: 'normal' },
+        { m: 'HLXU-940', col: 14, fil: 9,  color: 'gris',  tipo: 'normal' },
+        { m: 'OOLU-355', col: 17, fil: 14, color: 'azul',  tipo: 'normal' },
+        { m: 'MEDU-090', col: 5,  fil: 14, color: 'gris',  tipo: 'normal' },
+        { m: 'SUDU-410', col: 4,  fil: 19, color: 'verde', tipo: 'normal' }
       ],
       ordenes: [
         { m: 'MSKU-201', zona: 'B' },
         { m: 'CAIU-733', zona: 'B' },
         { m: 'HLXU-940', zona: 'A' }
+      ],
+      trafico: [
+        { tipo: 'camion', fil: 6, dir: 1,  x0: -3, v: 4.5, cada: 7 },
+        { tipo: 'camion', fil: 7, dir: -1, x0: 42, v: 4,   cada: 9, retraso: 3 }
       ]
     },
     {
-      nombre: 'TURNO 2', clima: 'lluvia', segundos: 200,
-      lema: 'Llueve y el piso resbala. Ademas hay pilas de por medio: para sacar la de abajo primero se quita la de arriba.',
+      nombre: 'TURNO 2', clima: 'lluvia', segundos: 240,
+      lema: 'Buque atracado y lloviendo. Hay que alimentar el pie de grua para que la STS embarque, y el piso resbala.',
+      inicio: { col: 20, fil: 19 },
+      mapa: [
+        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '~~~SSSSSSSSSSSSSSSSSSSSSSSSSSSSSS~~~~~~~',
+        '~~~SddddddddddddddddddddddddddddS~~~~~~~',
+        '~~~SddddddddddddddddddddddddddddS~~~~~~~',
+        '~~~SSSSSSSSSSSSSSSSSSSSSSSSSSSSSS~~~~~~~',
+        'qqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqq',
+        'LMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM.....L...',
+        'LMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM.....L...',
+        '........P......................P........',
+        '#......................................#',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#......................................#',
+        '#...AAAAAA...BBBBBB...EEEE.............#',
+        '#...AAAAAA...BBBBBB...EEEE.............#',
+        '#...AAAAAA...BBBBBB...EEEE.............#',
+        '#...======...======....................#',
+        '#......................................#',
+        '#..o..........o...........o............#',
+        '#......................................#',
+        '#..VVVVVV....IIII......................#',
+        '#..VVVVVV....IIII......................#',
+        '#......................................#',
+        '#..KKKKK..............WWW..............#',
+        '#..KKKKK...............................#',
+        '#......................................#',
+        '#.HHH....................GGGGGG........#',
+        '########################################',
+      ],
       cajas: [
-        { m: 'MSKU-412', col: 2,  fil: 4, color: 'rojo',  tipo: 'normal' },
-        { m: 'TGHU-501', col: 2,  fil: 5, color: 'azul',  tipo: 'normal' },
-        { m: 'CAIU-088', col: 2,  fil: 6, color: 'verde', tipo: 'normal' },
-        { m: 'SUDU-677', col: 5,  fil: 4, color: 'gris',  tipo: 'normal' },
-        { m: 'HLXU-122', col: 5,  fil: 4, color: 'rojo',  tipo: 'normal' },
-        { m: 'OOLU-909', col: 5,  fil: 4, color: 'azul',  tipo: 'normal' },
-        { m: 'MEDU-343', col: 13, fil: 5, color: 'verde', tipo: 'normal' }
+        { m: 'MSKU-412', col: 5,  fil: 13, color: 'rojo',  tipo: 'normal' },
+        { m: 'TGHU-501', col: 5,  fil: 13, color: 'azul',  tipo: 'normal' },
+        { m: 'CAIU-088', col: 7,  fil: 14, color: 'verde', tipo: 'normal' },
+        { m: 'SUDU-677', col: 14, fil: 13, color: 'gris',  tipo: 'normal' },
+        { m: 'HLXU-122', col: 14, fil: 13, color: 'rojo',  tipo: 'normal' },
+        { m: 'OOLU-909', col: 14, fil: 13, color: 'azul',  tipo: 'normal' },
+        { m: 'MEDU-343', col: 17, fil: 15, color: 'verde', tipo: 'normal' },
+        { m: 'CRXU-201', col: 23, fil: 13, color: 'aqua',  tipo: 'reefer' }
       ],
       ordenes: [
-        { m: 'OOLU-909', zona: 'B' },
-        { m: 'SUDU-677', zona: 'B' },
-        { m: 'CAIU-088', zona: 'B' }
+        { m: 'OOLU-909', zona: 'M' },
+        { m: 'SUDU-677', zona: 'M' },
+        { m: 'CAIU-088', zona: 'M' }
+      ],
+      trafico: [
+        { tipo: 'camion', fil: 10,  dir: 1,  x0: -3, v: 4,   cada: 6 },
+        { tipo: 'camion', fil: 11, dir: -1, x0: 42, v: 4.5, cada: 8, retraso: 2 },
+        { tipo: 'sts',    col: 8,  fil: 6,  v: 1.2, ida: 4, vuelta: 26 }
       ]
     },
     {
-      nombre: 'TURNO 3', clima: 'niebla', segundos: 220,
-      lema: 'Niebla cerrada: solo se ve lo que tienes cerca. Y entra carga especial, con sus reglas.',
+      nombre: 'TURNO 3', clima: 'niebla', segundos: 260,
+      lema: 'Niebla en la zona intermodal: solo ves lo que tienes cerca, pasa el tren y entra carga especial con sus reglas.',
+      inicio: { col: 20, fil: 24 },
+      mapa: [
+        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        'qqqqqqbqqqqqqqqqbqqqqqqqqqbqqqqqqqbqqqqq',
+        'MMMMMMMMMMMMMMMM........................',
+        '............P..............P............',
+        '#......................................#',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#......................................#',
+        '#.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.#',
+        '#.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.#',
+        '#......................................#',
+        '#..VVVVVVVV....VVVVVVVV................#',
+        '#..VVVVVVVV....VVVVVVVV................#',
+        '#..========....========................#',
+        '#......................................#',
+        '#..........p......p....................#',
+        '#..AAAAA...BBBBB...EEEE................#',
+        '#..AAAAA...BBBBB...EEEE................#',
+        '#..AAAAA...BBBBB.......................#',
+        '#......................................#',
+        '#..o............o.........o............#',
+        '#......................................#',
+        '#..WWWW.....KKKKKK.....................#',
+        '#..WWWW.....KKKKKK.....................#',
+        '#......................................#',
+        '#.HHH................GGGGGG............#',
+        '#......................................#',
+        '########################################',
+      ],
       cajas: [
-        { m: 'CRXU-777', col: 3,  fil: 4, color: 'aqua',  tipo: 'reefer' },
-        { m: 'MSKU-018', col: 3,  fil: 5, color: 'rojo',  tipo: 'normal' },
-        { m: 'IMOU-666', col: 5,  fil: 6, color: 'naranja', tipo: 'imo' },
-        { m: 'TGHU-240', col: 12, fil: 4, color: 'azul',  tipo: 'normal' },
-        { m: 'HLXU-881', col: 14, fil: 5, color: 'gris',  tipo: 'normal' },
-        { m: 'CAIU-455', col: 15, fil: 4, color: 'verde', tipo: 'normal' }
+        { m: 'CRXU-777', col: 4,  fil: 16, color: 'aqua',  tipo: 'reefer' },
+        { m: 'MSKU-018', col: 5,  fil: 17, color: 'rojo',  tipo: 'normal' },
+        { m: 'IMOU-666', col: 12, fil: 16, color: 'naranja', tipo: 'imo' },
+        { m: 'TGHU-240', col: 13, fil: 17, color: 'azul',  tipo: 'normal' },
+        { m: 'HLXU-881', col: 6,  fil: 11, color: 'gris',  tipo: 'normal' },
+        { m: 'CAIU-455', col: 18, fil: 12, color: 'verde', tipo: 'normal' },
+        { m: 'OOLU-512', col: 7,  fil: 11, color: 'azul',  tipo: 'normal' }
       ],
       ordenes: [
         { m: 'CRXU-777', zona: 'E' },
-        { m: 'IMOU-666', zona: 'B' },
-        { m: 'TGHU-240', zona: 'A' }
+        { m: 'IMOU-666', zona: 'V' },
+        { m: 'HLXU-881', zona: 'B' }
+      ],
+      trafico: [
+        { tipo: 'camion', fil: 5, dir: 1,  x0: -3, v: 4.5, cada: 8 },
+        { tipo: 'tren',   fil: 8, dir: 1,  x0: -12, v: 6,  cada: 16, largo: 9 },
+        { tipo: 'camion', fil: 6, dir: -1, x0: 42, v: 4,   cada: 11, retraso: 4 }
       ]
     },
     {
-      nombre: 'TURNO 4', clima: 'noche', segundos: 240,
-      lema: 'Turno de noche: solo alumbran tus faros y los postes. Y hay un overweight, que solo va abajo y pesa lo suyo.',
+      nombre: 'TURNO 4', clima: 'noche', segundos: 300,
+      lema: 'Turno de noche con la terminal entera abierta: buque, tren y gate. Solo alumbran tus faros y los postes.',
+      inicio: { col: 20, fil: 25 },
+      mapa: [
+        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '~SSSSSSSSSSSSSSSSSSSSSSSSSS~~~~~~~~~~~~~',
+        '~SddddddddddddddddddddddddS~~~~~~~~~~~~~',
+        '~SddddddddddddddddddddddddS~~~~~~~~~~~~~',
+        '~SSSSSSSSSSSSSSSSSSSSSSSSSS~~~~~~~~~~~~~',
+        'qqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqq',
+        'LMMMMMMMMMMMMMMMMMMMMMMMMMM......L......',
+        'LMMMMMMMMMMMMMMMMMMMMMMMMMM......L......',
+        '......P..........................P......',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#......................................#',
+        '#..AAAAA..BBBBB..EEEE..IIII............#',
+        '#..AAAAA..BBBBB..EEEE..IIII............#',
+        '#..AAAAA..BBBBB..EEEE..IIII............#',
+        '#..=====..=====........................#',
+        '#......................................#',
+        '#.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.#',
+        '#.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.#',
+        '#......................................#',
+        '#..o.........p........o........p.......#',
+        '#......................................#',
+        '#..VVVVVV...VVVVVV.....WWW.............#',
+        '#..VVVVVV...VVVVVV.....WWW.............#',
+        '#......................................#',
+        '#..KKKKKK............o.................#',
+        '#.HHH..................GGGGGGGG........#',
+        '########################################',
+      ],
       cajas: [
-        { m: 'CRXU-310', col: 2,  fil: 4, color: 'aqua',  tipo: 'reefer' },
-        { m: 'OWLU-900', col: 14, fil: 6, color: 'morado', tipo: 'pesado' },
-        { m: 'IMOU-121', col: 13, fil: 4, color: 'naranja', tipo: 'imo' },
-        { m: 'IMOU-122', col: 15, fil: 6, color: 'naranja', tipo: 'imo' },
-        { m: 'MSKU-505', col: 3,  fil: 6, color: 'rojo',  tipo: 'normal' },
-        { m: 'TGHU-660', col: 14, fil: 5, color: 'azul',  tipo: 'normal' },
-        { m: 'CAIU-771', col: 12, fil: 6, color: 'verde', tipo: 'normal' }
+        { m: 'CRXU-310', col: 4,  fil: 12, color: 'aqua',  tipo: 'reefer' },
+        { m: 'OWLU-900', col: 12, fil: 12, color: 'morado', tipo: 'pesado' },
+        { m: 'IMOU-121', col: 11, fil: 13, color: 'naranja', tipo: 'imo' },
+        { m: 'IMOU-122', col: 25, fil: 14, color: 'naranja', tipo: 'imo' },
+        { m: 'MSKU-505', col: 5,  fil: 13, color: 'rojo',  tipo: 'normal' },
+        { m: 'TGHU-660', col: 13, fil: 14, color: 'azul',  tipo: 'normal' },
+        { m: 'CAIU-771', col: 6,  fil: 22, color: 'verde', tipo: 'normal' },
+        { m: 'MEDU-888', col: 14, fil: 22, color: 'gris',  tipo: 'normal' }
       ],
       ordenes: [
-        { m: 'OWLU-900', zona: 'A' },
+        { m: 'OWLU-900', zona: 'M' },
         { m: 'CRXU-310', zona: 'E' },
-        { m: 'IMOU-121', zona: 'A' },
-        { m: 'MSKU-505', zona: 'B' }
+        { m: 'IMOU-121', zona: 'I' },
+        { m: 'MSKU-505', zona: 'M' }
+      ],
+      trafico: [
+        { tipo: 'camion', fil: 9,  dir: 1,  x0: -3, v: 4.5, cada: 6 },
+        { tipo: 'camion', fil: 10, dir: -1, x0: 42, v: 5,   cada: 7, retraso: 3 },
+        { tipo: 'tren',   fil: 17, dir: -1, x0: 50, v: 6.5, cada: 18, largo: 10 },
+        { tipo: 'sts',    col: 10, fil: 6,  v: 1.4, ida: 3, vuelta: 24 }
       ]
     }
   ];
 
-  const INICIO = { col: 9, fil: 11, rumbo: 0 };
+  const RUMBO_INICIAL = 0;
+
+  // El mundo es GRANDE y el canvas es solo una ventana sobre el: la
+  // vista mide 20 x 14 casillas y la terminal 40 x 28, asi que la
+  // camara sigue a la maquina. Manteniendo la vista del tamano de
+  // antes, el pixel se sigue viendo al triple en proyector.
+  const VISTA_C = 20, VISTA_F = 14;
+  const VISTA_W = VISTA_C * TILE, VISTA_H = VISTA_F * TILE;
+  const CAM_MUELLE = 6;            // que tan rapido persigue la camara
 
   // Para taller y pruebas: ?turno=3 arranca directo en ese turno (util
   // para ensenar solo el de noche) y ?seg=30 acorta el reloj.
@@ -222,10 +380,13 @@
   const PUNTO = String.fromCharCode(0xB7);
   const FLECHA = String.fromCharCode(0x2192);
 
-  const COLS = MAPA[0].length;
-  const FILAS = MAPA.length;
-  const MUNDO_W = COLS * TILE;
-  const MUNDO_H = FILAS * TILE;
+  // El trazado cambia con el turno, asi que las medidas del mundo son
+  // variables y se recalculan al arrancar cada uno.
+  let mapa = TURNOS[0].mapa;
+  let COLS = mapa[0].length;
+  let FILAS = mapa.length;
+  let MUNDO_W = COLS * TILE;
+  let MUNDO_H = FILAS * TILE;
 
   // ---------- paleta ----------
   const COL = {
@@ -238,6 +399,15 @@
     zonaA:      '#54BBAB',
     zonaB:      '#009BDE',
     zonaE:      '#c9a227',
+    zonaM:      '#e8734a',   // pie de grua, el color de la faena de muelle
+    zonaV:      '#7f8a96',   // vacios
+    zonaI:      '#ffd23d',   // peligrosos
+    zonaG:      '#9d7be0',   // gate
+    zonaW:      '#54BBAB',   // bascula
+    agua:       '#1d3d51',
+    aguaAlt:    '#274d63',
+    aguaOsc:    '#152c3c',
+    espuma:     '#5f93ad',
     rayado:     '#FFC627',
     rayadoPiso: '#9c7d1c',
     rayadoOsc:  '#272d34',
@@ -505,6 +675,96 @@
     caja(g, x + 14, y + 15, 7, 8, '#3d5a6b', '#527588');
   };
 
+  // ---------- lo nautico ----------
+  const dibujarBolardo = (g, x, base) => {
+    rc(g, x + 8, base - 2, 9, 3, COL.sombra);
+    caja(g, x + 9, base - 11, 7, 5, '#4a525c', '#69737e');    // cabeza
+    caja(g, x + 10, base - 7, 5, 6, '#39424c', '#525d69');    // fuste
+    caja(g, x + 7, base - 2, 11, 3, '#2b323a', '#414a54');    // base
+  };
+
+  const dibujarPataSTS = (g, x, base) => {
+    rc(g, x + 4, base - 2, 16, 3, COL.sombra);
+    caja(g, x + 5, base - 34, 6, 34, '#5a636d', '#7d8791');
+    caja(g, x + 14, base - 34, 6, 34, '#5a636d', '#7d8791');
+    for (let i = 4; i < 30; i += 7) rc(g, x + 11, base - 34 + i, 3, 2, '#4a525c');
+    caja(g, x + 3, base - 6, 19, 6, '#39424c', '#525d69');    // zapata
+    rc(g, x + 6, base - 40, 4, 6, M.a);                        // baliza
+  };
+
+  const dibujarTuberia = (g, x, base) => {
+    rc(g, x + 2, base - 2, 20, 3, COL.sombra);
+    for (let i = 0; i < 3; i++) {
+      caja(g, x + 3, base - 6 - i * 5, 18, 5, '#6b7078', '#878d96');
+      rc(g, x + 4, base - 5 - i * 5, 2, 3, '#4a4f56');
+      rc(g, x + 18, base - 5 - i * 5, 2, 3, '#4a4f56');
+    }
+  };
+
+  const dibujarNave = (g, x, base, vecinos) => {
+    const y = base - 34;
+    rc(g, x + 1, base - 2, TILE - 2, 3, COL.sombra);
+    rc(g, x, y, TILE, 12, '#3f4a54');                          // techo a dos aguas
+    for (let i = 0; i < TILE; i += 4) rc(g, x + i, y, 2, 12, '#485460');
+    rc(g, x, y, TILE, 2, '#5c6b78');
+    rc(g, x, y + 12, TILE, 24, '#8c949c');                     // muro
+    rc(g, x, y + 12, TILE, 1, '#a8b0b8');
+    if (!vecinos.izq) rc(g, x, y, 1, 36, '#666e76');
+    if (!vecinos.der) rc(g, x + TILE - 1, y, 1, 36, '#666e76');
+    rc(g, x, y + 35, TILE, 1, M.k);
+    if (!vecinos.izq) { caja(g, x + 4, y + 20, 10, 15, '#2b323a', '#3f4750'); }  // porton
+    else { for (let i = 2; i < TILE - 2; i += 5) rc(g, x + i, y + 18, 3, 6, '#5c6570'); }
+  };
+
+  // El buque: la fila de arriba es la banda de estribor, que se ve de
+  // canto y casi plana; la de abajo es el costado de babor, el que da
+  // al muelle, con su linea de flotacion y la obra viva. Dibujar las
+  // dos igual dejaba el buque como dos franjas rojas gemelas.
+  const dibujarCasco = (g, x, base, vecinos, tipo) => {
+    if (tipo === 'lejos') {
+      const y = base - 14;
+      rc(g, x, y, TILE, 14, '#243440');                        // banda lejana
+      rc(g, x, y, TILE, 3, '#3a4e5d');
+      rc(g, x, y + 11, TILE, 3, '#1a252e');
+      for (let i = 3; i < TILE; i += 7) rc(g, x + i, y + 4, 2, 5, '#1c2a34');
+      return;
+    }
+    const y = base - 22;
+    rc(g, x, y, TILE, 9, '#2b3a45');                           // amurada
+    rc(g, x, y, TILE, 2, '#43596b');
+    for (let i = 2; i < TILE; i += 6) rc(g, x + i, y + 3, 1, 5, '#1f2c35');
+    rc(g, x, y + 9, TILE, 3, '#8c3a30');                       // linea de flotacion
+    rc(g, x, y + 9, TILE, 1, '#c25c4f');
+    rc(g, x, y + 12, TILE, 10, '#6e2a22');                     // obra viva
+    for (let i = 0; i < TILE; i += 4) rc(g, x + i, y + 14, 1, 7, '#5c221b');
+    rc(g, x, y + 20, TILE, 2, '#3f1712');
+    if (!vecinos.izq) rc(g, x, y, 2, 22, '#1a252e');
+    if (!vecinos.der) rc(g, x + TILE - 2, y, 2, 22, '#1a252e');
+    if (tipo === 'popa') {
+      caja(g, x + 3, y - 22, 18, 24, '#c6ced6', '#e2e8ee');    // superestructura
+      caja(g, x + 5, y - 17, 6, 5, '#3d5a6b', '#527588');
+      caja(g, x + 13, y - 17, 6, 5, '#3d5a6b', '#527588');
+      rc(g, x + 5, y - 9, 14, 1, '#8f99a3');
+      rc(g, x + 8, y - 32, 7, 12, '#8c3a30');                  // chimenea
+      rc(g, x + 8, y - 32, 7, 3, '#2b323a');
+      rc(g, x + 17, y - 30, 2, 10, '#8c949c');                 // mastil
+    }
+  };
+
+  const dibujarCubierta = (g, x, base, i) => {
+    const y = base - 30;
+    rc(g, x, y, TILE, 30, '#39434d');                          // cubierta
+    rc(g, x, y, TILE, 2, '#4d5964');
+    // dos contenedores estibados a bordo, con su matricula insinuada
+    const paleta = ['azul', 'rojo', 'verde', 'gris'];
+    const c1 = COLORES_CAJA[paleta[i % 4]];
+    const c2 = COLORES_CAJA[paleta[(i + 2) % 4]];
+    caja(g, x + 2, y - 12, TILE - 4, 13, c1.base, c1.alto);
+    for (let k = 3; k < TILE - 5; k += 3) rc(g, x + k, y - 9, 1, 8, c1.bajo);
+    caja(g, x + 2, y + 1, TILE - 4, 13, c2.base, c2.alto);
+    for (let k = 3; k < TILE - 5; k += 3) rc(g, x + k, y + 4, 1, 8, c2.bajo);
+  };
+
   const dibujarValla = (g, x, base) => {
     const y = base - 14;
     rc(g, x, y, TILE, 5, '#525c67');
@@ -554,11 +814,21 @@
     SPR.cono = cocer(TILE, 18, (g) => dibujarCono(g, 0, 15));
     SPR.poste = cocer(TILE, 38, (g) => dibujarPoste(g, 0, 35));
     SPR.valla = cocer(TILE, 18, (g) => dibujarValla(g, 0, 15));
+    SPR.bolardo = cocer(TILE, 14, (g) => dibujarBolardo(g, 0, 11));
+    SPR.pata = cocer(TILE, 44, (g) => dibujarPataSTS(g, 0, 41));
+    SPR.tuberia = cocer(TILE, 22, (g) => dibujarTuberia(g, 0, 19));
     SPR.caseta = {};
+    SPR.nave = {};
+    SPR.casco = {};
     [0, 1, 2, 3].forEach((n) => {
-      SPR.caseta[n] = cocer(TILE, 34, (g) =>
-        dibujarCaseta(g, 0, 31, { izq: !!(n & 1), der: !!(n & 2) }));
+      const v = { izq: !!(n & 1), der: !!(n & 2) };
+      SPR.caseta[n] = cocer(TILE, 34, (g) => dibujarCaseta(g, 0, 31, v));
+      SPR.nave[n] = cocer(TILE, 38, (g) => dibujarNave(g, 0, 35, v));
+      SPR.casco['cerca' + n] = cocer(TILE, 24, (g) => dibujarCasco(g, 0, 22, v, 'cerca'));
+      SPR.casco['popa' + n] = cocer(TILE, 62, (g) => dibujarCasco(g, 0, 60, v, 'popa'));
+      SPR.casco['lejos' + n] = cocer(TILE, 16, (g) => dibujarCasco(g, 0, 14, v, 'lejos'));
     });
+    SPR.cubierta = [0, 1, 2, 3].map((i) => cocer(TILE, 34, (g) => dibujarCubierta(g, 0, 31, i)));
   };
 
   // ---------- DOM ----------
@@ -583,11 +853,11 @@
     turno: 0,
     fase: 'juego',         // 'juego' | 'cierre'
     reloj: 0, resta: 0,
-    col: INICIO.col, fil: INICIO.fil, rumbo: INICIO.rumbo,
-    desdeCol: INICIO.col, desdeFil: INICIO.fil,
+    col: 0, fil: 0, rumbo: RUMBO_INICIAL,
+    desdeCol: 0, desdeFil: 0,
     accion: null,
     t: 0, dur: 0,
-    giroDesde: INICIO.rumbo,
+    giroDesde: RUMBO_INICIAL,
     cmdTope: null,
     alcance: 0, altura: 0,
     alcanceVis: 0, alturaVis: 0,
@@ -598,6 +868,8 @@
     zarandeo: 0, quieto: 99,
     patina: 0,             // lo que queda de derrape con lluvia
     cierra: 0,             // cuenta atras para el cierre tras la ultima entrega
+    cam: { x: 0, y: 0, c0: 0, c1: 0, f0: 0, f1: 0 },
+    trafico: [],
     humo: [], gotas: [],
     buffer: null
   };
@@ -644,9 +916,10 @@
 
   // ---------- consultas del mapa ----------
   const dentro = (c, f) => c >= 0 && c < COLS && f >= 0 && f < FILAS;
-  const charEn = (c, f) => (dentro(c, f) ? MAPA[f][c] : '#');
+  const charEn = (c, f) => (dentro(c, f) ? mapa[f][c] : '#');
   const tileEn = (c, f) => TILES[charEn(c, f)] || TILES['#'];
-  const transitable = (c, f) => dentro(c, f) && !tileEn(c, f).solido && alturaPila(c, f) === 0;
+  const transitable = (c, f) =>
+    dentro(c, f) && !tileEn(c, f).solido && alturaPila(c, f) === 0 && !trafficoEn(c, f);
 
   const objetivo = () => {
     const r = RUMBOS[st.rumbo];
@@ -656,6 +929,7 @@
 
   const describir = (c, f) => {
     if (!dentro(c, f)) return 'FUERA DEL PATIO';
+    if (trafficoEn(c, f)) return 'VEHICULO EN MARCHA';
     const p = pilaEn(c, f);
     if (p && p.length) {
       const arr = p[p.length - 1];
@@ -670,12 +944,17 @@
     return 'BAHIA ' + bahia + ' ' + PUNTO + ' CARRIL ' + carril;
   };
 
-  const OBJETOS = [];
+  // Todo lo que levanta del piso es entidad y se ordena por
+  // profundidad. Los del mapa no cambian dentro de un turno, asi que
+  // se listan al arrancarlo.
+  const CON_ALTURA = '#HoPbLpKSd';
+  let OBJETOS = [];
   const listarObjetos = () => {
+    OBJETOS = [];
     for (let f = 0; f < FILAS; f++) {
       for (let c = 0; c < COLS; c++) {
-        const ch = MAPA[f][c];
-        if (ch === '#' || ch === 'H' || ch === 'o' || ch === 'P') OBJETOS.push({ col: c, fil: f, ch });
+        const ch = mapa[f][c];
+        if (CON_ALTURA.indexOf(ch) >= 0) OBJETOS.push({ col: c, fil: f, ch });
       }
     }
   };
@@ -708,22 +987,41 @@
     }
   };
 
-  const pintarCharco = (g, px, py, c, f) => {
-    pintarAsfalto(g, px, py, c, f, COL.asfalto, COL.asfaltoAlt, COL.asfaltoOsc);
-    const esAgua = (cc, ff) => charEn(cc, ff) === '~';
-    for (let y = 0; y < TILE; y++) {
-      for (let x = 0; x < TILE; x++) {
-        let d = TILE;
-        if (!esAgua(c - 1, f)) d = Math.min(d, x);
-        if (!esAgua(c + 1, f)) d = Math.min(d, TILE - 1 - x);
-        if (!esAgua(c, f - 1)) d = Math.min(d, y);
-        if (!esAgua(c, f + 1)) d = Math.min(d, TILE - 1 - y);
-        const borde = 3 + Math.floor(ruido(c * 7.3 + x, f * 11.9 + y) * 3);
-        if (d < borde) continue;
-        g.fillStyle = d < borde + 2 ? COL.charcoAlt : COL.charco;
-        g.fillRect(px + x, py + y, 1, 1);
-      }
+  // La darsena: agua profunda con reflejo y crestas. Se hornea, asi
+  // que el oleaje que se mueve va aparte en dibujarOleaje.
+  const pintarAgua = (g, px, py, c, f) => {
+    // bandas anchas y suaves: rayar linea a linea dejaba el agua como
+    // estatica de television
+    for (let y = 0; y < TILE; y += 2) {
+      const v = ruido(c * 2.3 + y * 0.31, f * 4.7);
+      g.fillStyle = v > 0.62 ? COL.aguaAlt : (v > 0.28 ? COL.agua : COL.aguaOsc);
+      g.fillRect(px, py + y, TILE, 2);
     }
+    for (let i = 0; i < 2; i++) {
+      const rx = Math.floor(ruido(c * 17.7 + i, f * 23.1) * (TILE - 8));
+      const ry = Math.floor(ruido(f * 13.9 + i, c * 31.3) * TILE);
+      rc(g, px + rx, py + ry, 5 + i * 2, 1, COL.espuma);
+    }
+  };
+
+  // El cantil: el canto de hormigon donde muere el muelle, con su
+  // defensa de caucho colgando sobre el agua.
+  const pintarCantil = (g, px, py, c, f) => {
+    pintarAgua(g, px, py, c, f);
+    rc(g, px, py + 6, TILE, TILE - 6, '#8f9aa4');
+    rc(g, px, py + 6, TILE, 2, '#b3bcc4');
+    rc(g, px, py + 4, TILE, 2, '#5c6570');
+    for (let x = 2; x < TILE; x += 8) rc(g, px + x, py + 10, 5, 4, '#2b323a');
+    rc(g, px, py + TILE - 2, TILE, 2, '#6d7783');
+  };
+
+  const pintarRiel = (g, px, py, c, f) => {
+    pintarAsfalto(g, px, py, c, f, '#3b3a36', '#47453f', '#2b2a27');
+    for (let x = 0; x < TILE; x += 6) rc(g, px + x, py + 5, 4, 14, '#5a5348');  // traviesas
+    rc(g, px, py + 7, TILE, 2, '#9aa3ab');                                       // rieles
+    rc(g, px, py + 15, TILE, 2, '#9aa3ab');
+    rc(g, px, py + 7, TILE, 1, '#c3ccd4');
+    rc(g, px, py + 15, TILE, 1, '#c3ccd4');
   };
 
   const pintarVia = (g, px, py, c, f) => {
@@ -738,9 +1036,32 @@
     }
   };
 
+  // Cada zona lleva su color y su marca de piso, para reconocerla sin
+  // leer el panel: escuadras de cajon en el patio, tomas en la linea
+  // de reefers, rayas de embarque en el pie de grua, y asi.
+  const PINTA_ZONA = {
+    A: COL.zonaA, B: COL.zonaB, E: COL.zonaE, M: COL.zonaM,
+    V: COL.zonaV, I: COL.zonaI, G: COL.zonaG, W: COL.zonaW
+  };
+
   const pintarSlot = (g, px, py, c, f, zona) => {
     pintarAsfalto(g, px, py, c, f, COL.asfalto, COL.asfaltoAlt, COL.asfaltoOsc);
-    g.fillStyle = zona === 'A' ? COL.zonaA : (zona === 'B' ? COL.zonaB : COL.zonaE);
+    const tono = PINTA_ZONA[zona];
+
+    // El pie de grua es una franja larguisima pegada al cantil, no un
+    // cajon: marcarle escuadras a cada casilla llenaba la pantalla de
+    // ruido naranja. Lleva dos lineas continuas de embarque y punto.
+    if (zona === 'M') {
+      rc(g, px, py + 5, TILE, 2, tono);
+      rc(g, px, py + TILE - 7, TILE, 2, tono);
+      if (c % 4 === 0) {
+        rc(g, px + 9, py + 9, 6, 6, 'rgba(0,0,0,0.3)');
+        rc(g, px + 10, py + 10, 4, 4, tono);
+      }
+      return;
+    }
+
+    g.fillStyle = tono;
     const L = 7, m = 2;
     const x0 = px + m, x1 = px + TILE - m - 1;
     const y0 = py + m, y1 = py + TILE - m - 1;
@@ -748,10 +1069,30 @@
     g.fillRect(x1 - L + 1, y0, L, 1);  g.fillRect(x1, y0, 1, L);
     g.fillRect(x0, y1, L, 1);          g.fillRect(x0, y1 - L + 1, 1, L);
     g.fillRect(x1 - L + 1, y1, L, 1);  g.fillRect(x1, y1 - L + 1, 1, L);
-    // la linea de tomas lleva su caja de conexion pintada
-    if (zona === 'E') {
+
+    if (zona === 'E') {                       // caja de conexion del reefer
       rc(g, px + 10, py + 10, 4, 5, '#2b323a');
       rc(g, px + 11, py + 11, 2, 2, '#ffd23d');
+    } else if (zona === 'I') {                // rombo de peligrosos
+      for (let i = 0; i < 4; i++) {
+        rc(g, px + 11 - i, py + 8 + i, 1 + i * 2, 1, tono);
+        rc(g, px + 11 - (3 - i), py + 12 + i, 1 + (3 - i) * 2, 1, tono);
+      }
+    } else if (zona === 'V') {                // aspa de vacios
+      for (let i = 0; i < 8; i++) {
+        rc(g, px + 8 + i, py + 8 + i, 1, 1, tono);
+        rc(g, px + 15 - i, py + 8 + i, 1, 1, tono);
+      }
+    } else if (zona === 'W') {                // plataforma de la bascula
+      rc(g, px + 3, py + 8, TILE - 6, 1, tono);
+      rc(g, px + 3, py + 15, TILE - 6, 1, tono);
+      rc(g, px + 3, py + 8, 1, 8, tono);
+      rc(g, px + TILE - 4, py + 8, 1, 8, tono);
+    } else if (zona === 'G') {                // damero del gate
+      for (let x = 0; x < TILE; x += 4) {
+        rc(g, px + x, py + 9, 2, 2, tono);
+        rc(g, px + x + 2, py + 13, 2, 2, tono);
+      }
     }
   };
 
@@ -762,17 +1103,27 @@
     for (let f = 0; f < FILAS; f++) {
       for (let c = 0; c < COLS; c++) {
         const px = c * TILE, py = f * TILE;
-        const ch = MAPA[f][c];
+        const ch = mapa[f][c];
+        const t = TILES[ch];
         if (ch === 'T') pintarVia(g, px, py, c, f);
+        else if (ch === 'r') pintarRiel(g, px, py, c, f);
         else if (ch === '=') pintarRayado(g, px, py, c, f);
-        else if (ch === '~') pintarCharco(g, px, py, c, f);
-        else if (ch === 'A' || ch === 'B' || ch === 'E') pintarSlot(g, px, py, c, f, ch);
+        else if (ch === '~') pintarAgua(g, px, py, c, f);
+        else if (ch === 'q' || ch === 'b') pintarCantil(g, px, py, c, f);
+        else if (ch === 'S' || ch === 'd') pintarAgua(g, px, py, c, f);
+        else if (t && t.zona) pintarSlot(g, px, py, c, f, t.zona);
         else pintarAsfalto(g, px, py, c, f, COL.asfalto, COL.asfaltoAlt, COL.asfaltoOsc);
       }
     }
+    // la rejilla solo sobre tierra: en el agua no hay casillas que ver
     g.fillStyle = COL.rejilla;
-    for (let c = 1; c < COLS; c++) g.fillRect(c * TILE, 0, 1, MUNDO_H);
-    for (let f = 1; f < FILAS; f++) g.fillRect(0, f * TILE, MUNDO_W, 1);
+    for (let f = 0; f < FILAS; f++) {
+      for (let c = 0; c < COLS; c++) {
+        if ('~Sdqb'.indexOf(mapa[f][c]) >= 0) continue;
+        g.fillRect(c * TILE, f * TILE, 1, TILE);
+        g.fillRect(c * TILE, f * TILE, TILE, 1);
+      }
+    }
     suelo = l.c;
   };
 
@@ -801,6 +1152,39 @@
   const rumboVisible = () => {
     if (st.accion === 'giro' && st.t / st.dur < 0.5) return st.giroDesde;
     return st.rumbo;
+  };
+
+  // ---------- camara ----------
+  // Persigue a la maquina con amortiguacion y se frena en los bordes
+  // del mundo, para no ensenar el vacio de fuera del mapa.
+  const camaraObjetivo = () => {
+    const a = apoyoMaquina();
+    return {
+      x: Math.max(0, Math.min(Math.max(0, MUNDO_W - VISTA_W), a.cx - VISTA_W / 2)),
+      y: Math.max(0, Math.min(Math.max(0, MUNDO_H - VISTA_H), a.cy - VISTA_H / 2 - 8))
+    };
+  };
+
+  const recortarVista = () => {
+    st.cam.c0 = Math.floor(st.cam.x / TILE);
+    st.cam.c1 = Math.ceil((st.cam.x + VISTA_W) / TILE);
+    st.cam.f0 = Math.floor(st.cam.y / TILE);
+    st.cam.f1 = Math.ceil((st.cam.y + VISTA_H) / TILE);
+  };
+
+  const seguirCamara = (dt) => {
+    const o = camaraObjetivo();
+    const k = Math.min(1, dt * CAM_MUELLE);
+    st.cam.x += (o.x - st.cam.x) * k;
+    st.cam.y += (o.y - st.cam.y) * k;
+    recortarVista();
+  };
+
+  const plantarCamara = () => {
+    const o = camaraObjetivo();
+    st.cam.x = o.x;
+    st.cam.y = o.y;
+    recortarVista();
   };
 
   const dibujarMaquina = (g) => {
@@ -954,11 +1338,11 @@
   const dibujarDestino = (g) => {
     const o = ordenActiva();
     if (!o) return;
-    const pulso = REDUCIDO ? 0.1 : 0.07 + Math.sin(st.reloj * 2.6) * 0.05;
+    const pulso = REDUCIDO ? 0.11 : 0.08 + Math.sin(st.reloj * 2.6) * 0.06;
     g.globalAlpha = pulso;
-    g.fillStyle = o.zona === 'A' ? COL.zonaA : (o.zona === 'B' ? COL.zonaB : COL.zonaE);
-    for (let f = 0; f < FILAS; f++) {
-      for (let c = 0; c < COLS; c++) {
+    g.fillStyle = PINTA_ZONA[o.zona] || COL.rayado;
+    for (let f = Math.max(0, st.cam.f0); f <= Math.min(FILAS - 1, st.cam.f1); f++) {
+      for (let c = Math.max(0, st.cam.c0); c <= Math.min(COLS - 1, st.cam.c1); c++) {
         if ((tileEn(c, f).zona || '') !== o.zona) continue;
         g.fillRect(c * TILE + 1, f * TILE + 1, TILE - 2, TILE - 2);
       }
@@ -966,14 +1350,55 @@
     g.globalAlpha = 1;
   };
 
+  // El agua viva: crestas que corren sobre la darsena. El fondo esta
+  // horneado, esto es solo lo que se mueve.
+  const dibujarOleaje = (g) => {
+    if (REDUCIDO) return;
+    const t = st.reloj;
+    for (let f = Math.max(0, st.cam.f0); f <= Math.min(FILAS - 1, st.cam.f1); f++) {
+      for (let c = Math.max(0, st.cam.c0); c <= Math.min(COLS - 1, st.cam.c1); c++) {
+        if (charEn(c, f) !== '~') continue;
+        const px = c * TILE, py = f * TILE;
+        for (let i = 0; i < 2; i++) {
+          const fase = ruido(c * 5.1 + i * 3.7, f * 7.9);
+          const y = Math.floor(((fase + t * 0.05) % 1) * TILE);
+          const x = Math.floor(ruido(f * 11.3 + i, c * 4.3) * (TILE - 8));
+          g.globalAlpha = 0.16 + fase * 0.14;
+          rc(g, px + x, py + y, 6 + (i % 2) * 2, 1, COL.espuma);
+        }
+      }
+    }
+    g.globalAlpha = 1;
+  };
+
+  // Los modulos contiguos del mismo tipo comparten borde para que se
+  // lean como una sola construccion y no como cajas sueltas.
+  const vecinos = (o, ch) =>
+    (charEn(o.col - 1, o.fil) === ch ? 1 : 0) | (charEn(o.col + 1, o.fil) === ch ? 2 : 0);
+
   const dibujarObjeto = (g, o) => {
     const x = o.col * TILE, base = o.fil * TILE + TILE - 2;
-    if (o.ch === '#') g.drawImage(SPR.valla, x, base - 15);
-    else if (o.ch === 'o') g.drawImage(SPR.cono, x, base - 15);
-    else if (o.ch === 'P') g.drawImage(SPR.poste, x, base - 35);
-    else if (o.ch === 'H') {
-      const n = (charEn(o.col - 1, o.fil) === 'H' ? 1 : 0) | (charEn(o.col + 1, o.fil) === 'H' ? 2 : 0);
-      g.drawImage(SPR.caseta[n], x, base - 31);
+    switch (o.ch) {
+      case '#': g.drawImage(SPR.valla, x, base - 15); break;
+      case 'o': g.drawImage(SPR.cono, x, base - 15); break;
+      case 'P': g.drawImage(SPR.poste, x, base - 35); break;
+      case 'b': g.drawImage(SPR.bolardo, x, base - 11); break;
+      case 'L': g.drawImage(SPR.pata, x, base - 41); break;
+      case 'p': g.drawImage(SPR.tuberia, x, base - 19); break;
+      case 'H': g.drawImage(SPR.caseta[vecinos(o, 'H')], x, base - 31); break;
+      case 'K': g.drawImage(SPR.nave[vecinos(o, 'K')], x, base - 35); break;
+      case 'd': g.drawImage(SPR.cubierta[o.col % 4], x, base - 31); break;
+      case 'S': {
+        const arriba = charEn(o.col, o.fil + 1) === 'd' || charEn(o.col, o.fil + 1) === 'S';
+        const n = (charEn(o.col - 1, o.fil) === 'S' || charEn(o.col - 1, o.fil) === 'd' ? 1 : 0) |
+                  (charEn(o.col + 1, o.fil) === 'S' || charEn(o.col + 1, o.fil) === 'd' ? 2 : 0);
+        if (arriba) { g.drawImage(SPR.casco['lejos' + n], x, base - 14); break; }
+        // la superestructura va en la popa, el extremo de estribor
+        const popa = charEn(o.col + 1, o.fil) !== 'S' && charEn(o.col + 1, o.fil) !== 'd';
+        if (popa) g.drawImage(SPR.casco['popa' + n], x, base - 60);
+        else g.drawImage(SPR.casco['cerca' + n], x, base - 22);
+        break;
+      }
     }
   };
 
@@ -987,13 +1412,139 @@
     }
   };
 
+  // ---------- trafico ----------
+  // La terminal tiene vida propia: camiones por la via, trenes por los
+  // rieles y la grua STS trabajando el buque. No son decorado -- su
+  // huella ocupa casillas de verdad, no se puede entrar donde estan y
+  // si te alcanzan es golpe.
+  const VEHICULOS = {
+    camion: { largo: 2, alto: 20, nombre: 'CAMION' },
+    tren:   { largo: 9, alto: 18, nombre: 'CONVOY' },
+    sts:    { largo: 3, alto: 44, nombre: 'GRUA STS' }
+  };
+
+  const sembrarTrafico = () => {
+    st.trafico = (turnoActual().trafico || []).map((v) => ({
+      tipo: v.tipo, fil: v.fil, col: v.col,
+      dir: v.dir || 1, v: v.v, cada: v.cada || 8,
+      largo: v.largo || VEHICULOS[v.tipo].largo,
+      x0: v.x0, ida: v.ida, vuelta: v.vuelta,
+      x: v.x0, espera: v.retraso || 0, vivo: !v.retraso, alto: 0
+    }));
+  };
+
+  // Casillas que ocupa un vehiculo ahora mismo
+  const huella = (v) => {
+    if (v.tipo === 'sts') return [];   // la STS va por encima, no estorba
+    const a = Math.floor(Math.min(v.x, v.x + v.largo - 1));
+    const b = Math.ceil(Math.max(v.x, v.x + v.largo - 1));
+    return [a, b];
+  };
+
+  const trafficoEn = (c, f) => st.trafico.some((v) => {
+    if (!v.vivo || v.tipo === 'sts' || v.fil !== f) return false;
+    const h = huella(v);
+    return c >= h[0] && c <= h[1];
+  });
+
+  const moverTrafico = (dt) => {
+    st.trafico.forEach((v) => {
+      if (v.tipo === 'sts') {
+        // la grua recorre el muelle de un extremo al otro, sin fin
+        v.x = v.x === undefined ? v.ida : v.x;
+        v.x += v.v * v.dir * dt;
+        if (v.x > v.vuelta) { v.x = v.vuelta; v.dir = -1; }
+        if (v.x < v.ida) { v.x = v.ida; v.dir = 1; }
+        v.vivo = true;
+        return;
+      }
+      if (!v.vivo) {
+        v.espera -= dt;
+        if (v.espera <= 0) { v.vivo = true; v.x = v.x0; }
+        return;
+      }
+      v.x += v.v * v.dir * dt;
+      const fuera = v.dir > 0 ? v.x > COLS + 2 : v.x < -v.largo - 2;
+      if (fuera) { v.vivo = false; v.espera = v.cada; return; }
+
+      // atropello: si alcanza la casilla de la maquina, golpe serio
+      const h = huella(v);
+      if (v.fil === st.fil && st.col >= h[0] && st.col <= h[1] && st.tGolpe >= ESPERA_GOLPE) {
+        st.golpes += 2;
+        st.tGolpe = 0;
+        st.sacudida = 0.8;
+        st.puntos = Math.max(0, st.puntos - PT_GOLPE * 2);
+        if (st.carga) danarCarga(DANO_GOLPE, 'TE LLEVO EL ' + VEHICULOS[v.tipo].nombre);
+        else decir('TE LLEVO EL ' + VEHICULOS[v.tipo].nombre + ' ' + PUNTO + ' NO TE PARES EN LA VIA', true);
+        // el atropello pasa fuera de una maniobra, asi que hay que
+        // refrescar el panel a mano o el marcador se queda colgado
+        refrescar();
+      }
+    });
+  };
+
+  const dibujarCamion = (g, x, base, dir) => {
+    const w = TILE * 2;
+    rc(g, x + 2, base - 2, w - 4, 3, COL.sombra);
+    const cab = dir > 0 ? x + w - 15 : x + 2;
+    caja(g, x + 2, base - 16, w - 4, 14, '#4a5560', '#5d6a76');   // caja
+    for (let i = 3; i < w - 6; i += 4) rc(g, x + 2 + i, base - 13, 1, 8, '#39424c');
+    caja(g, cab, base - 20, 13, 18, '#2f6a9e', '#4287c1');        // tractor
+    caja(g, cab + 2, base - 18, 9, 6, M.w, M.wA);
+    rc(g, x + 5, base - 3, 5, 4, M.t); rc(g, x + w - 10, base - 3, 5, 4, M.t);
+    rc(g, dir > 0 ? x + w - 4 : x + 1, base - 10, 3, 3, dir > 0 ? M.faro : M.r);
+  };
+
+  const dibujarTren = (g, x, base, largo) => {
+    const w = TILE * largo;
+    rc(g, x + 2, base - 2, w - 4, 3, COL.sombra);
+    // locomotora al frente y una fila de plataformas con cajas
+    caja(g, x + 2, base - 20, 26, 18, '#7a2f2f', '#a04141');
+    caja(g, x + 6, base - 17, 12, 7, M.w, M.wA);
+    for (let i = 30; i < w - 6; i += 26) {
+      caja(g, x + i, base - 8, 24, 6, '#39424c', '#525d69');      // plataforma
+      const c = COLORES_CAJA[['azul', 'verde', 'gris', 'rojo'][(i / 26) % 4 | 0]];
+      caja(g, x + i + 2, base - 22, 20, 15, c.base, c.alto);
+      rc(g, x + i + 4, base - 2, 4, 3, M.t);
+      rc(g, x + i + 17, base - 2, 4, 3, M.t);
+    }
+  };
+
+  // La STS cabalga el muelle: patas a los lados, viga arriba y el
+  // carro con el spreader colgando sobre el buque.
+  const dibujarSTS = (g, v) => {
+    const cx = Math.round(v.x * TILE + TILE / 2);
+    const base = v.fil * TILE + TILE + 6;
+    const alto = 44;
+    rc(g, cx - 30, base - 2, 60, 3, COL.sombra);
+    rc(g, cx - 26, base - alto, 5, alto, '#5a636d');              // patas
+    rc(g, cx + 21, base - alto, 5, alto, '#5a636d');
+    rc(g, cx - 26, base - alto, 5, 3, '#7d8791');
+    rc(g, cx + 21, base - alto, 5, 3, '#7d8791');
+    caja(g, cx - 34, base - alto - 8, 76, 9, '#6f7883', '#949daa'); // viga
+    caja(g, cx - 8, base - alto - 6, 16, 7, M.y, M.yA);            // carro
+    rc(g, cx - 1, base - alto + 1, 2, 16, '#39424c');              // cables
+    caja(g, cx - 11, base - alto + 16, 22, 6, M.n, M.nA);          // spreader
+    rc(g, cx - 30, base - 12, 8, 4, M.a);                          // baliza de pata
+  };
+
+  const dibujarVehiculo = (g, v) => {
+    if (v.tipo === 'sts') { dibujarSTS(g, v); return; }
+    const x = Math.round(v.x * TILE);
+    const base = v.fil * TILE + TILE - 2;
+    if (v.tipo === 'tren') dibujarTren(g, x, base, v.largo);
+    else dibujarCamion(g, x, base, v.dir);
+  };
+
   // ---------- clima ----------
   const dibujarLluvia = (g) => {
-    if (REDUCIDO) return;
+    if (REDUCIDO || !st.gotas.length) return;
+    g.save();
+    g.setTransform(1, 0, 0, 1, 0, 0);
     g.globalAlpha = 0.3;
-    g.fillStyle = '#9fc6dd';
     st.gotas.forEach((p) => rc(g, p.x, p.y, 1, 3, '#9fc6dd'));
     g.globalAlpha = 1;
+    g.restore();
   };
 
   // Niebla y noche recortan lo que se ve: se pinta un velo sobre todo
@@ -1006,16 +1557,19 @@
   // hay que comunicar es "de aqui para alla no ves", y eso lo dice
   // mejor un velo oscuro; la niebla se distingue de la noche por el
   // tinte frio, por ser menos densa y por la bruma de encima.
+  // El velo se pinta del tamano de la VISTA, no del mundo: con una
+  // terminal de 40 x 28 casillas, rehacer el velo entero cada cuadro
+  // seria pintar cuatro veces mas de lo que se ve.
   let velo = null;
   const dibujarVelo = (g) => {
     const c = clima();
     if (c !== 'niebla' && c !== 'noche') return;
-    if (!velo) velo = lienzo(MUNDO_W, MUNDO_H);
+    if (!velo) velo = lienzo(VISTA_W, VISTA_H);
     const vg = velo.g;
     vg.globalCompositeOperation = 'source-over';
     vg.fillStyle = c === 'noche' ? 'rgba(4, 7, 12, 0.9)' : 'rgba(41, 56, 68, 0.82)';
-    vg.clearRect(0, 0, MUNDO_W, MUNDO_H);
-    vg.fillRect(0, 0, MUNDO_W, MUNDO_H);
+    vg.clearRect(0, 0, VISTA_W, VISTA_H);
+    vg.fillRect(0, 0, VISTA_W, VISTA_H);
 
     vg.globalCompositeOperation = 'destination-out';
     // borde muy difuminado: un canto duro se lee como un foco de
@@ -1030,40 +1584,61 @@
       vg.fillRect(cx - r, cy - r, r * 2, r * 2);
     };
 
+    // los huecos van en coordenadas de pantalla: mundo menos camara
+    const cx0 = Math.round(st.cam.x), cy0 = Math.round(st.cam.y);
     const a = apoyoMaquina();
-    hueco(a.cx, a.cy - 14, c === 'noche' ? 54 : 74);
+    hueco(a.cx - cx0, a.cy - cy0 - 14, c === 'noche' ? 54 : 74);
     // los faros alargan el cono hacia donde encara la maquina
     const r = RUMBOS[st.rumbo];
-    hueco(a.cx + r.dc * TILE * 1.7, a.cy - 14 + r.df * TILE * 1.7, c === 'noche' ? 42 : 50);
-    // y los postes de luz alumbran su rincon
+    hueco(a.cx - cx0 + r.dc * TILE * 1.7, a.cy - cy0 - 14 + r.df * TILE * 1.7,
+          c === 'noche' ? 42 : 50);
+    // y los postes de luz y las patas de la STS alumbran su rincon
     OBJETOS.forEach((o) => {
-      if (o.ch !== 'P') return;
-      hueco(o.col * TILE + TILE / 2, o.fil * TILE + TILE / 2 - 20, 58);
+      if (o.ch !== 'P' && o.ch !== 'L') return;
+      if (!enVista(o.col, o.fil, 4)) return;
+      hueco(o.col * TILE + TILE / 2 - cx0, o.fil * TILE + TILE / 2 - 20 - cy0, 58);
     });
 
     vg.globalCompositeOperation = 'source-over';
+    // se dibuja sin la traslacion de camara, porque ya esta en
+    // coordenadas de pantalla
+    g.save();
+    g.setTransform(1, 0, 0, 1, 0, 0);
     g.drawImage(velo.c, 0, 0);
-
-    // la niebla ademas lava un poco el color de todo el patio
     if (c === 'niebla') {
       g.globalAlpha = 0.12;
       g.fillStyle = '#b9c8d2';
-      g.fillRect(0, 0, MUNDO_W, MUNDO_H);
+      g.fillRect(0, 0, VISTA_W, VISTA_H);
       g.globalAlpha = 1;
     }
+    g.restore();
+  };
+
+  // Lo que se ve ahora mismo, en casillas. Todo lo que quede fuera no
+  // se dibuja: con un mundo de 40 x 28 pintar la terminal entera cada
+  // cuadro seria tirar la mitad del trabajo.
+  const enVista = (c, f, margen) => {
+    const m = margen || 2;
+    return c >= st.cam.c0 - m && c <= st.cam.c1 + m &&
+           f >= st.cam.f0 - m && f <= st.cam.f1 + m;
   };
 
   const render = () => {
     ctx.imageSmoothingEnabled = false;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, MUNDO_W, MUNDO_H);
+    ctx.clearRect(0, 0, VISTA_W, VISTA_H);
 
+    // la camara se resta con enteros: a medio pixel el pixel art vibra
+    let dx = -Math.round(st.cam.x), dy = -Math.round(st.cam.y);
     if (st.sacudida > 0 && !REDUCIDO) {
       const s = st.sacudida;
-      ctx.translate(Math.round(Math.sin(st.reloj * 90) * s * 12), Math.round(Math.cos(st.reloj * 74) * s * 8));
+      dx += Math.round(Math.sin(st.reloj * 90) * s * 12);
+      dy += Math.round(Math.cos(st.reloj * 74) * s * 8);
     }
+    ctx.translate(dx, dy);
 
     ctx.drawImage(suelo, 0, 0);
+    dibujarOleaje(ctx);
     dibujarDestino(ctx);
     dibujarFaros(ctx);
     dibujarReversa(ctx);
@@ -1072,12 +1647,20 @@
     // mas cerca del ojo y tapa a lo que apoya mas arriba.
     const a = apoyoMaquina();
     const cosas = [];
-    OBJETOS.forEach((o) => cosas.push({ y: o.fil * TILE + TILE - 2, pintar: () => dibujarObjeto(ctx, o) }));
+    OBJETOS.forEach((o) => {
+      if (!enVista(o.col, o.fil)) return;
+      cosas.push({ y: o.fil * TILE + TILE - 2, pintar: () => dibujarObjeto(ctx, o) });
+    });
     pilas.forEach((p, k) => {
       if (!p.length) return;
       const cf = k.split(',');
       const c = Number(cf[0]), f = Number(cf[1]);
+      if (!enVista(c, f)) return;
       cosas.push({ y: f * TILE + TILE - 2, pintar: () => dibujarPila(ctx, c, f, p) });
+    });
+    st.trafico.forEach((v) => {
+      if (!v.vivo) return;
+      cosas.push({ y: v.fil * TILE + TILE - 2 + 0.1, pintar: () => dibujarVehiculo(ctx, v) });
     });
 
     // De perfil el boom pasa por ENCIMA del chasis y hay que verlo;
@@ -1156,6 +1739,82 @@
     if (!st.carga) return;
     st.carga.integridad = Math.max(0, st.carga.integridad - puntos);
     decir(motivo + ' ' + PUNTO + ' CARGA AL ' + st.carga.integridad + '%', true);
+  };
+
+  // ---------- minimapa ----------
+  // Con la camara siguiendo a la maquina hace falta un plano: si no,
+  // en una terminal de 40 x 28 no hay forma de saber donde queda la
+  // zona a la que te mandan.
+  const MINI_COL = {
+    '~': '#16303f', q: '#5c6570', b: '#8f9aa4', S: '#2b3a45', d: '#3d5566',
+    L: '#7d8791', p: '#5c6570', K: '#6b747d', H: '#8c949c', '#': '#39414a',
+    o: '#b3562a', P: '#6d7783', T: '#2a3037', r: '#4a4740', '=': '#5a4a12',
+    A: '#2e5f57', B: '#1a5878', E: '#6b571a', M: '#7a3d26',
+    V: '#454d55', I: '#7a651c', G: '#4e3d73', W: '#2e5f57', '.': '#2c3138'
+  };
+
+  let miniFondo = null;
+  const hornearMini = () => {
+    const l = lienzo(COLS * 4, FILAS * 4);
+    const g = l.g;
+    for (let f = 0; f < FILAS; f++) {
+      for (let c = 0; c < COLS; c++) {
+        g.fillStyle = MINI_COL[mapa[f][c]] || '#2c3138';
+        g.fillRect(c * 4, f * 4, 4, 4);
+      }
+    }
+    miniFondo = l.c;
+  };
+
+  const pintarMini = () => {
+    const cv = $('minimapa');
+    if (!cv || !miniFondo) return;
+    if (cv.width !== COLS * 4 || cv.height !== FILAS * 4) {
+      cv.width = COLS * 4;
+      cv.height = FILAS * 4;
+    }
+    const g = cv.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    g.clearRect(0, 0, cv.width, cv.height);
+    g.drawImage(miniFondo, 0, 0);
+
+    // la zona a la que va la orden en curso, latiendo
+    const o = ordenActiva();
+    if (o) {
+      g.globalAlpha = REDUCIDO ? 0.7 : 0.45 + Math.sin(st.reloj * 3) * 0.3;
+      g.fillStyle = PINTA_ZONA[o.zona] || COL.rayado;
+      for (let f = 0; f < FILAS; f++) {
+        for (let c = 0; c < COLS; c++) {
+          if ((tileEn(c, f).zona || '') === o.zona) g.fillRect(c * 4, f * 4, 4, 4);
+        }
+      }
+      g.globalAlpha = 1;
+    }
+
+    // las pilas, y en blanco la caja que pide la orden
+    pilas.forEach((p, k) => {
+      if (!p.length) return;
+      const cf = k.split(',');
+      const marcada = !!o && p.some((x) => x.m === o.m);
+      g.fillStyle = marcada ? '#ffffff' : COLORES_CAJA[p[p.length - 1].color].base;
+      g.fillRect(Number(cf[0]) * 4, Number(cf[1]) * 4, 4, 4);
+    });
+
+    // el trafico, para ver si viene algo antes de cruzar
+    g.fillStyle = '#ff8b5e';
+    st.trafico.forEach((v) => {
+      if (!v.vivo || v.tipo === 'sts') return;
+      const h = huella(v);
+      g.fillRect(Math.max(0, h[0]) * 4, v.fil * 4, (h[1] - h[0] + 1) * 4, 4);
+    });
+
+    // la maquina y el recuadro de lo que estas viendo
+    g.fillStyle = M.y;
+    g.fillRect(st.col * 4 - 1, st.fil * 4 - 1, 6, 6);
+    g.strokeStyle = 'rgba(255,255,255,0.55)';
+    g.lineWidth = 1;
+    g.strokeRect(Math.round(st.cam.x / TILE * 4) + 0.5, Math.round(st.cam.y / TILE * 4) + 0.5,
+      VISTA_C * 4 - 1, VISTA_F * 4 - 1);
   };
 
   // ---------- instrumentos ----------
@@ -1512,10 +2171,19 @@
   const arrancarTurno = (n) => {
     st.turno = Math.max(0, Math.min(TURNOS.length - 1, n));
     const t = turnoActual();
+    // cada turno trae su trazado, asi que hay que rehacer el mundo
+    mapa = t.mapa;
+    COLS = mapa[0].length;
+    FILAS = mapa.length;
+    MUNDO_W = COLS * TILE;
+    MUNDO_H = FILAS * TILE;
+    listarObjetos();
+    hornearSuelo();
+    hornearMini();
     st.fase = 'juego';
     st.resta = SEG_FORZADO || t.segundos;
-    st.col = INICIO.col; st.fil = INICIO.fil; st.rumbo = INICIO.rumbo;
-    st.desdeCol = INICIO.col; st.desdeFil = INICIO.fil;
+    st.col = t.inicio.col; st.fil = t.inicio.fil; st.rumbo = RUMBO_INICIAL;
+    st.desdeCol = st.col; st.desdeFil = st.fil;
     st.accion = null; st.t = 0; st.dur = 0; st.buffer = null;
     st.alcance = 0; st.altura = 0; st.alcanceVis = 0; st.alturaVis = 0;
     st.carga = null; st.zarandeo = 0; st.quieto = 99; st.patina = 0; st.cierra = 0;
@@ -1524,6 +2192,8 @@
     st.humo.length = 0;
     CMDS.forEach((c) => { activos[c] = false; });
     sembrarTurno();
+    sembrarTrafico();
+    plantarCamara();
     $('finale').hidden = true;
     decir(t.nombre + ' ' + PUNTO + ' ' + CLIMAS[t.clima]);
     refrescar();
@@ -1546,6 +2216,9 @@
       }
     }
 
+    if (st.fase === 'juego') moverTrafico(dt);
+    seguirCamara(dt);
+
     // el brazo persigue su posicion logica en vez de saltar a ella
     const k = Math.min(1, dt / T_BRAZO);
     st.alcanceVis += (st.alcance - st.alcanceVis) * k;
@@ -1562,12 +2235,12 @@
 
     if (clima() === 'lluvia' && !REDUCIDO) {
       while (st.gotas.length < 90) {
-        st.gotas.push({ x: Math.random() * MUNDO_W, y: Math.random() * MUNDO_H, v: 150 + Math.random() * 120 });
+        st.gotas.push({ x: Math.random() * VISTA_W, y: Math.random() * VISTA_H, v: 150 + Math.random() * 120 });
       }
       st.gotas.forEach((p) => {
         p.y += p.v * dt;
         p.x += 22 * dt;
-        if (p.y > MUNDO_H) { p.y = -4; p.x = Math.random() * MUNDO_W; }
+        if (p.y > VISTA_H) { p.y = -4; p.x = Math.random() * VISTA_W; }
       });
     } else if (st.gotas.length) st.gotas.length = 0;
 
@@ -1597,9 +2270,9 @@
     const apilado = window.innerWidth <= 980;
     const dispW = r.width - 36;
     const dispH = (apilado ? window.innerHeight * 0.62 : r.height) - 36;
-    const e = Math.max(1, Math.floor(Math.min(dispW / MUNDO_W, dispH / MUNDO_H)));
-    canvas.style.width = (MUNDO_W * e) + 'px';
-    canvas.style.height = (MUNDO_H * e) + 'px';
+    const e = Math.max(1, Math.floor(Math.min(dispW / VISTA_W, dispH / VISTA_H)));
+    canvas.style.width = (VISTA_W * e) + 'px';
+    canvas.style.height = (VISTA_H * e) + 'px';
   };
 
   // ---------- entrada ----------
@@ -1701,12 +2374,11 @@
     last = now;
     avanzarTiempo(dt);
     render();
+    pintarMini();
   };
 
   // ---------- arranque ----------
   cocerTodo();
-  listarObjetos();
-  hornearSuelo();
   arrancarTurno(TURNO_INICIAL);
   escalar();
   requestAnimationFrame(tick);

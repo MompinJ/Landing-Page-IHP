@@ -14,10 +14,20 @@
   <!-- ============================================================
        DINAMICA: PATIO REACH
 
-       Patio de contenedores en pixel art sobre una cuadricula de
-       20 x 14 casillas, en vista 3/4: el suelo se ve a plomo y todo
-       lo que levanta del piso se dibuja de frente, como en los RPG
-       de cuadricula. El participante ES la reachstacker RS-04.
+       Terminal maritima en pixel art, vista 3/4: el suelo se ve a
+       plomo y todo lo que levanta del piso se dibuja de frente, como
+       en los RPG de cuadricula. El participante ES la reachstacker
+       RS-04.
+
+       EL MUNDO es grande -- 40 x 28 casillas -- y el canvas solo una
+       ventana de 20 x 14 sobre el, asi que la camara sigue a la
+       maquina y el panel lleva el plano de la terminal. Cada turno
+       trae SU trazado: patio, muelle con buque atracado, zona
+       intermodal y la terminal entera de noche.
+
+       Y la terminal esta viva: camiones por la via, convoyes por los
+       rieles y la grua STS trabajando el buque. No son decorado --
+       ocupan casillas de verdad y si te alcanzan es golpe.
 
        CONDUCIR es vehicular, no de personaje:
        - ARRIBA  avanza una casilla en el rumbo actual
@@ -52,12 +62,12 @@
        - ESPACIO: twistlocks (enganchar y soltar)
        - R reiniciar el turno, H ayuda
 
-       PERSONALIZAR: el trazado del patio esta en la constante MAPA
-       de js/reach.js (un caracter por casilla) y los turnos, con
-       sus cajas, ordenes, clima y tiempo, en TURNOS. La maquina son
-       cuatro dibujos, uno por rumbo, en maquinaPerfil, maquinaFrente
-       y maquinaEspalda; el boom y el spreader se pintan aparte en
-       dibujarBoom y dibujarSpreader.
+       PERSONALIZAR: cada turno lleva su mapa, sus cajas, sus ordenes,
+       su clima, su tiempo y su trafico en la constante TURNOS de
+       js/reach.js. El mapa es un caracter por casilla y la leyenda
+       esta en TILES. La maquina son cuatro dibujos, uno por rumbo, en
+       maquinaPerfil, maquinaFrente y maquinaEspalda; el boom y el
+       spreader se pintan aparte en dibujarBoom y dibujarSpreader.
        ============================================================ -->
 
   <main class="app">
@@ -67,7 +77,7 @@
            topetazo caiga sobre el patio y no al pie de la pagina -->
       <div class="marco">
         <canvas id="patio" class="patio" width="480" height="336"
-                aria-label="Patio de contenedores en vista 3/4"></canvas>
+                aria-label="Terminal maritima en vista 3/4"></canvas>
         <div class="toast" id="toast" hidden></div>
       </div>
     </section>
@@ -90,6 +100,12 @@
           <div><span>ENTREGAS</span><b id="mk-entregas">0/0</b></div>
           <div><span>GOLPES</span><b id="lec-golpes" class="lectura__mal">0</b></div>
         </div>
+      </section>
+
+      <section class="mini" aria-label="Plano de la terminal">
+        <p class="bloque__nombre">PLANO DE LA TERMINAL</p>
+        <canvas id="minimapa" width="160" height="112"
+                aria-label="Plano con tu posicion y la zona de destino"></canvas>
       </section>
 
       <section class="ordenes" aria-label="Ordenes de trabajo">

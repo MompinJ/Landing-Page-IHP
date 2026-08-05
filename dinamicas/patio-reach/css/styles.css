@@ -164,6 +164,20 @@ html, body {
   color: var(--texto);
 }
 
+/* ---------- minimapa ---------- */
+
+.mini { display: flex; flex-direction: column; gap: 5px; }
+
+.mini canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  background: #10161c;
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+}
+
 /* ---------- ordenes de trabajo ---------- */
 
 .ordenes__lista { list-style: none; display: flex; flex-direction: column; gap: 5px; }
