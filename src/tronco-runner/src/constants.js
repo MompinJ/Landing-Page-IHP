@@ -102,4 +102,22 @@ export const COLORS = {
   amber: '#FFC627',
 }
 
-export const LEADERBOARD_KEY = 'tronco-runner-leaderboard'
+// Unidades de negocio del grupo. Se guardan junto al nombre y el puntaje para
+// poder leer el TOP 10 por terminal en el stand.
+export const BUSINESS_UNITS = [
+  'LCT',
+  'LCMT',
+  'ECV',
+  'EIT',
+  'HPMX',
+  'HPML',
+  'TNG',
+  'ICAVE',
+  'TILH',
+  'TIMSA',
+  'CCI',
+]
+
+// Clave nueva: las tablas viejas no traen unidad de negocio, asi que arrancan
+// limpias en vez de mezclar registros sin terminal en el mismo TOP 10.
+export const LEADERBOARD_KEY = 'terminal-rally-leaderboard'

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Cabina RTG: que es cultura y que no</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+<style>.suelo,.grua,.foco{transition:none !important}</style></head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: CABINA RTG
+       Primera persona desde la cabina de una grua de patio sobre
+       neumaticos. La cabina cuelga del trolley, asi que el spreader
+       esta SIEMPRE justo debajo del operador: lo que se mueve es el
+       patio. La escena es CSS 3D real (perspective + preserve-3d),
+       no un dibujo cenital.
+
+       El bloque tiene 6 carriles x 8 bahias:
+       - carriles A-B (a tu izquierda):  PATIO A, si es cultura
+       - carriles C-D (frente a ti):     linea de inspeccion
+       - carriles E-F (a tu derecha):    PATIO B, no es cultura
+
+       CICLO REAL DE LA MAQUINA
+       posicionar (gantry + trolley) -> arriar spreader -> cerrar
+       twistlocks -> izar -> trasladar -> arriar -> abrir twistlocks.
+       Con el spreader abajo la grua no traslada, igual que en obra.
+
+       CONTROLES
+       - Joystick izquierdo: gantry (bahias) y trolley (carriles)
+       - Joystick derecho: hoist (izar / arriar)
+       - Boton rojo del tablero: twistlocks
+       - Teclado: flechas o WASD, ESPACIO hoist, ENTER twistlocks,
+         R otra ronda
+       - Toque o click sobre una caja del patio: la grua va hacia ella
+
+       PERSONALIZAR: los 16 conceptos, su veredicto y su explicacion
+       estan en la constante CAJAS de js/rtg.js.
+       ============================================================ -->
+
+  <div class="mundo" id="mundo">
+    <div class="cielo" id="cielo">
+      <div class="cielo__horizonte"></div>
+      <div class="cielo__grumbo" id="grumbo"></div>
+    </div>
+
+    <div class="camara">
+      <div class="suelo" id="suelo">
+        <div class="asfalto" aria-hidden="true"></div>
+        <div class="pintura" id="pintura" aria-hidden="true"></div>
+        <div class="slots" id="slots"></div>
+        <div class="cajas" id="cajas"></div>
+
+        <!-- spreader: cuelga siempre bajo la cabina -->
+        <div class="grua" id="grua">
+          <div class="cable cable--a" aria-hidden="true"></div>
+          <div class="cable cable--b" aria-hidden="true"></div>
+          <div class="cable cable--c" aria-hidden="true"></div>
+          <div class="cable cable--d" aria-hidden="true"></div>
+          <div class="spreader" id="spreader">
+            <div class="spreader__viga" aria-hidden="true"></div>
+            <i class="tw tw--a"></i><i class="tw tw--b"></i>
+            <i class="tw tw--c"></i><i class="tw tw--d"></i>
+          </div>
+          <div class="foco" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="niebla" aria-hidden="true"></div>
+  </div>
+
+  <!-- ============ CABINA ============ -->
+  <div class="cabina" id="cabina">
+    <div class="cabina__vidrio" aria-hidden="true"></div>
+    <div class="cabina__techo" aria-hidden="true">
+      <span class="placa">RTG-07 &middot; BLOQUE C</span>
+      <span class="cabina__tarea">EN TURNO <b id="cnt-colocados">0/16</b> &middot; EN SU PATIO <b id="cnt-correctos">0</b> &middot; ERRORES <b id="cnt-errores">0</b></span>
+    </div>
+    <div class="montante montante--izq" aria-hidden="true">
+      <span class="montante__rotulo">&#9664; PATIO A &middot; SI ES CULTURA</span>
+    </div>
+    <div class="montante montante--der" aria-hidden="true">
+      <span class="montante__rotulo">PATIO B &middot; NO ES CULTURA &#9654;</span>
+    </div>
+
+    <!-- ============ TABLERO ============ -->
+    <section class="tablero" aria-label="Controles de la grua">
+      <div class="mando mando--izq">
+        <div class="stick" id="stick-mov" data-stick="mov">
+          <div class="stick__pozo"></div>
+          <div class="stick__palanca"><b></b></div>
+          <span class="stick__flecha stick__flecha--up" data-mov="up">&#9650;</span>
+          <span class="stick__flecha stick__flecha--down" data-mov="down">&#9660;</span>
+          <span class="stick__flecha stick__flecha--left" data-mov="left">&#9664;</span>
+          <span class="stick__flecha stick__flecha--right" data-mov="right">&#9654;</span>
+        </div>
+        <p class="mando__nombre">GANTRY / TROLLEY</p>
+      </div>
+
+      <div class="consola">
+        <div class="consola__pantallas">
+          <div class="radar">
+            <p class="radar__titulo">POSICION EN BLOQUE</p>
+            <div class="radar__grid" id="radar"></div>
+            <p class="radar__pie"><span id="radar-pos">BAHIA 01 &middot; CARRIL C</span></p>
+          </div>
+          <div class="monitor" id="monitor">
+            <p class="monitor__titulo" id="monitor-titulo">SISTEMA DE PATIO</p>
+            <p class="monitor__texto" id="monitor-texto">Engancha una caja de la linea de inspeccion y llevala al patio que le toca.</p>
+          </div>
+        </div>
+
+        <div class="consola__fila">
+          <div class="lamparas">
+            <span class="lampara" id="lmp-landed"><i></i>LANDED</span>
+            <span class="lampara" id="lmp-lock"><i></i>LOCKED</span>
+            <span class="lampara" id="lmp-load"><i></i>LOADED</span>
+          </div>
+          <button class="boton-rojo" type="button" id="btn-lock">
+            <b id="btn-lock-txt">TWISTLOCKS</b><small>ENTER</small>
+          </button>
+        </div>
+
+        <p class="orden" id="orden">POSICIONA LA GRUA SOBRE UNA CAJA Y ARRIA EL SPREADER</p>
+      </div>
+
+      <div class="mando mando--der">
+        <div class="stick" id="stick-hoist" data-stick="hoist">
+          <div class="stick__pozo"></div>
+          <div class="stick__palanca"><b></b></div>
+          <span class="stick__flecha stick__flecha--up" data-hoist="up">IZAR</span>
+          <span class="stick__flecha stick__flecha--down" data-hoist="down">ARRIAR</span>
+        </div>
+        <p class="mando__nombre">HOIST &middot; ESPACIO</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+  <button class="ayuda" id="btn-ayuda" type="button" aria-label="Instrucciones">?</button>
+
+  <div class="finale" id="finale" hidden>
+    <div class="finale__caja">
+      <p class="finale__kicker" id="finale-kicker">--</p>
+      <h2 id="finale-titulo">--</h2>
+      <p class="finale__score" id="finale-score">--</p>
+      <div class="finale__tabla">
+        <div class="columna">
+          <h3>SI ES CULTURA</h3>
+          <ul id="lista-si"></ul>
+        </div>
+        <div class="columna">
+          <h3>NO ES CULTURA</h3>
+          <ul id="lista-no"></ul>
+        </div>
+      </div>
+      <div class="finale__btns">
+        <button type="button" id="btn-corregir">SEGUIR OPERANDO</button>
+        <button type="button" id="btn-reiniciar">OTRA RONDA [R]</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-titulo">
+    <div class="overlay__caja">
+      <p class="overlay__kicker">TURNO DE PATIO &middot; CABINA DE LA RTG-07</p>
+      <h1 id="overlay-titulo">ESTAS EN LA CABINA</h1>
+      <p class="overlay__intro">Vas colgado del trolley, a 18 metros del piso, mirando por la ventana. El spreader esta siempre justo debajo de ti: lo que se mueve es el patio. En la linea de inspeccion, al frente, hay 16 contenedores rotulados. A tu <strong>izquierda</strong> el PATIO A, para lo que <strong>si es cultura organizacional</strong>. A tu <strong>derecha</strong> el PATIO B, para lo que <strong>no</strong>.</p>
+      <ul>
+        <li>Palanca izquierda (o flechas / WASD): <strong>gantry</strong> para avanzar de bahia y <strong>trolley</strong> para cruzar carriles.</li>
+        <li>Palanca derecha (o espacio): <strong>arriar</strong> el spreader hasta posarlo, e <strong>izar</strong> cuando ya este anclado.</li>
+        <li>Boton rojo (o enter): <strong>twistlocks</strong>. Cierran para enganchar, abren para soltar.</li>
+        <li>Con el spreader abajo la grua no traslada, igual que en obra.</li>
+        <li>Tambien puedes tocar directo una caja del patio para mandar la grua hacia ella.</li>
+        <li>Cada caja que sueltes te dice en el monitor si acertaste y <strong>por que</strong>. Si te equivocas la vuelves a levantar y la corriges: no hay reloj.</li>
+      </ul>
+      <button class="overlay__btn" id="btn-entendido" type="button">TOMAR LOS MANDOS</button>
+    </div>
+  </div>
+
+  <script src="js/rtg.js"></script>
+<script>const CULT = ['HISTORIA','SEGURIDAD','LIDERAZGO','VALORES','DISCIPLINA','NORMAS','COMUNICACION','AMISTAD','JERARQUIA','ENTORNO','IDENTIDAD'];
+const key = (k) => window.dispatchEvent(new KeyboardEvent('keydown', {key: k, bubbles: true}));
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+document.getElementById('overlay').hidden = true;
+(async () => {
+  const slots = () => document.querySelectorAll('.slot');
+  const usados = {};
+  for (let n = 0; n < 16; n++) {
+    const caja = [...document.querySelectorAll('#cajas .caja')].find(e => !e.dataset.hecho);
+    if (!caja) break;
+    caja.dataset.hecho = '1';
+    const rot = caja.querySelector('.rot').textContent.trim().split(' ')[0].split('\n')[0];
+    const col = Math.round(-parseFloat(caja.style.top) / 330 - 0.5);
+    const row = Math.round((parseFloat(caja.style.left) - 8) / 150);
+    slots()[row * 8 + col].click(); await wait(700);
+    key(" "); await wait(560); key("Enter"); await wait(420); key(" "); await wait(560);
+    let esCult = CULT.indexOf(rot) >= 0;
+    if (n === 15) esCult = !esCult;
+    const base = esCult ? 0 : 4;
+    let idx = -1;
+    for (let r = base; r < base + 2 && idx < 0; r++) {
+      for (let c = 0; c < 8; c++) { if (!usados[r * 8 + c]) { idx = r * 8 + c; break; } }
+    }
+    usados[idx] = 1;
+    slots()[idx].click(); await wait(700);
+    key(" "); await wait(560); key("Enter"); await wait(520);
+  }
+})();
+</script></body>
+</html>

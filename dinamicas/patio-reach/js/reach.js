@@ -1,8 +1,8 @@
 /* ============================================================
    DINAMICA PATIO REACH - motor
 
-   Patio de contenedores de 20 x 14 casillas en pixel art, vista
-   3/4 (el suelo se ve a plomo y todo lo que tiene altura se dibuja
+   Terminal de contenedores de 60 x 40 casillas en pixel art, con
+   una ventana de 20 x 14 encima, vista 3/4 (el suelo se ve a plomo y todo lo que tiene altura se dibuja
    de frente, como en los RPG de cuadricula). El participante ES la
    reachstacker RS-04.
 
@@ -46,9 +46,11 @@
    el alcance y la altura.
 
    PERSONALIZAR
-   - MAPA         trazado del patio, un caracter por casilla
+   - TURNOS.mapa  trazado de la terminal, un caracter por casilla
    - TILES        que significa cada caracter y si es solido
    - TURNOS       cajas, ordenes, clima y tiempo de cada turno
+   - .relleno     los bloques llenos del patio, por rectangulos: se
+                  siembran solos con altura y color variados
    - MAX_ALTURA   la curva de carga
    - maquina*     dibujo de la maquina, rumbo por rumbo
    ============================================================ */
@@ -97,7 +99,14 @@
     'I': { nombre: 'CELDA DE PELIGROSOS',   solido: false, zona: 'I' },
     'G': { nombre: 'GATE DE CAMIONES',      solido: false, zona: 'G' },
     'W': { nombre: 'BASCULA',               solido: false, zona: 'W' },
+    'x': { nombre: 'SUELO DE DESGUACE',     solido: false },
     '~': { nombre: 'AGUA',                  solido: true,  agua: true },
+    'C': { nombre: 'ALMACEN DE CARGA',      solido: true },
+    'c': { nombre: 'ANDEN DE CARGA',        solido: true },
+    'Y': { nombre: 'MONTON DE CHATARRA',    solido: true },
+    'Z': { nombre: 'CONTENEDOR DESGUAZADO', solido: true },
+    'u': { nombre: 'VOLQUETE DE RESIDUOS',  solido: true },
+    'e': { nombre: 'RACK DE TOMAS',         solido: true },
     'q': { nombre: 'CANTIL DEL MUELLE',     solido: true },
     'b': { nombre: 'BOLARDO',               solido: true },
     'S': { nombre: 'CASCO DEL BUQUE',       solido: true },
@@ -130,235 +139,323 @@
 
   // ---------- los turnos ----------
   // Cada turno trae SU trazado de terminal, no solo otra carga: el
-  // mundo mide 40 x 28 casillas y la camara sigue a la maquina.
+  // mundo mide 60 x 40 casillas y la camara sigue a la maquina.
   // Cada caja lleva matricula para que las ordenes puedan nombrarla
   // sin ambiguedad; el resto es el estorbo que hay que sortear.
   const TURNOS = [
     {
-      nombre: 'TURNO 1', clima: 'dia', segundos: 200,
+      nombre: 'TURNO 1', clima: 'dia', segundos: 240,
       lema: 'Dia claro en el patio. Tres movimientos limpios para agarrar el ritmo y aprenderte la terminal.',
-      inicio: { col: 19, fil: 21 },
+      inicio: { col: 24, fil: 20 },
       mapa: [
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-        'qqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqq',
-        'MMMMMMMMMMMMMMMMMMMMMMMM................',
-        'MMMMMMMMMMMMMMMMMMMMMMMM.......P........',
-        '........................................',
-        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
-        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
-        '#......................................#',
-        '#..AAAAAA....BBBBBB....EEEE............#',
-        '#..AAAAAA....BBBBBB....EEEE............#',
-        '#..AAAAAA....BBBBBB....EEEE............#',
-        '#..======....======....................#',
-        '#..AAAAAA....BBBBBB....................#',
-        '#..AAAAAA....BBBBBB....................#',
-        '#..AAAAAA....BBBBBB....................#',
-        '#..======....======....................#',
-        '#...o........o......j...o..............#',
-        '#..........................y...........#',
-        '#..VVVVV..KKKKKK....WWW...F............#',
-        '#..VVVVV..KKKKKK....WWW...F............#',
-        '#................n.....................#',
-        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
-        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
-        '#......................................#',
-        '#.HHHH................gGGGGGGg.........#',
-        '#......................................#',
-        '########################################',
+        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        'qqqqbqqqqqqqqbqqqqqqqqbqqqqqqqqbqqqqqqqqbqqqqqqqqbqqqqqqqqbq',
+        '.MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM.',
+        '.MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM.',
+        '#....P.............P.............P.............P...........#',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#.......o.................o.................o..............#',
+        '#...AAAAAAAAAAAAAAAAAA......BBBBBBBBBBBBBBBBBB..VVVVVVVV...#',
+        '#...AAAAAAAAAAAAAAAAAA......BBBBBBBBBBBBBBBBBB..VVVVVVVV...#',
+        '#...AAAAAAAAAAAAAAAAAA......BBBBBBBBBBBBBBBBBB..VVVVVVVV...#',
+        '#...==================......==================.............#',
+        '#...AAAAAAAAAAAAAAAAAA......BBBBBBBBBBBBBBBBBB..VVVVVVVV...#',
+        '#...AAAAAAAAAAAAAAAAAA......BBBBBBBBBBBBBBBBBB..VVVVVVVV...#',
+        '#...AAAAAAAAAAAAAAAAAA......BBBBBBBBBBBBBBBBBB..VVVVVVVV...#',
+        '#..........................................................#',
+        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
+        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
+        '#.................................................y........#',
+        '#.............................j...j...j...j.............y..#',
+        '#.....................................o.............o......#',
+        '#..CCCCCCCCCCCCCCCCCCCCCCCC................................#',
+        '#..cccccccccccccccccccccccc................................#',
+        '#...j..j..j..j..j..j..j..j.................................#',
+        '#...o.....o.....o.....o....................................#',
+        '#...............................e...e...e...e.....VVVVVVVV.#',
+        '#..VVVVVVVVVVVV................EEEEEEEEEEEEEEEEE..VVVVVVVV.#',
+        '#..VVVVVVVVVVVV................EEEEEEEEEEEEEEEEE..VVVVVVVV.#',
+        '#..VVVVVVVVVVVV............................................#',
+        '#.................................============..WWWWWW.....#',
+        '#.xxxYxZxxxxxuxxxx................IIIIIIIIIIII..WWWWWW.g...#',
+        '#.xYxxxxxZxYxxxxxx................IIIIIIIIIIII.............#',
+        '#.xxxxxuxxxxxZxYxx................============.............#',
+        '#..........................................................#',
+        '#...................j..j..j..j..j..........................#',
+        '#...KKKKKKKKKKKK..FF.n........................HHHHHHHHHHH..#',
+        '#......................gGGGGGGGGGGGGGGGGGGGg...............#',
+        '#....................o..GGGGGGGGGGGGGGGGGGG..y.............#',
+        '############################################################',
+      ],
+      relleno: [
+        { c0:  4, f0:  9, c1: 15, f1: 11, alto: [1, 3], vacio: 0.12 },
+        { c0:  4, f0: 13, c1: 17, f1: 15, alto: [1, 3], vacio: 0.14 },
+        { c0: 33, f0:  9, c1: 45, f1: 11, alto: [1, 2], vacio: 0.18 },
+        { c0: 36, f0: 13, c1: 45, f1: 15, alto: [1, 3], vacio: 0.15 },
+        { c0: 48, f0:  9, c1: 55, f1: 11, alto: [2, 3], vacio: 0.1, paleta: ['gris', 'verde', 'gris', 'azul'] },
+        { c0: 48, f0: 13, c1: 55, f1: 15, alto: [2, 3], vacio: 0.1, paleta: ['gris', 'verde', 'gris', 'azul'] },
+        { c0:  3, f0: 27, c1: 14, f1: 29, alto: [3, 3], vacio: 0.06, paleta: ['gris', 'gris', 'verde', 'azul'] },
+        { c0: 50, f0: 26, c1: 57, f1: 28, alto: [2, 3], vacio: 0.08, paleta: ['gris', 'verde', 'gris', 'azul'] },
       ],
       cajas: [
-        { m: 'MSKU-201', col: 3,  fil: 9,  color: 'rojo',  tipo: 'normal' },
-        { m: 'TGHU-118', col: 4,  fil: 9,  color: 'azul',  tipo: 'normal' },
-        { m: 'CAIU-733', col: 6,  fil: 10, color: 'verde', tipo: 'normal' },
-        { m: 'HLXU-940', col: 14, fil: 9,  color: 'gris',  tipo: 'normal' },
-        { m: 'OOLU-355', col: 17, fil: 14, color: 'azul',  tipo: 'normal' },
-        { m: 'MEDU-090', col: 5,  fil: 14, color: 'gris',  tipo: 'normal' },
-        { m: 'SUDU-410', col: 4,  fil: 19, color: 'verde', tipo: 'normal' }
+        { m: 'MSKU-201', col: 19, fil: 10, color: 'rojo', tipo: 'normal' },
+        { m: 'TGHU-118', col: 20, fil: 14, color: 'azul', tipo: 'normal' },
+        { m: 'CAIU-733', col: 17, fil:  9, color: 'verde', tipo: 'normal' },
+        { m: 'HLXU-940', col: 30, fil: 14, color: 'gris', tipo: 'normal' },
+        { m: 'OOLU-355', col: 29, fil: 10, color: 'azul', tipo: 'normal' },
+        { m: 'MEDU-090', col: 21, fil: 13, color: 'gris', tipo: 'normal' },
+        { m: 'SUDU-410', col: 18, fil: 15, color: 'verde', tipo: 'normal' },
       ],
       ordenes: [
         { m: 'MSKU-201', zona: 'B' },
         { m: 'CAIU-733', zona: 'B' },
-        { m: 'HLXU-940', zona: 'A' }
+        { m: 'HLXU-940', zona: 'A' },
       ],
       trafico: [
-        { tipo: 'camion', fil: 6, dir: 1,  x0: -3, v: 4.5, cada: 7 },
-        { tipo: 'camion', fil: 7, dir: -1, x0: 42, v: 4,   cada: 9, retraso: 3 }
+        { tipo: 'camion', fil: 6, dir: 1, x0: -3, v: 4.5, cada: 7 },
+        { tipo: 'camion', fil: 7, dir: -1, x0: 62, v: 4, cada: 9, retraso: 3 },
+        { tipo: 'tren', fil: 18, dir: 1, x0: -12, v: 6, cada: 20, largo: 9 },
       ]
     },
     {
-      nombre: 'TURNO 2', clima: 'lluvia', segundos: 240,
+      nombre: 'TURNO 2', clima: 'lluvia', segundos: 260,
       lema: 'Buque atracado y lloviendo. Hay que alimentar el pie de grua para que la STS embarque, y el piso resbala.',
-      inicio: { col: 20, fil: 19 },
+      inicio: { col: 23, fil: 24 },
       mapa: [
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-        '~~~SSSSSSSSSSSSSSSSSSSSSSSSSSSSSS~~~~~~~',
-        '~~~SddddddddddddddddddddddddddddS~~~~~~~',
-        '~~~SddddddddddddddddddddddddddddS~~~~~~~',
-        '~~~SSSSSSSSSSSSSSSSSSSSSSSSSSSSSS~~~~~~~',
-        'qqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqq',
-        'LMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM.....L...',
-        'LMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM.....L...',
-        '........P......................P........',
-        '#......................................#',
-        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
-        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
-        '#......................................#',
-        '#...AAAAAA...BBBBBB...EEEE.............#',
-        '#...AAAAAA...BBBBBB...EEEE.............#',
-        '#...AAAAAA...BBBBBB...EEEE.............#',
-        '#...======...======....................#',
-        '#......................................#',
-        '#..o..........o......j....o............#',
-        '#..............................y.......#',
-        '#..VVVVVV....IIII.....F.F..............#',
-        '#..VVVVVV....IIII......................#',
-        '#....................n.................#',
-        '#..KKKKKK.............WWW..............#',
-        '#..KKKKKK..............................#',
-        '#......................................#',
-        '#.HHHH.................gGGGGGGg........#',
-        '########################################',
+        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '..SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS.................',
+        '..ddddddddddddddddddddddddddddddddddddddddd.................',
+        '..ddddddddddddddddddddddddddddddddddddddddd.................',
+        '..SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS.................',
+        'qqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqb',
+        '.MMMMMMMMMLLMMMMMMMMMMMMMMMMMMMMMMLLMMMMMMMMMMMMMMMMMMMMMMM.',
+        '.MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM.',
+        '.MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM.',
+        '#.....P...............P...............P...............P....#',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#........o....................o....................o.......#',
+        '#..AAAAAAAAAAAAAAAAAA......BBBBBBBBBBBBBBBBBB....e...e...e.#',
+        '#..AAAAAAAAAAAAAAAAAA......BBBBBBBBBBBBBBBBBB...EEEEEEEEEE.#',
+        '#..AAAAAAAAAAAAAAAAAA......BBBBBBBBBBBBBBBBBB...EEEEEEEEEE.#',
+        '#..==================......==================..............#',
+        '#..AAAAAAAAAAAAAAAAAA......BBBBBBBBBBBBBBBBBB..............#',
+        '#..AAAAAAAAAAAAAAAAAA......BBBBBBBBBBBBBBBBBB...EEEEEEEEEE.#',
+        '#..AAAAAAAAAAAAAAAAAA......BBBBBBBBBBBBBBBBBB...EEEEEEEEEE.#',
+        '#..........................................................#',
+        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
+        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
+        '#..............y..j..j..j..j...............................#',
+        '#...................o..........o...........................#',
+        '#..VVVVVVVVVVVVVV.................................WWWWWW...#',
+        '#..VVVVVVVVVVVVVV.............CCCCCCCCCCCCCCCCCCCCWWWWWW...#',
+        '#..VVVVVVVVVVVVVV.............cccccccccccccccccccccccccc...#',
+        '#..==============..............j..j..j..j..j..j..j..j......#',
+        '#..VVVVVVVVVVVVVV...............o....o....o....o..VVVVVVVV.#',
+        '#..VVVVVVVVVVVVVV...xxxYxxxxxZxux...============..VVVVVVVV.#',
+        '#..VVVVVVVVVVVVVV...xYxxxxxZxxxxx...IIIIIIIIIIII..VVVVVVVV.#',
+        '#...................xxxYxuxxxxxZx...IIIIIIIIIIII...........#',
+        '#...................................============...........#',
+        '#...................j...j...j...j...j...j..y...............#',
+        '#...KKKKKKKKKKKKK..FF.n..........................KKKKKKKKK.#',
+        '#...........................................HHHHHHHHHHHH...#',
+        '#......................gGGGGGGGGGGGGGGGGGGGg...............#',
+        '#...................o...GGGGGGGGGGGGGGGGGGG.y..............#',
+        '############################################################',
+      ],
+      relleno: [
+        { c0:  3, f0: 13, c1: 14, f1: 15, alto: [1, 3], vacio: 0.12 },
+        { c0:  3, f0: 17, c1: 16, f1: 19, alto: [2, 3], vacio: 0.1 },
+        { c0: 32, f0: 13, c1: 44, f1: 15, alto: [1, 3], vacio: 0.16 },
+        { c0: 35, f0: 17, c1: 44, f1: 19, alto: [1, 3], vacio: 0.14 },
+        { c0:  3, f0: 25, c1: 16, f1: 27, alto: [3, 3], vacio: 0.06, paleta: ['gris', 'gris', 'verde', 'azul'] },
+        { c0:  3, f0: 29, c1: 16, f1: 31, alto: [2, 3], vacio: 0.12, paleta: ['gris', 'verde', 'gris', 'azul'] },
+        { c0: 50, f0: 29, c1: 57, f1: 31, alto: [2, 3], vacio: 0.1, paleta: ['gris', 'gris', 'verde', 'azul'] },
       ],
       cajas: [
-        { m: 'MSKU-412', col: 5,  fil: 13, color: 'rojo',  tipo: 'normal' },
-        { m: 'TGHU-501', col: 5,  fil: 13, color: 'azul',  tipo: 'normal' },
-        { m: 'CAIU-088', col: 7,  fil: 14, color: 'verde', tipo: 'normal' },
-        { m: 'SUDU-677', col: 14, fil: 13, color: 'gris',  tipo: 'normal' },
-        { m: 'HLXU-122', col: 14, fil: 13, color: 'rojo',  tipo: 'normal' },
-        { m: 'OOLU-909', col: 14, fil: 13, color: 'azul',  tipo: 'normal' },
-        { m: 'MEDU-343', col: 17, fil: 15, color: 'verde', tipo: 'normal' },
-        { m: 'CRXU-201', col: 23, fil: 13, color: 'aqua',  tipo: 'reefer' }
+        { m: 'MSKU-412', col: 18, fil: 14, color: 'rojo', tipo: 'normal' },
+        { m: 'TGHU-501', col: 18, fil: 14, color: 'azul', tipo: 'normal' },
+        { m: 'CAIU-088', col: 19, fil: 18, color: 'verde', tipo: 'normal' },
+        { m: 'SUDU-677', col: 29, fil: 14, color: 'gris', tipo: 'normal' },
+        { m: 'HLXU-122', col: 29, fil: 14, color: 'rojo', tipo: 'normal' },
+        { m: 'OOLU-909', col: 29, fil: 14, color: 'azul', tipo: 'normal' },
+        { m: 'MEDU-343', col: 30, fil: 18, color: 'verde', tipo: 'normal' },
+        { m: 'CRXU-201', col: 33, fil: 18, color: 'aqua', tipo: 'reefer' },
       ],
       ordenes: [
         { m: 'OOLU-909', zona: 'M' },
         { m: 'SUDU-677', zona: 'M' },
-        { m: 'CAIU-088', zona: 'M' }
+        { m: 'CAIU-088', zona: 'M' },
       ],
       trafico: [
-        { tipo: 'camion', fil: 10,  dir: 1,  x0: -3, v: 4,   cada: 6 },
-        { tipo: 'camion', fil: 11, dir: -1, x0: 42, v: 4.5, cada: 8, retraso: 2 },
-        { tipo: 'sts',    col: 8,  fil: 6,  v: 1.2, ida: 4, vuelta: 26 }
+        { tipo: 'camion', fil: 10, dir: 1, x0: -3, v: 4, cada: 6 },
+        { tipo: 'camion', fil: 11, dir: -1, x0: 62, v: 4.5, cada: 8, retraso: 2 },
+        { tipo: 'sts', col: 12, fil: 6, v: 1.2, ida: 6, vuelta: 40 },
       ]
     },
     {
-      nombre: 'TURNO 3', clima: 'niebla', segundos: 260,
+      nombre: 'TURNO 3', clima: 'niebla', segundos: 280,
       lema: 'Niebla en la zona intermodal: solo ves lo que tienes cerca, pasa el tren y entra carga especial con sus reglas.',
-      inicio: { col: 20, fil: 24 },
+      inicio: { col: 22, fil: 20 },
       mapa: [
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-        'qqqqqqbqqqqqqqqqbqqqqqqqqqbqqqqqqqbqqqqq',
-        'MMMMMMMMMMMMMMMM........................',
-        '............P..............P............',
-        '#......................................#',
-        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
-        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
-        '#......................................#',
-        '#.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.#',
-        '#.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.#',
-        '#......................................#',
-        '#..VVVVVVVV....VVVVVVVV................#',
-        '#..VVVVVVVV....VVVVVVVV................#',
-        '#..========....========................#',
-        '#......................................#',
-        '#..........p......p....................#',
-        '#..AAAAA...BBBBB...EEEE................#',
-        '#..AAAAA...BBBBB...EEEE................#',
-        '#..AAAAA...BBBBB.......................#',
-        '#......................................#',
-        '#..o............o.....j...o............#',
-        '#........................y.............#',
-        '#..WWWW....KKKKKKK.....F.F.............#',
-        '#..WWWW....KKKKKKK.....................#',
-        '#..............n.......................#',
-        '#.HHHH..............gGGGGGGg...........#',
-        '#......................................#',
-        '########################################',
+        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        'qqqqqbqqqqqqqqqqbqqqqqqqqqqbqqqqqqqqqqbqqqqqqqqqqbqqqqqqqqqq',
+        '.MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM.',
+        '.MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM.',
+        'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
+        'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
+        '#......P.....................P.....................P.......#',
+        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
+        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
+        '#...j............j............j............j............j..#',
+        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
+        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
+        '#.............................................e...e...e...e#',
+        '#..VVVVVVVVVVVVVVVV.....AAAAAAAAAAAAAAAAAA...EEEEEEEEEEEEE.#',
+        '#..VVVVVVVVVVVVVVVV.....AAAAAAAAAAAAAAAAAA...EEEEEEEEEEEEE.#',
+        '#..VVVVVVVVVVVVVVVV.....AAAAAAAAAAAAAAAAAA.................#',
+        '#..================.....==================.................#',
+        '#..VVVVVVVVVVVVVVVV.....AAAAAAAAAAAAAAAAAA...EEEEEEEEEEEEE.#',
+        '#..VVVVVVVVVVVVVVVV.....AAAAAAAAAAAAAAAAAA...EEEEEEEEEEEEE.#',
+        '#..VVVVVVVVVVVVVVVV.....AAAAAAAAAAAAAAAAAA.................#',
+        '#.........................o.......................y........#',
+        '#..........................j...j...j...j...j......o........#',
+        '#...........................BBBBBBBBBBBBBBBBBB...VVVVVVVV..#',
+        '#..CCCCCCCCCCCCCCCCCCCCCC...BBBBBBBBBBBBBBBBBB...VVVVVVVV..#',
+        '#..cccccccccccccccccccccc...BBBBBBBBBBBBBBBBBB...VVVVVVVV..#',
+        '#...j..j..j..j..j..j..j.....==================.............#',
+        '#...o....o....o....o........BBBBBBBBBBBBBBBBBB...VVVVVVVV..#',
+        '#...........................BBBBBBBBBBBBBBBBBB...VVVVVVVV..#',
+        '#..==========...............BBBBBBBBBBBBBBBBBB...VVVVVVVV..#',
+        '#..IIIIIIIIII..xxxYxZxxxxx............VVVVVVVVVVVVV........#',
+        '#..IIIIIIIIII..xuxxxxxYxZx............VVVVVVVVVVVVV........#',
+        '#..==========..xxxxxYxxxxx............VVVVVVVVVVVVV........#',
+        '#..............xuxZxxxxxYx....WWWWWW.......................#',
+        '#.............................WWWWWW.......................#',
+        '#.......................................KKKKKKKKKKKKK.FF...#',
+        '#...HHHHHHHHHHH..........................................n.#',
+        '#...............y..j..j.j...j...y..........................#',
+        '#........................gGGGGGGGGGGGGGGGGGGGg.............#',
+        '#.........................GGGGGGGGGGGGGGGGGGG..............#',
+        '############################################################',
+      ],
+      relleno: [
+        { c0:  3, f0: 13, c1: 18, f1: 15, alto: [3, 3], vacio: 0.08, paleta: ['gris', 'gris', 'verde', 'azul'] },
+        { c0:  3, f0: 17, c1: 15, f1: 19, alto: [2, 3], vacio: 0.12, paleta: ['gris', 'verde', 'gris', 'azul'] },
+        { c0: 28, f0: 13, c1: 41, f1: 15, alto: [1, 3], vacio: 0.15 },
+        { c0: 30, f0: 17, c1: 41, f1: 19, alto: [1, 3], vacio: 0.15 },
+        { c0: 28, f0: 22, c1: 38, f1: 24, alto: [1, 2], vacio: 0.2 },
+        { c0: 33, f0: 26, c1: 45, f1: 28, alto: [1, 3], vacio: 0.16 },
+        { c0: 49, f0: 22, c1: 56, f1: 24, alto: [2, 3], vacio: 0.1, paleta: ['gris', 'gris', 'verde'] },
+        { c0: 49, f0: 26, c1: 56, f1: 28, alto: [2, 3], vacio: 0.1, paleta: ['gris', 'gris', 'verde'] },
+        { c0: 38, f0: 29, c1: 50, f1: 31, alto: [2, 3], vacio: 0.12, paleta: ['gris', 'verde', 'gris', 'azul'] },
       ],
       cajas: [
-        { m: 'CRXU-777', col: 4,  fil: 16, color: 'aqua',  tipo: 'reefer' },
-        { m: 'MSKU-018', col: 5,  fil: 17, color: 'rojo',  tipo: 'normal' },
-        { m: 'IMOU-666', col: 12, fil: 16, color: 'naranja', tipo: 'imo' },
-        { m: 'TGHU-240', col: 13, fil: 17, color: 'azul',  tipo: 'normal' },
-        { m: 'HLXU-881', col: 6,  fil: 11, color: 'gris',  tipo: 'normal' },
-        { m: 'CAIU-455', col: 18, fil: 12, color: 'verde', tipo: 'normal' },
-        { m: 'OOLU-512', col: 7,  fil: 11, color: 'azul',  tipo: 'normal' }
+        { m: 'CRXU-777', col: 20, fil: 14, color: 'aqua', tipo: 'reefer' },
+        { m: 'MSKU-018', col: 21, fil: 18, color: 'rojo', tipo: 'normal' },
+        { m: 'IMOU-666', col: 43, fil: 14, color: 'naranja', tipo: 'imo' },
+        { m: 'TGHU-240', col: 43, fil: 18, color: 'azul', tipo: 'normal' },
+        { m: 'HLXU-881', col: 40, fil: 23, color: 'gris', tipo: 'normal' },
+        { m: 'CAIU-455', col: 31, fil: 27, color: 'verde', tipo: 'normal' },
+        { m: 'OOLU-512', col: 47, fil: 23, color: 'azul', tipo: 'normal' },
       ],
       ordenes: [
         { m: 'CRXU-777', zona: 'E' },
-        { m: 'IMOU-666', zona: 'V' },
-        { m: 'HLXU-881', zona: 'B' }
+        { m: 'IMOU-666', zona: 'I' },
+        { m: 'HLXU-881', zona: 'B' },
       ],
       trafico: [
-        { tipo: 'camion', fil: 5, dir: 1,  x0: -3, v: 4.5, cada: 8 },
-        { tipo: 'tren',   fil: 8, dir: 1,  x0: -12, v: 6,  cada: 16, largo: 9 },
-        { tipo: 'camion', fil: 6, dir: -1, x0: 42, v: 4,   cada: 11, retraso: 4 }
+        { tipo: 'camion', fil: 4, dir: 1, x0: -3, v: 4.5, cada: 8 },
+        { tipo: 'tren', fil: 8, dir: 1, x0: -14, v: 6, cada: 17, largo: 10 },
+        { tipo: 'tren', fil: 11, dir: -1, x0: 72, v: 5.5, cada: 21, largo: 9, retraso: 6 },
+        { tipo: 'camion', fil: 5, dir: -1, x0: 62, v: 4, cada: 11, retraso: 4 },
       ]
     },
     {
-      nombre: 'TURNO 4', clima: 'noche', segundos: 300,
+      nombre: 'TURNO 4', clima: 'noche', segundos: 320,
       lema: 'Turno de noche con la terminal entera abierta: buque, tren y gate. Solo alumbran tus faros y los postes.',
-      inicio: { col: 20, fil: 25 },
+      inicio: { col: 19, fil: 23 },
       mapa: [
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-        '~SSSSSSSSSSSSSSSSSSSSSSSSSS~~~~~~~~~~~~~',
-        '~SddddddddddddddddddddddddS~~~~~~~~~~~~~',
-        '~SddddddddddddddddddddddddS~~~~~~~~~~~~~',
-        '~SSSSSSSSSSSSSSSSSSSSSSSSSS~~~~~~~~~~~~~',
-        'qqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqq',
-        'LMMMMMMMMMMMMMMMMMMMMMMMMMM......L......',
-        'LMMMMMMMMMMMMMMMMMMMMMMMMMM......L......',
-        '......P..........................P......',
-        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
-        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
-        '#......................................#',
-        '#..AAAAA..BBBBB..EEEE..IIII............#',
-        '#..AAAAA..BBBBB..EEEE..IIII............#',
-        '#..AAAAA..BBBBB..EEEE..IIII............#',
-        '#..=====..=====........................#',
-        '#......................................#',
-        '#.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.#',
-        '#.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.#',
-        '#......................................#',
-        '#..o.........p.....j.o........p........#',
-        '#....................y.................#',
-        '#..VVVVVV...VVVVVV....WWW..F.F.........#',
-        '#..VVVVVV...VVVVVV....WWW..............#',
-        '#............n.........................#',
-        '#..KKKKKKK...........o.................#',
-        '#.HHHH...............gGGGGGGGGg........#',
-        '########################################',
+        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+        '....SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS.............',
+        '....ddddddddddddddddddddddddddddddddddddddddddd.............',
+        '....ddddddddddddddddddddddddddddddddddddddddddd.............',
+        '....SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS.............',
+        'qqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqbqqqqqqqbq',
+        '.MMMMMMMMMMMLLMMMMMMMMMMMMMMMMMMMMMMMMLLMMMMMMMMMMMMMMMMMMM.',
+        '.MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM.',
+        '#....P...........P...........P...........P...........P.....#',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#',
+        '#......o...............o...............oe...e...e...e..oe..#',
+        '#..AAAAAAAAAAAAAA....BBBBBBBBBBBBBB....EEEEEEEEEEEEEEEEEE..#',
+        '#..AAAAAAAAAAAAAA....BBBBBBBBBBBBBB....EEEEEEEEEEEEEEEEEE..#',
+        '#..AAAAAAAAAAAAAA....BBBBBBBBBBBBBB........................#',
+        '#..==============....==============....============........#',
+        '#..AAAAAAAAAAAAAA....BBBBBBBBBBBBBB........................#',
+        '#..AAAAAAAAAAAAAA....BBBBBBBBBBBBBB....EEEEEEEEEEEEEEEEEE..#',
+        '#..AAAAAAAAAAAAAA....BBBBBBBBBBBBBB....EEEEEEEEEEEEEEEEEE..#',
+        '#..........................................................#',
+        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
+        '#rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr#',
+        '#........................o............................y....#',
+        '#.............................j...j...j...j...j...j....o...#',
+        '#.............................VVVVVVVVVVVVVV...==========..#',
+        '#..CCCCCCCCCCCCCCCCCCCCCCCC...VVVVVVVVVVVVVV...IIIIIIIIII..#',
+        '#..cccccccccccccccccccccccc...VVVVVVVVVVVVVV...IIIIIIIIII..#',
+        '#...j..j..j..j..j..j..j..j....==============...IIIIIIIIII..#',
+        '#...o....o....o....o....o.....VVVVVVVVVVVVVV...==========..#',
+        '#.............................VVVVVVVVVVVVVV...............#',
+        '#..xxxxxYxZxxxxx..............VVVVVVVVVVVVVV....VVVVVVVVV..#',
+        '#..xxxuxxxxxYxZx..WWWWWWWWWW....................VVVVVVVVV..#',
+        '#..xYxxxxxuxxxxx..WWWWWWWWWW.gGGGGGGGGGGGGG.....VVVVVVVVV..#',
+        '#..xxxZxYxxxxxZx..WWWWWWWWWW..GGGGGGGGGGGGG................#',
+        '#.............................j...j...j...j................#',
+        '#.......................y......................y...........#',
+        '#...KKKKKKKKKKKKK..FF.n.....................HHHHHHHHHHHHH..#',
+        '#.............................j..j..j......g...............#',
+        '#...........o.............o................................#',
+        '############################################################',
+      ],
+      relleno: [
+        { c0:  3, f0: 12, c1: 13, f1: 14, alto: [1, 3], vacio: 0.12 },
+        { c0:  3, f0: 16, c1: 14, f1: 18, alto: [2, 3], vacio: 0.1 },
+        { c0: 24, f0: 12, c1: 34, f1: 14, alto: [1, 3], vacio: 0.16 },
+        { c0: 26, f0: 16, c1: 34, f1: 18, alto: [1, 3], vacio: 0.14 },
+        { c0: 30, f0: 24, c1: 43, f1: 26, alto: [3, 3], vacio: 0.07, paleta: ['gris', 'gris', 'verde', 'azul'] },
+        { c0: 30, f0: 28, c1: 43, f1: 30, alto: [2, 3], vacio: 0.12, paleta: ['gris', 'verde', 'gris', 'azul'] },
+        { c0: 48, f0: 30, c1: 56, f1: 32, alto: [2, 3], vacio: 0.1, paleta: ['gris', 'gris', 'verde', 'azul'] },
       ],
       cajas: [
-        { m: 'CRXU-310', col: 4,  fil: 12, color: 'aqua',  tipo: 'reefer' },
-        { m: 'OWLU-900', col: 12, fil: 12, color: 'morado', tipo: 'pesado' },
-        { m: 'IMOU-121', col: 11, fil: 13, color: 'naranja', tipo: 'imo' },
-        { m: 'IMOU-122', col: 25, fil: 14, color: 'naranja', tipo: 'imo' },
-        { m: 'MSKU-505', col: 5,  fil: 13, color: 'rojo',  tipo: 'normal' },
-        { m: 'TGHU-660', col: 13, fil: 14, color: 'azul',  tipo: 'normal' },
-        { m: 'CAIU-771', col: 6,  fil: 22, color: 'verde', tipo: 'normal' },
-        { m: 'MEDU-888', col: 14, fil: 22, color: 'gris',  tipo: 'normal' }
+        { m: 'CRXU-310', col: 18, fil: 13, color: 'aqua', tipo: 'reefer' },
+        { m: 'OWLU-900', col: 19, fil: 17, color: 'morado', tipo: 'pesado' },
+        { m: 'IMOU-121', col: 36, fil: 13, color: 'naranja', tipo: 'imo' },
+        { m: 'IMOU-122', col: 36, fil: 17, color: 'naranja', tipo: 'imo' },
+        { m: 'MSKU-505', col: 15, fil: 13, color: 'rojo', tipo: 'normal' },
+        { m: 'TGHU-660', col: 18, fil: 18, color: 'azul', tipo: 'normal' },
+        { m: 'CAIU-771', col: 45, fil: 30, color: 'verde', tipo: 'normal' },
+        { m: 'MEDU-888', col: 28, fil: 22, color: 'gris', tipo: 'normal' },
       ],
       ordenes: [
         { m: 'OWLU-900', zona: 'M' },
         { m: 'CRXU-310', zona: 'E' },
         { m: 'IMOU-121', zona: 'I' },
-        { m: 'MSKU-505', zona: 'M' }
+        { m: 'MSKU-505', zona: 'M' },
       ],
       trafico: [
-        { tipo: 'camion', fil: 9,  dir: 1,  x0: -3, v: 4.5, cada: 6 },
-        { tipo: 'camion', fil: 10, dir: -1, x0: 42, v: 5,   cada: 7, retraso: 3 },
-        { tipo: 'tren',   fil: 17, dir: -1, x0: 50, v: 6.5, cada: 18, largo: 10 },
-        { tipo: 'sts',    col: 10, fil: 6,  v: 1.4, ida: 3, vuelta: 24 }
+        { tipo: 'camion', fil: 9, dir: 1, x0: -3, v: 4.5, cada: 6 },
+        { tipo: 'camion', fil: 10, dir: -1, x0: 62, v: 5, cada: 7, retraso: 3 },
+        { tipo: 'tren', fil: 21, dir: -1, x0: 72, v: 6.5, cada: 19, largo: 10 },
+        { tipo: 'sts', col: 14, fil: 6, v: 1.4, ida: 5, vuelta: 42 },
       ]
     }
   ];
-
   const RUMBO_INICIAL = 0;
 
   // El mundo es GRANDE y el canvas es solo una ventana sobre el: la
-  // vista mide 20 x 14 casillas y la terminal 40 x 28, asi que la
+  // vista mide 20 x 14 casillas y la terminal 60 x 40, asi que la
   // camara sigue a la maquina. Manteniendo la vista del tamano de
   // antes, el pixel se sigue viendo al triple en proyector.
   const VISTA_C = 20, VISTA_F = 14;
@@ -979,6 +1076,187 @@
     if (der) rc(g, x + TILE - 4, y + 19, 2, ALTO - 20, '#71797f');
   };
 
+  // ALMACEN DE CARGA (CFS): la nave grande de la terminal, la que se
+  // ve desde cualquier punto del patio. Es mas alta y mas larga que el
+  // taller: cubierta a dos aguas con lucernario corrido, chapa
+  // nervada, franja de rotulo y portones de anden numerados. Se dibuja
+  // por modulos como los demas edificios, asi que su largo lo pone el
+  // mapa: una racha de veinte casillas es una nave de veinte casillas.
+  const dibujarAlmacen = (g, x, base, i, n) => {
+    const ALTO = 70;
+    const y = base - ALTO;
+    const izq = i === 0, der = i === n - 1;
+    rc(g, x + 1, base - 2, TILE - 2, 4, COL.sombra);
+
+    // cubierta: cumbrera, faldon y lucernario corrido
+    rc(g, x, y + 2, TILE, 5, '#39434d');
+    rc(g, x, y + 2, TILE, 2, '#4d5964');
+    rc(g, x, y + 7, TILE, 11, '#48535f');
+    for (let k = 0; k < TILE; k += 4) rc(g, x + k, y + 7, 1, 11, '#525e6a');
+    rc(g, x + (izq ? 3 : 0), y + 9, TILE - (izq ? 3 : 0) - (der ? 3 : 0), 5, '#6f96ab');
+    rc(g, x + (izq ? 3 : 0), y + 9, TILE - (izq ? 3 : 0) - (der ? 3 : 0), 2, '#9cc4d8');
+    rc(g, x, y + 18, TILE, 3, '#69747f');                  // canalon
+    rc(g, x, y + 18, TILE, 1, '#8b96a1');
+
+    // cuerpo de chapa nervada
+    rc(g, x, y + 21, TILE, ALTO - 21, '#a4adb5');
+    for (let k = 1; k < TILE; k += 3) rc(g, x + k, y + 21, 1, ALTO - 22, '#949da5');
+    rc(g, x, y + 21, TILE, 1, '#c2cad1');
+
+    // franja de rotulo corrida, con letras insinuadas en el centro
+    rc(g, x, y + 27, TILE, 9, '#1d5878');
+    rc(g, x, y + 27, TILE, 1, '#2e7ba3');
+    rc(g, x, y + 35, TILE, 1, '#123c53');
+    const centro = Math.floor(n / 2);
+    if (n > 2 && i >= centro - 1 && i <= centro + 1) {
+      for (let k = 2; k < TILE - 3; k += 5) rc(g, x + k, y + 29, 3, 5, '#bfe4f7');
+    }
+
+    // portones de anden en los modulos pares, ventanal alto en los
+    // impares: alternar es lo que le quita la cara de caja repetida
+    if (i % 2 === 0) {
+      rc(g, x + 2, y + 44, TILE - 4, 26, '#2b333b');        // hueco
+      rc(g, x + 3, y + 45, TILE - 6, 24, '#586472');
+      for (let k = 0; k < 6; k++) rc(g, x + 3, y + 46 + k * 4, TILE - 6, 2, '#46515e');
+      rc(g, x + 2, y + 41, TILE - 4, 3, '#ffd23d');         // dintel senalizado
+      rc(g, x + 3, y + 42, TILE - 6, 1, '#2b333b');
+      rc(g, x + 9, y + 38, 6, 3, '#2b333b');                // numero de anden
+      rc(g, x + 10, y + 39, 4, 1, '#ffd23d');
+    } else {
+      for (let k = 3; k < TILE - 5; k += 8) caja(g, x + k, y + 40, 6, 8, '#26404f', '#4f7f96');
+      rc(g, x + 2, y + 56, TILE - 4, 14, '#8f99a2');        // paramento ciego
+      rc(g, x + 2, y + 56, TILE - 4, 1, '#a9b2ba');
+      if (izq) {
+        caja(g, x + 4, y + 56, 8, 14, '#2f3a44', '#48545f');   // puerta de personal
+        rc(g, x + 10, y + 63, 2, 2, '#ffd23d');
+      }
+    }
+
+    rc(g, x, base - 3, TILE, 3, '#6b747d');                 // zocalo
+    if (izq) rc(g, x, y + 2, 1, ALTO - 2, '#727c86');
+    if (der) rc(g, x + TILE - 1, y + 2, 1, ALTO - 2, '#727c86');
+    rc(g, x, base - 1, TILE, 1, M.k);
+
+    // bajantes, extractores y torre de escalera, salteados
+    if (i % 4 === 2) rc(g, x + TILE - 5, y + 21, 2, ALTO - 24, '#79838d');
+    if (i % 5 === 1) {
+      rc(g, x + 7, y - 6, 10, 8, '#69747f');
+      rc(g, x + 6, y - 8, 12, 2, '#8b96a1');
+      rc(g, x + 10, y - 12, 4, 4, '#4a525c');
+    }
+    if (der) {
+      rc(g, x + 4, y - 14, 3, 16, '#8d97a1');               // pararrayos
+      rc(g, x + 4, y - 16, 3, 2, '#d0342c');
+    }
+  };
+
+  // ANDEN DE CARGA: la plataforma a la altura de la caja del camion
+  // que corre delante del almacen, con su canto rayado, los topes de
+  // caucho y la escalerilla en un extremo.
+  const dibujarAnden = (g, x, base, i, n) => {
+    const ALTO = 17;
+    const y = base - ALTO;
+    rc(g, x + 1, base - 2, TILE - 2, 3, COL.sombra);
+    rc(g, x, y, TILE, ALTO, '#8f9aa4');                     // losa
+    rc(g, x, y, TILE, 3, '#adb7bf');
+    rc(g, x, y + 3, TILE, 1, '#6f7a85');
+    for (let px = 0; px < TILE; px++) {                     // canto rayado
+      rc(g, x + px, y + 10, 1, 4, ((px + i * TILE) % 8) < 4 ? '#ffd23d' : '#2b323a');
+    }
+    rc(g, x, y + 14, TILE, 3, '#5f6a75');
+    if (i % 2 === 0) {                                      // topes de caucho
+      rc(g, x + 3, y + 4, 4, 6, '#1d2228');
+      rc(g, x + TILE - 7, y + 4, 4, 6, '#1d2228');
+      rc(g, x + 8, y + 5, TILE - 16, 4, '#77828d');         // nivelador
+    }
+    if (i === n - 1) {                                      // escalerilla
+      for (let k = 0; k < 4; k++) rc(g, x + 13, y + 5 + k * 3, 8, 2, '#6d7783');
+      rc(g, x + 12, y + 3, 2, 14, '#525d69');
+    }
+    rc(g, x, base - 1, TILE, 1, M.k);
+  };
+
+  // MONTON DE CHATARRA: perfiles retorcidos y plancha oxidada, lo que
+  // se acumula en el rincon de desguace de cualquier terminal.
+  const dibujarChatarra = (g, x, base) => {
+    rc(g, x + 1, base - 2, TILE - 2, 3, COL.sombra);
+    const y = base - 22;
+    // masa del monton, en dos aguas irregulares
+    rc(g, x + 2, y + 10, 20, 12, '#6b5340');
+    rc(g, x + 4, y + 6, 16, 6, '#7d6149');
+    rc(g, x + 7, y + 2, 10, 5, '#8a6b4e');
+    // perfiles y planchas sueltas asomando
+    rc(g, x + 3, y + 8, 9, 2, '#9a5f34');
+    rc(g, x + 12, y + 12, 8, 2, '#a86b3a');
+    rc(g, x + 5, y + 15, 12, 2, '#7a4f2c');
+    rc(g, x + 2, y + 4, 6, 2, '#8d97a1');
+    rc(g, x + 14, y + 4, 7, 2, '#77818b');
+    rc(g, x + 9, y, 3, 4, '#8d97a1');
+    rc(g, x + 16, y + 8, 5, 5, '#5f6a75');
+    for (let k = 0; k < 5; k++) rc(g, x + 4 + k * 4, y + 18, 2, 2, '#4a3b2e');
+    rc(g, x + 2, base - 3, 20, 3, '#3f3529');
+  };
+
+  // CONTENEDOR DESGUAZADO: la caja que ya no navega -- oxidada, con la
+  // puerta descolgada y otra encima medio aplastada.
+  const dibujarDesguace = (g, x, base) => {
+    rc(g, x + 1, base - 2, TILE - 2, 3, COL.sombra);
+    const y = base - 30;
+    // caja de abajo, panzuda y comida de oxido
+    caja(g, x + 2, y + 14, 20, 16, '#6d4a34', '#87604399');
+    for (let k = 4; k < 20; k += 3) rc(g, x + k, y + 17, 1, 10, '#5a3b28');
+    rc(g, x + 2, y + 14, 20, 2, '#8a6144');
+    rc(g, x + 4, y + 20, 7, 5, '#4a3123');                  // boquete
+    rc(g, x + 13, y + 18, 6, 3, '#9a5f34');
+    rc(g, x + 17, y + 14, 5, 16, '#5b3d2a');                // puerta descolgada
+    rc(g, x + 17, y + 21, 5, 1, '#8a6144');
+    // la de arriba, hundida por el centro
+    caja(g, x + 3, y + 3, 18, 12, '#5e5b52', '#76736899');
+    rc(g, x + 8, y + 3, 9, 3, '#4a4840');                   // hundimiento
+    rc(g, x + 6, y + 6, 12, 1, '#3f3d36');
+    for (let k = 5; k < 19; k += 3) rc(g, x + k, y + 7, 1, 7, '#514f47');
+    rc(g, x + 3, y + 14, 18, 1, '#39372f');
+    rc(g, x + 2, base - 3, 20, 3, '#3a3128');
+  };
+
+  // VOLQUETE DE RESIDUOS: la caja abierta donde va el escombro y el
+  // pale roto. Va en la zona de desechos, no en el patio operativo.
+  const dibujarVolquete = (g, x, base) => {
+    rc(g, x + 2, base - 2, 20, 3, COL.sombra);
+    const y = base - 18;
+    rc(g, x + 2, y + 3, 20, 15, '#3d7a5f');                 // cuba
+    rc(g, x + 2, y + 3, 20, 2, '#519a78');
+    rc(g, x + 2, y + 3, 2, 15, '#2a5843');
+    rc(g, x + 20, y + 3, 2, 15, '#2a5843');
+    for (let k = 6; k < 20; k += 5) rc(g, x + k, y + 6, 1, 11, '#2f6650');
+    rc(g, x + 4, y + 11, 16, 2, '#ffd23d');                 // banda reflectante
+    // escombro asomando por la boca
+    rc(g, x + 4, y, 6, 4, '#8a6b4e');
+    rc(g, x + 10, y - 2, 5, 6, '#6d7783');
+    rc(g, x + 15, y + 1, 6, 3, '#8a5a3a');
+    rc(g, x + 6, y - 3, 3, 3, '#a9b2ba');
+    rc(g, x + 3, base - 3, 18, 3, '#2b323a');               // patines
+  };
+
+  // RACK DE TOMAS: el armario con los enchufes de los reefers. Va
+  // detras de la linea de tomas, con la manguera colgando.
+  const dibujarRack = (g, x, base) => {
+    rc(g, x + 4, base - 2, 16, 3, COL.sombra);
+    const y = base - 22;
+    rc(g, x + 8, y + 14, 3, 8, '#5f6a75');                  // pie
+    rc(g, x + 13, y + 14, 3, 8, '#5f6a75');
+    caja(g, x + 4, y, 16, 15, '#7b838c', '#99a1aa');        // armario
+    rc(g, x + 5, y + 2, 6, 5, '#2b323a');                   // tomas
+    rc(g, x + 13, y + 2, 6, 5, '#2b323a');
+    rc(g, x + 6, y + 3, 2, 2, '#ffd23d');
+    rc(g, x + 14, y + 3, 2, 2, '#54BBAB');
+    rc(g, x + 5, y + 9, 14, 4, '#4a525c');                  // cuadro
+    rc(g, x + 6, y + 10, 3, 2, '#ff5a3c');
+    rc(g, x + 4, y - 2, 16, 3, '#66707a');                  // visera
+    rc(g, x + 18, y + 7, 2, 12, '#2b323a');                 // manguera colgando
+    rc(g, x + 19, y + 17, 3, 2, '#2b323a');
+  };
+
   // El buque: la fila de arriba es la banda de estribor, que se ve de
   // canto y casi plana; la de abajo es el costado de babor, el que da
   // al muelle, con su linea de flotacion y la obra viva. Dibujar las
@@ -1085,6 +1363,10 @@
     SPR.generador = cocer(TILE, 32, (g) => dibujarGenerador(g, 0, 29));
     SPR.chasis = cocer(TILE, 20, (g) => dibujarChasis(g, 0, 17));
     SPR.bidones = cocer(TILE, 22, (g) => dibujarBidones(g, 0, 19));
+    SPR.chatarra = cocer(TILE, 25, (g) => dibujarChatarra(g, 0, 22));
+    SPR.desguace = cocer(TILE, 33, (g) => dibujarDesguace(g, 0, 30));
+    SPR.volquete = cocer(TILE, 21, (g) => dibujarVolquete(g, 0, 18));
+    SPR.rack = cocer(TILE, 25, (g) => dibujarRack(g, 0, 22));
     SPR.casco = {};
     [0, 1, 2, 3].forEach((n) => {
       const v = { izq: !!(n & 1), der: !!(n & 2) };
@@ -1152,8 +1434,60 @@
 
   let ordenes = [];
 
+  // Matriculas y colores del relleno. Los prefijos no coinciden con
+  // los de las cajas con orden, asi que buscar una matricula de la
+  // hoja de trabajo nunca cae en un contenedor de decorado.
+  const PREFIJOS = ['TCLU', 'GESU', 'FCIU', 'TRLU', 'APZU', 'BMOU', 'DFSU', 'SEGU'];
+  const PALETA_PATIO = ['rojo', 'azul', 'verde', 'gris', 'aqua', 'naranja'];
+
+  // Un patio de verdad esta LLENO, y escribir trescientos contenedores
+  // a mano en TURNOS no era manera: los bloques se declaran como
+  // rectangulos en `relleno` y aqui se siembran con altura y color
+  // variados. El ruido va por coordenada, asi que el mismo bloque sale
+  // siempre igual -- se puede aprender el patio de un turno.
+  // Se recorre contra el mapa del turno que se le pasa, no contra el
+  // cargado: el menu dibuja el plano de turnos que aun no se han
+  // abierto y necesita el mismo relleno que va a encontrar dentro.
+  const recorrerRelleno = (t, cb) => {
+    const filas = t.mapa;
+    const nf = filas.length, nc = filas[0].length;
+    (t.relleno || []).forEach((r, ri) => {
+      const pal = r.paleta || PALETA_PATIO;
+      const min = Math.max(1, r.alto ? r.alto[0] : 1);
+      const max = Math.min(PILA_MAX, r.alto ? r.alto[1] : PILA_MAX);
+      for (let f = r.f0; f <= r.f1; f++) {
+        for (let c = r.c0; c <= r.c1; c++) {
+          if (c < 0 || c >= nc || f < 0 || f >= nf) continue;
+          const tl = TILES[filas[f][c]];
+          if (!tl || tl.solido) continue;
+          if (ruido(c * 12.9 + ri * 7.7, f * 78.2 + ri * 3.3) < (r.vacio || 0)) continue;
+          const n = min + Math.floor(ruido(c * 3.7 + ri, f * 9.1) * (max - min + 1));
+          for (let i = 0; i < n; i++) {
+            const w = ruido(c * 5.3 + i * 2.1 + ri, f * 8.7 + i * 4.9);
+            cb(c, f, i, {
+              m: PREFIJOS[Math.floor(w * PREFIJOS.length) % PREFIJOS.length] +
+                 '-' + String(100 + Math.floor(w * 899)),
+              color: pal[Math.floor(ruido(c * 2.3 + i, f * 6.1 + ri) * pal.length) % pal.length],
+              tipo: 'normal',
+              integridad: 100
+            });
+          }
+        }
+      }
+    });
+  };
+
+  const sembrarRelleno = (t) => {
+    recorrerRelleno(t, (c, f, i, cj) => {
+      const p = pilas.get(llave(c, f)) || [];
+      if (p.length < PILA_MAX) p.push(cj);
+      pilas.set(llave(c, f), p);
+    });
+  };
+
   const sembrarTurno = () => {
     pilas.clear();
+    sembrarRelleno(turnoActual());
     turnoActual().cajas.forEach((c) => {
       const k = llave(c.col, c.fil);
       const p = pilas.get(k) || [];
@@ -1202,16 +1536,21 @@
     return tileEn(c, f).nombre;
   };
 
+  // La terminal es mas larga que el abecedario, asi que pasada la Z
+  // los carriles siguen en AA, AB... como la numeracion de bahias de
+  // verdad, en vez de irse a minusculas por acumular al codigo ASCII.
   const posTexto = () => {
     const bahia = String(st.col + 1).padStart(2, '0');
-    const carril = String.fromCharCode(65 + st.fil);
+    const carril = st.fil < 26
+      ? String.fromCharCode(65 + st.fil)
+      : 'A' + String.fromCharCode(65 + st.fil - 26);
     return 'BAHIA ' + bahia + ' ' + PUNTO + ' CARRIL ' + carril;
   };
 
   // Todo lo que levanta del piso es entidad y se ordena por
   // profundidad. Los del mapa no cambian dentro de un turno, asi que
   // se listan al arrancarlo.
-  const CON_ALTURA = '#HoPbLpKSdgFnjy';
+  const CON_ALTURA = '#HoPbLpKSdgFnjyCcYZue';
   let OBJETOS = [];
   const listarObjetos = () => {
     OBJETOS = [];
@@ -1277,6 +1616,19 @@
     rc(g, px, py + 4, TILE, 2, '#5c6570');
     for (let x = 2; x < TILE; x += 8) rc(g, px + x, py + 10, 5, 4, '#2b323a');
     rc(g, px, py + TILE - 2, TILE, 2, '#6d7783');
+  };
+
+  // El rincon de desguace no es asfalto de patio: es tierra pisada con
+  // escombro y manchas de oxido, para que se lea distinto del resto.
+  const pintarChatarraSuelo = (g, px, py, c, f) => {
+    pintarAsfalto(g, px, py, c, f, '#3d382f', '#4a4438', '#2e2a24');
+    for (let i = 0; i < 5; i++) {
+      const rx = Math.floor(ruido(c * 19.3 + i * 5.1, f * 29.7) * (TILE - 5));
+      const ry = Math.floor(ruido(f * 11.7 + i * 4.3, c * 37.1) * (TILE - 3));
+      const v = ruido(c * 7.3 + i, f * 3.9 + i);
+      rc(g, px + rx, py + ry, v > 0.6 ? 4 : 2, v > 0.85 ? 2 : 1,
+        v > 0.72 ? '#6b4a2c' : (v > 0.4 ? '#55503f' : '#2b2823'));
+    }
   };
 
   const pintarRiel = (g, px, py, c, f) => {
@@ -1369,7 +1721,8 @@
         const px = c * TILE, py = f * TILE;
         const ch = mapa[f][c];
         const t = TILES[ch];
-        if (ch === 'T') pintarVia(g, px, py, c, f);
+        if ('xYZu'.indexOf(ch) >= 0) pintarChatarraSuelo(g, px, py, c, f);
+        else if (ch === 'T') pintarVia(g, px, py, c, f);
         else if (ch === 'r') pintarRiel(g, px, py, c, f);
         else if (ch === '=') pintarRayado(g, px, py, c, f);
         else if (ch === '~') pintarAgua(g, px, py, c, f);
@@ -1651,6 +2004,12 @@
       case 'p': g.drawImage(SPR.tuberia, x, base - 19); break;
       case 'H': { const r = racha(o.col, o.fil, 'H'); dibujarOficina(g, x, base, r.i, r.n); break; }
       case 'K': { const r = racha(o.col, o.fil, 'K'); dibujarNave(g, x, base, r.i, r.n); break; }
+      case 'C': { const r = racha(o.col, o.fil, 'C'); dibujarAlmacen(g, x, base, r.i, r.n); break; }
+      case 'c': { const r = racha(o.col, o.fil, 'c'); dibujarAnden(g, x, base, r.i, r.n); break; }
+      case 'Y': g.drawImage(SPR.chatarra, x, base - 22); break;
+      case 'Z': g.drawImage(SPR.desguace, x, base - 30); break;
+      case 'u': g.drawImage(SPR.volquete, x, base - 18); break;
+      case 'e': g.drawImage(SPR.rack, x, base - 22); break;
       case 'g': g.drawImage(SPR.garita, x, base - 31); break;
       case 'F': g.drawImage(SPR.tanque, x, base - 37); break;
       case 'n': g.drawImage(SPR.generador, x, base - 29); break;
@@ -1827,7 +2186,7 @@
   // mejor un velo oscuro; la niebla se distingue de la noche por el
   // tinte frio, por ser menos densa y por la bruma de encima.
   // El velo se pinta del tamano de la VISTA, no del mundo: con una
-  // terminal de 40 x 28 casillas, rehacer el velo entero cada cuadro
+  // terminal de 60 x 40 casillas, rehacer el velo entero cada cuadro
   // seria pintar cuatro veces mas de lo que se ve.
   let velo = null;
   const dibujarVelo = (g) => {
@@ -1884,7 +2243,7 @@
   };
 
   // Lo que se ve ahora mismo, en casillas. Todo lo que quede fuera no
-  // se dibuja: con un mundo de 40 x 28 pintar la terminal entera cada
+  // se dibuja: con un mundo de 60 x 40 pintar la terminal entera cada
   // cuadro seria tirar la mitad del trabajo.
   const enVista = (c, f, margen) => {
     const m = margen || 2;
@@ -2012,7 +2371,7 @@
 
   // ---------- minimapa ----------
   // Con la camara siguiendo a la maquina hace falta un plano: si no,
-  // en una terminal de 40 x 28 no hay forma de saber donde queda la
+  // en una terminal de 60 x 40 no hay forma de saber donde queda la
   // zona a la que te mandan.
   const MINI_COL = {
     '~': '#16303f', q: '#5c6570', b: '#8f9aa4', S: '#2b3a45', d: '#3d5566',
@@ -2020,7 +2379,9 @@
     g: '#9aa4ad', F: '#9aa4ad', n: '#4f6b52', j: '#5a636d', y: '#a8483d',
     o: '#b3562a', P: '#6d7783', T: '#2a3037', r: '#4a4740', '=': '#5a4a12',
     A: '#2e5f57', B: '#1a5878', E: '#6b571a', M: '#7a3d26',
-    V: '#454d55', I: '#7a651c', G: '#4e3d73', W: '#2e5f57', '.': '#2c3138'
+    V: '#454d55', I: '#7a651c', G: '#4e3d73', W: '#2e5f57', '.': '#2c3138',
+    C: '#8d97a1', c: '#6f7a85', x: '#3d382f', Y: '#6b5340', Z: '#6d4a34',
+    u: '#3d7a5f', e: '#7b838c'
   };
 
   let miniFondo = null;
@@ -2122,27 +2483,125 @@
     return m + ':' + String(r).padStart(2, '0');
   };
 
+  // La lista de ordenes ya no es el instrumento principal -- de eso se
+  // encarga la tarjeta de mision -- sino el marcador de cuanto falta.
   const pintarOrdenes = () => {
     const lista = $('ordenes-lista');
     lista.replaceChildren();
     const act = ordenActiva();
-    ordenes.forEach((o) => {
+    ordenes.forEach((o, i) => {
       const li = document.createElement('li');
       if (o.hecha) li.className = 'is-hecha';
       else if (o === act) li.className = 'is-activa';
       const donde = buscarCaja(o.m);
-      let pista = '';
-      if (!o.hecha) {
-        if (donde && donde.enSpreader) pista = ' (la llevas)';
-        else if (donde && donde.nivel > 0) pista = ' (nivel ' + donde.nivel + ')';
-      }
       const cj = donde && donde.caja;
-      const tono = cj ? COLORES_CAJA[cj.color].base : '#4a525c';
-      const sigla = cj && cj.tipo !== 'normal' ? ' ' + TIPOS[cj.tipo].sigla : '';
-      li.innerHTML = '<i style="background:' + tono + '"></i>' +
-        '<span><b>' + o.m + '</b>' + sigla + ' ' + FLECHA + ' <em>' + ZONAS[o.zona] + '</em>' + pista + '</span>';
+      li.innerHTML = '<i style="background:' + (cj ? COLORES_CAJA[cj.color].base : '#4a525c') + '"></i>' +
+        '<span>' + (i + 1) + '. ' + o.m + ' ' + FLECHA + ' <em>' + ZONAS[o.zona] + '</em></span>';
       lista.appendChild(li);
     });
+  };
+
+  // ---------- que hago ahora ----------
+  // Saber cual es el encargo no es saber que tecla toca. Este paso se
+  // calcula del estado REAL de la maquina -- donde apunta el boom, a
+  // que altura va el spreader, que lleva enganchado -- y va guiando
+  // maniobra a maniobra. Es lo que convierte el panel en algo que se
+  // entiende sin haber leido las instrucciones.
+  const siguientePaso = (o, donde) => {
+    if (!o) return { txt: 'TURNO CUMPLIDO: no quedan ordenes en la hoja.', tono: 'ok' };
+    const obj = objetivo();
+
+    // llevas colgando algo que no es lo pedido
+    if (st.carga && st.carga.m !== o.m) {
+      return { txt: 'Llevas ' + st.carga.m + ' enganchada: posala en un hueco libre antes de seguir.', tono: 'mal' };
+    }
+
+    // la llevas tu: toca entregarla
+    if (st.carga) {
+      const enZona = (tileEn(obj.col, obj.fil).zona || '') === o.zona;
+      if (enZona) {
+        if (puedeSoltar()) {
+          return { txt: 'Estas apuntando a ' + ZONAS[o.zona] + ': pulsa ESPACIO y la posas.', tono: 'ok' };
+        }
+        const n = alturaPila(obj.col, obj.fil);
+        const veto = vetoColocar(obj.col, obj.fil, n, st.carga);
+        if (veto) return { txt: veto, tono: 'mal' };
+        if (n >= PILA_MAX) return { txt: 'Esa casilla ya tiene tres: busca otro hueco en ' + ZONAS[o.zona] + '.', tono: 'mal' };
+        if (st.altura < n) return { txt: 'Iza el spreader al nivel ' + n + ' para posarla encima.', tono: '' };
+      }
+      if (st.altura >= 2) return { txt: 'Con la carga tan alta la maquina no arranca: arriala al nivel 0.', tono: 'mal' };
+      if (st.altura === 1) return { txt: 'Arria al nivel 0: circular izado va castigando la caja.', tono: 'mal' };
+      return { txt: 'Llevala a ' + ZONAS[o.zona] + '. La zona va resaltada en el patio y en el plano.', tono: '' };
+    }
+
+    // hay que ir por ella
+    if (!donde) return { txt: 'Localiza ' + o.m + ' en el patio.', tono: '' };
+    const pila = pilaEn(donde.col, donde.fil) || [];
+    const encima = pila.length - 1 - donde.nivel;
+    if (encima > 0) {
+      return {
+        txt: 'Tiene ' + encima + (encima === 1 ? ' contenedor encima' : ' contenedores encima') +
+             ': quitalos a un hueco libre para poder sacarla.',
+        tono: 'mal'
+      };
+    }
+    if (obj.col === donde.col && obj.fil === donde.fil) {
+      if (st.altura === donde.nivel) {
+        return { txt: 'La tienes a tiro: pulsa ESPACIO para cerrar los twistlocks.', tono: 'ok' };
+      }
+      return {
+        txt: (st.altura > donde.nivel ? 'Arria' : 'Iza') + ' el spreader hasta el nivel ' + donde.nivel + '.',
+        tono: ''
+      };
+    }
+    return { txt: 'Encarala y dejala en la zona de alcance: va parpadeando en el patio y en blanco en el plano.', tono: '' };
+  };
+
+  const pintarMision = () => {
+    const sec = document.querySelector('.mision');
+    const act = ordenActiva();
+    const donde = act ? buscarCaja(act.m) : null;
+    const cj = donde && donde.caja;
+
+    sec.classList.toggle('is-fin', !act);
+    $('mision-orden').textContent = act
+      ? 'ORDEN ' + (ordenes.filter((x) => x.hecha).length + 1) + ' DE ' + ordenes.length
+      : 'HOJA DE TRABAJO CERRADA';
+    $('mision-m').textContent = act ? act.m : 'SIN PENDIENTES';
+    $('mision-color').style.background = cj ? COLORES_CAJA[cj.color].base : '#4a525c';
+
+    const tipo = $('mision-tipo');
+    tipo.hidden = !(cj && cj.tipo !== 'normal');
+    if (!tipo.hidden) tipo.textContent = TIPOS[cj.tipo].nombre;
+
+    let de = '--';
+    if (donde && donde.enSpreader) de = 'LA LLEVAS TU';
+    else if (donde) {
+      de = tileEn(donde.col, donde.fil).nombre;
+      const pila = pilaEn(donde.col, donde.fil) || [];
+      if (pila.length > 1) de += ' ' + PUNTO + ' NIVEL ' + donde.nivel;
+    }
+    $('mision-de').textContent = de;
+    $('mision-a').textContent = act ? ZONAS[act.zona] : '--';
+
+    const paso = siguientePaso(act, donde);
+    const p = $('mision-siguiente');
+    p.textContent = paso.txt;
+    p.className = 'mision__paso' + (paso.tono ? ' is-' + paso.tono : '');
+
+    // la integridad solo se ensena cuando hay algo colgando: sin carga
+    // era un bloque entero para decir que el spreader va vacio
+    const ll = $('mision-llevas');
+    ll.hidden = !st.carga;
+    if (st.carga) {
+      const c = st.carga;
+      $('llevas-m').textContent = c.m + (c.tipo !== 'normal' ? ' ' + PUNTO + ' ' + TIPOS[c.tipo].sigla : '');
+      const cb = $('carga-barra');
+      cb.style.width = c.integridad + '%';
+      cb.className = c.integridad > 60 ? '' : (c.integridad > 30 ? 'is-medio' : 'is-mal');
+      $('llevas-estado').textContent =
+        ESTADOS.find((x) => c.integridad >= x.min).txt + ' ' + PUNTO + ' ' + c.integridad + '%';
+    }
   };
 
   const refrescar = () => {
@@ -2151,14 +2610,16 @@
     $('lec-pos').textContent = posTexto();
     $('lec-rumbo').textContent = r.letra;
     $('lec-alcance').textContent = describir(o.col, o.fil);
-    $('lec-golpes').textContent = String(st.golpes);
+    const gol = $('lec-golpes');
+    gol.textContent = String(st.golpes);
+    gol.classList.toggle('is-mal', st.golpes > 0);
     $('brujula').textContent = FLECHAS[st.rumbo];
 
-    $('panel-sub').textContent = 'REACHSTACKER ' + PUNTO + ' ' + turnoActual().nombre;
+    $('panel-sub').textContent = 'RS-04 ' + PUNTO + ' ' + turnoActual().nombre;
     $('turno-clima').textContent = CLIMAS[clima()];
     const rel = $('turno-reloj');
     rel.textContent = mmss(st.resta);
-    rel.className = 'turno__reloj' + (st.resta <= 15 ? ' is-mal' : (st.resta <= 45 ? ' is-poco' : ''));
+    rel.className = 'hud__reloj' + (st.resta <= 15 ? ' is-mal' : (st.resta <= 45 ? ' is-poco' : ''));
     $('mk-puntos').textContent = String(st.puntos);
     $('mk-entregas').textContent = st.entregas + '/' + ordenes.length;
 
@@ -2169,36 +2630,13 @@
     $('txt-altura').textContent = 'NIVEL ' + st.altura + ' ' + PUNTO +
       (st.altura === 0 ? ' SUELO' : ' MAX ' + alturaMax());
 
-    let aviso = 'MAS ALCANCE ES MENOS ALTURA';
-    let mal = false;
-    if (st.carga && st.altura >= 2) { aviso = 'BAJA LA CARGA PARA PODER CIRCULAR'; mal = true; }
-    else if (st.carga && st.altura === 1) { aviso = 'CIRCULAR IZADO CASTIGA LA CARGA'; mal = true; }
-    else if (st.altura > alturaMax()) { aviso = 'RECOGE EL BOOM PARA SUBIR MAS'; mal = true; }
-    const av = $('brazo-aviso');
-    av.textContent = aviso;
-    av.classList.toggle('is-mal', mal);
-
     const listo = st.carga ? puedeSoltar() : puedeEnganchar();
     $('txt-twist').textContent = st.carga ? 'SOLTAR' : 'ENGANCHAR';
     $('btn-twist').classList.toggle('is-cargado', !!st.carga);
     $('btn-twist').disabled = !listo && !st.carga;
 
-    const cq = $('carga-que'), cb = $('carga-barra'), ce = $('carga-estado');
-    if (st.carga) {
-      const c = st.carga;
-      cq.textContent = c.m + ' ' + PUNTO + ' ' + TIPOS[c.tipo].sigla;
-      cb.style.width = c.integridad + '%';
-      cb.className = c.integridad > 60 ? '' : (c.integridad > 30 ? 'is-medio' : 'is-mal');
-      ce.textContent = TIPOS[c.tipo].nombre + ' ' + PUNTO + ' ' +
-        ESTADOS.find((x) => c.integridad >= x.min).txt + ' ' + c.integridad + '%';
-    } else {
-      cq.textContent = 'SIN CARGA';
-      cb.style.width = '100%';
-      cb.className = '';
-      ce.textContent = 'EL SPREADER VA VACIO';
-    }
-
     pintarOrdenes();
+    pintarMision();
   };
 
   // ---------- acciones del brazo ----------
@@ -2392,6 +2830,191 @@
     iniciar(cmd);
   };
 
+  // ---------- pantalla inicial ----------
+  // Las tarjetas no estan escritas en el HTML: salen de TURNOS, y de
+  // cada turno se hornea su plano con la misma paleta del minimapa.
+  // Anadir un turno al juego lo pone tambien aqui, con su mapa, su
+  // clima, su reloj y sus destinos, sin tocar el menu.
+
+  const MARCAS_LLAVE = 'patio-reach-marcas';
+
+  // La marca vive en el navegador de quien juega. Si el almacenamiento
+  // esta cerrado (modo privado, file:// con permisos raros) el menu se
+  // ve igual, solo que sin historial.
+  const leerMarcas = () => {
+    try { return JSON.parse(localStorage.getItem(MARCAS_LLAVE)) || {}; }
+    catch (e) { return {}; }
+  };
+
+  const guardarMarca = (n, puntos, completo) => {
+    try {
+      const m = leerMarcas();
+      const antes = m[n] || { puntos: 0, completo: false };
+      m[n] = { puntos: Math.max(antes.puntos, puntos), completo: antes.completo || completo };
+      localStorage.setItem(MARCAS_LLAVE, JSON.stringify(m));
+    } catch (e) { /* sin almacenamiento no hay marca que guardar */ }
+  };
+
+  const PREVIA_PX = 4;
+  const CLIMA_CORTO = { dia: 'DIA CLARO', lluvia: 'LLUVIA', niebla: 'NIEBLA', noche: 'NOCHE' };
+
+  // Cuanto pide el turno: el clima pesa, la carga especial pesa y una
+  // orden de mas tambien. Se calcula del propio turno para que no se
+  // quede desfasado cuando se retoque una carga.
+  const PESO_CLIMA = { dia: 0, lluvia: 2, niebla: 2, noche: 4 };
+  const retoDe = (t) => {
+    const esp = t.cajas.filter((c) => c.tipo !== 'normal').length;
+    const p = (PESO_CLIMA[t.clima] || 0) + esp + (t.ordenes.length > 3 ? 2 : 0);
+    return p >= 7 ? 4 : p >= 4 ? 3 : p >= 2 ? 2 : 1;
+  };
+
+  const dibujarPlano = (cv, t) => {
+    const filas = t.mapa;
+    const nf = filas.length, nc = filas[0].length;
+    cv.width = nc * PREVIA_PX;
+    cv.height = nf * PREVIA_PX;
+    const g = cv.getContext('2d');
+    g.imageSmoothingEnabled = false;
+
+    // las zonas a las que manda este turno van encendidas, para elegir
+    // el turno por donde se trabaja y no por el nombre
+    const pedidas = new Set(t.ordenes.map((o) => o.zona));
+
+    for (let f = 0; f < nf; f++) {
+      for (let c = 0; c < nc; c++) {
+        const ch = filas[f][c];
+        g.fillStyle = MINI_COL[ch] || '#2c3138';
+        g.fillRect(c * PREVIA_PX, f * PREVIA_PX, PREVIA_PX, PREVIA_PX);
+        const z = (TILES[ch] || {}).zona;
+        if (z && pedidas.has(z)) {
+          g.fillStyle = 'rgba(255, 198, 39, 0.32)';
+          g.fillRect(c * PREVIA_PX, f * PREVIA_PX, PREVIA_PX, PREVIA_PX);
+        }
+      }
+    }
+
+    // los bloques llenos, con el mismo relleno que se va a encontrar
+    // dentro: en el plano se ve donde hay patio trabajado y donde no
+    recorrerRelleno(t, (c, f, i, cj) => {
+      if (i > 0) return;                    // en planta solo se ve la de arriba
+      const col = COLORES_CAJA[cj.color] || COLORES_CAJA.gris;
+      g.fillStyle = col.base;
+      g.fillRect(c * PREVIA_PX, f * PREVIA_PX, PREVIA_PX, PREVIA_PX);
+    });
+
+    // la carga que lleva orden, en su color y mas viva
+    t.cajas.forEach((k) => {
+      const col = COLORES_CAJA[k.color] || COLORES_CAJA.gris;
+      g.fillStyle = col.alto;
+      g.fillRect(k.col * PREVIA_PX, k.fil * PREVIA_PX, PREVIA_PX, PREVIA_PX);
+    });
+
+    // y donde arranca la maquina, un punto mas gordo para encontrarlo
+    g.fillStyle = '#FFC627';
+    g.fillRect(t.inicio.col * PREVIA_PX - 1, t.inicio.fil * PREVIA_PX - 1, PREVIA_PX + 2, PREVIA_PX + 2);
+  };
+
+  const listaUnica = (arr) => arr.filter((v, i) => arr.indexOf(v) === i);
+
+  const construirMenu = () => {
+    const grid = $('menu-grid');
+    const marcas = leerMarcas();
+    grid.replaceChildren();
+
+    TURNOS.forEach((t, n) => {
+      const marca = marcas[n];
+      const reto = retoDe(t);
+      const destinos = listaUnica(t.ordenes.map((o) => ZONAS[o.zona] || o.zona));
+      const especiales = listaUnica(t.cajas.filter((c) => c.tipo !== 'normal')
+        .map((c) => TIPOS[c.tipo].nombre));
+
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'carta';
+
+      const puntos = document.createElement('span');
+      puntos.className = 'carta__reto';
+      puntos.textContent = 'EXIGENCIA';
+      for (let i = 0; i < 4; i++) {
+        const p = document.createElement('i');
+        if (i < reto) p.className = 'is-on';
+        puntos.appendChild(p);
+      }
+
+      const vista = document.createElement('div');
+      vista.className = 'carta__vista';
+      const cv = document.createElement('canvas');
+      cv.setAttribute('aria-hidden', 'true');
+      dibujarPlano(cv, t);
+      const num = document.createElement('span');
+      num.className = 'carta__num';
+      num.textContent = String(n + 1).padStart(2, '0');
+      vista.append(cv, num, puntos);
+
+      const estado = marca
+        ? (marca.completo ? 'COMPLETADO' : 'INTENTADO')
+        : 'SIN JUGAR';
+      const claseEstado = marca ? (marca.completo ? 'is-hecho' : '') : 'is-nuevo';
+
+      const cuerpo = document.createElement('div');
+      cuerpo.className = 'carta__cuerpo';
+      cuerpo.innerHTML =
+        '<div class="carta__fila">' +
+          '<h3>' + t.nombre + '</h3>' +
+          '<b class="carta__marca' + (marca && marca.completo ? ' is-hecho' : '') + '">' +
+            (marca && marca.puntos > 0 ? 'MEJOR ' + marca.puntos + ' PTS' : 'SIN MARCA') +
+          '</b>' +
+        '</div>' +
+        '<p class="carta__lema">' + t.lema + '</p>' +
+        '<ul class="carta__datos">' +
+          '<li><span>CLIMA</span><b>' + (CLIMA_CORTO[t.clima] || t.clima.toUpperCase()) + '</b></li>' +
+          '<li><span>RELOJ</span><b>' + mmss(t.segundos) + '</b></li>' +
+          '<li><span>ORDENES</span><b>' + t.ordenes.length + ' MOVIMIENTOS</b></li>' +
+          '<li><span>DESTINOS</span><b>' + destinos.join(' ' + PUNTO + ' ') + '</b></li>' +
+          '<li class="carta__ancho"><span>CARGA ESPECIAL</span><b>' +
+            (especiales.length ? especiales.join(' ' + PUNTO + ' ') : 'NINGUNA, TODO ESTANDAR') +
+          '</b></li>' +
+        '</ul>' +
+        '<div class="carta__pie">' +
+          '<span class="carta__estado ' + claseEstado + '">' + estado + '</span>' +
+          '<span class="carta__ir">SUBIR A LA MAQUINA</span>' +
+        '</div>';
+
+      b.append(vista, cuerpo);
+      b.addEventListener('click', () => elegirTurno(n));
+      grid.appendChild(b);
+    });
+  };
+
+  // A donde se vuelve si se cierra el menu sin elegir. Arranca en null
+  // porque al abrir la pagina todavia no hay turno al que regresar.
+  let faseAntes = null;
+
+  const abrirMenu = (arranque) => {
+    if (!$('menu').hidden) return;
+    faseAntes = arranque ? null : st.fase;
+    st.fase = 'menu';
+    CMDS.forEach((c) => { activos[c] = false; });
+    $('finale').hidden = true;
+    $('overlay').hidden = true;
+    toast.hidden = true;
+    construirMenu();
+    $('menu').hidden = false;
+  };
+
+  const volverDelMenu = () => {
+    if (faseAntes === null) return;
+    $('menu').hidden = true;
+    st.fase = faseAntes;
+    if (faseAntes === 'cierre') $('finale').hidden = false;
+  };
+
+  const elegirTurno = (n) => {
+    $('menu').hidden = true;
+    faseAntes = null;
+    arrancarTurno(n);
+  };
+
   // ---------- cierre de turno ----------
   const RANGOS = [
     { min: 0.9, txt: 'OPERADOR DE PRIMERA' },
@@ -2416,11 +3039,20 @@
     $('fin-titulo').textContent = todas ? rango.txt : 'TURNO INCOMPLETO';
     $('fin-score').textContent = st.puntos + ' PTS';
 
+    // la marca del turno se guarda antes de leerla para la tabla, asi
+    // que el record previo hay que apartarlo primero
+    const previo = leerMarcas()[st.turno];
+    const mejorAntes = previo ? previo.puntos : 0;
+    guardarMarca(st.turno, st.puntos, todas);
+
     const filas = [
       ['ENTREGAS', st.entregas + ' de ' + ordenes.length, 'is-suma'],
       ['MANIOBRAS', String(st.pasos), ''],
       ['GOLPES', st.golpes ? st.golpes + '  (-' + (st.golpes * PT_GOLPE) + ')' : 'ninguno', st.golpes ? 'is-resta' : 'is-suma'],
-      ['TIEMPO QUE SOBRO', mmss(st.resta) + (bonus ? '  (+' + bonus + ')' : ''), bonus ? 'is-suma' : '']
+      ['TIEMPO QUE SOBRO', mmss(st.resta) + (bonus ? '  (+' + bonus + ')' : ''), bonus ? 'is-suma' : ''],
+      ['MEJOR MARCA EN ESTE TURNO',
+        st.puntos > mejorAntes ? st.puntos + ' PTS  (nueva)' : mejorAntes + ' PTS',
+        st.puntos > mejorAntes ? 'is-suma' : '']
     ];
     const tabla = $('fin-tabla');
     tabla.replaceChildren();
@@ -2538,8 +3170,8 @@
     // seria medir el resultado anterior y la escala se iria abajo a
     // cada resize. Ahi el presupuesto sale de la ventana.
     const apilado = window.innerWidth <= 980;
-    const dispW = r.width - 36;
-    const dispH = (apilado ? window.innerHeight * 0.62 : r.height) - 36;
+    const dispW = r.width - 20;
+    const dispH = (apilado ? window.innerHeight * 0.62 : r.height) - 20;
     const e = Math.max(1, Math.floor(Math.min(dispW / VISTA_W, dispH / VISTA_H)));
     canvas.style.width = (VISTA_W * e) + 'px';
     canvas.style.height = (VISTA_H * e) + 'px';
@@ -2558,12 +3190,26 @@
 
   document.addEventListener('keydown', (e) => {
     const k = e.key.toLowerCase();
-    if (k === 'escape') { cerrarAyuda(); return; }
-    if (k === 'h') { if ($('overlay').hidden) abrirAyuda(); else cerrarAyuda(); return; }
+
+    // la ayuda va por encima de todo, incluso del menu: mientras este
+    // abierta las teclas solo sirven para cerrarla
     if (!$('overlay').hidden) {
-      if (k === 'enter' || k === ' ') { e.preventDefault(); cerrarAyuda(); }
+      if (k === 'escape' || k === 'h' || k === 'enter' || k === ' ') { e.preventDefault(); cerrarAyuda(); }
       return;
     }
+    if (k === 'h') { abrirAyuda(); return; }
+
+    // con el menu delante los numeros eligen turno y nada maneja la
+    // maquina
+    if (!$('menu').hidden) {
+      const n = Number(k) - 1;
+      if (Number.isInteger(n) && n >= 0 && n < TURNOS.length) { e.preventDefault(); elegirTurno(n); return; }
+      if (k === 'escape' || k === 'm') volverDelMenu();
+      return;
+    }
+
+    if (k === 'm') { abrirMenu(); return; }
+    if (k === 'escape') return;
     if (k === 'r') { arrancarTurno(st.turno); return; }
     if (st.fase === 'cierre') {
       if (k === 'enter' && !$('btn-seguir').hidden) arrancarTurno(st.turno + 1);
@@ -2631,9 +3277,12 @@
 
   $('btn-entendido').addEventListener('click', cerrarAyuda);
   $('btn-ayuda').addEventListener('click', abrirAyuda);
+  $('btn-menu-ayuda').addEventListener('click', abrirAyuda);
   $('btn-reiniciar').addEventListener('click', () => arrancarTurno(st.turno));
   $('btn-repetir').addEventListener('click', () => arrancarTurno(st.turno));
   $('btn-seguir').addEventListener('click', () => arrancarTurno(st.turno + 1));
+  $('btn-menu').addEventListener('click', () => abrirMenu());
+  $('btn-fin-menu').addEventListener('click', () => abrirMenu());
   window.addEventListener('resize', escalar);
 
   // ---------- loop ----------
@@ -2648,8 +3297,13 @@
   };
 
   // ---------- arranque ----------
+  // Se monta el turno igual que siempre -- hace falta para que haya
+  // mundo que dibujar detras -- y encima se pone el menu. Con ?turno=N
+  // en la direccion se entra directo a ese turno, que es como se lanza
+  // en taller cuando ya se sabe cual toca.
   cocerTodo();
   arrancarTurno(TURNO_INICIAL);
+  if (!PARAMS.has('turno')) abrirMenu(true);
   escalar();
   requestAnimationFrame(tick);
 })();

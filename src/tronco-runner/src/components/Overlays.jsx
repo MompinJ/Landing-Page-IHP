@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../store'
 import { sfx } from '../audio'
 import { useGamepadAction, useGamepadConnected, useGamepadGrid } from '../useGamepad'
-import { GOOD_ITEMS, BAD_ITEMS, RANKS, LEADERBOARD_KEY } from '../constants'
+import { GOOD_ITEMS, BAD_ITEMS, RANKS, LEADERBOARD_KEY, BUSINESS_UNITS } from '../constants'
 
 function Rules({ pad }) {
   return (
@@ -99,7 +99,7 @@ function Intro() {
       <div className="panel" ref={ref}>
         <p className="kicker">Hutchison Ports | Congreso de Calidad</p>
         <h1 className="title">
-          TRONCO COMÚN <span className="title-accent">RUNNER</span>
+          TERMINAL <span className="title-accent">RALLY</span>
         </h1>
         <p className="subtitle">Corre hacia lo correcto. Evita los riesgos.</p>
         <PadBadge pad={pad} />
@@ -194,7 +194,37 @@ const KEY_ROWS = [
   ['V', 'W', 'X', 'Y', 'Z', 'Ñ', '-'],
 ]
 
-function NameKeys({ value, onType, onBack, onSave, rowOffset }) {
+// Las once unidades en filas de cuatro. La rejilla del mando lee las filas del
+// DOM, asi que el reparto de aqui es tambien el que recorre la cruceta.
+const UNIT_ROWS = [
+  BUSINESS_UNITS.slice(0, 4),
+  BUSINESS_UNITS.slice(4, 8),
+  BUSINESS_UNITS.slice(8),
+]
+
+function UnitPicker({ value, onPick, rowOffset }) {
+  return (
+    <div className="units">
+      <p className="units-label">UNIDAD DE NEGOCIO</p>
+      {UNIT_ROWS.map((row, r) => (
+        <div className="units-row" key={r}>
+          {row.map((u) => (
+            <button
+              key={u}
+              className={u === value ? 'unit unit-on' : 'unit'}
+              data-gp-row={rowOffset + r}
+              onClick={() => onPick(u)}
+            >
+              {u}
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function NameKeys({ value, onType, onBack, rowOffset }) {
   return (
     <div className="keys">
       {KEY_ROWS.map((row, r) => (
@@ -221,14 +251,6 @@ function NameKeys({ value, onType, onBack, onSave, rowOffset }) {
         >
           BORRAR
         </button>
-        <button
-          className="key key-wide key-ok"
-          data-gp-row={rowOffset + KEY_ROWS.length}
-          onClick={onSave}
-          disabled={!value.trim()}
-        >
-          GUARDAR
-        </button>
       </div>
     </div>
   )
@@ -245,6 +267,7 @@ function GameOver() {
   const pad = useGamepadConnected()
 
   const [name, setName] = useState('')
+  const [unit, setUnit] = useState('')
   const [savedId, setSavedId] = useState(null)
   const [board, setBoard] = useState(loadBoard)
 
@@ -255,8 +278,8 @@ function GameOver() {
 
   const save = () => {
     const clean = name.trim().toUpperCase().slice(0, MAX_NAME)
-    if (!clean) return
-    const entry = { id: Date.now(), name: clean, score }
+    if (!clean || !unit) return
+    const entry = { id: Date.now(), name: clean, unit, score }
     const next = [...loadBoard(), entry].sort((a, b) => b.score - a.score).slice(0, 10)
     localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(next))
     setBoard(next)
@@ -265,10 +288,12 @@ function GameOver() {
 
   const typing = savedId === null
   const keysShown = typing && pad
-  // El teclado en pantalla ocupa las cinco primeras filas de la rejilla, asi que
-  // los botones de abajo empiezan donde acabe. Con una sola cuenta se mantienen
-  // alineados los tres casos: teclado, campo de texto y TOP 10 ya guardado.
-  const btnRow = keysShown ? KEY_ROWS.length + 1 : typing ? 1 : 0
+  // Las filas de la rejilla van en el mismo orden que la tarjeta: teclado en
+  // pantalla (solo con mando), unidades de negocio, GUARDAR y los dos botones
+  // del final. Con una sola cuenta se mantienen alineados los tres casos.
+  const unitRow = keysShown ? KEY_ROWS.length + 1 : 0
+  const saveRow = unitRow + UNIT_ROWS.length
+  const btnRow = typing ? saveRow + 1 : 0
 
   return (
     <div className="overlay">
@@ -304,13 +329,6 @@ function GameOver() {
                 onChange={(e) => setName(e.target.value.toUpperCase())}
                 onKeyDown={(e) => e.key === 'Enter' && save()}
               />
-              {/* con mando el boton de guardar vive en el teclado en pantalla,
-                  para no tener dos GUARDAR distintos en la misma tarjeta */}
-              {!keysShown && (
-                <button className="btn-secondary" data-gp-row="0" onClick={save} disabled={!name.trim()}>
-                  GUARDAR
-                </button>
-              )}
             </div>
             {keysShown && (
               <NameKeys
@@ -318,9 +336,19 @@ function GameOver() {
                 rowOffset={0}
                 onType={(ch) => setName((v) => (v + ch).slice(0, MAX_NAME))}
                 onBack={() => setName((v) => v.slice(0, -1))}
-                onSave={save}
               />
             )}
+            <UnitPicker value={unit} onPick={setUnit} rowOffset={unitRow} />
+            {/* un unico GUARDAR para los dos casos: va debajo de las unidades
+                porque el registro no esta completo hasta elegir terminal */}
+            <button
+              className="btn-secondary btn-save"
+              data-gp-row={saveRow}
+              onClick={save}
+              disabled={!name.trim() || !unit}
+            >
+              GUARDAR
+            </button>
           </>
         ) : (
           <div className="board">
@@ -330,6 +358,7 @@ function GameOver() {
                 <li key={e.id} className={e.id === savedId ? 'me' : ''}>
                   <span className="pos">{i + 1}</span>
                   <span className="pname">{e.name}</span>
+                  <span className="punit">{e.unit}</span>
                   <span className="pscore">{e.score}</span>
                 </li>
               ))}
