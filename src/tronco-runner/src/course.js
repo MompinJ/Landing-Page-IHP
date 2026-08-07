@@ -1,14 +1,13 @@
 import {
   LANES,
   PLAYER_Z,
-  GOOD_ITEMS,
-  BAD_ITEMS,
   THEME_METERS,
   OBSTACLE_LEN,
   TRUCK_APPROACH,
   LOCO_APPROACH,
   HOOK_APPROACH,
 } from './constants'
+import { ZONE_WORDS } from './words'
 
 // Lo que se mueve por su cuenta y cuanto cierra de mas sobre el mundo
 const APPROACH = { truck: TRUCK_APPROACH, loco: LOCO_APPROACH, hook: HOOK_APPROACH }
@@ -790,11 +789,10 @@ function build() {
   const items = []
   const boats = []
   const gates = []
-  let goodN = 0
-  let badN = 0
 
-  const addGood = (d, lane, dy) =>
-    items.push({ d, lane, good: true, dy, label: GOOD_ITEMS[goodN++ % GOOD_ITEMS.length] })
+  // La etiqueta no se decide aqui: la reparte assignLabels() al final, cuando ya
+  // se sabe en que zona cae cada ficha y se puede sacar del glosario de su tema.
+  const addGood = (d, lane, dy) => items.push({ d, lane, good: true, dy })
 
   for (let zi = 0; zi < ZONES.length; zi++) {
     const zone = ZONES[zi]
@@ -839,13 +837,7 @@ function build() {
           })
         }
         for (const [bd, lane] of p.bad || []) {
-          items.push({
-            d: d + bd,
-            lane,
-            good: false,
-            dy: deckAt(d + bd),
-            label: BAD_ITEMS[badN++ % BAD_ITEMS.length],
-          })
+          items.push({ d: d + bd, lane, good: false, dy: deckAt(d + bd) })
         }
         // Premio: una fila de tres valores en el carril que el patron deja libre.
         // Es lo que convierte "esquivar" en "esquivar hacia el lado correcto".
@@ -938,6 +930,44 @@ function build() {
 }
 
 export const COURSE = build()
+
+// ---------- Reparto del glosario ----------
+//
+// Cada zona suelta el vocabulario de su tema (ver words.js, generado del CSV de
+// RRHH). La bolsa de una zona son sus temas barajados por separado y pegados en
+// orden: el principal se agota antes de que entre el de apoyo, asi que la zona
+// arranca siempre con lo suyo. Como toda bolsa es mas grande que las fichas de
+// su zona, en una carrera no se repite ninguna palabra.
+//
+// Se rebaraja al empezar cada partida, no solo al cargar la pagina: en el stand
+// se juega varias veces seguidas sin recargar y el reparto seria el mismo.
+function shuffled(list) {
+  const a = [...list]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
+export function assignLabels() {
+  const bags = ZONE_WORDS.map((z) => ({
+    good: z.good.flatMap(shuffled),
+    bad: shuffled(z.bad),
+    gi: 0,
+    bi: 0,
+  }))
+  for (const it of COURSE.items) {
+    const bag = bags[zoneIndexAt(it.d)]
+    // El modulo es solo red de seguridad: si algun dia una zona reparte mas
+    // fichas que palabras tiene su tema, se repite en vez de quedarse en blanco.
+    const list = it.good ? bag.good : bag.bad
+    const i = it.good ? bag.gi++ : bag.bi++
+    it.label = list[i % list.length]
+  }
+}
+
+assignLabels()
 
 // lista de lanchas para boatTop(); COURSE se construye al cargar el modulo, asi
 // que cuando corre el juego ya existe

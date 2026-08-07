@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../store'
 import { sfx } from '../audio'
 import { useGamepadAction, useGamepadConnected, useGamepadGrid } from '../useGamepad'
-import { GOOD_ITEMS, BAD_ITEMS, RANKS, LEADERBOARD_KEY, BUSINESS_UNITS } from '../constants'
+import { LEGEND_GOOD, LEGEND_BAD, RANKS, LEADERBOARD_KEY, BUSINESS_UNITS } from '../constants'
 
 function Rules({ pad }) {
   return (
@@ -18,7 +18,8 @@ function Rules({ pad }) {
         <span className="key-hint">{pad ? 'B / Abajo' : 'Desliza abajo / Flecha abajo'}</span> para rodar por debajo.
       </li>
       <li>
-        Recoge los hexagonos <b className="txt-good">verdes</b>: valores del Tronco Comun <b>(+10)</b>.
+        Recoge los hexagonos <b className="txt-good">verdes</b>: palabras del Tronco Comun <b>(+10)</b>. Cada
+        terminal suelta las de su tema, y ninguna se repite en la misma carrera.
       </li>
       <li>
         Esquiva los <b className="txt-bad">rojos</b>: riesgos que danan nuestra cultura <b>(-10)</b>.
@@ -56,14 +57,14 @@ function Legend() {
   return (
     <div className="legend">
       <div className="legend-col">
-        {GOOD_ITEMS.map((l) => (
+        {LEGEND_GOOD.map((l) => (
           <span key={l} className="tag tag-good">
             {l}
           </span>
         ))}
       </div>
       <div className="legend-col">
-        {BAD_ITEMS.map((l) => (
+        {LEGEND_BAD.map((l) => (
           <span key={l} className="tag tag-bad">
             {l}
           </span>
