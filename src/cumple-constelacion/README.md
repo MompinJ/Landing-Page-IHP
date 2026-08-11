@@ -44,15 +44,29 @@ npm run dev      # http://localhost:5173
 
 Este repo se despliega estatico y **sin build step**, asi que hay que
 compilar a mano y copiar el resultado antes de hacer push, igual que con
-`gateway-react` y `tronco-runner`:
+`gateway-react` y `tronco-runner`. El script lo hace todo:
 
 ```bash
-cd src/cumple-constelacion
-npm run build
-cp -r dist/. ../../para-ti-v7qybjrdrcit/
+src/cumple-constelacion/publicar.sh
 ```
 
-Queda en `https://<dominio>/para-ti-v7qybjrdrcit/` (con la diagonal final).
+Son **dos enlaces** con el mismo codigo (con la diagonal final):
+
+| Carpeta | Que se ve |
+| --- | --- |
+| `para-ti-v7qybjrdrcit/` | La buena: los recuerdos se leen |
+| `para-ti-8xqyvcsdgesw/` | El espejo: los recuerdos salen tachados |
+
+El espejo es la broma: identico en todo — mismas fotos, mismos titulos,
+mismo mensaje final — salvo que el texto de cada foto sale como documento
+censurado. Sale de una segunda pagina de Vite (`censurado.html` +
+`src/main-censurado.jsx`), que monta el mismo `<App censura />`. **Por eso un
+cambio en `contenido.js` sale en las dos**: no hay contenido duplicado.
+
+Cada barra se dibuja del ancho que le tocaria a su palabra y el texto no se
+escribe en el DOM, asi que en la pagina censurada no hay nada que
+seleccionar. Ojo: el texto si viaja en el bundle de JavaScript, porque
+`contenido.js` es compartido. Es una broma, no un secreto.
 
 ### Esta pagina es la excepcion del hub
 

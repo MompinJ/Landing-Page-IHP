@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { Fragment, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useScroll } from '@react-three/drei'
 import * as THREE from 'three'
@@ -33,7 +33,25 @@ function Seccion({ indice, className = '', children }) {
   )
 }
 
-export default function Overlay({ visible }) {
+// Version espejo: en vez del recuerdo salen las barras del tachon.
+// Cada palabra se convierte en una barra del ancho que le tocaria, y el
+// texto no se dibuja: no hay nada que seleccionar ni copiar en la pagina.
+function TextoTachado({ texto }) {
+  const palabras = texto.split(/\s+/).filter(Boolean)
+
+  return (
+    <p className="texto texto--tachado" aria-label="Recuerdo censurado">
+      {palabras.map((palabra, i) => (
+        <Fragment key={i}>
+          {i > 0 ? ' ' : null}
+          <span className="tachon" style={{ '--letras': palabra.length }} />
+        </Fragment>
+      ))}
+    </p>
+  )
+}
+
+export default function Overlay({ visible, censura = false }) {
   const { intro, fotos, mensaje } = contenido
 
   return (
@@ -60,7 +78,7 @@ export default function Overlay({ visible }) {
           <p className="indice">{String(i + 1).padStart(2, '0')}</p>
           <h2 className="titulo">{foto.titulo}</h2>
           <span className="filete filete--corto" />
-          <p className="texto">{foto.texto}</p>
+          {censura ? <TextoTachado texto={foto.texto} /> : <p className="texto">{foto.texto}</p>}
         </Seccion>
       ))}
 

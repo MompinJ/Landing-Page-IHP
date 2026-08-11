@@ -8,7 +8,7 @@ import Portada from './ui/Portada'
 import { PAGINAS, esMovil } from './util/medidas'
 import { paleta } from './contenido'
 
-export default function App() {
+export default function App({ censura = false }) {
   const [entrado, setEntrado] = useState(false)
 
   return (
@@ -31,7 +31,7 @@ export default function App() {
         <ScrollControls pages={PAGINAS} damping={0.26} enabled={entrado} distance={1}>
           <Escena />
           <Scroll html style={{ width: '100%' }}>
-            <Overlay visible={entrado} />
+            <Overlay visible={entrado} censura={censura} />
           </Scroll>
         </ScrollControls>
 
