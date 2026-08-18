@@ -2240,6 +2240,50 @@ code {
     linear-gradient(90deg, transparent calc(50% - 1px), rgba(255, 155, 58, 0.4) 50%, transparent calc(50% + 1px)) 100% 62% / 48% 30% no-repeat;
 }
 
+/* ============================================================
+   TEMA: dyn-corte-limpio — MESA DE CORTE POR PLASMA
+   dique de noche, rayado de tolva abajo y naranja de plasma
+   ============================================================ */
+.hub-card[data-theme="dyn-corte-limpio"] {
+  --card-accent: #ff7a1a;
+  background:
+    repeating-linear-gradient(-52deg, rgba(255, 199, 39, 0.16) 0 10px, transparent 10px 22px) 0 100% / 100% 16% no-repeat,
+    linear-gradient(180deg, #0d1c2a, #060d15);
+  border: 2px solid #ff7a1a;
+  box-shadow: 9px 9px 0 rgba(255, 122, 26, 0.35);
+  color: #dce9f4;
+}
+.hub-card[data-theme="dyn-corte-limpio"]:hover { box-shadow: 16px 16px 0 #FFC627; }
+.hub-card[data-theme="dyn-corte-limpio"] .hub-card__title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+.hub-card[data-theme="dyn-corte-limpio"] .hub-card__date,
+.hub-card[data-theme="dyn-corte-limpio"] .hub-card__kind { font-family: 'JetBrains Mono', monospace; color: #7fa8c6; }
+.hub-card[data-theme="dyn-corte-limpio"] .hub-card__kind::before { content: "DINAMICA // MANDO XBOX · A B X Y"; }
+.hub-card[data-theme="dyn-corte-limpio"] .hub-card__subtitle { color: #ff7a1a; }
+.hub-card[data-theme="dyn-corte-limpio"] .hub-card__desc { color: #8fb6cf; }
+.hub-card[data-theme="dyn-corte-limpio"] .hub-card__tag {
+  font-family: 'JetBrains Mono', monospace;
+  border: 2px solid #1c6d94;
+  background: rgba(4, 18, 36, 0.65);
+  color: #ffd7a8;
+}
+.hub-card[data-theme="dyn-corte-limpio"] .hub-card__arrow { color: #ff7a1a; }
+/* los cuatro botones del mando y el tajo de plasma cruzandolos */
+.hub-card[data-theme="dyn-corte-limpio"] .hub-card__deco {
+  bottom: calc(16% + 10px); right: 1.4rem;
+  width: 84px; height: 84px;
+  background:
+    radial-gradient(circle 11px at 50% 14%, #f0b91d 96%, transparent),
+    radial-gradient(circle 11px at 86% 50%, #e5342b 96%, transparent),
+    radial-gradient(circle 11px at 50% 86%, #6ac72f 96%, transparent),
+    radial-gradient(circle 11px at 14% 50%, #2a7de1 96%, transparent),
+    linear-gradient(28deg, transparent calc(50% - 2px), rgba(255, 240, 210, 0.95) 50%, transparent calc(50% + 2px));
+}
+
 .hub-footer {
   border-top: 3px solid var(--ink);
   background: var(--ink);

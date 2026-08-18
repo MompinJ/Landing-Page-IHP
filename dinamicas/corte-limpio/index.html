@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Corte Limpio: decide antes de que caiga</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: CORTE LIMPIO
+
+       Un Fruit Ninja de mando. Las piezas salen despedidas desde
+       la grada en arco parabolico y cada una lleva DOS cosas
+       encima:
+
+         - un CONCEPTO (la palabra del glosario)
+         - una LETRA DE BOTON (A / B / X / Y)
+
+       La letra dice COMO cortarla. El concepto dice SI hay que
+       cortarla. Esa separacion es lo que hace que funcione sin
+       cursor ni punteria: no hay que "llegar" a la pieza, hay que
+       DECIDIR y pulsar antes de que caiga.
+
+       Regla dura del reparto: nunca hay dos piezas vivas con la
+       misma letra. La dificultad sube metiendo mas piezas a la
+       vez (hasta tres) y acortando el vuelo, no creando
+       ambiguedad sobre a que pieza va dirigida una pulsacion.
+
+       LO QUE CASTIGA QUE:
+         cortar conforme .......... +100 x multiplicador
+         dejar caer NO conforme ... +60  (decidir bien tambien
+                                    es acertar, y sin esto el
+                                    juego premiaria solo cortar)
+         cortar NO conforme ....... -80 y rompe racha
+         dejar caer conforme ...... -40 y rompe racha
+         corte en falso ........... -20 y rompe racha
+
+       El ultimo renglon es el importante: sin el, machacar los
+       cuatro botones sin leer nada seria la estrategia optima.
+
+       LA PARTIDA DURA LO QUE DURE EL GLOSARIO: no hay reloj. Se
+       lanzan todas las palabras de la lista, una por pieza, y al
+       resolverse la ultima se cierra con el desglose.
+
+       CONTENIDO: la ronda va de CULTURA ORGANIZACIONAL. Se corta
+       lo que FORMA la cultura (historia y tradiciones, valores,
+       normas, liderazgo, identidad, comunicacion...) y se deja
+       caer lo que es un recurso, un activo o un factor que viene
+       de fuera (dinero, clientes, presion externa, tecnologia,
+       salario, proveedores...). Las 16 primeras palabras son las
+       de la lamina de contenedores del taller.
+
+       PERSONALIZAR: el criterio de la ronda esta en CRITERIO y
+       las palabras en GLOSARIO, las dos al principio de
+       js/corte.js. Cada entrada es { t: 'PALABRA', ok: true }
+       donde ok = "cumple el criterio, hay que cortarla".
+
+       CONTROLES
+       - Mando de Xbox: A / B / X / Y cortan, START pausa.
+       - Teclado (respaldo): teclas A, B, X, Y; P pausa, H ayuda,
+         R reinicia.
+
+       TALLER: ?vuelo=<seg> cambia el tiempo de vuelo inicial,
+       ?piezas=<n> recorta el glosario a n palabras y ?mando saca
+       el panel de diagnostico del control.
+       ============================================================ -->
+
+  <main class="app">
+    <div class="marco">
+      <canvas id="lienzo" width="1280" height="720"
+              aria-label="Dique seco: las piezas salen por el aire y se cortan con el mando"></canvas>
+
+      <!-- El HUD va SOBRE la escena y en DOM, no pintado en el
+           canvas: es lo que se mira de reojo y asi se mantiene
+           nitido en proyector a cualquier escala. -->
+      <div class="hud">
+        <div class="hud__caja">
+          <span>PUNTOS</span><b id="hud-puntos">0</b>
+        </div>
+        <div class="hud__criterio">
+          <span id="hud-criterio-pre">CORTA SOLO LO QUE SEA</span>
+          <b id="hud-criterio">--</b>
+        </div>
+        <div class="hud__caja hud__caja--der">
+          <span>PIEZAS</span><b id="hud-progreso">0/0</b>
+        </div>
+      </div>
+
+      <div class="racha" id="racha" hidden>
+        <b id="racha-mult">x2</b><span id="racha-n">4 SEGUIDAS</span>
+      </div>
+
+      <div class="botonera" id="botonera" aria-hidden="true"></div>
+
+      <div class="aviso" id="aviso" hidden></div>
+
+      <!-- diagnostico del mando, solo con ?mando -->
+      <div class="diag" id="diag" hidden></div>
+    </div>
+  </main>
+
+  <button class="ayuda" id="btn-ayuda" type="button" aria-label="Instrucciones">?</button>
+
+  <!-- ==================== PORTADA ==================== -->
+  <div class="portada" id="portada" role="dialog" aria-modal="true" aria-labelledby="portada-titulo">
+    <div class="portada__caja">
+      <p class="portada__kicker">ASTILLERO &middot; MESA DE CORTE POR PLASMA</p>
+      <h1 class="portada__titulo" id="portada-titulo">CORTE LIMPIO</h1>
+      <p class="portada__lema">Las piezas suben del dique con una palabra y un boton.
+        Corta las que <strong>cumplen</strong> y deja caer a chatarra las que <strong>no</strong>.
+        Tienes lo que tarde en caer.</p>
+
+      <div class="portada__criterio">
+        <span id="port-criterio-pre">CRITERIO DE ESTA RONDA</span>
+        <b id="port-criterio">--</b>
+        <small id="port-criterio-nota">--</small>
+      </div>
+
+      <div class="portada__mando" id="port-mando">
+        <i></i><span id="port-mando-txt">BUSCANDO MANDO...</span>
+      </div>
+
+      <ul class="portada__teclas">
+        <li><b class="btn btn--a">A</b><b class="btn btn--b">B</b><b class="btn btn--x">X</b><b class="btn btn--y">Y</b><span>CORTAN LA PIEZA QUE LLEVA ESA LETRA</span></li>
+        <li><b class="btn btn--n">START</b><span>PAUSA</span></li>
+        <li><b class="btn btn--n">TECLADO</b><span>LAS MISMAS LETRAS A, B, X, Y SI NO HAY MANDO</span></li>
+      </ul>
+
+      <button class="portada__btn" type="button" id="btn-empezar">EMPEZAR EL TURNO</button>
+      <p class="portada__nota">Pulsa <strong>A</strong> en el mando o <strong>ESPACIO</strong> para arrancar.
+        <button class="portada__link" type="button" id="btn-portada-ayuda">COMO SE JUEGA [H]</button></p>
+    </div>
+  </div>
+
+  <!-- ==================== PAUSA ==================== -->
+  <div class="pausa" id="pausa" hidden>
+    <div class="pausa__caja">
+      <h2>TURNO EN PAUSA</h2>
+      <p>Pulsa <strong>START</strong> o <strong>P</strong> para seguir cortando.</p>
+    </div>
+  </div>
+
+  <!-- ==================== CIERRE ==================== -->
+  <div class="finale" id="finale" hidden>
+    <div class="finale__caja">
+      <p class="finale__kicker" id="fin-kicker">TURNO CERRADO</p>
+      <h2 id="fin-titulo">--</h2>
+      <p class="finale__score"><b id="fin-puntos">0</b><span>PUNTOS</span></p>
+      <div class="finale__tabla" id="fin-tabla"></div>
+      <p class="finale__nota" id="fin-nota"></p>
+      <div class="finale__btns">
+        <button type="button" id="btn-repetir">OTRO TURNO [A]</button>
+        <button type="button" class="pbtn2" id="btn-fin-portada">VOLVER A LA PORTADA</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== AYUDA ==================== -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-titulo" hidden>
+    <div class="overlay__caja">
+      <p class="overlay__kicker">DIQUE SECO &middot; CONTROL DE PIEZAS</p>
+      <h1 id="overlay-titulo">CORTA LO QUE CUMPLE, DEJA CAER LO QUE NO</h1>
+      <p class="overlay__intro">Estas en la mesa de corte. Del dique suben piezas por el aire y cada una
+        trae <strong>una palabra</strong> y <strong>un boton</strong>. El boton te dice con que se corta.
+        La palabra te dice si <strong>hay que</strong> cortarla. Y solo tienes lo que tarde en caer.</p>
+
+      <h2 class="overlay__sub">COMO SE CORTA</h2>
+      <ul>
+        <li>Cada pieza lleva su letra <strong>A</strong>, <strong>B</strong>, <strong>X</strong> o <strong>Y</strong> siempre en el <strong>mismo sitio</strong>: centrada en el canto de abajo, con el color del mando. Pulsa ese boton y el plasma la parte.</li>
+        <li><strong>Nunca hay dos piezas con la misma letra en el aire</strong>, asi que no hay que apuntar a nada: se decide y se pulsa.</li>
+        <li>El color del boton es al azar: <strong>no dice nada</strong> de si la palabra cumple o no. Lo unico que decide es lo que esta escrito.</li>
+      </ul>
+
+      <h2 class="overlay__sub">COMO SE PUNTUA</h2>
+      <ul>
+        <li>Cortar una que <strong>cumple</strong>: <strong>+100</strong> y sube la racha.</li>
+        <li>Dejar caer una que <strong>no cumple</strong>: <strong>+60</strong>. Decidir que no se toca tambien es acertar.</li>
+        <li>Cortar una que <strong>no cumple</strong>: <strong>-80</strong> y se rompe la racha. Es el error caro.</li>
+        <li>Dejar caer una que <strong>cumple</strong>: <strong>-40</strong> y se rompe la racha.</li>
+        <li><strong>Corte en falso</strong> (pulsar un boton que no tiene pieza): <strong>-20</strong> y se rompe la racha. Machacar los cuatro botones no funciona.</li>
+        <li>A las <strong>4</strong> seguidas se multiplica por <strong>2</strong>, a las <strong>8</strong> por <strong>3</strong> y a las <strong>12</strong> por <strong>4</strong>.</li>
+      </ul>
+
+      <h2 class="overlay__sub">EL TURNO</h2>
+      <ul>
+        <li>No hay reloj: <strong>el turno dura lo que dure el glosario</strong>. Cada palabra sale una sola vez.</li>
+        <li>Segun avanza, salen <strong>mas piezas a la vez</strong> y el vuelo se acorta un poco. Al final puede haber tres en el aire.</li>
+        <li>Cada acierto <strong>suelda una plancha</strong> del casco que se esta armando en el dique. Al cerrar veras cuanto barco quedo.</li>
+      </ul>
+
+      <p class="overlay__nota">Con mando: <strong>A B X Y</strong> cortan y <strong>START</strong> pausa.
+        Sin mando valen las mismas teclas del teclado. <strong>P</strong> pausa, <strong>R</strong> reinicia y <strong>H</strong> abre esta ficha.</p>
+      <button class="overlay__btn" id="btn-entendido" type="button">A LA MESA DE CORTE</button>
+    </div>
+  </div>
+
+  <script src="js/mando.js"></script>
+  <script src="js/corte.js"></script>
+</body>
+</html>
