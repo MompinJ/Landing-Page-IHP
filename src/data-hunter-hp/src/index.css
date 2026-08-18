@@ -1,0 +1,492 @@
+:root {
+  --hp-navy: #002e6d;
+  --hp-sky: #009bde;
+  --cyan: #00e5ff;
+  --steel: #8a9ba8;
+  --white: #f5f7fa;
+  --glow-good: #00ff66;
+  --glow-bad: #ff0033;
+  --safety-orange: #ff6600;
+  --deep-sea: #061a2e;
+
+  /* Tokens de la interfaz de tarjetas (portada, cartel de terminal, final) */
+  --ink-1: #eaf2fb;
+  --ink-2: #b7cade;
+  --blue-bright: #3fa9f5;
+  --amber: #ffce4a;
+  --green: #6ee787;
+  --red: #ff6b6b;
+
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: var(--white);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body, #root { height: 100%; overflow: hidden; background: var(--deep-sea); }
+
+.app-root { position: fixed; inset: 0; }
+
+/* ---------- HUD ---------- */
+.hud { position: absolute; inset: 0; pointer-events: none; }
+
+.hud-panel {
+  position: absolute;
+  top: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 22px;
+  background: color-mix(in srgb, var(--hp-navy) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--cyan) 18%, transparent);
+}
+
+.hud-score { left: 22px; align-items: flex-start; }
+.hud-timer { left: 50%; transform: translateX(-50%); }
+.hud-combo { right: 22px; align-items: flex-end; }
+
+.hud-label {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.hud-value {
+  font-size: 30px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.hud-timer--critical .hud-value { color: var(--glow-bad); animation: pulse 0.5s infinite alternate; }
+@keyframes pulse { from { opacity: 1; } to { opacity: 0.55; } }
+
+.hud-combo-x2 { color: var(--glow-good); }
+.hud-combo-x3 { color: var(--safety-orange); text-shadow: 0 0 12px var(--safety-orange); }
+.hud-streak { font-size: 11px; color: var(--steel); }
+
+.hud-flash { position: absolute; inset: 0; pointer-events: none; }
+
+.event-popup {
+  position: absolute;
+  top: 34%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  font-weight: 800;
+  white-space: nowrap;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+}
+.event-popup--good { color: var(--glow-good); }
+.event-popup--bad { color: var(--glow-bad); }
+
+/* ---------- Overlays ---------- */
+/* El scroll vive en el overlay (no en la tarjeta) para que la barra azul
+   superior de la tarjeta no se despegue al desplazarse. `margin:auto` en el
+   hijo es lo que evita que un contenido más alto que la pantalla se corte
+   por arriba al centrarlo con flexbox. */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 22px 12px;
+  background: color-mix(in srgb, var(--deep-sea) 80%, transparent);
+  backdrop-filter: blur(4px);
+}
+
+/* ---------- Tarjeta (lenguaje común: portada, cartel, final)
+   Sin barra luminosa arriba: el marco biselado y el borde ya la encuadran. */
+.card {
+  position: relative;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 13px;
+  width: min(94vw, 560px);
+  padding: 30px 38px 34px;
+  text-align: center;
+  color: var(--ink-1);
+  background: linear-gradient(165deg, #0c2244 0%, #08172c 58%, #050e1c 100%);
+  border: 1px solid rgba(63, 169, 245, 0.24);
+  /* Esquinas biseladas: el marco del material del congreso */
+  clip-path: polygon(
+    28px 0, 100% 0, 100% calc(100% - 28px),
+    calc(100% - 28px) 100%, 0 100%, 0 28px
+  );
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.65), inset 0 0 70px rgba(0, 80, 160, 0.14);
+}
+
+.card--wide { width: min(94vw, 620px); }
+.card--tall { gap: 12px; }
+
+.card-kicker {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #58aae9;
+}
+.card-kicker i { font-style: normal; opacity: 0.5; margin: 0 5px; }
+.card-kicker--sm { font-size: 11px; letter-spacing: 0.22em; margin-top: 6px; }
+
+.card-title {
+  font-size: clamp(30px, 5.2vw, 46px);
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1.02;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+}
+.card-title em { font-style: italic; color: var(--blue-bright); }
+.card-title--hero { font-size: clamp(38px, 7vw, 58px); }
+
+.card-tagline {
+  font-size: clamp(15px, 2.3vw, 18px);
+  font-weight: 800;
+  color: var(--amber);
+}
+
+.card-lead {
+  max-width: 46ch;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+/* Entradilla de cada regla de la portada: da un ancla visual para escanear */
+.rule-lead { color: var(--cyan); font-weight: 800; margin-right: 4px; }
+
+.t-good { color: var(--green); }
+.t-bad { color: var(--red); }
+.t-warn { color: var(--amber); }
+
+/* ---------- Lista de reglas ---------- */
+.rules {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  width: 100%;
+  margin-top: 2px;
+  text-align: left;
+}
+.rule { display: flex; gap: 9px; font-size: 14px; line-height: 1.5; color: var(--ink-1); }
+.rule::before { content: '>'; flex: none; font-weight: 900; color: var(--blue-bright); }
+.rule strong { color: #fff; }
+
+kbd {
+  display: inline-block;
+  min-width: 24px;
+  padding: 2px 9px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #eaf3ff;
+  background: rgba(10, 42, 80, 0.75);
+  border: 1px solid rgba(120, 180, 230, 0.45);
+  border-radius: 6px;
+}
+
+/* ---------- Fichas de vocabulario (paralelogramos) ---------- */
+.chips { display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: center; }
+.chips-group { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.chip {
+  padding: 5px 14px;
+  border-radius: 3px;
+  transform: skewX(-12deg);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.chip > span { display: block; transform: skewX(12deg); }
+.chip--good { color: #8bf3ac; background: rgba(28, 104, 60, 0.35); border: 1px solid rgba(110, 231, 135, 0.5); }
+.chip--bad { color: #ff9b9b; background: rgba(122, 30, 42, 0.35); border: 1px solid rgba(255, 107, 107, 0.45); }
+
+/* ---------- Botones ---------- */
+.btn-skew {
+  padding: 15px 52px;
+  border: none;
+  border-radius: 3px;
+  background: linear-gradient(100deg, #2f8fdc, #59b9f7);
+  transform: skewX(-12deg);
+  cursor: pointer;
+  box-shadow: 0 12px 34px rgba(47, 143, 220, 0.35);
+  transition: transform 0.12s, box-shadow 0.12s, filter 0.12s;
+}
+.btn-skew > span {
+  display: block;
+  transform: skewX(12deg);
+  font-family: inherit;
+  font-size: clamp(17px, 2.6vw, 21px);
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.btn-skew:hover { filter: brightness(1.08); box-shadow: 0 14px 40px rgba(63, 169, 245, 0.5); }
+.btn-skew:active { transform: skewX(-12deg) translateY(2px); }
+.btn-skew--sm { padding: 12px 26px; }
+.btn-skew--sm > span { font-size: 15px; }
+
+.btn-ghost {
+  position: relative;
+  padding: 15px 30px;
+  font-family: inherit;
+  font-size: clamp(15px, 2.2vw, 18px);
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-1);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.12s;
+}
+.btn-ghost::before, .btn-ghost::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  height: 1px;
+  background: rgba(120, 175, 225, 0.4);
+}
+.btn-ghost::before { top: 0; }
+.btn-ghost::after { bottom: 0; }
+.btn-ghost:hover { color: #fff; }
+
+/* ---------- Pantalla final ---------- */
+.final-score {
+  font-size: clamp(60px, 12vw, 104px);
+  font-weight: 900;
+  line-height: 0.94;
+  color: var(--amber);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 46px rgba(255, 190, 60, 0.35);
+}
+.final-unit {
+  margin-top: -4px;
+  font-size: 12px;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--ink-1);
+}
+/* Tabla del ranking en barras */
+.board { display: flex; flex-direction: column; gap: 7px; width: 100%; }
+.board-row {
+  display: grid;
+  grid-template-columns: 22px 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 16px;
+  background: linear-gradient(90deg, rgba(18, 52, 96, 0.9), rgba(12, 34, 64, 0.5));
+  border: 1px solid rgba(63, 169, 245, 0.14);
+  border-radius: 3px;
+  transform: skewX(-8deg);
+}
+.board-row > * { transform: skewX(8deg); }
+.board-row--me {
+  background: linear-gradient(90deg, rgba(36, 96, 165, 0.95), rgba(20, 60, 110, 0.6));
+  border-color: rgba(120, 200, 255, 0.45);
+}
+.board-pos { font-size: 15px; font-weight: 900; color: var(--amber); text-align: center; }
+.board-name {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.board-unit {
+  padding: 3px 9px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #9fd2f7;
+  border: 1px solid rgba(120, 190, 240, 0.4);
+  border-radius: 3px;
+}
+.board-score {
+  font-size: 16px;
+  font-weight: 900;
+  font-style: italic;
+  color: #7fc9ff;
+  font-variant-numeric: tabular-nums;
+}
+
+.concepts { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-height: 96px; overflow-y: auto; }
+.concept-chip {
+  padding: 3px 10px;
+  font-size: 12px;
+  border: 1px solid color-mix(in srgb, var(--glow-good) 45%, transparent);
+  border-radius: 999px;
+  color: var(--green);
+}
+
+.signup { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.submit-row { display: flex; gap: 10px; align-items: stretch; }
+
+/* Fichas seleccionables (unidad de negocio del jugador) */
+.chips--pick { gap: 8px; max-width: 520px; }
+.chip--pick {
+  font-family: inherit;
+  color: #9fc6e8;
+  background: rgba(14, 42, 78, 0.7);
+  border: 1px solid rgba(120, 175, 225, 0.35);
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s, border-color 0.12s;
+}
+.chip--pick:hover { color: #dcecfa; border-color: rgba(120, 200, 255, 0.6); }
+/* Doble clase a propósito: si no, el `:hover` de arriba gana por especificidad
+   y la ficha elegida se despinta mientras el dedo/ratón sigue encima. */
+.chip--pick.chip--on, .chip--pick.chip--on:hover {
+  color: #04121f;
+  font-weight: 900;
+  background: linear-gradient(100deg, #2f8fdc, #59b9f7);
+  border-color: #7fd0ff;
+  box-shadow: 0 0 18px rgba(63, 169, 245, 0.45);
+}
+.name-input {
+  padding: 12px 16px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--white);
+  background: rgba(4, 16, 30, 0.85);
+  border: 1px solid rgba(120, 175, 225, 0.4);
+  border-radius: 3px;
+  outline: none;
+  text-transform: uppercase;
+}
+.name-input:focus { border-color: var(--blue-bright); }
+
+.actions { display: flex; gap: 16px; align-items: center; margin-top: 4px; }
+
+/* ---------- Pasaporte de terminales (pantalla final) ---------- */
+.passport {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(9, 30, 58, 0.55);
+  border: 1px solid rgba(63, 169, 245, 0.18);
+  border-radius: 4px;
+}
+
+.passport-stamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  /* Ancho uniforme: con el nombre completo, dejar que cada sello midiera lo
+     que mide su texto dejaba la rejilla 3+2 desalineada casilla a casilla. */
+  width: 162px;
+  padding: 6px 8px;
+  border: 1px dashed color-mix(in srgb, var(--steel) 55%, transparent);
+  border-radius: 4px;
+  text-align: center;
+  color: color-mix(in srgb, var(--steel) 75%, transparent);
+  transition: color 0.3s, border-color 0.3s;
+}
+
+/* Siglas de apoyo sobre el nombre: quien las conoce las reconoce de un vistazo,
+   quien no, lee el nombre y no se pierde nada. */
+.passport-stamp-code {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  opacity: 0.72;
+}
+.passport-stamp-name {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.passport-stamp--on { border-style: solid; }
+
+.passport-block { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+
+/* ---------- Cartel de entrada a terminal ---------- */
+.term-sign {
+  position: absolute;
+  top: 13%;
+  left: 50%;
+  width: min(90vw, 520px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.term-sign-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 15px 30px 17px;
+  text-align: center;
+  background: linear-gradient(165deg, rgba(11, 33, 64, 0.95), rgba(4, 13, 26, 0.92));
+  border: 1px solid color-mix(in srgb, var(--accent, #3fa9f5) 40%, transparent);
+  clip-path: polygon(
+    20px 0, 100% 0, 100% calc(100% - 20px),
+    calc(100% - 20px) 100%, 0 100%, 0 20px
+  );
+  box-shadow:
+    0 20px 55px rgba(0, 0, 0, 0.6),
+    0 0 40px color-mix(in srgb, var(--accent, #3fa9f5) 18%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.term-sign-kicker {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--accent, #3fa9f5);
+}
+
+.term-sign-title {
+  font-size: clamp(22px, 4.2vw, 34px);
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--white);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.7);
+}
+.term-sign-title em { font-style: italic; color: var(--accent, #3fa9f5); }
+
+.term-sign-detail { font-size: 12.5px; color: var(--ink-2); }
+.term-sign-detail b { color: var(--ink-1); font-weight: 800; letter-spacing: 0.1em; }
+
+.term-sign-badge {
+  margin-top: 3px;
+  padding: 3px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--amber);
+  background: rgba(120, 85, 10, 0.3);
+  border: 1px solid rgba(255, 206, 74, 0.45);
+  border-radius: 3px;
+}

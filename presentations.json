@@ -751,6 +751,22 @@
       "accent": "#35d3ff",
       "theme": "dyn-tronco-runner",
       "path": "dinamicas/tronco-runner/index.html"
+    },
+    {
+      "slug": "data-hunter-hp",
+      "title": "Data Hunter",
+      "subtitle": "Salta hacia lo correcto. Esquiva los riesgos.",
+      "description": "Arcade 3D estilo Crossy Road (React Three Fiber) para stand de congreso: un colaborador con casco y chaleco cruza a saltos las CINCO terminales del grupo recogiendo tarjetas verdes con conceptos de valor (+100, x2 a las cinco seguidas y x3 a las diez) y esquivando las rojas con los riesgos (-50). Cada terminal es un bioma con su propio verbo: en la TEC hay que cruzar vias con camiones y AGVs y colarse entre las patas de las gruas RTG; en la TUM el suelo se MUEVE (bandas transportadoras que te descolocan de la columna desde la que ibas a saltar) entre convoyes de tolvas y cargadoras de pala; en la Terminal Intermodal el tren no se esquiva por reflejos sino LEYENDO EL SEMAFORO, porque pasa a 8.5 y avisa 1.6 s antes; en Cruceros se acaba el suelo y hay que abordar la flota en movimiento (remolcadores, veleros, yates, pesqueros y el crucero, con su cubierta de paseo abordable), saltando de casco en casco mientras el agua te arrastra y el que se cae paga una vida; y en el Astillero los diques secos son fosos de varias filas que se cruzan por cadenas de andamios, con la grua portico del taller barriendo la fila entera a ras de suelo y un DIQUE MAYOR con un buque dentro que tapa el paso de lado a lado: o se cruza por las pasarelas que pasan por encima del barco, o te pones en el punto de embarque y la grua del dique te iza, te traslada colgado y te AVIENTA al otro lado. Se juega con 3 vidas (sin reloj) y se gana una extra cada 15 conceptos seguidos; los conceptos de proteccion dan escudo de un golpe. Como en Crossy Road se puede recular, pero con correa: hasta 3 casillas por detras de tu record, y al segundo paso atras aparece la maquina que te va a sacar de la zona. Hay DOS y se ALTERNAN, para que quien juega dos veces no vea la misma escena: la GRUA PORTICO, que entra rodando por sus rieles, corre el carro por la viga hasta tu columna, baja un contenedor de 40 pies sobre tu cabeza con una marca de peligro pintada en el suelo y, si te pasas de la correa, abre los twistlocks y lo suelta (el cuerpo se va comprimiendo con la panza del cajon hasta quedar de sello); y el DRON DE SEGURIDAD del Smart Port, que patrulla en circulos con el foco apuntandote y, si te pasas, baja en vertical, cierra la garra del cabestrante y se te lleva fuera de cuadro colgando de un cable que oscila como pendulo amortiguado. Cada una cuesta una vida. La partida infinita tiene meta: el PASAPORTE. Cada terminal nueva que se pisa lo sella (+250) y completar las cinco da +1500, con el recorrido de sellos en la pantalla final. Cartel de bienvenida cada vez que se cruza una frontera de terminal, atmosfera propia por bioma (niebla, cielo y luz), estelas y espuma en el agua, sombras ancladas a texel para que no hiervan y pipeline con bloom selectivo mas aberracion cromatica y glitch digital al recibir dano. Un input = un paso, arbitrado en un solo sitio para que los encoders arcade de doble modo (que presentan el mismo joystick como teclado Y como mando) no encolen dos saltos por empujada: flechas o WASD, espacio para avanzar y mando de Xbox por Gamepad API (cruceta o stick, A para avanzar o iniciar). Al final se pide nombre y unidad de negocio y el TOP 10 queda en localStorage para competir en el stand. Fuente en src/data-hunter-hp (Vite + React 19 + TypeScript + three + Zustand); ?debug abre el panel de depuracion (hitboxes reales con H, camara libre con C) y ?row=N arranca la partida en esa fila para inspeccionar un bioma. Verificacion headless con Playwright en scripts/ (npm run sim, smoke, test:back, test:hazard...).",
+      "tags": [
+        "Dinamica",
+        "Hutchison Ports",
+        "3D",
+        "React",
+        "Stand"
+      ],
+      "accent": "#00E5FF",
+      "theme": "dyn-data-hunter-hp",
+      "path": "dinamicas/data-hunter-hp/index.html"
     }
   ],
   "experimental": [
