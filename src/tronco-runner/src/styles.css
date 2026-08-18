@@ -313,24 +313,516 @@ body,
   max-width: 44ch;
 }
 
-.rules {
-  list-style: none;
+/* ---------- Instrucciones ----------
+   El briefing se parece al juego: la ficha esta dibujada, los iconos se mueven
+   como el movimiento que piden y cada renglon es una orden corta. Antes era una
+   lista de ocho parrafos que nadie se paraba a leer delante del stand. */
+
+.howto {
   text-align: left;
-  margin: 16px auto;
-  max-width: 46ch;
+  margin: 14px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Tres carriles con el trazo discontinuo corriendo hacia el jugador. Puro
+   adorno, pero pone al que lee delante de la pista antes de leer nada. Sin
+   perspectiva 3D a proposito: aplastaba las rayas contra el borde de arriba y
+   no se leia ningun carril. */
+.track {
+  position: relative;
+  height: 52px;
+  overflow: hidden;
+  /* asfalto, los dos bordes de la pista y el resplandor del centro: la tira
+     tiene que leerse como pista aunque este quieta */
+  background:
+    linear-gradient(to right, transparent 5%, rgba(255, 255, 255, 0.5) 5%, rgba(255, 255, 255, 0.5) calc(5% + 2px), transparent calc(5% + 2px)),
+    linear-gradient(to right, transparent 95%, rgba(255, 255, 255, 0.5) 95%, rgba(255, 255, 255, 0.5) calc(95% + 2px), transparent calc(95% + 2px)),
+    radial-gradient(ellipse 70% 130% at 50% 50%, rgba(0, 155, 222, 0.3), transparent 72%),
+    linear-gradient(to bottom, rgba(10, 30, 62, 0.95), rgba(0, 46, 109, 0.7));
+  border-top: 1px solid rgba(53, 211, 255, 0.3);
+  border-bottom: 1px solid rgba(53, 211, 255, 0.3);
+  /* los bordes se difuminan para que la pista no arranque de golpe */
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+}
+
+.track-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.8) 0 14px,
+    transparent 14px 26px
+  );
+  animation: dash 0.5s linear infinite;
+}
+
+.track-line:nth-child(1) {
+  left: 33%;
+}
+
+.track-line:nth-child(2) {
+  left: 67%;
+}
+
+@keyframes dash {
+  to {
+    background-position-y: 26px;
+  }
+}
+
+/* Las dos fichas del juego bajando por sus carriles. Es la unica parte de las
+   instrucciones que se mueve como se mueve el juego. */
+.track-chip {
+  position: absolute;
+  top: -14px;
+  width: 13px;
+  height: 15px;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  animation: drop 2.4s linear infinite;
+  /* delay negativo: al abrir el briefing ya hay una ficha en pista en vez de
+     una tira vacia esperando a que entre la primera */
+  animation-delay: -0.9s;
+}
+
+.track-chip-good {
+  left: 16%;
+  background: var(--good);
+  box-shadow: 0 0 12px rgba(46, 224, 111, 0.8);
+}
+
+.track-chip-bad {
+  left: 82%;
+  background: var(--bad);
+  box-shadow: 0 0 12px rgba(255, 71, 87, 0.8);
+  animation-delay: -2.1s;
+}
+
+@keyframes drop {
+  to {
+    transform: translateY(80px);
+  }
+}
+
+.how-sec {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  font-size: 13px;
-  line-height: 1.45;
+}
+
+/* el titulo hace de separador: linea fina a la derecha para que la vista salte
+   de bloque en bloque sin tener que leer el contenido */
+.how-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--neon);
+}
+
+.how-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+}
+
+.how-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.how-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 14px 8px 10px;
+  text-align: center;
+  background: rgba(0, 46, 109, 0.45);
+  border: 1px solid var(--border);
+  clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px);
+}
+
+/* numero de paso en la esquina: da orden de lectura sin gastar un renglon */
+.how-step {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  font-size: 15px;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1;
+  color: rgba(53, 211, 255, 0.35);
+}
+
+.how-card b {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+}
+
+.how-glyph {
+  width: 28px;
+  height: 24px;
+  color: var(--sky);
+}
+
+.glyph-jump {
+  color: var(--amber);
+}
+
+.glyph-roll {
+  color: var(--neon);
+}
+
+/* Cada icono se mueve como el movimiento que pide: la flecha de salto rebota,
+   la de rodar cae y gira, y las de carril van y vienen. Es lo que convierte la
+   tarjeta en una demostracion en vez de una etiqueta. */
+.anim-jump {
+  animation: hop 1.5s ease-in-out infinite;
+}
+
+.anim-roll {
+  animation: tuck 1.7s ease-in-out infinite;
+}
+
+.anim-lane {
+  animation: sway 1.9s ease-in-out infinite;
+}
+
+@keyframes hop {
+  0%,
+  55%,
+  100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-7px);
+  }
+  40% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes tuck {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  30% {
+    transform: translateY(6px) scaleY(0.62);
+  }
+}
+
+@keyframes sway {
+  0%,
+  100% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+}
+
+/* quien pidio menos movimiento no tiene por que aguantar tres bucles a la vez */
+@media (prefers-reduced-motion: reduce) {
+  .anim-jump,
+  .anim-roll,
+  .anim-lane,
+  .track-line,
+  .track-chip {
+    animation: none;
+  }
+}
+
+/* Que recoger: las dos fichas del juego, a tamano de verse, con la orden en
+   grande. La palabra "hexagono" sobra si el hexagono esta ahi dibujado. */
+.loot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.loot-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 2px 10px;
+  padding: 10px 12px;
+  clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px);
+}
+
+.loot-good {
+  background: rgba(46, 224, 111, 0.12);
+  border: 1px solid rgba(46, 224, 111, 0.45);
+}
+
+.loot-bad {
+  background: rgba(255, 71, 87, 0.1);
+  border: 1px solid rgba(255, 71, 87, 0.45);
+}
+
+.chip-ico {
+  grid-row: span 2;
+  width: 34px;
+  height: 38px;
+}
+
+.chip-good {
+  color: var(--good);
+}
+
+.chip-bad {
+  color: var(--bad);
+}
+
+.loot-card b {
+  align-self: end;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.loot-val {
+  align-self: start;
+  font-size: 17px;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1;
+}
+
+.loot-good .loot-val {
+  color: var(--good);
+}
+
+.loot-bad .loot-val {
+  color: var(--bad);
+}
+
+.loot-tags {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+/* Lo que sale al paso: icono, orden y lo que cuesta fallarla, en tres columnas
+   fijas. La columna de la derecha se puede leer sola. */
+.cues {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  line-height: 1.35;
   color: #e6eefb;
 }
 
-.rules li::before {
-  content: '>';
-  color: var(--sky);
+.cues li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 10px;
+  background: rgba(0, 46, 109, 0.32);
+  clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
+}
+
+.cues li span:nth-child(2) {
+  flex: 1;
+}
+
+.cue-ico {
+  flex: none;
+  width: 18px;
+  height: 16px;
+}
+
+/* lo que cierra el carril no lleva flecha: en la lista tampoco, se dibuja como
+   el bloque macizo que es */
+.cue-block {
+  height: 13px;
+  background: repeating-linear-gradient(-45deg, #cfe0f2 0 3px, rgba(207, 224, 242, 0.25) 3px 6px);
+}
+
+.cue-water {
+  height: 12px;
+  background: linear-gradient(to bottom, transparent 45%, rgba(53, 211, 255, 0.85) 45%);
+  border-bottom: 2px solid var(--sky);
+}
+
+.cue-bonus {
+  height: 14px;
+  background: linear-gradient(to bottom, var(--amber) 0 3px, transparent 3px 100%);
+  border-left: 3px solid rgba(255, 198, 39, 0.6);
+  border-right: 3px solid rgba(255, 198, 39, 0.6);
+}
+
+.cue-cost {
+  flex: none;
+  font-size: 11px;
+  font-weight: 900;
+  font-style: italic;
+  color: var(--bad);
+}
+
+.cost-good {
+  color: var(--amber);
+}
+
+.how-foot {
+  font-size: 11px;
+  color: #8fa9c8;
+  font-style: italic;
+}
+
+.how-goal {
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 13px;
+  color: #e6eefb;
+  background: rgba(0, 155, 222, 0.12);
+  border-left: 2px solid var(--sky);
+}
+
+.how-goal b {
+  color: var(--amber);
+}
+
+/* ---------- Piezas del mando ----------
+   En el congreso se juega con mando casi siempre, asi que las instrucciones
+   enseñan el boton con su color de verdad y el teclado queda de pie de linea. */
+
+.pad-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.pad-face {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+  /* el circulo tiene que verse como una tecla fisica, no como una pegatina */
+  box-shadow:
+    inset 0 -2px 0 rgba(0, 0, 0, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+/* Cruceta dibujada entera con los brazos que valen encendidos: medio jugador
+   busca la cruz en el mando, no la palabra "cruceta". */
+.dpad {
+  position: relative;
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+}
+
+.dpad-arm {
+  position: absolute;
+  background: rgba(207, 224, 242, 0.28);
+}
+
+.dpad-arm[data-d='up'],
+.dpad-arm[data-d='down'] {
+  left: 9px;
+  width: 8px;
+  height: 10px;
+}
+
+.dpad-arm[data-d='up'] {
+  top: 0;
+}
+
+.dpad-arm[data-d='down'] {
+  bottom: 0;
+}
+
+.dpad-arm[data-d='left'],
+.dpad-arm[data-d='right'] {
+  top: 9px;
+  width: 10px;
+  height: 8px;
+}
+
+.dpad-arm[data-d='left'] {
+  left: 0;
+}
+
+.dpad-arm[data-d='right'] {
+  right: 0;
+}
+
+.dpad-on {
+  background: var(--neon);
+  box-shadow: 0 0 8px rgba(53, 211, 255, 0.7);
+}
+
+.dpad-hub {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  background: rgba(207, 224, 242, 0.28);
+}
+
+.bumper {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 9px;
+  background: rgba(207, 224, 242, 0.18);
+  border: 1px solid rgba(207, 224, 242, 0.4);
+  font-size: 10px;
   font-weight: 800;
-  margin-right: 8px;
+  letter-spacing: 0.06em;
+  color: #eaf2ff;
+}
+
+/* el teclado no desaparece, pero pasa a ser la alternativa */
+.alt-keys {
+  font-size: 10px;
+  font-style: italic;
+  color: #8fa9c8;
+}
+
+.how-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.how-keys i {
+  padding: 1px 6px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  color: #cfe0f2;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: rgba(0, 155, 222, 0.15);
+  white-space: nowrap;
 }
 
 .key-hint {
@@ -349,23 +841,6 @@ body,
 
 .txt-bad {
   color: var(--bad);
-}
-
-.legend {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin: 6px 0 18px;
-}
-
-.legend-col {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-  align-items: flex-start;
-  align-content: flex-start;
-  max-width: 240px;
 }
 
 .tag {
@@ -419,24 +894,93 @@ body,
   background: var(--amber);
 }
 
+/* deshabilitado: navy apagado en vez de ambar translucido, que sobre el panel
+   daba un verde oliva que no se parece a nada del juego */
 .btn-secondary:disabled {
-  opacity: 0.4;
+  color: #6f86a3;
+  background: rgba(0, 46, 109, 0.7);
   cursor: default;
 }
 
+/* sin borde a proposito: clip-path recorta el trazo y dejaba una linea suelta
+   por encima del texto. El fondo si sigue la silueta biselada. */
 .btn-ghost {
-  padding: 10px 22px;
+  padding: 12px 18px;
   font-size: 14px;
   color: var(--neon);
-  background: transparent;
-  border: 1px solid var(--border);
+  background: rgba(0, 46, 109, 0.75);
+}
+
+.btn-ghost:hover {
+  background: rgba(0, 155, 222, 0.32);
+}
+
+/* en la fila de acciones el principal se mide para que los tres botones del
+   final de partida quepan en un renglon */
+.btn-row .btn-primary {
+  padding: 12px 22px;
+  font-size: 15px;
 }
 
 .btn-row {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
   justify-content: center;
-  margin-top: 18px;
+  margin-top: 16px;
+}
+
+/* JUGAR de la portada: es la unica accion que hace falta entender para empezar,
+   asi que va sola y en grande, y lo demas queda como accion secundaria. */
+.btn-hero {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 4px auto 0;
+  padding: 16px 0;
+  font-size: 20px;
+}
+
+/* Rotulo del briefing: las instrucciones no son una pantalla del menu, son el
+   paso previo a la carrera, y esto es lo que lo dice. */
+.brief-kicker {
+  margin-top: 14px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+/* Los datos de la carrera de un vistazo, en lugar de escondidos en la ultima
+   linea de las instrucciones. */
+.facts {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 16px 0 18px;
+}
+
+.fact {
+  flex: 1;
+  max-width: 120px;
+  padding: 8px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8fa9c8;
+  background: rgba(0, 46, 109, 0.45);
+  border: 1px solid var(--border);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.fact b {
+  display: block;
+  font-size: 22px;
+  font-style: italic;
+  letter-spacing: 0;
+  color: var(--amber);
 }
 
 /* ---------- Countdown ---------- */
@@ -489,13 +1033,63 @@ body,
   margin: 10px 0 4px;
 }
 
+.rank-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: #8fa9c8;
+  margin-top: 12px;
+}
+
 .stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 14px 0 16px;
+}
+
+.stat {
   display: flex;
-  gap: 18px;
-  justify-content: center;
-  font-size: 13px;
-  color: #cfe0f2;
-  margin: 10px 0 16px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 4px;
+  background: rgba(0, 46, 109, 0.4);
+  border: 1px solid var(--border);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.stat b {
+  font-size: 20px;
+  font-weight: 800;
+  font-style: italic;
+  line-height: 1;
+}
+
+.stat i {
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8fa9c8;
+}
+
+/* El registro va en su propia caja: al acabar la partida compiten por la vista
+   el puntaje, la tabla y el formulario, y sin marco no se ve donde escribir. */
+.register {
+  padding: 12px 12px 10px;
+  margin-top: 4px;
+  background: rgba(0, 46, 109, 0.28);
+  border: 1px solid var(--border);
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+
+.reg-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--neon);
 }
 
 .save-row {
@@ -577,12 +1171,23 @@ body,
 }
 
 .board {
-  margin: 10px auto 4px;
+  margin: 22px auto 4px;
   max-width: 330px;
   text-align: left;
 }
 
+/* en la portada la tabla cierra la tarjeta: linea fina arriba para separarla
+   del boton sin meter otro bloque de texto */
+.btn-hero + .board {
+  padding-top: 20px;
+  border-top: 1px solid rgba(53, 211, 255, 0.18);
+  margin-top: 24px;
+}
+
 .board h3 {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
   font-size: 12px;
   letter-spacing: 0.22em;
   color: var(--neon);
@@ -590,11 +1195,46 @@ body,
   margin-bottom: 8px;
 }
 
-.board ol {
+.board-count {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: #8fa9c8;
+}
+
+.board-me {
+  margin-bottom: 8px;
+  text-align: center;
+  font-size: 12px;
+  color: #cfe0f2;
+}
+
+.board-me b {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--amber);
+}
+
+/* La tabla lista a TODOS los que se registran, asi que scrollea por su cuenta
+   en vez de estirar la tarjeta hasta el infinito. */
+.board-list {
   list-style: none;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  max-height: 40vh;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(53, 211, 255, 0.45) transparent;
+}
+
+.board-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.board-list::-webkit-scrollbar-thumb {
+  background: rgba(53, 211, 255, 0.45);
 }
 
 .board li {
@@ -613,9 +1253,32 @@ body,
 }
 
 .board .pos {
-  width: 20px;
+  width: 22px;
   font-weight: 800;
+  font-style: italic;
+  color: #8fa9c8;
+}
+
+/* podio: el 1, 2 y 3 se distinguen del resto sin leer el puntaje */
+.board .pos-1 {
   color: var(--amber);
+}
+
+.board .pos-2 {
+  color: #d8e4f2;
+}
+
+.board .pos-3 {
+  color: #e08c4a;
+}
+
+.board-empty {
+  padding: 14px 10px;
+  text-align: center;
+  font-size: 12.5px;
+  color: #8fa9c8;
+  background: rgba(0, 46, 109, 0.3);
+  border: 1px dashed var(--border);
 }
 
 .board .pname {
@@ -871,6 +1534,29 @@ body,
 
   .panel {
     padding: 22px 18px;
+  }
+
+  .how-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .how-card {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 9px 12px;
+  }
+
+  .how-card b {
+    flex: 1;
+  }
+
+  .facts {
+    gap: 6px;
+  }
+
+  .stat b {
+    font-size: 17px;
   }
 
   .title {
