@@ -65,20 +65,12 @@ export const ROLL_PIVOT = 0.92
 // medio ancho del corredor: cuanto ocupa de alto cuando esta horizontal
 export const ROLL_HALF_WIDTH = 0.32
 
-export const GOOD_ITEMS = [
-  'INTEGRIDAD',
-  'SEGURIDAD',
-  'INNOVACIÓN',
-  'TRABAJO EN EQUIPO',
-  'EXCELENCIA',
-]
+// Muestra para la leyenda de la portada. Las palabras que se recogen de verdad
+// salen del glosario por zona (words.js); aqui solo hacen falta unos ejemplos
+// que enseñen de un vistazo que es verde y que es rojo.
+export const LEGEND_GOOD = ['VALOR', 'CULTURA', 'LIDERAZGO', 'INCLUSIÓN', 'EXCELENCIA']
 
-export const BAD_ITEMS = [
-  'DESINFORMACIÓN',
-  'RIESGO',
-  'DATOS ERRÓNEOS',
-  'ACCIDENTES',
-]
+export const LEGEND_BAD = ['AMENAZA', 'DERRAME', 'ESTRÉS', 'RIESGO']
 
 // Escalados al curso real: recogerlo todo sin chocar da 1920 puntos (180 fichas
 // mas los tres bonos de andamio), asi que el rango maximo pide poco mas de la
@@ -102,4 +94,22 @@ export const COLORS = {
   amber: '#FFC627',
 }
 
-export const LEADERBOARD_KEY = 'tronco-runner-leaderboard'
+// Unidades de negocio del grupo. Se guardan junto al nombre y el puntaje para
+// poder leer el TOP 10 por terminal en el stand.
+export const BUSINESS_UNITS = [
+  'LCT',
+  'LCMT',
+  'ECV',
+  'EIT',
+  'HPMX',
+  'HPML',
+  'TNG',
+  'ICAVE',
+  'TILH',
+  'TIMSA',
+  'CCI',
+]
+
+// Clave nueva: las tablas viejas no traen unidad de negocio, asi que arrancan
+// limpias en vez de mezclar registros sin terminal en el mismo TOP 10.
+export const LEADERBOARD_KEY = 'terminal-rally-leaderboard'

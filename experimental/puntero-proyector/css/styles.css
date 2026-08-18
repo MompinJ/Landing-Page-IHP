@@ -142,6 +142,66 @@ html, body {
   margin-left: 0.3rem;
 }
 
+/* durante las dianas la pantalla se despeja: nada debe tapar las esquinas */
+body.calibrando .hud,
+body.calibrando .toolbar,
+body.calibrando .help-btn { display: none; }
+
+.cal-exit {
+  position: fixed;
+  top: 50%;
+  left: 25%;
+  transform: translate(-50%, -50%);
+  z-index: 6;
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  background: var(--panel-bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+}
+.cal-exit[hidden] { display: none; }
+
+/* legible parado frente a la pantalla proyectada, a varios metros */
+.senal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  pointer-events: none;
+  text-align: center;
+  padding: 1.4rem 2.6rem;
+  border: 2px solid var(--ink-soft);
+  border-radius: 16px;
+  background: rgba(5, 8, 12, 0.55);
+  backdrop-filter: blur(3px);
+}
+.senal__estado {
+  font-size: clamp(2rem, 6vw, 4.2rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.1;
+  color: var(--ink-soft);
+}
+.senal__detalle {
+  margin-top: 0.6rem;
+  font-size: clamp(0.8rem, 1.4vw, 1.1rem);
+  color: var(--ink-soft);
+}
+.senal--idle { animation: senal-latido 2.2s ease-in-out infinite; }
+.senal--live { opacity: 0.55; }
+.senal--oculta { display: none; }
+
+@keyframes senal-latido {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 0.35; }
+}
+
 .intro {
   position: fixed;
   inset: 0;

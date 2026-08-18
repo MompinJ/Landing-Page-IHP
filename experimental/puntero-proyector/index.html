@@ -18,6 +18,12 @@
 
   <button class="help-btn" id="btn-help" type="button" aria-label="Ver instrucciones">?</button>
 
+  <!-- lectura a distancia: es lo unico legible parado frente a la pantalla proyectada -->
+  <div class="senal senal--idle" id="senal">
+    <div class="senal__estado" id="senal-estado">SIN SEÑAL</div>
+    <div class="senal__detalle" id="senal-detalle">esperando cualquier evento de puntero</div>
+  </div>
+
   <aside class="hud hud--panel" id="panel">
     <h2>Entorno</h2>
     <dl>
@@ -25,10 +31,12 @@
       <div><dt>Pointer Events</dt><dd id="env-support">--</dd></div>
       <div><dt>devicePixelRatio</dt><dd id="env-dpr">--</dd></div>
       <div><dt>Viewport</dt><dd id="env-view">--</dd></div>
+      <div><dt>Pantalla</dt><dd id="env-screen">--</dd></div>
     </dl>
 
     <h2>Ultimo evento</h2>
     <dl>
+      <div><dt>evento</dt><dd data-f="evt">--</dd></div>
       <div><dt>pointerType</dt><dd data-f="type">--</dd></div>
       <div><dt>pointerId</dt><dd data-f="id">--</dd></div>
       <div><dt>isPrimary</dt><dd data-f="primary">--</dd></div>
@@ -37,20 +45,35 @@
       <div><dt>tiltX / tiltY</dt><dd data-f="tilt">--</dd></div>
       <div><dt>ancho x alto</dt><dd data-f="size">--</dd></div>
       <div><dt>buttons</dt><dd data-f="buttons">--</dd></div>
+      <div><dt>salto desde el previo</dt><dd data-f="delta">--</dd></div>
     </dl>
 
     <h2>Actividad</h2>
     <dl>
       <div><dt>Punteros activos</dt><dd data-f="active">0</dd></div>
+      <div><dt>Eventos capturados</dt><dd data-f="total">0</dd></div>
       <div><dt>Conteo por tipo</dt><dd data-f="counts">--</dd></div>
+      <div><dt>Saltos (absoluto?)</dt><dd data-f="jumps">0</dd></div>
+    </dl>
+
+    <h2>Calibracion</h2>
+    <dl>
+      <div><dt>Diana</dt><dd data-f="cal-step">apagada</dd></div>
+      <div><dt>Ultimo desvio</dt><dd data-f="cal-last">--</dd></div>
+      <div><dt>Promedio</dt><dd data-f="cal-avg">--</dd></div>
     </dl>
   </aside>
 
   <div class="hud hud--log" id="log" aria-live="off"></div>
 
+  <!-- unico control visible durante las dianas: cae lejos de los nueve puntos -->
+  <button class="cal-exit" id="btn-cal-exit" type="button" hidden>SALIR<br>DIANAS</button>
+
   <div class="toolbar">
     <button id="btn-clear" type="button">Limpiar <kbd>C</kbd></button>
     <button id="btn-grid" type="button">Rejilla <kbd>G</kbd></button>
+    <button id="btn-cal" type="button">Dianas <kbd>D</kbd></button>
+    <button id="btn-export" type="button">Exportar <kbd>E</kbd></button>
   </div>
 
   <div class="intro" id="intro">
@@ -60,18 +83,43 @@
         Prueba si el lapiz/dedo de un proyector interactivo de tiro ultracorto (Epson BrightLink, BenQ, etc.)
         llega al navegador como un puntero utilizable, y con que precision y datos.
       </p>
-      <p class="intro__flujo">Dibuja en la pantalla completa; el panel lateral y la bitacora muestran cada evento en vivo.</p>
+      <p class="intro__flujo">
+        Captura <strong>todo</strong> evento de puntero de la ventana (pointer, mouse y touch), aunque caiga sobre
+        los paneles o sobre esta misma tarjeta. El cartel central es legible desde lejos: si algo llega, cambia.
+      </p>
 
-      <h3>Requisitos para que funcione</h3>
+      <h3>Sala actual: que hay conectado</h3>
       <ul>
-        <li>El proyector debe estar conectado por <strong>USB</strong> ademas del cable de video: por ahi viaja el reporte HID del lapiz/dedo.</li>
-        <li>Debe estar <strong>calibrado</strong> con el software oficial del fabricante para el area exacta de proyeccion.</li>
-        <li>El sistema operativo debe reconocerlo como dispositivo de puntero (mouse, touch o pen) — se ve en <em>Dispositivos</em> de Windows/macOS.</li>
-        <li><code>pointerType</code> puede llegar como <code>"pen"</code>, <code>"touch"</code> o incluso <code>"mouse"</code> segun el driver: el codigo debe aceptar cualquiera.</li>
-        <li>La pagina necesita <code>touch-action: none</code> en la zona interactiva (ya incluido aqui) para que el navegador no intente hacer scroll/zoom con los trazos.</li>
+        <li>Proyector <strong>Epson EB-760Wi</strong> (laser, WXGA 1280x800, interactivo con lapiz).</li>
+        <li>Lapiz <strong>Epson ELPPN05</strong> (Easy Interactive Pen, pila AA).</li>
+        <li><strong>ClickShare de Barco</strong>: manda el video de la laptop al proyector por HDMI1, de forma inalambrica.</li>
+        <li>Laptop <strong>ThinkPad</strong> con el boton ClickShare por USB.</li>
       </ul>
 
-      <p class="intro__flujo">Usa la rejilla de calibracion para verificar que el trazo cae exactamente donde toca el lapiz en cada esquina y el centro.</p>
+      <h3>Por que el lapiz no aparecio</h3>
+      <p class="intro__flujo">
+        El ClickShare es una via de <em>video de ida</em>: laptop &rarr; proyector. Las coordenadas del lapiz van al
+        <em>reves</em> (proyector &rarr; laptop) y viajan como reporte <strong>HID</strong>, que el ClickShare no lleva.
+        Sin ese canal de regreso el lapiz solo pinta en la anotacion interna del proyector y el navegador nunca se entera.
+      </p>
+
+      <h3>Prueba en orden (una variable a la vez)</h3>
+      <ul>
+        <li><strong>1. Cable USB.</strong> Cable USB A-B del puerto <code>USB-B</code> del proyector a la ThinkPad. Es el canal por donde viaja el lapiz.</li>
+        <li><strong>2. Video directo.</strong> Para esta primera prueba, HDMI directo laptop &rarr; proyector, <em>sin</em> ClickShare. Si funciona asi, despues se vuelve a meter el ClickShare para ver si sobrevive.</li>
+        <li><strong>3. Lapiz encendido.</strong> Pila AA nueva; al apoyar la punta debe prender su LED.</li>
+        <li><strong>4. Menu del proyector.</strong> Con el control Epson: <code>Menu</code> &rarr; Easy Interactive Function &rarr; activar el modo interactivo con PC, y dejar <code>USB Type B</code> en Easy Interactive Function (no en USB Display ni raton inalambrico). Correr la <strong>calibracion automatica</strong>.</li>
+        <li><strong>5. Windows.</strong> En Administrador de dispositivos debe aparecer un dispositivo de entrada (HID / digitalizador). Si no aparece, instalar el <em>Easy Interactive Driver</em> de Epson.</li>
+        <li><strong>6. Esta pagina.</strong> Pantalla completa (F11) y tocar con el lapiz. El cartel central dice si llego algo y de que tipo.</li>
+      </ul>
+
+      <h3>Que mirar cuando ya llegue algo</h3>
+      <ul>
+        <li><code>pointerType</code> puede llegar como <code>"pen"</code>, <code>"touch"</code> o incluso <code>"mouse"</code> segun el driver: el codigo acepta cualquiera.</li>
+        <li>El contador de <strong>saltos</strong> delata un puntero absoluto: un digitalizador teletransporta el cursor, un trackpad no.</li>
+        <li>Las <strong>dianas</strong> (<kbd>D</kbd>) miden el desvio en pixeles entre donde tocas y donde cae el evento. Con el ClickShare de por medio se espera desvio si la laptop no esta en 16:10.</li>
+        <li><strong>Exportar</strong> (<kbd>E</kbd>) baja la bitacora completa en .txt para revisarla fuera de la sala.</li>
+      </ul>
 
       <button class="intro__btn" id="btn-start" type="button">ENTENDIDO</button>
     </div>

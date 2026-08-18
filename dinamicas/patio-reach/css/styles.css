@@ -1,0 +1,1181 @@
+/* ============================================================
+   DINAMICA PATIO REACH - estilos
+   Layout de dos columnas: la escena (canvas pixel art escalado a
+   factor entero por JS, con el marcador encima) y la columna de la
+   derecha, que va de arriba abajo por orden de importancia: que hay
+   que hacer ahora, donde estas y con que se maneja. Bajo 980px la
+   columna se apila debajo de la escena.
+   La estetica es de consola de maquinaria: navy oscuro, mono para
+   los instrumentos, sunray para lo que pide atencion.
+   ============================================================ */
+
+:root {
+  --sky: #009BDE;
+  --sunray: #FFC627;
+  --aqua: #54BBAB;
+  --navy: #0b1017;
+  --panel: #131a23;
+  --panel-alto: #1b2531;
+  --linea: rgba(255, 255, 255, 0.10);
+  --texto: #e8eef5;
+  --tenue: rgba(232, 238, 245, 0.55);
+  --mal: #ff6a4d;
+  --f-sans: 'Montserrat', system-ui, sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--navy);
+  color: var(--texto);
+  font-family: var(--f-sans);
+  overflow: hidden;
+}
+
+/* ---------- layout ---------- */
+
+.app {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.escena {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, #16202b 0%, #0b1017 70%);
+}
+
+.marco { position: relative; }
+
+/* El canvas se dibuja a 480x336 nativos y JS le fija un tamano CSS
+   multiplo entero de esa resolucion. Sin suavizado los pixeles
+   quedan cuadrados de verdad, no borrosos. */
+.patio {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- panel ---------- */
+
+/* 276 px no es capricho: con el canvas a 480 px nativos es lo que deja
+   que en una pantalla de 1280 el patio siga entrando al DOBLE de
+   tamano en vez de caer a escala 1 y verse diminuto. */
+.panel {
+  flex: 0 0 276px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 14px 13px;
+  overflow-y: auto;
+  background: linear-gradient(180deg, var(--panel-alto), var(--panel));
+  border-left: 1px solid var(--linea);
+}
+
+/* Del encabezado grande solo queda una linea: el nombre de la maquina
+   y el turno son contexto, no instrumento. */
+.panel__sub {
+  font-family: var(--f-mono);
+  font-size: 0.48rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--tenue);
+}
+
+.bloque__nombre {
+  font-family: var(--f-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--tenue);
+  margin-bottom: 6px;
+}
+
+/* ---------- marcador sobre el patio ----------
+   Reloj, puntos y clima viven encima del canvas: se leen de reojo sin
+   soltar la vista de la maquina, y liberan la columna de la derecha. */
+
+.hud {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 9px;
+  background: linear-gradient(180deg, rgba(6, 9, 13, 0.88), rgba(6, 9, 13, 0.55));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  pointer-events: none;
+}
+
+.hud__clima {
+  font-family: var(--f-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--sky);
+  white-space: nowrap;
+}
+
+.hud__marcador {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  font-family: var(--f-mono);
+  font-size: 0.44rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--tenue);
+  white-space: nowrap;
+}
+
+.hud__marcador b {
+  margin-left: 4px;
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--texto);
+}
+
+.hud__marcador b.is-mal { color: var(--mal); }
+
+.hud__reloj {
+  font-family: var(--f-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--texto);
+}
+
+.hud__reloj.is-poco { color: var(--sunray); }
+.hud__reloj.is-mal { color: var(--mal); }
+
+/* Lo que tienes justo delante y donde estas: pegado al patio, que es
+   donde se mira, y en letra chica porque es consulta. */
+.mira {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 9px;
+  background: linear-gradient(0deg, rgba(6, 9, 13, 0.88), rgba(6, 9, 13, 0.45));
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  font-family: var(--f-mono);
+  font-size: 0.44rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--tenue);
+  pointer-events: none;
+}
+
+.mira b { margin-left: 5px; font-size: 0.54rem; color: var(--sky); }
+.mira__pos { white-space: nowrap; }
+
+/* ---------- minimapa ---------- */
+
+.mini { display: flex; }
+
+/* La terminal es apaisada: limitando el ALTO el plano se queda en su
+   sitio y le deja aire a los mandos, que es lo que se toca. */
+.mini canvas {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 118px;
+  width: auto;
+  height: auto;
+  image-rendering: pixelated;
+  background: #10161c;
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+}
+
+/* ---------- tarjeta de mision ----------
+   Lo primero del panel y lo unico que hay que leer entero: que caja,
+   de donde sale, a donde va y cual es el siguiente movimiento. */
+
+.mision {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px 11px 11px;
+  background: rgba(0, 155, 222, 0.07);
+  border: 1px solid rgba(0, 155, 222, 0.3);
+  border-radius: 6px;
+}
+
+.mision.is-fin { background: rgba(84, 187, 171, 0.08); border-color: rgba(84, 187, 171, 0.35); }
+
+.mision__kicker {
+  font-family: var(--f-mono);
+  font-size: 0.46rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--sunray);
+}
+
+.mision__caja { display: flex; align-items: center; gap: 8px; }
+
+.mision__color {
+  flex: 0 0 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  background: #4a525c;
+}
+
+.mision__m {
+  flex: 1 1 auto;
+  font-family: var(--f-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--texto);
+}
+
+.mision__tipo {
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--sunray);
+  color: #16202b;
+  font-family: var(--f-mono);
+  font-size: 0.46rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.mision__tipo[hidden] { display: none; }
+
+/* de donde sale y a donde va, uno debajo del otro con la flecha en
+   medio: leido de arriba abajo es el viaje que hay que hacer */
+.mision__ruta { display: flex; flex-direction: column; gap: 2px; }
+
+.mision__ruta div { display: flex; align-items: baseline; gap: 8px; }
+
+.mision__ruta span {
+  flex: 0 0 76px;
+  font-family: var(--f-mono);
+  font-size: 0.42rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--tenue);
+}
+
+.mision__ruta b {
+  font-family: var(--f-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--texto);
+}
+
+.mision__ruta div:last-child b { color: var(--sunray); }
+
+.mision__flecha {
+  display: block;
+  margin-left: 30px;
+  font-size: 0.5rem;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.mision__llevas {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 7px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.mision__llevas[hidden] { display: none; }
+
+.mision__llevasfila { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+
+.mision__llevas span {
+  font-family: var(--f-mono);
+  font-size: 0.42rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--tenue);
+}
+
+.mision__llevas b {
+  font-family: var(--f-mono);
+  font-size: 0.56rem;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.mision__llevas small {
+  font-family: var(--f-mono);
+  font-size: 0.42rem;
+  letter-spacing: 0.1em;
+  color: var(--tenue);
+}
+
+/* EL SIGUIENTE PASO: la frase que dice que hacer ahora mismo. Se
+   recalcula del estado de la maquina en cada refresco. */
+.mision__paso::before {
+  content: 'SIGUIENTE PASO';
+  display: block;
+  margin-bottom: 3px;
+  font-family: var(--f-mono);
+  font-size: 0.42rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--sunray);
+}
+
+.mision__paso.is-ok::before { content: 'AHORA'; color: var(--aqua); }
+.mision__paso.is-mal::before { content: 'ATENCION'; color: var(--mal); }
+
+.mision__paso {
+  padding: 8px 10px;
+  background: rgba(255, 198, 39, 0.1);
+  border-left: 3px solid var(--sunray);
+  border-radius: 3px;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--texto);
+}
+
+.mision__paso.is-ok {
+  background: rgba(84, 187, 171, 0.12);
+  border-left-color: var(--aqua);
+}
+
+.mision__paso.is-mal {
+  background: rgba(255, 106, 77, 0.12);
+  border-left-color: var(--mal);
+}
+
+/* las otras ordenes del turno: solo para saber cuanto falta */
+.mision__resto {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 8px;
+  border-top: 1px solid var(--linea);
+}
+
+.mision__resto li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--f-mono);
+  font-size: 0.46rem;
+  letter-spacing: 0.06em;
+  color: rgba(232, 238, 245, 0.45);
+}
+
+.mision__resto li.is-activa { color: var(--texto); }
+.mision__resto li.is-hecha { color: rgba(84, 187, 171, 0.7); text-decoration: line-through; }
+
+.mision__resto li i {
+  flex: 0 0 6px;
+  height: 6px;
+  border-radius: 1px;
+  font-style: normal;
+  background: #4a525c;
+}
+
+.mision__resto li em { font-style: normal; }
+
+/* ---------- botonera de conduccion ---------- */
+
+.dpad {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-areas:
+    '.   av  .'
+    'izq br  der'
+    '.   rev .';
+  gap: 6px;
+}
+
+.cbtn--av  { grid-area: av; }
+.cbtn--izq { grid-area: izq; }
+.cbtn--der { grid-area: der; }
+.cbtn--rev { grid-area: rev; }
+.brujula   { grid-area: br; }
+
+.cbtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 7px 2px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 5px;
+  background: linear-gradient(180deg, #26313e, #18202a);
+  color: var(--texto);
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform 90ms ease, border-color 120ms ease;
+}
+
+.cbtn i { font-style: normal; font-size: 0.9rem; line-height: 1; color: var(--sunray); }
+
+.cbtn b {
+  font-family: var(--f-mono);
+  font-size: 0.44rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--tenue);
+}
+
+.cbtn:hover { border-color: var(--sunray); }
+
+.cbtn.is-press {
+  transform: translateY(2px);
+  border-color: var(--sunray);
+  background: linear-gradient(180deg, #354353, #202b37);
+}
+
+.brujula {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1px solid var(--linea);
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.brujula i { font-style: normal; font-size: 1.1rem; line-height: 1; color: var(--sky); }
+
+.brujula small {
+  font-family: var(--f-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--sky);
+}
+
+/* ---------- brazo: alcance y altura ---------- */
+
+.brazo { display: flex; flex-direction: column; gap: 7px; }
+
+.eje { display: flex; align-items: stretch; gap: 5px; }
+
+.ebtn {
+  flex: 0 0 30px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 5px;
+  background: linear-gradient(180deg, #26313e, #18202a);
+  color: var(--sunray);
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform 90ms ease, border-color 120ms ease;
+}
+
+.ebtn:hover { border-color: var(--sunray); }
+.ebtn.is-press { transform: translateY(2px); border-color: var(--sunray); }
+
+.ebtn:disabled {
+  color: rgba(232, 238, 245, 0.2);
+  border-color: rgba(255, 255, 255, 0.07);
+  background: rgba(0, 0, 0, 0.24);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.eje__cuerpo {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 5px 8px;
+  background: rgba(0, 0, 0, 0.34);
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+}
+
+.eje__nombre {
+  font-family: var(--f-mono);
+  font-size: 0.44rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--tenue);
+}
+
+/* Escalera de niveles: la barra mas alta es el nivel mayor, y los
+   que la curva de carga deja fuera de alcance se apagan. */
+.eje__niveles { display: flex; align-items: flex-end; gap: 3px; height: 13px; }
+
+.eje__niveles i {
+  flex: 1 1 auto;
+  background: rgba(255, 255, 255, 0.13);
+  border-radius: 1px;
+}
+
+.eje__niveles i.is-on { background: var(--sky); }
+.eje__niveles i.is-tope { background: var(--sunray); }
+.eje__niveles i.is-veto { background: rgba(255, 106, 77, 0.22); }
+
+.eje__valor {
+  font-family: var(--f-mono);
+  font-size: 0.56rem;
+  font-weight: 700;
+  color: var(--sky);
+}
+
+.tbtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 11px 13px;
+  border: 1px solid rgba(255, 198, 39, 0.4);
+  border-radius: 5px;
+  background: linear-gradient(180deg, #3a3018, #23200f);
+  color: var(--sunray);
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform 90ms ease, filter 120ms ease;
+}
+
+.tbtn b {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.tbtn small {
+  font-family: var(--f-mono);
+  font-size: 0.42rem;
+  letter-spacing: 0.12em;
+  color: rgba(232, 238, 245, 0.4);
+}
+
+.tbtn:hover { filter: brightness(1.2); }
+.tbtn.is-press { transform: translateY(2px); }
+
+.tbtn.is-cargado {
+  border-color: rgba(84, 187, 171, 0.55);
+  background: linear-gradient(180deg, #14352f, #0d211d);
+  color: var(--aqua);
+}
+
+.tbtn:disabled {
+  border-color: rgba(255, 255, 255, 0.09);
+  background: rgba(0, 0, 0, 0.24);
+  color: rgba(232, 238, 245, 0.24);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- integridad de la carga, dentro de la mision ---------- */
+
+.barra {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.09);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.barra i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--aqua);
+  transition: width 220ms ease, background 220ms ease;
+}
+
+.barra i.is-medio { background: var(--sunray); }
+.barra i.is-mal { background: var(--mal); }
+
+
+/* ---------- orden de trabajo ---------- */
+
+.orden {
+  padding: 11px 12px;
+  background: rgba(0, 155, 222, 0.07);
+  border: 1px solid rgba(0, 155, 222, 0.26);
+  border-radius: 5px;
+}
+
+.orden__texto {
+  font-size: 0.68rem;
+  line-height: 1.55;
+  color: rgba(232, 238, 245, 0.76);
+}
+
+/* ---------- pie ---------- */
+
+.panel__pie { margin-top: auto; padding-top: 4px; display: flex; gap: 6px; }
+
+.pbtn {
+  flex: 1 1 0;
+  padding: 9px 4px;
+  border: 1px solid var(--linea);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--tenue);
+  font-family: var(--f-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+}
+
+.pbtn:hover { color: var(--sunray); border-color: var(--sunray); }
+
+.pbtn--tenue { border-color: transparent; color: rgba(232, 238, 245, 0.4); }
+
+/* ---------- toast ---------- */
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  background: rgba(8, 12, 17, 0.94);
+  border: 1px solid var(--mal);
+  border-radius: 4px;
+  font-family: var(--f-mono);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--mal);
+  pointer-events: none;
+}
+
+/* ---------- cierre de turno ---------- */
+
+.finale {
+  position: fixed;
+  inset: 0;
+  z-index: 92;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(5, 8, 12, 0.92);
+  backdrop-filter: blur(5px);
+}
+
+.finale[hidden] { display: none; }
+
+.finale__caja {
+  width: min(620px, 94vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 26px 30px 28px;
+  background: linear-gradient(180deg, #161d25, #0e131a);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 4px solid var(--aqua);
+  border-radius: 10px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.75);
+}
+
+.finale__caja.is-mal { border-top-color: var(--mal); }
+
+.finale__kicker {
+  font-family: var(--f-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: var(--aqua);
+}
+
+.finale__caja.is-mal .finale__kicker { color: var(--mal); }
+
+.finale__caja h2 { margin-top: 6px; font-size: 1.8rem; font-weight: 900; }
+
+.finale__score {
+  margin-top: 4px;
+  font-family: var(--f-mono);
+  font-size: 2.2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--sunray);
+}
+
+.finale__tabla {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.finale__tabla div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--tenue);
+}
+
+.finale__tabla div b { color: var(--texto); }
+.finale__tabla div.is-suma b { color: var(--aqua); }
+.finale__tabla div.is-resta b { color: var(--mal); }
+
+.finale__nota {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: rgba(255, 198, 39, 0.08);
+  border-left: 3px solid var(--sunray);
+  border-radius: 3px;
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: rgba(232, 238, 245, 0.72);
+}
+
+.finale__btns { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+
+.finale__btns button {
+  padding: 11px 22px;
+  border: none;
+  border-radius: 5px;
+  background: var(--sky);
+  color: #fff;
+  font-family: var(--f-sans);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.finale__btns button:hover { filter: brightness(1.15); }
+
+.finale__btns button.pbtn2 {
+  background: transparent;
+  border: 1px solid var(--linea);
+  color: var(--tenue);
+}
+
+.finale__btns button.pbtn2:hover { color: var(--sunray); border-color: var(--sunray); }
+
+/* ---------- pantalla inicial: elegir turno ----------
+   Es lo primero que se ve, asi que manda la parrilla de tarjetas: en
+   cada una el plano del turno dibujado a pixel, para que se elija por
+   lo que se ve y no por leer el nombre. */
+
+.menu {
+  position: fixed;
+  inset: 0;
+  z-index: 88;
+  overflow-y: auto;
+  padding: 28px 24px 34px;
+  background:
+    radial-gradient(120% 80% at 50% 0%, #16202b 0%, #080c11 68%);
+}
+
+.menu[hidden] { display: none; }
+
+.menu__caja { width: min(940px, 100%); margin: 0 auto; }
+
+.menu__cab { text-align: center; }
+
+.menu__kicker {
+  font-family: var(--f-mono);
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  color: var(--sunray);
+}
+
+.menu__titulo {
+  margin-top: 8px;
+  font-size: clamp(2.1rem, 6vw, 3.2rem);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.menu__lema {
+  margin-top: 8px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: rgba(232, 238, 245, 0.7);
+}
+
+.menu__grid {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 14px;
+}
+
+/* ---------- tarjeta de turno ---------- */
+
+.carta {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  text-align: left;
+  background: linear-gradient(180deg, #172029, #0e131a);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9px;
+  color: var(--texto);
+  font-family: var(--f-sans);
+  cursor: pointer;
+  transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.carta:hover,
+.carta:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--sky);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.55);
+  outline: none;
+}
+
+.carta__vista {
+  position: relative;
+  background: #0a0e13;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* el plano se hornea a 4 px por casilla y se estira a lo ancho de la
+   tarjeta sin suavizar: mismo pixel que el juego */
+.carta__vista canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.carta__num {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  padding: 3px 8px;
+  background: rgba(8, 12, 17, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 3px;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--sunray);
+}
+
+.carta__reto {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background: rgba(8, 12, 17, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 3px;
+  font-family: var(--f-mono);
+  font-size: 0.44rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--tenue);
+}
+
+.carta__reto i {
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.carta__reto i.is-on { background: var(--sunray); }
+
+.carta__cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 13px 15px 15px;
+}
+
+.carta__fila { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+
+.carta__fila h3 { font-size: 1.05rem; font-weight: 900; letter-spacing: 0.04em; }
+
+.carta__marca {
+  font-family: var(--f-mono);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+  color: var(--tenue);
+  white-space: nowrap;
+}
+
+.carta__marca.is-hecho { color: var(--aqua); }
+
+.carta__lema {
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: rgba(232, 238, 245, 0.62);
+}
+
+.carta__datos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 10px;
+  list-style: none;
+  font-family: var(--f-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+}
+
+.carta__datos li { display: flex; flex-direction: column; gap: 2px; }
+.carta__datos li.carta__ancho { grid-column: 1 / -1; }
+.carta__datos span { font-size: 0.44rem; letter-spacing: 0.18em; color: var(--tenue); }
+.carta__datos b { color: var(--texto); font-weight: 700; }
+
+.carta__pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 2px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--f-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.carta__estado { color: var(--tenue); }
+.carta__estado.is-hecho { color: var(--aqua); }
+.carta__estado.is-nuevo { color: var(--sky); }
+
+.carta__ir { color: var(--sunray); }
+
+/* ---------- controles y pie del menu ---------- */
+
+.menu__teclas {
+  margin-top: 20px;
+  padding: 13px 15px 15px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+}
+
+.menu__teclas ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 7px 14px;
+  list-style: none;
+}
+
+.menu__teclas li { display: flex; align-items: center; gap: 9px; }
+
+.menu__teclas b {
+  flex: 0 0 auto;
+  min-width: 56px;
+  padding: 4px 7px;
+  text-align: center;
+  background: var(--panel-alto);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 3px;
+  font-family: var(--f-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.menu__teclas span {
+  font-family: var(--f-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  color: var(--tenue);
+}
+
+.menu__pie {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+}
+
+.menu__btn {
+  padding: 11px 24px;
+  border: 1px solid var(--linea);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--tenue);
+  font-family: var(--f-sans);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+
+.menu__btn:hover { color: var(--sunray); border-color: var(--sunray); }
+
+.menu__nota {
+  font-size: 0.72rem;
+  color: rgba(232, 238, 245, 0.55);
+}
+
+.menu__nota strong { color: var(--sunray); font-weight: 800; }
+
+/* ---------- ayuda ---------- */
+
+.ayuda {
+  position: fixed;
+  right: 316px;
+  top: 16px;
+  z-index: 55;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(10, 14, 19, 0.8);
+  color: var(--tenue);
+  font-family: var(--f-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ayuda:hover { color: var(--sunray); border-color: var(--sunray); }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(5, 8, 12, 0.9);
+  backdrop-filter: blur(5px);
+}
+
+.overlay[hidden] { display: none; }
+
+.overlay__caja {
+  width: min(660px, 94vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 26px 30px 28px;
+  background: linear-gradient(180deg, #161d25, #0e131a);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 4px solid var(--sunray);
+  border-radius: 10px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.75);
+}
+
+.overlay__kicker {
+  font-family: var(--f-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: var(--sunray);
+}
+
+.overlay__caja h1 { margin-top: 6px; font-size: 1.9rem; font-weight: 900; }
+
+.overlay__intro {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: rgba(232, 238, 245, 0.78);
+}
+
+.overlay__caja ul {
+  margin-top: 14px;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: rgba(232, 238, 245, 0.75);
+}
+
+.overlay__nota {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: rgba(255, 198, 39, 0.08);
+  border-left: 3px solid var(--sunray);
+  border-radius: 3px;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: rgba(232, 238, 245, 0.68);
+}
+
+.overlay__caja strong, .overlay__intro strong { color: var(--sunray); font-weight: 800; }
+
+.overlay__btn {
+  margin-top: 20px;
+  padding: 12px 26px;
+  border: none;
+  border-radius: 5px;
+  background: var(--sky);
+  color: #fff;
+  font-family: var(--f-sans);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+
+.overlay__btn:hover { filter: brightness(1.15); }
+
+/* ---------- apilado en pantallas angostas ---------- */
+
+@media (max-width: 980px) {
+  html, body { overflow: auto; }
+
+  .app { flex-direction: column; height: auto; min-height: 100%; }
+
+  /* apilado la escena se ajusta al canvas; el presupuesto de alto
+     para la escala lo saca JS de la ventana, no de aqui */
+  .escena { padding: 12px; }
+
+  .panel {
+    flex: 0 0 auto;
+    border-left: none;
+    border-top: 1px solid var(--linea);
+  }
+
+  .dpad { max-width: 320px; margin: 0 auto; }
+
+  .ayuda { right: 16px; }
+
+  .menu { padding: 20px 14px 26px; }
+  .menu__grid { grid-template-columns: 1fr; gap: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cbtn { transition: none; }
+}

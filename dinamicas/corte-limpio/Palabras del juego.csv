@@ -1,0 +1,350 @@
+#,Palabra,Sin acentos,Letras,Tema,Terminal,Tipo,Reparto
+1,ACTOR,ACTOR,5,Operaciones,Usos Multiples,Valor,Principal
+2,ADUANA,ADUANA,6,Operaciones,Usos Multiples,Valor,Principal
+3,AGENTE,AGENTE,6,Operaciones,Usos Multiples,Valor,Principal
+4,APILAR,APILAR,6,Operaciones,Usos Multiples,Valor,Principal
+5,AUTORIDAD,AUTORIDAD,9,Operaciones,Usos Multiples,Valor,Principal
+6,BUQUE,BUQUE,5,Operaciones,Usos Multiples,Valor,Principal
+7,CAMIÓN,CAMION,6,Operaciones,Usos Multiples,Valor,Principal
+8,CARGO,CARGO,5,Operaciones,Usos Multiples,Valor,Principal
+9,CÓDIGO,CODIGO,6,Operaciones,Usos Multiples,Valor,Principal
+10,CONEXIÓN,CONEXION,8,Operaciones,Usos Multiples,Valor,Principal
+11,CONTAINER,CONTAINER,9,Operaciones,Usos Multiples,Valor,Principal
+12,DIMENSIÓN,DIMENSION,9,Operaciones,Usos Multiples,Valor,Principal
+13,ENTREGA,ENTREGA,7,Operaciones,Usos Multiples,Valor,Principal
+14,EQUIPO,EQUIPO,6,Operaciones,Usos Multiples,Valor,Principal
+15,ESTADÍA,ESTADIA,7,Operaciones,Usos Multiples,Valor,Principal
+16,ESTIBA,ESTIBA,6,Operaciones,Usos Multiples,Valor,Principal
+17,FÉRREO,FERREO,6,Operaciones,Usos Multiples,Valor,Principal
+18,FRENTE,FRENTE,6,Operaciones,Usos Multiples,Valor,Principal
+19,GRANEL,GRANEL,6,Operaciones,Usos Multiples,Valor,Principal
+20,GRÚAS,GRUAS,5,Operaciones,Usos Multiples,Valor,Principal
+21,INDICADOR,INDICADOR,9,Operaciones,Usos Multiples,Valor,Principal
+22,MANEJO,MANEJO,6,Operaciones,Usos Multiples,Valor,Principal
+23,MARÍTIMO,MARITIMO,8,Operaciones,Usos Multiples,Valor,Principal
+24,MERCANCÍA,MERCANCIA,9,Operaciones,Usos Multiples,Valor,Principal
+25,MUELLE,MUELLE,6,Operaciones,Usos Multiples,Valor,Principal
+26,NAVIERA,NAVIERA,7,Operaciones,Usos Multiples,Valor,Principal
+27,OPERADOR,OPERADOR,8,Operaciones,Usos Multiples,Valor,Principal
+28,OPERAR,OPERAR,6,Operaciones,Usos Multiples,Valor,Principal
+29,ÓRGANO,ORGANO,6,Operaciones,Usos Multiples,Valor,Principal
+30,PATIO,PATIO,5,Operaciones,Usos Multiples,Valor,Principal
+31,PLANEAR,PLANEAR,7,Operaciones,Usos Multiples,Valor,Principal
+32,PROCESO,PROCESO,7,Operaciones,Usos Multiples,Valor,Principal
+33,PUERTO,PUERTO,6,Operaciones,Usos Multiples,Valor,Principal
+34,RECEPCIÓN,RECEPCION,9,Operaciones,Usos Multiples,Valor,Principal
+35,REEFER,REEFER,6,Operaciones,Usos Multiples,Valor,Principal
+36,SEGURO,SEGURO,6,Operaciones,Usos Multiples,Valor,Principal
+37,SISTEMA,SISTEMA,7,Operaciones,Usos Multiples,Valor,Principal
+38,TANK,TANK,4,Operaciones,Usos Multiples,Valor,Principal
+39,TERMINAL,TERMINAL,8,Operaciones,Usos Multiples,Valor,Principal
+40,TRACTOR,TRACTOR,7,Operaciones,Usos Multiples,Valor,Principal
+41,VAGÓN,VAGON,5,Operaciones,Usos Multiples,Valor,Principal
+42,VOLUMEN,VOLUMEN,7,Operaciones,Usos Multiples,Valor,Principal
+43,ACCIÓN,ACCION,6,SIGA,Usos Multiples,Valor,Apoyo
+44,CALIDAD,CALIDAD,7,SIGA,Usos Multiples,Valor,Apoyo
+45,CAMBIO,CAMBIO,6,SIGA,Usos Multiples,Valor,Apoyo
+46,CAUSA,CAUSA,5,SIGA,Usos Multiples,Valor,Apoyo
+47,COSTO,COSTO,5,SIGA,Usos Multiples,Valor,Apoyo
+48,ENFOQUE,ENFOQUE,7,SIGA,Usos Multiples,Valor,Apoyo
+49,ESBELTO,ESBELTO,7,SIGA,Usos Multiples,Valor,Apoyo
+50,ETAPA,ETAPA,5,SIGA,Usos Multiples,Valor,Apoyo
+51,EVENTO,EVENTO,6,SIGA,Usos Multiples,Valor,Apoyo
+52,EXCELENCIA,EXCELENCIA,10,SIGA,Usos Multiples,Valor,Apoyo
+53,GRÁFICO,GRAFICO,7,SIGA,Usos Multiples,Valor,Apoyo
+54,INDUSTRIA,INDUSTRIA,9,SIGA,Usos Multiples,Valor,Apoyo
+55,MEJORA,MEJORA,6,SIGA,Usos Multiples,Valor,Apoyo
+56,MÉTODO,METODO,6,SIGA,Usos Multiples,Valor,Apoyo
+57,SIGMA,SIGMA,5,SIGA,Usos Multiples,Valor,Apoyo
+58,BENCHMARK,BENCHMARK,9,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+59,CAPACITAR,CAPACITAR,9,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+60,COLABORAR,COLABORAR,9,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+61,CONSULTA,CONSULTA,8,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+62,CONTRATAR,CONTRATAR,9,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+63,CRITERIO,CRITERIO,8,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+64,EVALUAR,EVALUAR,7,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+65,EXPERTO,EXPERTO,7,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+66,FUENTES,FUENTES,7,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+67,FUNCIÓN,FUNCION,7,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+68,HUMANO,HUMANO,6,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+69,INDUCIR,INDUCIR,7,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+70,LABORES,LABORES,7,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+71,LICENCIA,LICENCIA,8,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+72,MEDIR,MEDIR,5,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+73,MERCADO,MERCADO,7,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+74,PAGOS,PAGOS,5,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+75,PERFIL,PERFIL,6,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+76,PUESTO,PUESTO,6,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+77,RENDIR,RENDIR,6,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+78,REPORTE,REPORTE,7,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+79,RESPETO,RESPETO,7,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+80,RETOS,RETOS,5,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+81,ROTACIÓN,ROTACION,8,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+82,SEGUIMIENTO,SEGUIMIENTO,11,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+83,SELECCIONAR,SELECCIONAR,11,Procesos de RRHH,Usos Multiples,Valor,Apoyo
+84,ARTÍCULO,ARTICULO,8,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+85,BUZÓN,BUZON,5,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+86,CLIMA,CLIMA,5,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+87,COLECTIVO,COLECTIVO,9,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+88,CONDICIÓN,CONDICION,9,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+89,CONTRATO,CONTRATO,8,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+90,CONVENIO,CONVENIO,8,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+91,CRECER,CRECER,6,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+92,DERECHO,DERECHO,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+93,DINÁMICA,DINAMICA,8,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+94,DIVERSIDAD,DIVERSIDAD,10,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+95,EMPLEADOR,EMPLEADOR,9,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+96,EMPRESA,EMPRESA,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+97,ENCUESTA,ENCUESTA,8,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+98,ENTORNO,ENTORNO,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+99,EQUIDAD,EQUIDAD,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+100,ESTATUTO,ESTATUTO,8,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+101,ÉTICA,ETICA,5,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+102,GESTIÓN,GESTION,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+103,GUÍA,GUIA,4,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+104,IMPACTO,IMPACTO,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+105,JORNADA,JORNADA,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+106,LABORAL,LABORAL,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+107,LEYES,LEYES,5,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+108,MARCO,MARCO,5,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+109,MÍNIMO,MINIMO,6,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+110,MOTIVAR,MOTIVAR,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+111,NOMBRAR,NOMBRAR,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+112,NÓMINA,NOMINA,6,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+113,NORMAS,NORMAS,6,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+114,PERMISO,PERMISO,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+115,PERSONAL,PERSONAL,8,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+116,POLÍTICA,POLITICA,8,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+117,PRESTACIÓN,PRESTACION,10,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+118,PROSPERAR,PROSPERAR,9,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+119,REGLA,REGLA,5,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+120,RELACIÓN,RELACION,8,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+121,RETENER,RETENER,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+122,SALARIO,SALARIO,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+123,SUBSIDIO,SUBSIDIO,8,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+124,TAREA,TAREA,5,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+125,TRABAJO,TRABAJO,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+126,TRATADO,TRATADO,7,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+127,VACACIÓN,VACACION,8,Relaciones Laborales,Usos Multiples,Valor,Apoyo
+128,DESALOJO,DESALOJO,8,Riesgo operativo,Usos Multiples,Riesgo,Principal
+129,DESVÍO,DESVIO,6,Riesgo operativo,Usos Multiples,Riesgo,Principal
+130,DEFECTO,DEFECTO,7,Riesgo operativo,Usos Multiples,Riesgo,Principal
+131,DAÑOS,DANOS,5,Riesgo operativo,Usos Multiples,Riesgo,Principal
+132,DERRAME,DERRAME,7,Riesgo operativo,Usos Multiples,Riesgo,Principal
+133,TÓXICO,TOXICO,6,Riesgo operativo,Usos Multiples,Riesgo,Principal
+134,QUÍMICO,QUIMICO,7,Riesgo operativo,Usos Multiples,Riesgo,Principal
+135,FUEGO,FUEGO,5,Riesgo operativo,Usos Multiples,Riesgo,Principal
+136,INMINENTE,INMINENTE,9,Riesgo operativo,Usos Multiples,Riesgo,Principal
+137,GRAVE,GRAVE,5,Riesgo operativo,Usos Multiples,Riesgo,Principal
+138,PELIGRO,PELIGRO,7,Riesgo operativo,Usos Multiples,Riesgo,Principal
+139,DESASTRE,DESASTRE,8,Riesgo operativo,Usos Multiples,Riesgo,Principal
+140,ACTIVO,ACTIVO,6,Ciberseguridad,Contenedores,Valor,Principal
+141,ADJUNTO,ADJUNTO,7,Ciberseguridad,Contenedores,Valor,Principal
+142,ALERTA,ALERTA,6,Ciberseguridad,Contenedores,Valor,Principal
+143,ALGORITMO,ALGORITMO,9,Ciberseguridad,Contenedores,Valor,Principal
+144,ARCO,ARCO,4,Ciberseguridad,Contenedores,Valor,Principal
+145,AVISO,AVISO,5,Ciberseguridad,Contenedores,Valor,Principal
+146,BLOQUEAR,BLOQUEAR,8,Ciberseguridad,Contenedores,Valor,Principal
+147,BORRAR,BORRAR,6,Ciberseguridad,Contenedores,Valor,Principal
+148,CIFRAR,CIFRAR,6,Ciberseguridad,Contenedores,Valor,Principal
+149,CONTRASEÑA,CONTRASENA,10,Ciberseguridad,Contenedores,Valor,Principal
+150,COPIA,COPIA,5,Ciberseguridad,Contenedores,Valor,Principal
+151,CORREO,CORREO,6,Ciberseguridad,Contenedores,Valor,Principal
+152,DEFENSA,DEFENSA,7,Ciberseguridad,Contenedores,Valor,Principal
+153,DENUNCIA,DENUNCIA,8,Ciberseguridad,Contenedores,Valor,Principal
+154,DIGITAL,DIGITAL,7,Ciberseguridad,Contenedores,Valor,Principal
+155,DOBLE,DOBLE,5,Ciberseguridad,Contenedores,Valor,Principal
+156,ENLACE,ENLACE,6,Ciberseguridad,Contenedores,Valor,Principal
+157,EVITAR,EVITAR,6,Ciberseguridad,Contenedores,Valor,Principal
+158,FILTRAR,FILTRAR,7,Ciberseguridad,Contenedores,Valor,Principal
+159,FIREWALL,FIREWALL,8,Ciberseguridad,Contenedores,Valor,Principal
+160,GESTOR,GESTOR,6,Ciberseguridad,Contenedores,Valor,Principal
+161,INTANGIBLE,INTANGIBLE,10,Ciberseguridad,Contenedores,Valor,Principal
+162,INTERNET,INTERNET,8,Ciberseguridad,Contenedores,Valor,Principal
+163,METADATO,METADATO,8,Ciberseguridad,Contenedores,Valor,Principal
+164,RESPALDO,RESPALDO,8,Ciberseguridad,Contenedores,Valor,Principal
+165,ROBUSTO,ROBUSTO,7,Ciberseguridad,Contenedores,Valor,Principal
+166,SEÑAL,SENAL,5,Ciberseguridad,Contenedores,Valor,Principal
+167,SITIO,SITIO,5,Ciberseguridad,Contenedores,Valor,Principal
+168,SOFTWARE,SOFTWARE,8,Ciberseguridad,Contenedores,Valor,Principal
+169,TANGIBLE,TANGIBLE,8,Ciberseguridad,Contenedores,Valor,Principal
+170,ÚNICA,UNICA,5,Ciberseguridad,Contenedores,Valor,Principal
+171,ANÁLISIS,ANALISIS,8,Tecnologia,Contenedores,Valor,Apoyo
+172,CONSUMO,CONSUMO,7,Tecnologia,Contenedores,Valor,Apoyo
+173,CRÍTICO,CRITICO,7,Tecnologia,Contenedores,Valor,Apoyo
+174,DRONES,DRONES,6,Tecnologia,Contenedores,Valor,Apoyo
+175,MODERNO,MODERNO,7,Tecnologia,Contenedores,Valor,Apoyo
+176,ÓPTIMO,OPTIMO,6,Tecnologia,Contenedores,Valor,Apoyo
+177,SENSOR,SENSOR,6,Tecnologia,Contenedores,Valor,Apoyo
+178,AMENAZA,AMENAZA,7,Riesgo ciber,Contenedores,Riesgo,Principal
+179,ATAQUE,ATAQUE,6,Riesgo ciber,Contenedores,Riesgo,Principal
+180,FRAUDE,FRAUDE,6,Riesgo ciber,Contenedores,Riesgo,Principal
+181,MALWARE,MALWARE,7,Riesgo ciber,Contenedores,Riesgo,Principal
+182,RANSOM,RANSOM,6,Riesgo ciber,Contenedores,Riesgo,Principal
+183,DELITO,DELITO,6,Riesgo ciber,Contenedores,Riesgo,Principal
+184,ERROR,ERROR,5,Riesgo ciber,Contenedores,Riesgo,Principal
+185,OCULTO,OCULTO,6,Riesgo ciber,Contenedores,Riesgo,Principal
+186,FALLAS,FALLAS,6,Riesgo ciber,Contenedores,Riesgo,Principal
+187,ACUERDO,ACUERDO,7,Sostenibilidad,Intermodal,Valor,Principal
+188,CICLO,CICLO,5,Sostenibilidad,Intermodal,Valor,Principal
+189,CIRCULAR,CIRCULAR,8,Sostenibilidad,Intermodal,Valor,Principal
+190,COMUNIDAD,COMUNIDAD,9,Sostenibilidad,Intermodal,Valor,Principal
+191,ECONOMÍA,ECONOMIA,8,Sostenibilidad,Intermodal,Valor,Principal
+192,EFICIENTE,EFICIENTE,9,Sostenibilidad,Intermodal,Valor,Principal
+193,ENERGÍA,ENERGIA,7,Sostenibilidad,Intermodal,Valor,Principal
+194,EÓLICA,EOLICA,6,Sostenibilidad,Intermodal,Valor,Principal
+195,ESTÁNDAR,ESTANDAR,8,Sostenibilidad,Intermodal,Valor,Principal
+196,FACTOR,FACTOR,6,Sostenibilidad,Intermodal,Valor,Principal
+197,FLOTAS,FLOTAS,6,Sostenibilidad,Intermodal,Valor,Principal
+198,FLUJO,FLUJO,5,Sostenibilidad,Intermodal,Valor,Principal
+199,FUTURO,FUTURO,6,Sostenibilidad,Intermodal,Valor,Principal
+200,HÍBRIDO,HIBRIDO,7,Sostenibilidad,Intermodal,Valor,Principal
+201,LIMPIO,LIMPIO,6,Sostenibilidad,Intermodal,Valor,Principal
+202,MEDIO,MEDIO,5,Sostenibilidad,Intermodal,Valor,Principal
+203,PILAR,PILAR,5,Sostenibilidad,Intermodal,Valor,Principal
+204,RECURSO,RECURSO,7,Sostenibilidad,Intermodal,Valor,Principal
+205,REGENERAR,REGENERAR,9,Sostenibilidad,Intermodal,Valor,Principal
+206,SOCIAL,SOCIAL,6,Sostenibilidad,Intermodal,Valor,Principal
+207,SOLAR,SOLAR,5,Sostenibilidad,Intermodal,Valor,Principal
+208,SOSTENIBLE,SOSTENIBLE,10,Sostenibilidad,Intermodal,Valor,Principal
+209,ÁCIDO,ACIDO,5,Desarrollo de nuevos productos,Intermodal,Valor,Apoyo
+210,CLIENTE,CLIENTE,7,Desarrollo de nuevos productos,Intermodal,Valor,Apoyo
+211,CREATIVO,CREATIVO,8,Desarrollo de nuevos productos,Intermodal,Valor,Apoyo
+212,DISEÑO,DISENO,6,Desarrollo de nuevos productos,Intermodal,Valor,Apoyo
+213,IDEAS,IDEAS,5,Desarrollo de nuevos productos,Intermodal,Valor,Apoyo
+214,MONETIZAR,MONETIZAR,9,Desarrollo de nuevos productos,Intermodal,Valor,Apoyo
+215,POTENCIAL,POTENCIAL,9,Desarrollo de nuevos productos,Intermodal,Valor,Apoyo
+216,PROYECTO,PROYECTO,8,Desarrollo de nuevos productos,Intermodal,Valor,Apoyo
+217,PRUEBA,PRUEBA,6,Desarrollo de nuevos productos,Intermodal,Valor,Apoyo
+218,RENTABLE,RENTABLE,8,Desarrollo de nuevos productos,Intermodal,Valor,Apoyo
+219,SERVICIO,SERVICIO,8,Desarrollo de nuevos productos,Intermodal,Valor,Apoyo
+220,SINERGIA,SINERGIA,8,Desarrollo de nuevos productos,Intermodal,Valor,Apoyo
+221,VIABLE,VIABLE,6,Desarrollo de nuevos productos,Intermodal,Valor,Apoyo
+222,EMISIÓN,EMISION,7,Riesgo ambiental,Intermodal,Riesgo,Principal
+223,FÓSIL,FOSIL,5,Riesgo ambiental,Intermodal,Riesgo,Principal
+224,DIÉSEL,DIESEL,6,Riesgo ambiental,Intermodal,Riesgo,Principal
+225,RUIDO,RUIDO,5,Riesgo ambiental,Intermodal,Riesgo,Principal
+226,MANGA,MANGA,5,Nomenclatura naval,Cruceros,Valor,Principal
+227,PUNTAL,PUNTAL,6,Nomenclatura naval,Cruceros,Valor,Principal
+228,CALADO,CALADO,6,Nomenclatura naval,Cruceros,Valor,Principal
+229,ESLORA,ESLORA,6,Nomenclatura naval,Cruceros,Valor,Principal
+230,ATRAQUE,ATRAQUE,7,Nomenclatura naval,Cruceros,Valor,Principal
+231,PROA,PROA,4,Nomenclatura naval,Cruceros,Valor,Principal
+232,POPA,POPA,4,Nomenclatura naval,Cruceros,Valor,Principal
+233,BABOR,BABOR,5,Nomenclatura naval,Cruceros,Valor,Principal
+234,ESTRIBOR,ESTRIBOR,8,Nomenclatura naval,Cruceros,Valor,Principal
+235,AMARRE,AMARRE,6,Nomenclatura naval,Cruceros,Valor,Principal
+236,BITÁCORA,BITACORA,8,Nomenclatura naval,Cruceros,Valor,Principal
+237,DESESTIBA,DESESTIBA,9,Nomenclatura naval,Cruceros,Valor,Principal
+238,DRAGADO,DRAGADO,7,Nomenclatura naval,Cruceros,Valor,Principal
+239,CABOTAJE,CABOTAJE,8,Nomenclatura naval,Cruceros,Valor,Principal
+240,QUILLA,QUILLA,6,Nomenclatura naval,Cruceros,Valor,Principal
+241,BOYA,BOYA,4,Nomenclatura naval,Cruceros,Valor,Principal
+242,FONDEO,FONDEO,6,Nomenclatura naval,Cruceros,Valor,Principal
+243,TRINCAJE,TRINCAJE,8,Nomenclatura naval,Cruceros,Valor,Principal
+244,REMOLQUE,REMOLQUE,8,Nomenclatura naval,Cruceros,Valor,Principal
+245,PILOTAJE,PILOTAJE,8,Nomenclatura naval,Cruceros,Valor,Principal
+246,NORAY,NORAY,5,Nomenclatura naval,Cruceros,Valor,Principal
+247,FRANCOBORDO,FRANCOBORDO,11,Nomenclatura naval,Cruceros,Valor,Principal
+248,MAMPARO,MAMPARO,7,Nomenclatura naval,Cruceros,Valor,Principal
+249,AMBIENTE,AMBIENTE,8,Programas de Bienestar,Cruceros,Valor,Apoyo
+250,ÁNIMO,ANIMO,5,Programas de Bienestar,Cruceros,Valor,Apoyo
+251,AUDICIÓN,AUDICION,8,Programas de Bienestar,Cruceros,Valor,Apoyo
+252,BALANCE,BALANCE,7,Programas de Bienestar,Cruceros,Valor,Apoyo
+253,BRINDAR,BRINDAR,7,Programas de Bienestar,Cruceros,Valor,Apoyo
+254,COMIDA,COMIDA,6,Programas de Bienestar,Cruceros,Valor,Apoyo
+255,CONTRIBUIR,CONTRIBUIR,10,Programas de Bienestar,Cruceros,Valor,Apoyo
+256,CUERPO,CUERPO,6,Programas de Bienestar,Cruceros,Valor,Apoyo
+257,CUIDAR,CUIDAR,6,Programas de Bienestar,Cruceros,Valor,Apoyo
+258,CULTIVAR,CULTIVAR,8,Programas de Bienestar,Cruceros,Valor,Apoyo
+259,DESCANSO,DESCANSO,8,Programas de Bienestar,Cruceros,Valor,Apoyo
+260,EJERCICIO,EJERCICIO,9,Programas de Bienestar,Cruceros,Valor,Apoyo
+261,EMOCIONAL,EMOCIONAL,9,Programas de Bienestar,Cruceros,Valor,Apoyo
+262,EMPATÍA,EMPATIA,7,Programas de Bienestar,Cruceros,Valor,Apoyo
+263,ERGONOMÍA,ERGONOMIA,9,Programas de Bienestar,Cruceros,Valor,Apoyo
+264,ESCUCHA,ESCUCHA,7,Programas de Bienestar,Cruceros,Valor,Apoyo
+265,ÉXITO,EXITO,5,Programas de Bienestar,Cruceros,Valor,Apoyo
+266,HÁBITO,HABITO,6,Programas de Bienestar,Cruceros,Valor,Apoyo
+267,HIDRATAR,HIDRATAR,8,Programas de Bienestar,Cruceros,Valor,Apoyo
+268,HIGIENE,HIGIENE,7,Programas de Bienestar,Cruceros,Valor,Apoyo
+269,HORARIO,HORARIO,7,Programas de Bienestar,Cruceros,Valor,Apoyo
+270,HUMANIDAD,HUMANIDAD,9,Programas de Bienestar,Cruceros,Valor,Apoyo
+271,IMPULSO,IMPULSO,7,Programas de Bienestar,Cruceros,Valor,Apoyo
+272,INSPECCIÓN,INSPECCION,10,Programas de Bienestar,Cruceros,Valor,Apoyo
+273,LÍMITE,LIMITE,6,Programas de Bienestar,Cruceros,Valor,Apoyo
+274,MEJORAR,MEJORAR,7,Programas de Bienestar,Cruceros,Valor,Apoyo
+275,NUTRIR,NUTRIR,6,Programas de Bienestar,Cruceros,Valor,Apoyo
+276,PLACER,PLACER,6,Programas de Bienestar,Cruceros,Valor,Apoyo
+277,POSTURA,POSTURA,7,Programas de Bienestar,Cruceros,Valor,Apoyo
+278,PRIORIZAR,PRIORIZAR,9,Programas de Bienestar,Cruceros,Valor,Apoyo
+279,PROMOVER,PROMOVER,8,Programas de Bienestar,Cruceros,Valor,Apoyo
+280,RELAJAR,RELAJAR,7,Programas de Bienestar,Cruceros,Valor,Apoyo
+281,RETORNO,RETORNO,7,Programas de Bienestar,Cruceros,Valor,Apoyo
+282,SALUDABLE,SALUDABLE,9,Programas de Bienestar,Cruceros,Valor,Apoyo
+283,TRATO,TRATO,5,Programas de Bienestar,Cruceros,Valor,Apoyo
+284,VISUAL,VISUAL,6,Programas de Bienestar,Cruceros,Valor,Apoyo
+285,APOYO,APOYO,5,Entorno laboral,Cruceros,Valor,Apoyo
+286,ATRAER,ATRAER,6,Entorno laboral,Cruceros,Valor,Apoyo
+287,BIENESTAR,BIENESTAR,9,Entorno laboral,Cruceros,Valor,Apoyo
+288,EMPLEO,EMPLEO,6,Entorno laboral,Cruceros,Valor,Apoyo
+289,EQUILIBRIO,EQUILIBRIO,10,Entorno laboral,Cruceros,Valor,Apoyo
+290,FAMILIA,FAMILIA,7,Entorno laboral,Cruceros,Valor,Apoyo
+291,FÍSICO,FISICO,6,Entorno laboral,Cruceros,Valor,Apoyo
+292,FORMAR,FORMAR,6,Entorno laboral,Cruceros,Valor,Apoyo
+293,MENTAL,MENTAL,6,Entorno laboral,Cruceros,Valor,Apoyo
+294,MUTUO,MUTUO,5,Entorno laboral,Cruceros,Valor,Apoyo
+295,PATRÓN,PATRON,6,Entorno laboral,Cruceros,Valor,Apoyo
+296,POSITIVO,POSITIVO,8,Entorno laboral,Cruceros,Valor,Apoyo
+297,ROLES,ROLES,5,Entorno laboral,Cruceros,Valor,Apoyo
+298,ROTAR,ROTAR,5,Entorno laboral,Cruceros,Valor,Apoyo
+299,SUEÑO,SUENO,5,Entorno laboral,Cruceros,Valor,Apoyo
+300,ESTRÉS,ESTRES,6,Riesgo personal,Cruceros,Riesgo,Principal
+301,ANSIEDAD,ANSIEDAD,8,Riesgo personal,Cruceros,Riesgo,Principal
+302,ENFERMEDAD,ENFERMEDAD,10,Riesgo personal,Cruceros,Riesgo,Principal
+303,AUSENCIA,AUSENCIA,8,Riesgo personal,Cruceros,Riesgo,Principal
+304,CONFLICTO,CONFLICTO,9,Riesgo personal,Cruceros,Riesgo,Principal
+305,APRENDER,APRENDER,8,Filosofia HP,Astillero,Valor,Principal
+306,CULTURA,CULTURA,7,Filosofia HP,Astillero,Valor,Principal
+307,DESAFÍO,DESAFIO,7,Filosofia HP,Astillero,Valor,Principal
+308,GRUPO,GRUPO,5,Filosofia HP,Astillero,Valor,Principal
+309,HISTORIA,HISTORIA,8,Filosofia HP,Astillero,Valor,Principal
+310,INCLUSIÓN,INCLUSION,9,Filosofia HP,Astillero,Valor,Principal
+311,LIDERAZGO,LIDERAZGO,9,Filosofia HP,Astillero,Valor,Principal
+312,NEGOCIO,NEGOCIO,7,Filosofia HP,Astillero,Valor,Principal
+313,NORMA,NORMA,5,Filosofia HP,Astillero,Valor,Principal
+314,SOCIO,SOCIO,5,Filosofia HP,Astillero,Valor,Principal
+315,TALENTO,TALENTO,7,Filosofia HP,Astillero,Valor,Principal
+316,UNITY,UNITY,5,Filosofia HP,Astillero,Valor,Principal
+317,VALOR,VALOR,5,Filosofia HP,Astillero,Valor,Principal
+318,ALTURA,ALTURA,6,Seguridad en las operaciones,Astillero,Valor,Apoyo
+319,ASTILLERO,ASTILLERO,9,Seguridad en las operaciones,Astillero,Valor,Apoyo
+320,AUXILIO,AUXILIO,7,Seguridad en las operaciones,Astillero,Valor,Apoyo
+321,AYUDA,AYUDA,5,Seguridad en las operaciones,Astillero,Valor,Apoyo
+322,BRIGADA,BRIGADA,7,Seguridad en las operaciones,Astillero,Valor,Apoyo
+323,CENTRO,CENTRO,6,Seguridad en las operaciones,Astillero,Valor,Apoyo
+324,CONTROL,CONTROL,7,Seguridad en las operaciones,Astillero,Valor,Apoyo
+325,CRUCERO,CRUCERO,7,Seguridad en las operaciones,Astillero,Valor,Apoyo
+326,MANIOBRA,MANIOBRA,8,Seguridad en las operaciones,Astillero,Valor,Apoyo
+327,NAVAL,NAVAL,5,Seguridad en las operaciones,Astillero,Valor,Apoyo
+328,PEATÓN,PEATON,6,Seguridad en las operaciones,Astillero,Valor,Apoyo
+329,PÓRTICO,PORTICO,7,Seguridad en las operaciones,Astillero,Valor,Apoyo
+330,POSIBLE,POSIBLE,7,Seguridad en las operaciones,Astillero,Valor,Apoyo
+331,PREVENIR,PREVENIR,8,Seguridad en las operaciones,Astillero,Valor,Apoyo
+332,PREVIOS,PREVIOS,7,Seguridad en las operaciones,Astillero,Valor,Apoyo
+333,PROBABLE,PROBABLE,8,Seguridad en las operaciones,Astillero,Valor,Apoyo
+334,REDUCIR,REDUCIR,7,Seguridad en las operaciones,Astillero,Valor,Apoyo
+335,SALUD,SALUD,5,Seguridad en las operaciones,Astillero,Valor,Apoyo
+336,SIMULACRO,SIMULACRO,9,Seguridad en las operaciones,Astillero,Valor,Apoyo
+337,TALLER,TALLER,6,Seguridad en las operaciones,Astillero,Valor,Apoyo
+338,VIALIDAD,VIALIDAD,8,Seguridad en las operaciones,Astillero,Valor,Apoyo
+339,FASES,FASES,5,Brigadas,Astillero,Valor,Apoyo
+340,LÍDER,LIDER,5,Brigadas,Astillero,Valor,Apoyo
+341,MEDIDA,MEDIDA,6,Brigadas,Astillero,Valor,Apoyo
+342,MONITOR,MONITOR,7,Brigadas,Astillero,Valor,Apoyo
+343,NIVEL,NIVEL,5,Brigadas,Astillero,Valor,Apoyo
+344,OFICIAL,OFICIAL,7,Brigadas,Astillero,Valor,Apoyo
+345,RESCATE,RESCATE,7,Brigadas,Astillero,Valor,Apoyo
+346,TÉCNICO,TECNICO,7,Brigadas,Astillero,Valor,Apoyo
+347,INCENDIO,INCENDIO,8,Riesgo de seguridad,Astillero,Riesgo,Principal
+348,RIESGO,RIESGO,6,Riesgo de seguridad,Astillero,Riesgo,Principal
+349,SANCIÓN,SANCION,7,Riesgo de seguridad,Astillero,Riesgo,Principal

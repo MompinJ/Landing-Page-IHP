@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINAMICA // Patio Reach: manejar la reachstacker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       DINAMICA: PATIO REACH
+
+       Terminal maritima en pixel art, vista 3/4: el suelo se ve a
+       plomo y todo lo que levanta del piso se dibuja de frente, como
+       en los RPG de cuadricula. El participante ES la reachstacker
+       RS-04.
+
+       EL MUNDO es grande -- 60 x 40 casillas -- y el canvas solo una
+       ventana de 20 x 14 sobre el, asi que la camara sigue a la
+       maquina y el panel lleva el plano de la terminal. Cada turno
+       trae SU trazado: patio, muelle con buque atracado, zona
+       intermodal y la terminal entera de noche.
+
+       Y la terminal esta LLENA: bloques de patio apilados hasta tres
+       alturas, almacen de carga con su anden y sus chasis, patios de
+       vacios, linea de tomas con sus racks, celda de peligrosos,
+       bascula, taller, oficinas, gate y hasta el rincon de desguace
+       con la chatarra. Los contenedores de los bloques no son fondo
+       de pantalla: estorban, se pueden coger y hay que sortearlos.
+
+       Y esta viva: camiones por la via, convoyes por los rieles y la
+       grua STS trabajando el buque. No son decorado -- ocupan
+       casillas de verdad y si te alcanzan es golpe.
+
+       CONDUCIR es vehicular, no de personaje:
+       - ARRIBA  avanza una casilla en el rumbo actual
+       - ABAJO   retrocede una casilla sin girar, mas lento
+       - IZQ/DER giran la maquina 90 grados en su sitio
+
+       EL BRAZO tiene dos ejes, como la maquina real:
+       - ALCANCE  corto, medio o largo: a que casilla llega el
+                  spreader, una, dos o tres por delante
+       - ALTURA   nivel 0 a 3 de la pila
+       Y una curva de carga real: cuanto mas alargas, menos alto
+       llegas. Corto alcanza los 3 niveles, medio 2, largo solo 1.
+
+       EL TURNO son ordenes de trabajo con reloj y puntaje. Cada
+       orden pide llevar un contenedor concreto a una zona. Se
+       cobra por entrega, por como llega la caja y por lo limpio
+       que se opero; los golpes restan.
+
+       CONTENEDORES ESPECIALES
+       - REEFER      va enchufado: solo en casilla con toma
+       - IMO         peligroso: segregado, y no se apila encima
+       - OVERWEIGHT  solo al nivel 0, y frena mas la maquina
+
+       CLIMA: cada turno tiene el suyo. La lluvia moja el piso y
+       alarga las frenadas, la niebla come visibilidad y de noche
+       solo se ve lo que alumbran los faros y los postes.
+
+       LA PANTALLA INICIAL lista los turnos con su plano dibujado,
+       su clima, su reloj y la mejor marca que llevas en esa maquina.
+       Se vuelve a ella con M, y las tarjetas las arma JS desde TURNOS.
+
+       CONTROLES
+       - Flechas o WASD: conducir
+       - Q / E: arriar y izar el spreader
+       - Z / X: recoger y alargar el boom
+       - ESPACIO: twistlocks (enganchar y soltar)
+       - R reiniciar el turno, H ayuda
+
+       PERSONALIZAR: cada turno lleva su mapa, sus cajas, sus ordenes,
+       su clima, su tiempo y su trafico en la constante TURNOS de
+       js/reach.js. El mapa es un caracter por casilla y la leyenda
+       esta en TILES; los bloques llenos de contenedores no se
+       escriben caja a caja, se declaran como rectangulos en
+       `relleno` y se siembran solos. La maquina son cuatro dibujos, uno por rumbo, en
+       maquinaPerfil, maquinaFrente y maquinaEspalda; el boom y el
+       spreader se pintan aparte en dibujarBoom y dibujarSpreader.
+       ============================================================ -->
+
+  <main class="app">
+
+    <section class="escena" id="escena">
+      <!-- el marco se ajusta al canvas, para que el aviso de
+           topetazo caiga sobre el patio y no al pie de la pagina -->
+      <div class="marco">
+        <canvas id="patio" class="patio" width="480" height="336"
+                aria-label="Terminal maritima en vista 3/4"></canvas>
+
+        <!-- El marcador va SOBRE el patio, no en el panel: es lo que se
+             mira de reojo sin apartar la vista de la maquina, y de paso
+             deja la columna de la derecha para lo que hay que leer. -->
+        <div class="hud">
+          <b class="hud__clima" id="turno-clima">DIA CLARO</b>
+          <div class="hud__marcador">
+            <span>PUNTOS <b id="mk-puntos">0</b></span>
+            <span>ENTREGAS <b id="mk-entregas">0/0</b></span>
+            <span>GOLPES <b id="lec-golpes">0</b></span>
+          </div>
+          <b class="hud__reloj" id="turno-reloj">3:00</b>
+        </div>
+
+        <div class="mira">
+          <span class="mira__delante">DELANTE <b id="lec-alcance">--</b></span>
+          <span class="mira__pos" id="lec-pos">--</span>
+        </div>
+
+        <div class="toast" id="toast" hidden></div>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="Controles de la reachstacker">
+
+      <p class="panel__sub" id="panel-sub">RS-04 &middot; TURNO 1</p>
+
+      <!-- LA TARJETA DE MISION: que caja, de donde, a donde y -- lo
+           importante -- cual es el siguiente movimiento. El paso se
+           calcula del estado real de la maquina, asi que va guiando
+           maniobra a maniobra en vez de dejar la orden en una linea
+           perdida de una lista. -->
+      <section class="mision" aria-label="Orden en curso">
+        <p class="mision__kicker" id="mision-orden">ORDEN 1 DE 3</p>
+
+        <div class="mision__caja">
+          <i class="mision__color" id="mision-color"></i>
+          <b class="mision__m" id="mision-m">--</b>
+          <span class="mision__tipo" id="mision-tipo" hidden>GP</span>
+        </div>
+
+        <div class="mision__ruta">
+          <div><span>DONDE ESTA</span><b id="mision-de">--</b></div>
+          <div class="mision__flecha" aria-hidden="true">&#9660;</div>
+          <div><span>A DONDE VA</span><b id="mision-a">--</b></div>
+        </div>
+
+        <div class="mision__llevas" id="mision-llevas" hidden>
+          <div class="mision__llevasfila">
+            <span>EN EL SPREADER</span><b id="llevas-m">--</b>
+          </div>
+          <div class="barra" aria-hidden="true"><i id="carga-barra"></i></div>
+          <small id="llevas-estado">--</small>
+        </div>
+
+        <p class="mision__paso" id="mision-siguiente">--</p>
+
+        <ul class="mision__resto" id="ordenes-lista"></ul>
+      </section>
+
+      <section class="mini" aria-label="Plano de la terminal">
+        <canvas id="minimapa" width="160" height="112"
+                aria-label="Plano con tu posicion y la zona de destino"></canvas>
+      </section>
+
+      <section class="mandos" aria-label="Botonera de conduccion">
+        <p class="bloque__nombre">CONDUCCION</p>
+        <div class="dpad">
+          <button class="cbtn cbtn--av" type="button" data-cmd="avanzar">
+            <i>&#9650;</i><b>AVANZAR</b>
+          </button>
+          <button class="cbtn cbtn--izq" type="button" data-cmd="izq">
+            <i>&#9664;</i><b>GIRAR</b>
+          </button>
+          <div class="brujula">
+            <i id="brujula" aria-hidden="true">&#9650;</i>
+            <small id="lec-rumbo">N</small>
+          </div>
+          <button class="cbtn cbtn--der" type="button" data-cmd="der">
+            <i>&#9654;</i><b>GIRAR</b>
+          </button>
+          <button class="cbtn cbtn--rev" type="button" data-cmd="reversa">
+            <i>&#9660;</i><b>REVERSA</b>
+          </button>
+        </div>
+      </section>
+
+      <section class="brazo" aria-label="Control del brazo">
+        <p class="bloque__nombre">BRAZO</p>
+
+        <div class="eje">
+          <button class="ebtn" type="button" data-cmd="recoger" aria-label="Recoger boom">&#9664;</button>
+          <div class="eje__cuerpo">
+            <span class="eje__nombre">ALCANCE</span>
+            <div class="eje__niveles" id="niv-alcance" aria-hidden="true"></div>
+            <b class="eje__valor" id="txt-alcance">CORTO</b>
+          </div>
+          <button class="ebtn" type="button" data-cmd="alargar" aria-label="Alargar boom">&#9654;</button>
+        </div>
+
+        <div class="eje">
+          <button class="ebtn" type="button" data-cmd="arriar" aria-label="Arriar spreader">&#9660;</button>
+          <div class="eje__cuerpo">
+            <span class="eje__nombre">ALTURA</span>
+            <div class="eje__niveles" id="niv-altura" aria-hidden="true"></div>
+            <b class="eje__valor" id="txt-altura">NIVEL 0 &middot; SUELO</b>
+          </div>
+          <button class="ebtn" type="button" data-cmd="izar" aria-label="Izar spreader">&#9650;</button>
+        </div>
+
+        <button class="tbtn" type="button" id="btn-twist">
+          <b id="txt-twist">ENGANCHAR</b><small>ESPACIO</small>
+        </button>
+      </section>
+
+      <footer class="panel__pie">
+        <button class="pbtn" type="button" id="btn-reiniciar">REINICIAR [R]</button>
+        <button class="pbtn pbtn--tenue" type="button" id="btn-menu">ELEGIR TURNO [M]</button>
+      </footer>
+
+    </aside>
+  </main>
+
+  <button class="ayuda" id="btn-ayuda" type="button" aria-label="Instrucciones">?</button>
+
+  <!-- ============ PANTALLA INICIAL: ELEGIR TURNO ============
+       Las tarjetas no estan escritas aqui: las arma JS leyendo la
+       constante TURNOS, para que anadir un turno al juego lo ponga
+       solo en el menu, con su plano, su clima y su reloj. -->
+  <div class="menu" id="menu" role="dialog" aria-modal="true" aria-labelledby="menu-titulo" hidden>
+    <div class="menu__caja">
+
+      <header class="menu__cab">
+        <p class="menu__kicker">TERMINAL DE CONTENEDORES &middot; OPERACION DE PATIO</p>
+        <h1 class="menu__titulo" id="menu-titulo">PATIO REACH</h1>
+        <p class="menu__lema">Eres la reachstacker RS-04. Elige el turno al que subes.</p>
+      </header>
+
+      <div class="menu__grid" id="menu-grid"></div>
+
+      <section class="menu__teclas" aria-label="Controles">
+        <p class="bloque__nombre">CONTROLES</p>
+        <ul>
+          <li><b>&#9650; &#9660;</b><span>AVANZAR Y REVERSA</span></li>
+          <li><b>&#9664; &#9654;</b><span>GIRAR LA MAQUINA</span></li>
+          <li><b>Z / X</b><span>RECOGER Y ALARGAR EL BOOM</span></li>
+          <li><b>Q / E</b><span>ARRIAR E IZAR EL SPREADER</span></li>
+          <li><b>ESPACIO</b><span>TWISTLOCKS</span></li>
+          <li><b>M</b><span>VOLVER A ESTE MENU</span></li>
+        </ul>
+      </section>
+
+      <footer class="menu__pie">
+        <button class="menu__btn" type="button" id="btn-menu-ayuda">COMO SE JUEGA [H]</button>
+        <p class="menu__nota">Los turnos estan todos abiertos: pulsa <strong>1</strong> a <strong>4</strong> o toca una tarjeta.</p>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- ============ CIERRE DE TURNO ============ -->
+  <div class="finale" id="finale" hidden>
+    <div class="finale__caja">
+      <p class="finale__kicker" id="fin-kicker">--</p>
+      <h2 id="fin-titulo">--</h2>
+      <p class="finale__score" id="fin-score">--</p>
+      <div class="finale__tabla" id="fin-tabla"></div>
+      <p class="finale__nota" id="fin-nota"></p>
+      <div class="finale__btns">
+        <button type="button" id="btn-seguir">SIGUIENTE TURNO</button>
+        <button type="button" id="btn-repetir">REPETIR TURNO [R]</button>
+        <button type="button" class="pbtn2" id="btn-fin-menu">ELEGIR OTRO TURNO [M]</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- la ayuda ya no salta al cargar: ahora lo primero es el menu,
+       y desde ahi (o con H, o con el boton ?) se abre esta ficha -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-titulo" hidden>
+    <div class="overlay__caja">
+      <p class="overlay__kicker">PATIO DE CONTENEDORES &middot; RS-04</p>
+      <h1 id="overlay-titulo">ERES LA REACHSTACKER</h1>
+      <p class="overlay__intro">No manejas a un operador: manejas la maquina. Pesa cuarenta y tantas toneladas y no se mueve de lado, asi que primero se <strong>encara</strong> y luego se avanza. Y lo que la hace especial es el brazo: <strong>alcanza por encima de la primera fila</strong>, que es justo para lo que sirve en un patio.</p>
+
+      <h2 class="overlay__sub">CONDUCIR</h2>
+      <ul>
+        <li><strong>ARRIBA</strong> avanza una casilla en el rumbo que llevas; <strong>ABAJO</strong> retrocede sin girar, mas lento.</li>
+        <li><strong>IZQUIERDA</strong> y <strong>DERECHA</strong> giran la maquina 90 grados <strong>en su sitio</strong>.</li>
+      </ul>
+
+      <h2 class="overlay__sub">EL BRAZO</h2>
+      <ul>
+        <li><strong>Z</strong> y <strong>X</strong> recogen y alargan el boom: el spreader trabaja a una, dos o tres casillas por delante. La casilla resaltada te dice a cual apunta.</li>
+        <li><strong>Q</strong> y <strong>E</strong> arrian e izan el spreader por niveles, del suelo al tercer piso de la pila.</li>
+        <li><strong>Cuanto mas alargas, menos alto llegas</strong>: corto alcanza los 3 niveles, medio 2 y largo solo 1. Es la curva de carga de la maquina real, y por eso a veces conviene reposicionarse en vez de estirar el brazo.</li>
+        <li><strong>ESPACIO</strong> cierra y abre los twistlocks. Para enganchar, el spreader tiene que estar <strong>justo al nivel</strong> de la caja de arriba de la pila; para soltar, al nivel del hueco donde va.</li>
+      </ul>
+
+      <h2 class="overlay__sub">LA TERMINAL</h2>
+      <ul>
+        <li>El patio esta <strong>lleno de verdad</strong>: los bloques estan apilados hasta tres alturas y no se atraviesan. Se circula por los <strong>pasillos</strong> y por el rayado que parte cada bloque, y se trabaja <strong>alcanzando por encima</strong> de la primera fila.</li>
+        <li>Hay terminal para rato: muelle, almacen de carga con su anden, patios de vacios, linea de tomas, celda de peligrosos, bascula, taller, gate y el rincon de desguace. El <strong>plano del panel</strong> es la forma de no perderse.</li>
+      </ul>
+
+      <h2 class="overlay__sub">EL TURNO</h2>
+      <ul>
+        <li>Cada turno trae sus <strong>ordenes de trabajo</strong>: llevar tal contenedor a tal zona, con reloj corriendo. La caja que toca va marcada en el patio y su destino resaltado.</li>
+        <li>Se cobra por entrega, por <strong>como llega la caja</strong> y por lo limpio que operaste. Cada golpe resta.</li>
+        <li>Hay contenedores especiales: el <strong>REEFER</strong> va enchufado y solo se posa en casilla con toma; el <strong>IMO</strong> es peligroso, va segregado de otros IMO y no se le apila nada encima; el <strong>OVERWEIGHT</strong> solo va al nivel 0 y frena mas la maquina.</li>
+      </ul>
+
+      <h2 class="overlay__sub">SEGURIDAD</h2>
+      <ul>
+        <li>Con la carga a <strong>nivel 2 o mas la maquina no arranca</strong>. A nivel 1 circula, pero va castigando el contenedor. Lo correcto es bajar a <strong>nivel 0</strong> para trasladar.</li>
+        <li>El contenedor tiene <strong>integridad</strong>: se dana al golpear, al soltarlo desde arriba en vez de posarlo, al pasearlo izado y al zangolotearlo con maniobras a tirones.</li>
+        <li>Con lluvia el piso resbala y las maniobras se alargan; con niebla y de noche se ve solo lo que tienes cerca o lo que alumbras.</li>
+      </ul>
+
+      <p class="overlay__nota">Si te pierdes, lee la <strong>tarjeta de arriba del panel</strong>: dice que contenedor toca, donde esta, a donde va y cual es el siguiente movimiento. <strong>R</strong> reinicia el turno, <strong>M</strong> vuelve a los turnos y <strong>H</strong> abre esta ayuda.</p>
+      <button class="overlay__btn" id="btn-entendido" type="button">SUBIR A LA MAQUINA</button>
+    </div>
+  </div>
+
+  <script src="js/reach.js"></script>
+</body>
+</html>

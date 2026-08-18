@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { GAME_DURATION, OBSTACLE_PENALTY } from './constants'
 import { runtime, SKIP } from './runtime'
+import { assignLabels } from './course'
 
 export const useGame = create((set, get) => ({
   phase: 'intro', // intro | countdown | playing | paused | gameover
@@ -16,6 +17,9 @@ export const useGame = create((set, get) => ({
 
   startCountdown: () => {
     runtime.reset()
+    // Palabras nuevas en cada carrera. Va ANTES del set: al entrar en
+    // 'countdown' Items remonta todos los hexagonos y ahi lee la etiqueta.
+    assignLabels()
     set({
       phase: 'countdown',
       score: 0,
