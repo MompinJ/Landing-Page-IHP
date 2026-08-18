@@ -497,7 +497,6 @@ function GameOver() {
   const bads = useGame((s) => s.bads)
   const crashes = useGame((s) => s.crashes)
   const distShown = useGame((s) => s.distShown)
-  const startCountdown = useGame((s) => s.startCountdown)
   const goIntro = useGame((s) => s.goIntro)
   const pad = useGamepadConnected()
 
@@ -596,12 +595,13 @@ function GameOver() {
           <Board entries={board} meId={savedId} />
         )}
 
+        {/* Un solo boton y devuelve al inicio: en el stand el que acaba le pasa
+            el mando al siguiente, que tiene que entrar por la portada y su
+            briefing, no caer de golpe en una cuenta atras de un juego que no ha
+            visto. Un INICIO aparte sobraba: hacia lo mismo. */}
         <div className="btn-row">
-          <button className="btn-primary" data-gp-row={btnRow} onClick={startCountdown}>
+          <button className="btn-primary" data-gp-row={btnRow} onClick={goIntro}>
             JUGAR OTRA VEZ
-          </button>
-          <button className="btn-ghost" data-gp-row={btnRow} onClick={goIntro}>
-            INICIO
           </button>
         </div>
       </div>
