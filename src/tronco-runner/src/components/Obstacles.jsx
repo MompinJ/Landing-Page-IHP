@@ -1,9 +1,10 @@
+import * as THREE from 'three'
 import { memo, useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGame } from '../store'
 import { runtime, scroll } from '../runtime'
 import { sfx } from '../audio'
-import { LANES, PLAYER_Z, VIEW_AHEAD, OBSTACLE_LEN, COLORS } from '../constants'
+import { LANES, PLAYER_Z, VIEW_AHEAD, OBSTACLE_LEN } from '../constants'
 import { COURSE } from '../course'
 import { useGameTextures, tiledTexture } from '../textures'
 
@@ -1201,20 +1202,64 @@ function Spmt({ tint }) {
 // Cada zona viste los obstaculos con su propio equipo, asi que la silueta
 // cambia cinco veces en dos minutos y no da tiempo a aprender cual se salta y
 // cual se pasa rodando: en las pruebas del stand la gente no los distinguia.
-// El aviso es lo unico que NO cambia de zona a zona: misma flecha, mismo color,
+// El aviso es lo unico que NO cambia de zona a zona: mismo boton, mismo color,
 // misma altura, encima de la pieza.
 //
-//   flecha arriba, ambar  -> saltar
-//   flecha abajo, cian    -> rodar
+//   boton A, verde -> saltar
+//   boton B, rojo  -> rodar
+//
+// Antes eran flechas (arriba / abajo), pero en el stand se juega con mando: la
+// flecha obligaba a traducir "arriba" a "cual boton aprieto". El boton se
+// aprieta directamente.
+//
+// El boton va OSCURO con la letra a color, como el mando de Xbox de hoy, no
+// como el disco verde/rojo del 360. La primera version era el disco de color y
+// se confundia con las fichas: en este juego el verde ya significa "recogelo"
+// y el rojo "ni lo toques", asi que una mancha verde flotando a media altura
+// se leia como un valor que se pasa de largo. Con el cuerpo oscuro la masa de
+// color en pantalla la siguen teniendo solo los hexagonos, y el aviso se
+// distingue por forma (disco negro) antes que por color.
 //
 // Las piezas macizas no llevan aviso: cierran el carril entero y eso ya se lee
-// solo, y ponerselo llenaria el pasillo de flechas.
+// solo, y ponerselo llenaria el pasillo de botones.
 const CUE = {
-  low: { y: 2.3, dir: 1, color: COLORS.amber, glow: '#7a5200' },
-  high: { y: 2.85, dir: -1, color: COLORS.neon, glow: '#0a4a63' },
+  low: { y: 2.3, key: 'A', color: '#7de53a', glow: '#2c6a00' },
+  high: { y: 2.85, key: 'B', color: '#ff5a4e', glow: '#6d0f0a' },
 }
 CUE.pipe = CUE.high
 CUE.hook = CUE.high
+
+// La letra va pintada en un canvas, no en una malla de texto: es un glifo por
+// boton y no cambia nunca, asi que sale mas barato un mapa de 128 px cacheado
+// que arrastrar el motor de texto hasta cada obstaculo vivo. Montserrat 800 ya
+// esta cargada por CSS; si aun no lo estuviera, cae en la sans del sistema y la
+// A sigue siendo una A.
+const LETTER_CACHE = {}
+function letterTexture(key, color) {
+  const id = key + color
+  if (LETTER_CACHE[id]) return LETTER_CACHE[id]
+  const SIZE = 128
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = SIZE
+  const g = canvas.getContext('2d')
+  g.textAlign = 'center'
+  g.textBaseline = 'middle'
+  g.font = `800 ${Math.round(SIZE * 0.78)}px Montserrat, Arial, sans-serif`
+  // Halo oscuro alrededor del trazo: la letra es lo unico con color y va sobre
+  // un cuerpo casi negro, asi que sin el borde el antialias la desdibuja a
+  // treinta metros, que es justo donde hay que leerla.
+  g.lineJoin = 'round'
+  g.lineWidth = SIZE * 0.09
+  g.strokeStyle = '#05070a'
+  g.strokeText(key, SIZE / 2, SIZE * 0.545)
+  g.fillStyle = color
+  g.fillText(key, SIZE / 2, SIZE * 0.545)
+  const tex = new THREE.CanvasTexture(canvas)
+  tex.colorSpace = THREE.SRGBColorSpace
+  tex.anisotropy = 4
+  LETTER_CACHE[id] = tex
+  return tex
+}
 
 function Cue({ type }) {
   const c = CUE[type]
@@ -1229,7 +1274,14 @@ function Cue({ type }) {
     // cuadro tapa. El z del padre es el del obstaculo, que ya lo calcula el
     // scroll cada frame.
     const z = ref.current.parent ? ref.current.parent.position.z : -50
-    const k = Math.max(0, Math.min(1, (-1 - z) / 7))
+    // Y tambien de lejos. La ventana de obstaculos llega a 135 m, y como el
+    // aviso se dibuja sin profundidad, uno de la fila septima se pintaba encima
+    // del contenedor que tienes a cinco metros: una A flotando sobre una pared.
+    // Se apaga pasados ~50 m, que es mas de lo que se puede decidir de todas
+    // formas (a 26 m/s son dos segundos).
+    const near = Math.max(0, Math.min(1, (-1 - z) / 7))
+    const far = Math.max(0, Math.min(1, (z + 62) / 14))
+    const k = near * far
     ref.current.visible = k > 0.02
     if (k > 0.02) {
       ref.current.traverse((o) => {
@@ -1239,63 +1291,78 @@ function Cue({ type }) {
   })
   if (!c) return null
   return (
-    <group ref={ref} position={[0, c.y, 0]}>
-      {/* Placa de senal. La flecha suelta se perdia contra el escenario a
-          treinta metros, que es justo donde hay que leerla; sobre una placa
-          oscura con canto de color se recorta contra cualquier fondo.
-          Va translucida y algo mas chica que la primera version: opaca comia
-          demasiado cuadro justo cuando el obstaculo esta cerca. La flecha si se
-          queda casi solida, porque es la que hay que leer. Los materiales se
+    // El aviso NO se ocluye: se dibuja con depthTest apagado y en el ultimo
+    // pase, asi que se ve aunque tenga delante una pluma, un portico o el
+    // obstaculo de la fila anterior. Antes desaparecia justo cuando mas falta
+    // hace, porque el pasillo esta lleno de piezas y basta una barrera de dos
+    // metros en el carril de al lado para comerse la senal del que viene
+    // detras. Es un aviso, no parte del escenario: se comporta como el HUD.
+    // Cada malla lleva su renderOrder porque sin profundidad el orden de dibujo
+    // es lo unico que decide que tapa a que, y la letra tiene que ir la ultima.
+    <group ref={ref} position={[0, c.y, 0]} renderOrder={900}>
+      {/* Cara del mando: chapa oscura y redonda, del color del plastico del
+          mando, no del codigo de colores del juego. Es la que da la silueta que
+          se distingue de un hexagono a treinta metros. Va translucida para no
+          comer cuadro cuando el obstaculo ya esta encima. Los materiales se
           declaran transparentes de fabrica y nunca se cambia esa bandera en
           caliente: eso obliga a recompilar el material. */}
-      <mesh position={[0, 0, -0.12]}>
-        <boxGeometry args={[1.34, 1.52, 0.06]} />
+      <mesh position={[0, 0, -0.12]} rotation={[Math.PI / 2, 0, 0]} renderOrder={900}>
+        <cylinderGeometry args={[0.8, 0.8, 0.06, 28]} />
         <meshStandardMaterial
           transparent
-          userData={{ base: 0.5 }}
-          opacity={0.5}
+          userData={{ base: 0.62 }}
+          opacity={0.62}
+          depthTest={false}
+          depthWrite={false}
+          color="#0a0e14"
+          roughness={0.7}
+        />
+      </mesh>
+      {/* Filo de color, fino: da el codigo verde/rojo de lejos sin pintar de
+          color medio metro de pantalla, que es lo que lo hacia pelearse con las
+          fichas. */}
+      <mesh position={[0, 0, -0.09]} rotation={[Math.PI / 2, 0, 0]} renderOrder={901}>
+        <cylinderGeometry args={[0.7, 0.7, 0.06, 28]} />
+        <meshStandardMaterial
+          transparent
+          userData={{ base: 0.9 }}
+          opacity={0.9}
+          depthTest={false}
           depthWrite={false}
           color={c.color}
           emissive={c.glow}
-          emissiveIntensity={0.8}
-          roughness={0.5}
+          emissiveIntensity={1.2}
+          roughness={0.45}
         />
       </mesh>
-      <mesh position={[0, 0, -0.07]}>
-        <boxGeometry args={[1.14, 1.32, 0.06]} />
+      {/* cuerpo del boton, con su bisel: la cara sale un pelin hacia el jugador
+          para que coja luz y se vea redonda y no como un circulo pintado */}
+      <mesh position={[0, 0, 0.02]} rotation={[Math.PI / 2, 0, 0]} renderOrder={902}>
+        <cylinderGeometry args={[0.6, 0.64, 0.24, 28]} />
         <meshStandardMaterial
           transparent
-          userData={{ base: 0.4 }}
-          opacity={0.4}
+          userData={{ base: 0.97 }}
+          opacity={0.97}
+          depthTest={false}
           depthWrite={false}
-          color="#04122b"
-          roughness={0.6}
+          color="#12161d"
+          emissive="#05070a"
+          emissiveIntensity={0.6}
+          roughness={0.4}
+          metalness={0.15}
         />
       </mesh>
-      {/* punta */}
-      <mesh position={[0, c.dir * 0.28, 0]} rotation={[0, Math.PI / 4, c.dir > 0 ? 0 : Math.PI]}>
-        <coneGeometry args={[0.5, 0.66, 4]} />
-        <meshStandardMaterial
+      {/* la letra: lo unico a color, y por eso va grande */}
+      <mesh position={[0, 0, 0.15]} renderOrder={903}>
+        <planeGeometry args={[0.98, 0.98]} />
+        <meshBasicMaterial
           transparent
-          userData={{ base: 0.92 }}
-          opacity={0.92}
-          color={c.color}
-          emissive={c.glow}
-          emissiveIntensity={1.3}
-          roughness={0.4}
-        />
-      </mesh>
-      {/* astil */}
-      <mesh position={[0, -c.dir * 0.26, 0]}>
-        <boxGeometry args={[0.27, 0.5, 0.18]} />
-        <meshStandardMaterial
-          transparent
-          userData={{ base: 0.92 }}
-          opacity={0.92}
-          color={c.color}
-          emissive={c.glow}
-          emissiveIntensity={1.3}
-          roughness={0.4}
+          userData={{ base: 1 }}
+          opacity={1}
+          depthTest={false}
+          depthWrite={false}
+          map={letterTexture(c.key, c.color)}
+          toneMapped={false}
         />
       </mesh>
     </group>

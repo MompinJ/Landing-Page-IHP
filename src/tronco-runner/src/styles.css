@@ -477,12 +477,14 @@ body,
   color: var(--sky);
 }
 
+/* La flecha de la tarjeta dice el movimiento; el color lo empareja con el
+   boton del mando que hay que apretar, que es lo que se ve en pista. */
 .glyph-jump {
-  color: var(--amber);
+  color: #6ac72f;
 }
 
 .glyph-roll {
-  color: var(--neon);
+  color: #e5342b;
 }
 
 /* Cada icono se mueve como el movimiento que pide: la flecha de salto rebota,
@@ -650,7 +652,7 @@ body,
   height: 16px;
 }
 
-/* lo que cierra el carril no lleva flecha: en la lista tampoco, se dibuja como
+/* lo que cierra el carril no lleva boton: en la lista tampoco, se dibuja como
    el bloque macizo que es */
 .cue-block {
   height: 13px;
@@ -726,6 +728,15 @@ body,
   box-shadow:
     inset 0 -2px 0 rgba(0, 0, 0, 0.35),
     0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+/* En la lista de "lo que te sale al paso" el boton ocupa el sitio del icono,
+   asi que va al tamano del icono y no al de las tarjetas. */
+.pad-face-sm {
+  flex: none;
+  width: 19px;
+  height: 19px;
+  font-size: 11px;
 }
 
 /* Cruceta dibujada entera con los brazos que valen encendidos: medio jugador
@@ -1568,13 +1579,13 @@ body,
   }
 }
 
-/* Codigo de color de las senales de obstaculo: el mismo de las flechas que se
-   ven en pista, para que la instruccion y el juego digan lo mismo. */
+/* Codigo de color de las senales de obstaculo: el mismo de los botones que
+   flotan en pista, para que la instruccion y el juego digan lo mismo. */
 .txt-cue-jump {
-  color: #FFC627;
+  color: #6ac72f;
 }
 .txt-cue-roll {
-  color: #35d3ff;
+  color: #e5342b;
 }
 
 /* Panel de rendimiento (?perf). Fuera del flujo del HUD y sin transiciones:

@@ -40,10 +40,10 @@ const FACE = {
   Y: { bg: '#f0b91d', fg: '#0b1118' },
 }
 
-function PadFace({ k }) {
+function PadFace({ k, sm }) {
   const c = FACE[k]
   return (
-    <span className="pad-face" style={{ background: c.bg, color: c.fg }}>
+    <span className={sm ? 'pad-face pad-face-sm' : 'pad-face'} style={{ background: c.bg, color: c.fg }}>
       {k}
     </span>
   )
@@ -177,22 +177,22 @@ function HowTo() {
         <p className="how-title">Lo que te sale al paso</p>
         <ul className="cues">
           <li>
-            <Arrow dir="up" className="cue-ico glyph-jump" />
+            <PadFace k="A" sm />
             <span>
-              Flecha <b className="txt-cue-jump">ambar</b>: salta o te lo llevas puesto
+              Boton <b className="txt-cue-jump">A verde</b>: salta o te lo llevas puesto
             </span>
             <b className="cue-cost">-15</b>
           </li>
           <li>
-            <Arrow dir="down" className="cue-ico glyph-roll" />
+            <PadFace k="B" sm />
             <span>
-              Flecha <b className="txt-cue-roll">cian</b>: agachate y rueda
+              Boton <b className="txt-cue-roll">B rojo</b>: agachate y rueda
             </span>
             <b className="cue-cost">-15</b>
           </li>
           <li>
             <span className="cue-ico cue-block" />
-            <span>Sin flecha: cierra el carril, cambiate</span>
+            <span>Sin boton: cierra el carril, cambiate</span>
             <b className="cue-cost">-15</b>
           </li>
           <li>
@@ -210,7 +210,7 @@ function HowTo() {
             <b className="cue-cost cost-good">BONO</b>
           </li>
         </ul>
-        <p className="how-foot">La flecha significa lo mismo en las cinco terminales.</p>
+        <p className="how-foot">El boton flotando sobre la pieza es el que hay que apretar, igual en las cinco terminales.</p>
       </div>
 
       <p className="how-goal">
