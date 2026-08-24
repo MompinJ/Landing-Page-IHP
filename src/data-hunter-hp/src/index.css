@@ -62,6 +62,16 @@ html, body, #root {
   user-select: none;
 }
 
+/* COLOR-MIX CON RESPALDO. `color-mix()` es de Safari 16.2 y por debajo de ahí
+   una declaración que lo use se descarta ENTERA — no cae a un color por
+   defecto, desaparece. Sin respaldo, en un teléfono con iOS 15 los paneles del
+   HUD se quedaban sin fondo y las tarjetas sin el oscurecido de detrás, encima
+   del juego en marcha. Por eso cada uso va precedido del mismo color en `rgba`:
+   el navegador viejo se queda con esa línea y el nuevo la pisa con la
+   siguiente, que es como se ha hecho toda la vida. `color-mix(in srgb, X p%,
+   transparent)` es exactamente X con opacidad p%, así que los dos valores no se
+   parecen: son el mismo. */
+
 /* El campo del nombre en la pantalla final SÍ tiene que dejar escribir y
    seleccionar: la regla de arriba es para el tablero, no para un formulario. */
 input, textarea { -webkit-user-select: text; user-select: text; }
@@ -79,10 +89,13 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   align-items: center;
   gap: 2px;
   padding: 10px 22px;
+  background: rgba(0, 46, 109, 0.72); /* respaldo para navegadores sin color-mix */
   background: color-mix(in srgb, var(--hp-navy) 72%, transparent);
+  border: 1px solid rgba(0, 229, 255, 0.45);
   border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
   border-radius: 10px;
   backdrop-filter: blur(6px);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.18);
   box-shadow: 0 0 18px color-mix(in srgb, var(--cyan) 18%, transparent);
 }
 
@@ -148,6 +161,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   overflow-y: auto;
   padding: calc(22px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right))
     calc(22px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
+  background: rgba(6, 26, 46, 0.8);
   background: color-mix(in srgb, var(--deep-sea) 80%, transparent);
   backdrop-filter: blur(4px);
   /* El overlay es lo único de la página que se desplaza, y tiene que poder
@@ -391,6 +405,7 @@ kbd {
 .concept-chip {
   padding: 3px 10px;
   font-size: 12px;
+  border: 1px solid rgba(0, 255, 102, 0.45);
   border: 1px solid color-mix(in srgb, var(--glow-good) 45%, transparent);
   border-radius: 999px;
   color: var(--green);
@@ -457,9 +472,11 @@ kbd {
      que mide su texto dejaba la rejilla 3+2 desalineada casilla a casilla. */
   width: 162px;
   padding: 6px 8px;
+  border: 1px dashed rgba(138, 155, 168, 0.55);
   border: 1px dashed color-mix(in srgb, var(--steel) 55%, transparent);
   border-radius: 4px;
   text-align: center;
+  color: rgba(138, 155, 168, 0.75);
   color: color-mix(in srgb, var(--steel) 75%, transparent);
   transition: color 0.3s, border-color 0.3s;
 }
@@ -502,11 +519,18 @@ kbd {
   padding: 15px 30px 17px;
   text-align: center;
   background: linear-gradient(165deg, rgba(11, 33, 64, 0.95), rgba(4, 13, 26, 0.92));
+  border: 1px solid rgba(63, 169, 245, 0.4);
   border: 1px solid color-mix(in srgb, var(--accent, #3fa9f5) 40%, transparent);
   clip-path: polygon(
     20px 0, 100% 0, 100% calc(100% - 20px),
     calc(100% - 20px) 100%, 0 100%, 0 20px
   );
+  /* La sombra es UNA sola propiedad, así que el respaldo se repite entera en
+     vez de partirse: no se puede dar el color plano por un lado y la mezcla
+     por otro. */
+  box-shadow:
+    0 20px 55px rgba(0, 0, 0, 0.6),
+    0 0 40px rgba(63, 169, 245, 0.18);
   box-shadow:
     0 20px 55px rgba(0, 0, 0, 0.6),
     0 0 40px color-mix(in srgb, var(--accent, #3fa9f5) 18%, transparent);

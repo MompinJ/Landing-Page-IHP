@@ -51,7 +51,8 @@
     "test:death": "tsx scripts/death-test.ts",
     "test:biomes": "tsx scripts/biome-profile.ts",
     "test:jankcause": "tsx scripts/jank-cause.ts",
-    "test:cpu": "tsx scripts/cpu-profile.ts"
+    "test:cpu": "tsx scripts/cpu-profile.ts",
+    "test:compat": "tsx scripts/compat-test.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

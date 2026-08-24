@@ -35,10 +35,65 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Port Quest — Hutchison Ports</title>
-    <script type="module" crossorigin src="./assets/index-BVfcNGME.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BTIoQ_Wi.css">
+    <script type="module" crossorigin src="./assets/index-XgBRh_cW.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-LS5fsORQ.css">
   </head>
   <body>
     <div id="root"></div>
+
+    <!--
+      AVISO DE ARRANQUE — la única red que cubre el caso de que el juego NO
+      LLEGUE A EJECUTARSE.
+
+      Fue el fallo real: el paquete salía compilado para iOS 16.4 y un teléfono
+      más viejo no podía ni leerlo. Un error de SINTAXIS no lanza una excepción
+      que se pueda capturar desde React ni desde ningún sitio del propio
+      paquete — el navegador descarta el fichero entero antes de ejecutar la
+      primera línea. Así que el aviso tiene que estar FUERA, aquí, en el HTML.
+
+      Va en ES5 puro y sin dependencias a propósito: es lo último que queda en
+      pie cuando falla todo lo demás, así que no puede necesitar nada.
+
+      Se quita solo en cuanto React monta (`main.tsx`).
+    -->
+    <div id="arranque" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;text-align:center;background:#061a2e;color:#eaf2fb;font:16px/1.5 'Segoe UI',system-ui,-apple-system,sans-serif">
+      <span style="font-size:12px;letter-spacing:.26em;color:#3fa9f5">PORT QUEST</span>
+      <span id="arranque-txt" style="font-size:15px;color:#8fb2d0">Cargando…</span>
+      <noscript>
+        <span style="font-size:15px;color:#8fb2d0">Este juego necesita JavaScript activado.</span>
+      </noscript>
+    </div>
+
+    <script>
+      (function () {
+        var listo = false;
+        window.__portQuestArrancado = function () {
+          listo = true;
+          var el = document.getElementById('arranque');
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        };
+
+        function avisar(detalle) {
+          if (listo) return;
+          var txt = document.getElementById('arranque-txt');
+          if (!txt) return;
+          txt.innerHTML =
+            '<b style="display:block;font-size:20px;font-style:italic;text-transform:uppercase;color:#eaf2fb;margin-bottom:10px">No se pudo cargar el juego</b>' +
+            'Suele arreglarse actualizando el navegador (en iPhone, iOS 15 o posterior) ' +
+            'o abriéndolo en Chrome o Safari en vez de dentro de otra aplicación.' +
+            (detalle ? '<span style="display:block;margin-top:12px;font-size:11px;opacity:.55">' + detalle + '</span>' : '');
+        }
+
+        // Un error de sintaxis en el paquete llega por aquí, no por try/catch.
+        window.addEventListener('error', function (e) {
+          avisar(e && e.message ? String(e.message).slice(0, 120) : '');
+        });
+        // ...y si lo que falla es la DESCARGA, no hay evento de error del
+        // paquete que valga: solo el reloj. Veinte segundos porque el paquete
+        // pesa metro y medio y en el 3G de un centro de convenciones eso tarda.
+        setTimeout(function () { avisar(''); }, 20000);
+      })();
+    </script>
+
   </body>
 </html>

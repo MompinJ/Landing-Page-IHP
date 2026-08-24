@@ -262,6 +262,45 @@ cortes, **178 → 151 (-15%)** con la imagen idéntica:
   misma imagen. Y sale gratis de memoria porque las caras son dos, compartidas,
   al revés que las etiquetas, que son una por palabra.
 
+## Que cargue, y que si no puede lo diga
+
+«No carga en algunos navegadores o teléfonos» resultó ser **una línea de
+configuración**: Vite 8 compila por omisión para `safari16.4` / `ios16.4`, o sea
+dando por hecho un iPhone actualizado a marzo de 2023 como mínimo. Con eso el
+paquete salía con asignación lógica (`??=`, `||=`, `&&=`) — sintaxis de 2021 que
+React y sus dependencias usan a manos llenas, 80 apariciones — y un teléfono más
+viejo no podía ni **parsear** el fichero.
+
+Y fallaba de la peor manera posible: no es una función que se rompe, es un error
+de **sintaxis**, así que el navegador descarta el fichero entero antes de
+ejecutar la primera línea. No hay excepción que capturar, no hay mensaje, no hay
+nada en consola que el que lo sufre vaya a mirar. Solo pantalla en blanco — por
+eso el síntoma era «no carga» y no «va mal». El arreglo son 10 kB más de
+paquete: `build.target` bajado a `es2020 / safari14 / ios14`.
+
+El suelo real del juego lo marca **WebGL2**, que es lo que three exige desde
+r163 y que llegó con Safari 15. Se compila un escalón por debajo a propósito:
+así en un aparato que no llega, el paquete **sí se ejecuta** y puede explicarlo
+en vez de dejar la pantalla vacía. Tres redes, cada una para lo que las otras no
+cubren:
+
+| red | cubre |
+| --- | --- |
+| `#arranque` en `index.html` (ES5, sin dependencias) | que el paquete **no llegue a ejecutarse**: sintaxis que el navegador no entiende, o la descarga que falla. Es el único sitio desde el que se puede avisar de eso |
+| `hayWebGL2()` en `App.tsx` | el navegador va, pero no sabe dibujar en 3D. Se comprueba **antes** de montar la escena, que es justo el momento en que reventaría |
+| `<Salvavidas>` (barrera de errores) | cualquier otro error de render. Sin ella, una excepción en cualquier componente desmonta el árbol y deja... la pantalla en blanco otra vez |
+
+`npm run test:compat` comprueba las dos mitades: que el paquete construido no
+lleve sintaxis por encima del suelo declarado —eso se mira sobre el **fichero**,
+no en un navegador, porque el navegador de la prueba es moderno y no se quejaría,
+que es exactamente por lo que el fallo llegó a producción— y que las tres redes
+digan lo que tienen que decir cuando les toca.
+
+De paso, los nueve `color-mix()` del CSS llevan ahora el mismo color en `rgba`
+delante. `color-mix()` es de Safari 16.2 y por debajo la declaración se descarta
+**entera**: en un iOS 15 los paneles del HUD se quedaban sin fondo y las
+tarjetas sin el oscurecido de detrás, encima del juego en marcha.
+
 ## Verificación
 
 ```bash
@@ -273,6 +312,7 @@ npm run test:viewport      # que la ventana de filas cubra lo que ve la cámara,
                            # ya recortada por el techo de cada nivel gráfico
 npm run test:touch         # los gestos, con toques de verdad sobre un iPhone emulado
 npm run test:mobile        # capturas de las cinco pantallas, en vertical y horizontal
+npm run test:compat        # que cargue en navegadores viejos, y que si no puede lo diga
 npm run test:center        # que el personaje quede centrado en doce pantallas distintas
 npm run test:death         # el remate de muerte: congelado, cámara lenta, acercamiento
 npm run test:jankcause     # caza el frame lento y dice qué cambió en él
