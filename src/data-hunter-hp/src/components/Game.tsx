@@ -1,4 +1,4 @@
-import { AdaptiveDpr, useTexture } from '@react-three/drei';
+import { useTexture } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { lazy, Suspense } from 'react';
 import { TEX_CONTAINER } from '../data/assets';
@@ -16,6 +16,7 @@ import { GameLoop } from './GameLoop';
 import { Map } from './Map';
 import { FpsMeter, Perf } from './Perf';
 import { Player } from './Player';
+import { ResolutionGovernor } from './ResolutionGovernor';
 import { Vfx } from './Vfx';
 import { Warmup } from './Warmup';
 
@@ -54,7 +55,9 @@ export function Game() {
     // Aquí se decide lo que más cuesta en una gráfica integrada:
     //
     //  - `dpr`: la resolución es cuadrática. Antes iba a [1, 2] para todos, o
-    //    sea 4× los píxeles en una pantalla retina.
+    //    sea 4× los píxeles en una pantalla retina. Aquí solo se declara el
+    //    RANGO; dentro de él, en un teléfono, quien elige es el propio aparato
+    //    midiéndose (ver `<ResolutionGovernor>` abajo).
     //  - `antialias`: solo tiene sentido SIN composer. Con cadena de efectos la
     //    escena no se pinta en el buffer del canvas sino en el render target
     //    del EffectComposer, así que el MSAA del contexto se asignaba y no se
@@ -124,14 +127,13 @@ export function Game() {
           GPU — lo primero que hay que mirar si el juego va lento. */}
       <Perf />
 
-      {/* Baja el dpr solo cuando de verdad caen los fps, y lo devuelve al
-          soltar. Es la red por debajo del nivel elegido, no el nivel.
-          SIN `pixelated`: esa prop pone `image-rendering: pixelated` en el
-          canvas, así que cuando bajaba la densidad el resultado se ampliaba a
-          bloques en vez de suavizarse. En un juego de cajas de colores planos
-          eso no se lee como "menos resolución", se lee como que el juego está
-          roto. */}
-      <AdaptiveDpr />
+      {/* EL APARATO SE MIDE Y DECIDE su resolución dentro del rango del nivel
+          (ver ResolutionGovernor.tsx). Sustituye a `<AdaptiveDpr>`, que estaba
+          aquí y no hacía nada: ese sigue a `performance.current`, que solo se
+          mueve si alguien llama a `regress()`, y este juego no lo llama en
+          ninguna parte. Solo tiene rango que recorrer el nivel 'movil' — en el
+          resto de niveles no se monta. */}
+      <ResolutionGovernor />
     </Canvas>
   );
 }

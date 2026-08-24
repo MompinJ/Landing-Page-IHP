@@ -70,41 +70,106 @@ personaje.
 El briefing enseña el control del aparato que hay delante: la cara del mando de
 Xbox en el stand, el dedo en un teléfono (`TOUCH` en `src/render/device.ts`).
 
-### Rendimiento en teléfono
+### Rendimiento y nitidez en teléfono
 
 El nivel gráfico `movil` se elige solo en un teléfono (táctil + lado corto
-≤ 540 px) y se puede forzar con `?q=movil`. Medido con `npm run test:mobilebench`,
-que dibuja por software a resolución de teléfono porque es el peor caso real y
-el mejor sustituto que hay de una GPU de móvil:
+≤ 540 px) y se puede forzar con `?q=movil`. Dibuja al tamaño completo de la
+página con un techo de densidad de 1.5, y **con MSAA**.
 
-| | fps | ms/frame | píxeles dibujados |
-| --- | --- | --- | --- |
-| antes (`rapido`) | 101 | 9.9 | 259 kpx (390×664) |
-| ahora (`movil`) | **150** | **6.7** | **93 kpx** (234×398) |
+**La primera versión de este nivel estaba mal y conviene que quede escrito.**
+Dibujaba al 60% sin suavizado: iba fluido y se veía a bloques. El error no fue
+el número sino de dónde salió — lo afiné contra `test:mobilebench`, que dibuja
+por software, o sea gastando CPU por píxel. Ese banco castiga la resolución
+muchísimo más de lo que la castiga una GPU de teléfono real, así que optimizar
+contra él lleva a pagar en calidad algo que no hacía falta pagar. Un banco de
+fps no sabe decir si algo se ve bien; para eso está `test:sharpness`, que
+captura el mismo instante del mapa a la densidad real de un móvil (×3) con
+varios ajustes, que es la herramienta que faltaba:
 
-Un 48% más rápido **dibujando el triple de mundo** — porque en un teléfono la
-cámara se aleja para que quepan las columnas y eso mete más filas en cuadro. La
-ganancia entera viene de los píxeles, y de ahí salieron dos cosas:
+| | cantos | detalle |
+| --- | --- | --- |
+| 0.6 sin MSAA | escalonados | el corrugado del contenedor se pierde |
+| 1.0 con MSAA | limpios | **aquí está el salto grande** |
+| 1.5 con MSAA | limpios | vuelve el detalle fino de las cajas |
 
-- **`scale` no se estaba aplicando donde más falta hacía.** El techo del rango
-  de dpr era `min(maxDpr, scale × densidad)`, así que en un teléfono
-  (densidad 3) el `min(1, 0.75 × 3)` daba 1: el 75% que decía el nivel se
-  perdía entero y solo funcionaba en la máquina del stand, que ya va a
-  densidad 1 y no lo necesitaba. Son dos preguntas distintas —cuánta densidad
-  de pantalla, y qué fracción de ella— y ahora se responden por separado.
-- **La cámara ortográfica tenía el zoom clavado en 58.** En 390 px de ancho eso
-  son **seis casillas** a la vista: no es que se viera pequeño, es que no se veía
-  a dónde esquivar. Ahora el zoom garantiza un ancho mínimo de mundo en cuadro
-  (`camZoomFor`) y en vertical la cámara mira más adelante para bajar al
-  corredor en pantalla (`camLookAheadFor`).
+Y **el suavizado es la mitad de la historia**: esta escena son cajas de color
+plano vistas en diagonal, o sea que casi todo lo que se dibuja es un canto
+inclinado — el peor caso posible para el escalonado. Subir resolución cuesta al
+cuadrado; el MSAA del contexto cuesta una fracción de eso y en una GPU de móvil,
+que dibuja por baldosas, se resuelve dentro de la baldosa. Y aquí no hay cadena
+de postproceso que lo desperdicie (mismo razonamiento que en `alto`).
+
+#### El aparato decide, no yo
+
+Lo táctil y el tamaño de pantalla sirven para separar un teléfono de un equipo
+de stand, y para nada más: entre el móvil más flojo que se va a asomar a esto y
+el más nuevo hay un orden de magnitud de GPU y ninguno de los dos lo dice.
+Adivinarlo desde aquí es exactamente lo que salió mal. Así que el nivel pone el
+techo y el suelo (1.5 y 0.75) y `src/components/ResolutionGovernor.tsx` recorre
+ese rango con los fps medidos en el propio aparato.
+
+Es un **trinquete: solo baja**. Se arranca arriba —dándole al aparato el
+beneficio de la duda— y cada vez que se demuestra que no llega, se afloja un
+escalón y ahí se queda. Corregir en los dos sentidos parece lo correcto y no lo
+es: en cuanto el aparato cae cerca de la frontera entra en vaivén —baja, con
+menos píxeles le sobra margen, sube, vuelve a no llegar, baja— y eso en la mano
+no se lee como «se está adaptando», se lee como una imagen que respira. Medido
+con dibujo por software, en una sola partida: 0.75 → 0.94 → 1.13 → 0.94. Y no
+es un fallo de ajuste sino la forma del problema: subir siempre parece buena
+idea justo después de bajar, porque bajar es lo que ha creado el margen que
+invita a subir. Con el trinquete no hay nada que perseguir — si el aparato
+pudiera con el techo, no habría bajado nunca.
+
+Se paga que un tramo cargado al principio deje la resolución baja el resto de la
+partida aunque luego sobre. Se acepta a sabiendas: la partida dura lo que dura,
+y quieto y algo más blando se juega mejor que nítido y a tirones.
+
+La primera decisión cae dentro del **briefing**, que es la misma ventana que
+aprovecha `Warmup` para compilar shaders. Comprobado con `npm run test:governor`,
+que corre el mismo build en dos máquinas de potencia muy distinta: la rápida se
+queda clavada en 1.5 y la lenta se asienta en 0.75 antes de empezar a jugar,
+ninguna de las dos vuelve a moverse en partida.
+
+Sustituye a `<AdaptiveDpr>`, que estaba montado y **no hacía nada**: ese sigue a
+`performance.current`, que solo se mueve si alguien llama a `regress()`, y este
+juego no lo llama en ninguna parte. La «red por debajo del nivel» no existía.
+
+Del `PerformanceMonitor` de drei hay además dos cosas que NO se usan, y las dos
+por el mismo motivo — hacen algo distinto de lo que su nombre promete:
+
+- `flipflops` parece hecho para cortar el vaivén, pero cuenta cada subida y cada
+  bajada, no cada cambio de sentido, y estando ya en el techo sigue contando
+  subidas que no mueven nada. En un teléfono sobrado el contador se disparaba a
+  los pocos segundos y `onFallback` lo mandaba al suelo: **el aparato más rápido
+  acababa con la peor imagen**.
+- El `refreshrate` que se le pasa a `bounds` suena a frecuencia del panel, pero
+  es el **máximo de fps que ha llegado a medir**. En un aparato que nunca llega
+  a la sincronía —el que hay que proteger— el listón se le baja solo hasta por
+  debajo de lo que ya está dando, y el gobernador se declara satisfecho sin
+  bajar nada. Medido: 35 fps sostenidos y la resolución sin moverse del techo.
+  La banda es fija, 60 fps y punto.
+
+### El encuadre, que era lo otro
+
+**La cámara ortográfica tenía el zoom clavado en 58.** En 390 px de ancho eso son
+**seis casillas** a la vista: no es que se viera pequeño, es que no se veía a
+dónde esquivar. Ahora el zoom garantiza un ancho mínimo de mundo en cuadro
+(`camZoomFor`) y en vertical la cámara mira más adelante para bajar al corredor
+en pantalla (`camLookAheadFor`).
 
 Alejar la cámara obliga a dibujar más filas, y ahí saltó un fallo escondido: el
-techo de filas del nivel dejaba 16 por delante donde la cámara alcanzaba 20, o
-sea océano en el hueco del mapa. `viewRowsFor` dejó de usar coeficientes
-ajustados a un encuadre fijo y proyecta las esquinas de la caja de vista sobre
-el suelo, que sale exacto para cualquier zoom; y `npm run test:viewport` ahora
-comprueba la ventana **ya recortada** por cada nivel, que es la que se dibuja de
-verdad. De paso destapó que una tableta se quedaba corta en las dos direcciones.
+techo de filas del nivel dejaba 16 por delante donde la cámara alcanza 20, o sea
+océano en el hueco del mapa. `viewRowsFor` dejó de usar coeficientes ajustados a
+un encuadre fijo y proyecta las esquinas de la caja de vista sobre el suelo, que
+sale exacto para cualquier zoom; y `npm run test:viewport` ahora comprueba la
+ventana **ya recortada** por cada nivel, que es la que se dibuja de verdad. De
+paso destapó que una tableta se quedaba corta en las dos direcciones.
+
+También estaba mal el reparto de las dos palancas de resolución: el techo del
+rango de dpr era `min(maxDpr, scale × densidad)`, así que en un teléfono
+(densidad 3) el `min(1, 0.75 × 3)` daba 1 y el `scale` del nivel se perdía
+entero. Son dos preguntas distintas —cuánta densidad de pantalla, y qué fracción
+de ella— y ahora se responden por separado.
 
 ## Verificación
 
@@ -117,7 +182,10 @@ npm run test:viewport      # que la ventana de filas cubra lo que ve la cámara,
                            # ya recortada por el techo de cada nivel gráfico
 npm run test:touch         # los gestos, con toques de verdad sobre un iPhone emulado
 npm run test:mobile        # capturas de las cinco pantallas, en vertical y horizontal
-npm run test:mobilebench   # los niveles gráficos dibujando por software (peor caso)
+npm run test:governor      # que el aparato decida: el rápido arriba, el lento abajo y quieto
+npm run test:sharpness     # cómo se ve, a la densidad real de un móvil, con varios ajustes
+npm run test:mobilebench   # los niveles dibujando por software. OJO: exagera el coste del
+                           # pixel frente a una GPU de movil — no afinar la nitidez con esto
 npm run test:mobileperf    # una partida en teléfono emulado con la CPU frenada
 ```
 

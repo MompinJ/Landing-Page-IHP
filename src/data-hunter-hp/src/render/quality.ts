@@ -40,17 +40,19 @@ export interface QualityLevel {
   /** Factor de resolución de dibujo (la página estira el resultado) */
   scale: number;
   /**
-   * SUELO al que `<AdaptiveDpr>` puede bajar la resolución si los fps se caen,
-   * como fracción del tamaño de la página. Si no se dice, es `scale`: o sea,
-   * sin red — el nivel dibuja siempre a su resolución y punto.
+   * SUELO al que el gobernador de resolución puede bajar el dibujo si los fps
+   * se caen (ver `components/ResolutionGovernor.tsx`). Si no se dice, es
+   * `scale`: rango de un punto, o sea sin gobernador — el nivel dibuja a su
+   * resolución y punto.
    *
    * Solo lo baja 'movil', y por un motivo concreto: los otros tres niveles
    * corren en máquinas que se pueden mirar (el stand, un portátil conocido) y
    * si van mal se les cambia el nivel a mano con `?q=`. Un teléfono ajeno no se
    * puede mirar ni se le puede pedir a nadie que escriba un parámetro en la
-   * barra de direcciones, y el abanico de GPU que hay ahí fuera es enorme. Ahí
-   * la red no sobra: si el aparato no da, que se vea más blando pero que se
-   * siga jugando.
+   * barra de direcciones, y el abanico de GPU que hay ahí fuera es enorme —
+   * entre el móvil más flojo del stand y el más nuevo hay un orden de magnitud.
+   * Adivinar eso desde aquí es justo lo que salió mal la primera vez; ahí lo
+   * que hace falta no es un número mío sino que el aparato se mida.
    */
   minScale?: number;
   /** Tope de densidad de píxeles, antes de aplicar `scale` */
@@ -151,41 +153,51 @@ export const LEVELS: Record<QualityLevel['name'], QualityLevel> = {
     exposure: 1.32,
   },
   /**
-   * TELÉFONO. Es 'rapido' apretado una vuelta más, y cada vuelta está medida
-   * contra el dibujo por software (`scripts/mobile-bench.ts`), que es el peor
-   * caso real y el mejor sustituto que hay de una GPU de móvil:
+   * TELÉFONO.
    *
-   *  - `scale` 0.6 en vez de 0.75. La resolución es CUADRÁTICA: 0.6² es un
-   *    36% de los píxeles de la pantalla contra el 56% de 'rapido'. En un
-   *    juego de cajas de colores planos vistas a 35 de zoom no hay detalle fino
-   *    que perder, y es de largo la palanca más barata que queda.
-   *  - `maxDpr` 1. En un teléfono `devicePixelRatio` es 3: dibujar a la
-   *    densidad real serían NUEVE veces los píxeles. Nadie mira un móvil con
-   *    lupa mientras corre.
+   * PRIMERA VERSIÓN, Y ESTABA MAL: dibujaba al 60% sin suavizado. Iba fluido y
+   * se veía a bloques — «muy pixeleado para un juego de este calibre», que es
+   * exactamente lo que era. El error no fue el número sino de dónde salió: lo
+   * afiné contra el dibujo POR SOFTWARE (`scripts/mobile-bench.ts`), que gasta
+   * CPU por píxel y por tanto castiga la resolución muchísimo más de lo que la
+   * castiga una GPU de teléfono de verdad. Optimizar contra un modelo que
+   * exagera el coste lleva a pagar en calidad algo que no hacía falta pagar.
    *
-   * Y UNA QUE NO SE APRIETA, a propósito: `maxRows` sube a 34, más que en
-   * ningún otro nivel. Parece al revés y no lo es. En un teléfono la cámara se
-   * ALEJA para que quepan las columnas (`camZoomFor`), y alejarse mete más
-   * mundo en cuadro: a 390×664 la cámara alcanza 20 filas por delante y 13 por
-   * detrás. Con el techo en 22 —el de 'rapido'— el recorte dejaba 16 por
-   * delante y el jugador veía el azul del océano en el hueco del mapa, que es
-   * peor fallo que cualquier fps. El ahorro de un teléfono no está en dibujar
-   * menos mundo sino en dibujar menos PÍXELES, que es lo que hacen las dos
-   * palancas de arriba: 34 filas al 36% de resolución cuestan mucho menos que
-   * 22 al 100%.
+   * Lo que se ve, mirado a la densidad real de un móvil con
+   * `scripts/sharpness-shot.ts` (que era la herramienta que faltaba: la nitidez
+   * no se juzga en una tabla de fps, se juzga mirándola):
+   *
+   *   0.6 sin MSAA  cantos escalonados y el corrugado del contenedor perdido
+   *   1.0 con MSAA  cantos limpios; el salto grande está aquí
+   *   1.5 con MSAA  además vuelve el detalle fino de las cajas
+   *
+   * Y EL SUAVIZADO ES LA MITAD DE LA HISTORIA. Esta escena es de cajas de
+   * color plano vistas en diagonal: casi todo lo que se dibuja es un canto
+   * inclinado, o sea el peor caso posible para el escalonado. Subir resolución
+   * cuesta al cuadrado; encender el MSAA del contexto cuesta una fracción de
+   * eso —y en una GPU de móvil, que dibuja por baldosas, se resuelve dentro de
+   * la baldosa sin volver a memoria—, y aquí no hay cadena de postproceso que
+   * lo desperdicie (mismo razonamiento que en 'alto').
+   *
+   * `maxDpr` 1.5, no 3. La densidad real de un teléfono son NUEVE veces los
+   * píxeles de la página y ahí ya no se ve la diferencia con la mano.
+   *
+   * Y el número de arriba es solo el TECHO: quien decide de verdad es el
+   * aparato, midiéndose (`components/ResolutionGovernor.tsx`). Por eso este
+   * nivel es el único con `minScale`.
    */
   movil: {
     name: 'movil',
-    scale: 0.6,
-    // Hasta el 42% si hace falta. Es lo que se ve cuando el teléfono no da: en
-    // un juego de cajas de colores planos eso se lee como bordes más blandos,
-    // no como un juego roto — y es justo la razón de que `<AdaptiveDpr>` vaya
-    // SIN `pixelated` (ver Game.tsx), que convertía lo blando en cuadrotes.
-    minScale: 0.42,
-    maxDpr: 1,
+    scale: 1,
+    // Suelo al que puede bajar el gobernador si el teléfono no da. 0.75 y no
+    // menos: por debajo se vuelve a ver el escalonado que se acaba de quitar, y
+    // un juego borroso tampoco es la respuesta. Si ni con eso llega, más vale
+    // que se note y se le pase `?q=rapido`.
+    minScale: 0.75,
+    maxDpr: 1.5,
     fx: false,
     multisampling: 0,
-    msaa: false,
+    msaa: true,
     bloom: false,
     shadows: false,
     softShadows: false,
@@ -216,7 +228,36 @@ function askedLevel(): QualityLevel['name'] | null {
   return q === 'ultra' || q === 'alto' || q === 'rapido' || q === 'movil' ? q : null;
 }
 
-export const QUALITY: QualityLevel = LEVELS[askedLevel() ?? autoLevel()];
+/**
+ * PALANCAS SUELTAS por URL: `?escala=1.5` y `?msaa=0|1`.
+ *
+ * No son para jugar, son para AJUSTAR. La calidad de imagen en un teléfono no
+ * se puede decidir desde un banco de fps —hay que mirarla— y no se puede mirar
+ * sin poder pedirle al mismo aparato el mismo instante del mapa con dos ajustes
+ * distintos. Eso es lo que hace `scripts/sharpness-shot.ts`, y esto es lo que
+ * se lo permite. Van encima del nivel elegido y no cambian nada si no se piden.
+ */
+function palancas(nivel: QualityLevel): QualityLevel {
+  if (typeof window === 'undefined') return nivel;
+  const q = new URLSearchParams(window.location.search);
+  const escala = Number(q.get('escala'));
+  const msaa = q.get('msaa');
+  if (!Number.isFinite(escala) && msaa === null) return nivel;
+  // `?escala=N` quiere decir, literalmente, «dibuja a N veces el tamaño de la
+  // página». Eso es UNA cifra, así que se pone en `maxDpr` y `scale` se deja a
+  // 1: repartirla entre las dos las multiplicaría (escala 1.5 salía a 2.25).
+  return {
+    ...nivel,
+    scale: escala > 0 ? 1 : nivel.scale,
+    // Pedir escala a mano desactiva el suelo automático: si se está mirando una
+    // resolución concreta, que nada la mueva por detrás.
+    minScale: escala > 0 ? escala : nivel.minScale,
+    maxDpr: escala > 0 ? escala : nivel.maxDpr,
+    msaa: msaa === null ? nivel.msaa : msaa !== '0',
+  };
+}
+
+export const QUALITY: QualityLevel = palancas(LEVELS[askedLevel() ?? autoLevel()]);
 
 /**
  * Rango de dpr para el <Canvas>. three dibuja a ese factor y el navegador
