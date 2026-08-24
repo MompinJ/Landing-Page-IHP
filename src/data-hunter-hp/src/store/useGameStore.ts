@@ -3,6 +3,7 @@ import { subscribeWithSelector } from 'zustand/middleware';
 import { BALANCE } from '../data/balance';
 import { isShieldItem } from '../data/items';
 import { BIOME_SEQUENCE, generateRows, rows, zoneOf, type ZoneTheme } from '../world/rows';
+import { startDying } from '../world/death';
 import { runtime } from './runtime';
 
 /** Fila de arranque de depuración (?row=N en la URL) — 0 en producción/kiosco */
@@ -320,7 +321,11 @@ export const useGameStore = create<GameState>()(
           points: BALANCE.SCORE_OBSTACLE,
         },
       }));
-      if (remaining <= 0) get().endGame();
+      // ÚLTIMA VIDA: no se corta a la pantalla final en este mismo frame — se
+      // arranca el remate y es `GameLoop` quien llama a `endGame` cuando
+      // termina. Sin esa pausa el jugador nunca llegaba a ver qué lo mató: el
+      // camión seguía su camino y encima aparecía la tarjeta de resultados.
+      if (remaining <= 0) startDying();
     },
 
     endGame: () => set({ phase: 'gameover' }),

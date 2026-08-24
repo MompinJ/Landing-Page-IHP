@@ -18,6 +18,26 @@ import { runtime } from '../store/runtime';
 import { useGameStore } from '../store/useGameStore';
 import { extendRowsIfNeeded, rows } from '../world/rows';
 
+/**
+ * SONDAS que los componentes publican para los scripts de medición.
+ *
+ * Se registran de fuera hacia dentro —el componente llama a `registraSonda`— y
+ * NO al revés, que fue el primer intento y rompió la simulación headless: para
+ * leer el tamaño de una caché, `debug.ts` importaba `components/Map`, y con eso
+ * `npm run sim` —que corre en Node, sin navegador— acababa arrastrando la
+ * cadena entera de render y reventaba en el primer `import.meta.env` que se
+ * encontraba. Este fichero lo importa la lógica pura, así que no puede tirar de
+ * nada que huela a DOM.
+ *
+ * El orden funciona porque los módulos se evalúan antes que el cuerpo de
+ * `main.tsx`: cuando se llama a `initDebug()` las sondas ya están puestas.
+ */
+const sondas: Record<string, () => number> = {};
+
+export function registraSonda(nombre: string, fn: () => number) {
+  sondas[nombre] = fn;
+}
+
 export const debug = {
   /** ?debug en la URL */
   enabled: false,
@@ -48,6 +68,8 @@ export function initDebug() {
     rows,
     /** Variantes de geometría fusionadas (mide el precalentado) */
     mergedCacheSize,
+    // Sondas que registran los componentes del juego (ver `registraSonda`)
+    ...sondas,
     store: useGameStore,
     /** Teletransporte instantáneo usado por los scripts de captura */
     teleport(row: number, col: number) {

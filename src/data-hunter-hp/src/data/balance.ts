@@ -14,6 +14,28 @@ export const BALANCE = {
   /** Referencia de duración (ya solo informativa para la simulación) */
   GAME_DURATION: 90,
 
+  // --- REMATE DE MUERTE (el compás antes de la pantalla final) ---
+  /**
+   * Lo que dura el remate entero. Un segundo y pico: bastante para leer qué te
+   * ha matado y ni un frame más — en un stand hay cola detrás, y una muerte que
+   * se hace larga se vive como que el juego no responde.
+   */
+  DEATH_BEAT: 1.15,
+  /**
+   * CONGELADO inicial. El mundo se para en seco en el instante del golpe: es lo
+   * que hace que el ojo vuelva al sitio del impacto en vez de seguir al camión.
+   * Es el mismo truco de fotograma congelado de los juegos de pelea, y a 0.16 s
+   * se lee como un golpe, no como un tirón.
+   */
+  DEATH_FREEZE: 0.16,
+  /** Pasado el congelado, el mundo sigue a esta fracción de velocidad */
+  DEATH_SLOWMO: 0.22,
+  /** Acercamiento de la cámara al final del remate (1 = no se mueve) */
+  DEATH_ZOOM: 1.42,
+  /** Aplastado del cuerpo al morir: se conserva el volumen a ojo — lo que
+   *  pierde de alto lo gana de ancho, el aplastado de dibujo animado. */
+  DEATH_SQUASH: 0.26,
+
   // --- Tablero (tutorial: minTileIndex -8, maxTileIndex 8 → 17 casillas) ---
   TILE: 1.1,
   MIN_TILE: -8,

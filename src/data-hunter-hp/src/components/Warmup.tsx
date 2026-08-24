@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import { BALANCE } from '../data/balance';
 import { BIOME_SEQUENCE, generateRows, rows } from '../world/rows';
 import { useGameStore } from '../store/useGameStore';
-import { Row } from './Map';
+import { Row, subeEtiquetasPendientes } from './Map';
 
 /**
  * PRECALENTADO DE SHADERS — el arreglo de los tirones, sin tocar la calidad.
@@ -21,6 +21,14 @@ import { Row } from './Map';
  *
  * LA SOLUCIÓN: compilarlos todos antes, mientras el jugador lee el briefing.
  * Ese hueco es regalado — la pantalla está quieta y nadie mira los fps.
+ *
+ * Y NO SOLO SHADERS. Compilar un material y subir sus texturas son dos cosas
+ * distintas: `compile()` hace lo primero, y lo segundo three lo hace la primera
+ * vez que algo se DIBUJA — que aquí no pasa nunca, porque las filas de
+ * precalentado van invisibles. Así que el precalentado dejaba dibujados los
+ * canvas de las 206 etiquetas de ficha y le pasaba a la partida el trabajo que
+ * de verdad atasca el frame: subirlas. Se cierra con `initTexture`, a
+ * cuentagotas (ver `ETIQUETAS_POR_FRAME`).
  *
  * Dos detalles de three que lo hacen barato:
  *
@@ -48,6 +56,14 @@ import { Row } from './Map';
 const FILAS_POR_FRAME = 6;
 
 /**
+ * Etiquetas de ficha subidas a la GPU por frame. A cuentagotas porque son ~6.6
+ * MB en total: soltarlos de golpe cambiaría un tirón en partida por un tirón en
+ * el briefing. Doce por frame vacía la cola de doscientas en menos de veinte
+ * frames, o sea en un parpadeo del rato que se tarda en leer las instrucciones.
+ */
+const ETIQUETAS_POR_FRAME = 12;
+
+/**
  * Filas recorridas por el precalentado. Generoso a propósito: el mapa se
  * regenera al empezar la partida (`startGame` → `resetRows`), así que las filas
  * que se calientan NO son las que se van a jugar. Lo que se está llenando es la
@@ -72,8 +88,16 @@ export function Warmup() {
     // Solo antes de jugar: durante la partida el hilo es del juego.
     if (phase !== 'menu' && phase !== 'briefing') return;
 
+    // Las etiquetas de ficha se suben a la GPU aquí, a cuentagotas. Van
+    // ANTES del `return` de abajo a propósito: la cola se sigue llenando
+    // mientras se montan filas, así que hay que seguir vaciándola después de
+    // haberlas recorrido todas (ver `subeEtiquetasPendientes` en Map.tsx).
+    const pendientes = subeEtiquetasPendientes(gl, ETIQUETAS_POR_FRAME);
+
     if (desde >= HASTA) {
-      listo.current = true;
+      // No se da por terminado hasta que no queda ninguna textura por subir:
+      // dejarse una es dejarse un tirón en la partida.
+      if (pendientes === 0) listo.current = true;
       return;
     }
 

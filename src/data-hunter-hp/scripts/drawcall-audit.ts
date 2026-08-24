@@ -22,13 +22,19 @@ import { chromium } from 'playwright';
 
 const BASE = process.argv[2] ?? 'http://localhost:4189/';
 const ROW = Number(process.argv[3] ?? 22);
+/** Nivel gráfico y tamaño de ventana. Por omisión el del stand; con `movil` se
+ *  mide lo que de verdad envía un teléfono, que ve menos mundo y no dibuja
+ *  sombras — o sea otro reparto completamente distinto. */
+const NIVEL = process.argv[4] ?? 'alto';
+const ANCHO = Number(process.argv[5] ?? 1600);
+const ALTO = Number(process.argv[6] ?? 900);
 
 const browser = await chromium.launch({
   args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'],
 });
-const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
+const page = await browser.newPage({ viewport: { width: ANCHO, height: ALTO } });
 page.on('pageerror', (e) => console.error('[pageerror]', String(e)));
-await page.goto(`${BASE}?debug&daily&q=alto`, { waitUntil: 'networkidle' });
+await page.goto(`${BASE}?debug&daily&fps=off&q=${NIVEL}`, { waitUntil: 'networkidle' });
 await page.getByRole('button', { name: 'Jugar', exact: true }).click();
 await page.waitForTimeout(250);
 await page.getByRole('button', { name: 'A jugar' }).click();
@@ -102,7 +108,18 @@ const informe = await page.evaluate(`(() => {
     triangulos += tris;
 
     // Etiqueta: el nombre propio, si no el del padre, si no el tipo de material
-    const etiqueta = o.name || o.parent?.name || ('sin-nombre:' + (o.material?.type ?? '?'));
+    // Las mallas no llevan nombre, asi que agrupar por material dejaba dos
+    // cubos gigantes que no dicen nada. La GEOMETRIA si distingue: cada modelo
+    // fusionado tiene la suya (render/boxes.ts la cachea por variante), asi que
+    // el numero de vertices separa un contenedor de una grua de una ficha.
+    const geo = o.geometry;
+    const verts = geo?.attributes?.position?.count ?? 0;
+    const conMapa = o.material && !Array.isArray(o.material) && o.material.map ? '+tex' : '';
+    // Sin plantillas de texto: este bloque viaja DENTRO de una, y una comilla
+    // invertida aqui la cierra antes de tiempo.
+    const tipo = (o.material && o.material.type ? o.material.type : '?')
+      .replace('Mesh', '').replace('Material', '');
+    const etiqueta = o.name || (o.parent && o.parent.name) || (tipo + conMapa + ':' + verts + 'v');
     const g = grupos[etiqueta] || (grupos[etiqueta] = { mallas: 0, sombra: 0, tri: 0 });
     g.mallas++;
     if (o.castShadow) g.sombra++;

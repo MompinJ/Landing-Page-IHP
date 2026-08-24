@@ -36,6 +36,11 @@ export function pressMove(direction: MoveDirection, source: InputSource) {
   const before = held[direction];
   held[direction] = before | source;
   if (before !== 0) return; // ya la mantenía otra fuente (o la misma): sin repetición
+  // Durante el remate de muerte la partida ya está decidida. Se sigue anotando
+  // la tecla como mantenida (arriba) para no dejarla pegada, pero no se encola
+  // el paso: pulsar mientras se muere no puede llevarse un salto de regalo a la
+  // pantalla final.
+  if (runtime.dying > 0) return;
   queueMove(direction);
 }
 

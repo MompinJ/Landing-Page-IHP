@@ -11,6 +11,7 @@ import { runtime, type MoveDirection } from '../src/store/runtime';
 import { useGameStore } from '../src/store/useGameStore';
 import { queueMove, sweepPickup, updatePlayer } from '../src/world/playerLogic';
 import { rows } from '../src/world/rows';
+import { updateDying } from '../src/world/death';
 import { checkHits, updateConveyor, updateTraffic, updateWaterRiding } from '../src/world/traffic';
 import { vfxBus } from '../src/world/vfxBus';
 
@@ -53,6 +54,14 @@ while (useGameStore.getState().phase === 'playing' && frames < 60 * 200) {
 
   // — réplica del GameLoop —
   runtime.elapsed += DT;
+  // El remate de muerte corre aquí igual que en el juego: si no, al perder la
+  // última vida la partida se quedaría para siempre en «jugando» y nunca
+  // llegaría a la pantalla final (ver `world/death.ts`).
+  const escalaTiempo = updateDying(DT);
+  if (runtime.dying > 0) {
+    if (escalaTiempo > 0) updateTraffic(DT * escalaTiempo);
+    continue;
+  }
   updateTraffic(DT);
 
   // — jugador aleatorio: intenta un salto ~4 veces por segundo —

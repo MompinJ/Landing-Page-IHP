@@ -6,6 +6,7 @@ import { rows } from '../world/rows';
 
 import { runtime } from '../store/runtime';
 import { useGameStore } from '../store/useGameStore';
+import { updateDying } from '../world/death';
 import { updateTraffic } from '../world/traffic';
 
 /**
@@ -18,6 +19,18 @@ export function GameLoop() {
   useFrame((_, dt) => {
     const store = useGameStore.getState();
     if (store.phase !== 'playing') return;
+
+    /**
+     * REMATE DE MUERTE. La cuenta y las reglas están en `world/death.ts`
+     * —lógica pura, la comparten el juego y la simulación headless—; aquí solo
+     * se aplica la escala de tiempo que devuelve: 0 mientras el mundo está
+     * congelado, un quinto durante la cámara lenta.
+     */
+    const escalaTiempo = updateDying(dt);
+    if (runtime.dying > 0) {
+      if (escalaTiempo > 0) updateTraffic(dt * escalaTiempo);
+      return;
+    }
 
     runtime.elapsed += dt;
 

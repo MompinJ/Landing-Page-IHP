@@ -72,6 +72,20 @@ export const runtime = {
   /** Aplastamiento del cuerpo bajo el contenedor: 1 normal, ~0.1 de sello */
   snatchSquash: 1,
 
+  /**
+   * REMATE DE MUERTE — los segundos que quedan del compás entre perder la
+   * última vida y que aparezca la pantalla final. 0 = no se está muriendo.
+   *
+   * Existe porque antes no había compás ninguno: se perdía el último corazón y
+   * la tarjeta de resultados aparecía encima en el mismo frame, así que el
+   * jugador nunca llegaba a VER qué lo había matado. En Crossy Road el remate
+   * es media mecánica: el mundo se para, la cámara se acerca al bicho y solo
+   * entonces entra el marcador. Ver `GameLoop`, `CameraRig` y `Player`.
+   */
+  dying: 0,
+  /** Aplastado del cuerpo durante el remate: 1 de pie, ~0.25 de calcomanía */
+  deathSquash: 1,
+
   /** Cola de movimientos (tutorial: `movesQueue`) */
   moveQueue: [] as MoveDirection[],
 
@@ -109,6 +123,8 @@ export const runtime = {
     this.snatching = false;
     this.snatchTime = 0;
     this.snatchSquash = 1;
+    this.dying = 0;
+    this.deathSquash = 1;
     this.moveQueue.length = 0;
     this.stunTimer = 0;
     this.invulnTimer = 0;

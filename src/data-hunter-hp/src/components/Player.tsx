@@ -26,7 +26,10 @@ export function Player() {
     const g = group.current;
     if (!g) return;
 
-    if (useGameStore.getState().phase === 'playing') {
+    // Durante el REMATE de muerte no se juega: ni se mueve, ni se recoge, ni se
+    // vuelve a chocar. El mundo sigue (a cámara lenta, ver `GameLoop`) pero el
+    // colaborador ya no participa.
+    if (useGameStore.getState().phase === 'playing' && runtime.dying === 0) {
       updatePlayer(dt);
       updateWaterRiding(dt); // mecánica río: arrastre de barcaza / caída al agua
       updateConveyor(dt); // TUM: la banda transportadora arrastra por el suelo
@@ -48,7 +51,15 @@ export function Player() {
       g.visible = true;
       return;
     }
-    if (g.scale.y !== 1) g.scale.set(1, 1, 1);
+    // CALCOMANÍA del remate: el mismo aplastado de dibujo animado que el
+    // contenedor, y por el mismo motivo — lo que pierde de alto lo gana de
+    // ancho, así se lee como un golpe y no como que el modelo se ha encogido.
+    if (runtime.dying > 0) {
+      const q = runtime.deathSquash;
+      g.scale.set(1 + (1 - q) * 0.55, q, 1 + (1 - q) * 0.55);
+    } else if (g.scale.y !== 1) {
+      g.scale.set(1, 1, 1);
+    }
 
     // Montado: el cuerpo se apoya sobre la cubierta y cabecea. La altura de
     // cubierta se amortigua porque no es la misma en barcaza (0.2) que en

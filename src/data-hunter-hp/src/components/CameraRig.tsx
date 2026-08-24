@@ -2,7 +2,7 @@ import { OrthographicCamera } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { CAM_LOOK_AHEAD, camZoomFor } from '../data/balance';
+import { BALANCE, CAM_LOOK_AHEAD, camZoomFor } from '../data/balance';
 import { debug } from '../debug/debug';
 import { QUALITY } from '../render/quality';
 import { runtime } from '../store/runtime';
@@ -139,8 +139,22 @@ export function CameraRig() {
       cam.lookAt(lookTarget.current);
       return;
     }
-    if (cam.zoom !== zoom) {
-      cam.zoom = zoom;
+    /**
+     * ACERCAMIENTO DEL REMATE. Mientras el jugador se muere, la cámara empuja
+     * hacia él: es la mitad del gesto de Crossy Road — el mundo se para y el
+     * encuadre se cierra sobre lo que ha pasado.
+     *
+     * Va con una curva suavizada en los dos extremos (`t*t*(3-2t)`) y no lineal:
+     * un zoom que arranca de golpe se lee como un fallo de cámara, y uno que
+     * frena de golpe al final corta el compás justo cuando entra la tarjeta.
+     */
+    let zoomAhora = zoom;
+    if (runtime.dying > 0) {
+      const t = Math.min(1, (BALANCE.DEATH_BEAT - runtime.dying) / BALANCE.DEATH_BEAT);
+      zoomAhora = zoom * (1 + (BALANCE.DEATH_ZOOM - 1) * (t * t * (3 - 2 * t)));
+    }
+    if (cam.zoom !== zoomAhora) {
+      cam.zoom = zoomAhora;
       cam.updateProjectionMatrix();
     }
 

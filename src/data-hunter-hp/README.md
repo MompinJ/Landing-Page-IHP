@@ -197,6 +197,71 @@ rango de dpr era `min(maxDpr, scale × densidad)`, así que en un teléfono
 entero. Son dos preguntas distintas —cuánta densidad de pantalla, y qué fracción
 de ella— y ahora se responden por separado.
 
+## El remate de muerte
+
+Antes no había ninguno: se perdía el último corazón y la tarjeta de resultados
+aparecía encima **en el mismo frame**, así que el jugador nunca llegaba a ver
+qué lo había matado. En Crossy Road eso es media mecánica. Ahora son tres
+tiempos (`src/world/death.ts`):
+
+1. **Congelado** (0.16 s) — el mundo se para en seco. Es el fotograma congelado
+   de los juegos de pelea: hace que el ojo vuelva al impacto en vez de irse
+   detrás del camión.
+2. **Cámara lenta** (×0.22) — el mundo sigue, así que el vehículo termina de
+   pasarte por encima; la cámara aprovecha para cerrarse un 42% sobre el
+   corredor, que queda de calcomanía.
+3. Y **entonces** entra la pantalla final.
+
+Vive en la capa de lógica pura y no en el componente, y esa es la parte que
+importa: la primera versión contaba el tiempo dentro de `GameLoop` y con eso
+`npm run sim` dejó de terminar — la simulación headless no monta componentes,
+nadie descontaba el compás y la partida se quedaba para siempre en «jugando».
+Lo comprueba `npm run test:death`, que verifica los ocho puntos del compás,
+incluido que pulsar mientras te mueres no se lleve un salto de regalo.
+
+## Los tirones: cuatro causas, todas medidas
+
+«Va trabado en las balsas» es una pista de las buenas — señala un sitio — así
+que se puede medir en vez de opinar. `npm run test:jankcause` caza el frame
+lento y dice qué cambió justo en él; `npm run test:biomes` compara las cinco
+terminales. Lo que salió:
+
+| | qué pasaba | arreglo |
+| --- | --- | --- |
+| **Texturas de etiqueta** | cada ficha creaba su propia textura de 256×128 en un `useMemo` — que es por instancia, o sea que no cacheaba nada: la misma palabra subía una textura nueva cada vez que reaparecía, y ninguna se liberaba (14 → 70 en un recorrido, y al volver al inicio seguían 70) | caché por palabra a 128×64, que es lo que de verdad se ve en pantalla (~41 px) |
+| **Crear ≠ subir** | el precalentado dejaba dibujados los 206 canvas pero `compile()` prepara MATERIALES, no sube TEXTURAS — y three las sube al DIBUJAR, que en filas invisibles no pasa nunca. Tras el briefing: 206 etiquetas en caché y **10** texturas subidas | `initTexture` a cuentagotas en el briefing: ahora se suben 201 antes de jugar |
+| **Geometrías por instancia** | cada ficha creaba sus tres geometrías al montarse (58 → 265 vivas, subiendo y bajando con el desfile de filas) | una compartida de cada |
+| **Shaders re-enlazados** | three borra un programa cuando se descarta el último material que lo usaba, y al cruzar de terminal se iba el último de los suyos: 298 materiales descartados por recorrido y el programa a recompilar **en mitad de la partida**, justo en las filas 26-37 (Cruceros) | `ShaderAnchor`: un material clonado por programa, en un grupo invisible que no se desmonta |
+
+Lo último merece subrayarse porque es contraintuitivo: los 298 materiales solo
+usan **12 programas distintos** — el programa no depende del color ni del brillo
+(esos son uniformes) sino de la forma del shader. Por eso anclar doce mallas
+invisibles arregla lo que parecía pedir tocar los 55 materiales declarados en
+línea repartidos por siete ficheros.
+
+Jugando de verdad, el resultado son 4 frames largos en 12.000 en vez de tirones
+en cada frontera de terminal.
+
+## Menos llamadas de dibujo
+
+Con la ventana de un teléfono se enviaban ~180 llamadas por frame, y el perfil
+de CPU (`npm run test:cpu`) sale dominado por `uniformMatrix4fv` y
+`drawElements`: coste POR LLAMADA, que no lo arregla tener buena GPU.
+`npm run test:drawcalls -- <url> <fila> movil 390 664` dice quiénes son. Dos
+cortes, **178 → 151 (-15%)** con la imagen idéntica:
+
+- **El suelo, instanciado.** Era el grupo homogéneo más grande: treinta filas en
+  cuadro, cada una su losa, y todas iguales salvo textura y tinte. Ahora es una
+  llamada por TIPO de suelo presente (dos o tres dentro de una terminal). La
+  banda transportadora y el pontón de cruceros se quedan fuera a propósito: la
+  primera lleva desplazamiento de textura propio por fila y el segundo tiene
+  variantes con geometría distinta.
+- **El halo de las fichas, pintado dentro de su textura.** Era una malla más por
+  ficha — trece de las ciento ochenta llamadas gastadas en un degradado — y no
+  hacía falta ninguna: es radial y concéntrico con el disco, así que cabe en la
+  misma imagen. Y sale gratis de memoria porque las caras son dos, compartidas,
+  al revés que las etiquetas, que son una por palabra.
+
 ## Verificación
 
 ```bash
@@ -209,6 +274,10 @@ npm run test:viewport      # que la ventana de filas cubra lo que ve la cámara,
 npm run test:touch         # los gestos, con toques de verdad sobre un iPhone emulado
 npm run test:mobile        # capturas de las cinco pantallas, en vertical y horizontal
 npm run test:center        # que el personaje quede centrado en doce pantallas distintas
+npm run test:death         # el remate de muerte: congelado, cámara lenta, acercamiento
+npm run test:jankcause     # caza el frame lento y dice qué cambió en él
+npm run test:biomes        # coste de las cinco terminales a resolución de teléfono
+npm run test:cpu           # perfil de CPU: qué función se come el frame
 npm run test:governor      # que el aparato decida: el rápido arriba, el lento abajo y quieto
 npm run test:sharpness     # cómo se ve, a la densidad real de un móvil, con varios ajustes
 npm run test:mobilebench   # los niveles dibujando por software. OJO: exagera el coste del

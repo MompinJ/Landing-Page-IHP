@@ -47,7 +47,11 @@
     "test:mobilebench": "tsx scripts/mobile-bench.ts",
     "test:governor": "tsx scripts/governor-test.ts",
     "test:sharpness": "tsx scripts/sharpness-shot.ts",
-    "test:center": "tsx scripts/center-test.ts"
+    "test:center": "tsx scripts/center-test.ts",
+    "test:death": "tsx scripts/death-test.ts",
+    "test:biomes": "tsx scripts/biome-profile.ts",
+    "test:jankcause": "tsx scripts/jank-cause.ts",
+    "test:cpu": "tsx scripts/cpu-profile.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

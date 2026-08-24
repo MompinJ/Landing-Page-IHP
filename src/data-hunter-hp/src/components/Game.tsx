@@ -17,6 +17,7 @@ import { Map } from './Map';
 import { FpsMeter, Perf } from './Perf';
 import { Player } from './Player';
 import { ResolutionGovernor } from './ResolutionGovernor';
+import { ShaderAnchor } from './ShaderAnchor';
 import { Vfx } from './Vfx';
 import { Warmup } from './Warmup';
 
@@ -118,6 +119,12 @@ export function Game() {
           los congelones de 40-76 ms que daba compilar un material nuevo en
           mitad de la partida (ver Warmup.tsx). No cuesta calidad. */}
       <Warmup />
+
+      {/* ...y esto es lo que impide que se DES-compilen. three borra un programa
+          cuando se descarta el último material que lo usaba, y al pasar de una
+          terminal a otra eso ocurre: el programa se borra y hay que enlazarlo
+          otra vez en mitad de la partida (ver ShaderAnchor.tsx). */}
+      <ShaderAnchor />
 
       {/* Contador de fps, siempre a la vista. Se oculta con la tecla F, o de
           entrada con `?fps=off` para el kiosco del stand. */}
