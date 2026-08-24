@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { GAME_DURATION, OBSTACLE_PENALTY } from './constants'
 import { runtime, SKIP } from './runtime'
 import { assignLabels } from './course'
+import { music } from './audio'
 
 export const useGame = create((set, get) => ({
   phase: 'intro', // intro | countdown | playing | paused | gameover
@@ -17,6 +18,9 @@ export const useGame = create((set, get) => ({
 
   startCountdown: () => {
     runtime.reset()
+    // La cancion acompana toda la carrera y se la deja acabar sola despues; si
+    // alguien vuelve a lanzar la cuenta atras antes de tiempo, empieza de cero.
+    music.start()
     // Palabras nuevas en cada carrera. Va ANTES del set: al entrar en
     // 'countdown' Items remonta todos los hexagonos y ahi lee la etiqueta.
     assignLabels()
