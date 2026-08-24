@@ -154,8 +154,34 @@ por el mismo motivo — hacen algo distinto de lo que su nombre promete:
 **La cámara ortográfica tenía el zoom clavado en 58.** En 390 px de ancho eso son
 **seis casillas** a la vista: no es que se viera pequeño, es que no se veía a
 dónde esquivar. Ahora el zoom garantiza un ancho mínimo de mundo en cuadro
-(`camZoomFor`) y en vertical la cámara mira más adelante para bajar al corredor
-en pantalla (`camLookAheadFor`).
+(`camZoomFor`), así que lo que cambia con la pantalla es cuánto mundo se ve —
+no dónde está el corredor.
+
+**Y el corredor va en el centro, como en Crossy Road** (`CAM_LOOK_AHEAD`). En una
+cámara ortográfica el punto de mira cae en el centro exacto del cuadro, así que
+«centrar al personaje» y «mirarle a él» son la misma frase. Suena obvio y no lo
+era: la mira iba por delante del jugador para descubrir camino por arriba, y
+como el desplazamiento de la cámara es DIAGONAL — (5.2, 9.2, 6.4) — adelantarla
+no lo bajaba en vertical sino en diagonal, abajo **y a la izquierda**. En un
+móvil en vertical se quedaba al 37% del ancho.
+
+`npm run test:center` lo mide sin ambigüedad: proyecta la posición real del
+jugador con la cámara real en doce pantallas —de un móvil de 320 px a 4K,
+pasando por una tira 21:9 y un cuadrado— y comprueba las tres cosas a la vez,
+porque centrar acercando tanto que no se vea a dónde esquivar sería un encuadre
+bonito e injugable:
+
+| | |
+| --- | --- |
+| centrado | 50.0% / 50.0% en las doce |
+| columnas a la vista | 12.9 en un móvil vertical, nunca menos de 9 |
+| filas por delante | 15 en un móvil vertical, nunca menos de 5 |
+
+Se paga que ahora se ve tanto por detrás como por delante y lo de detrás ya está
+jugado. Sale más barato de lo que parece: sin la mira adelantada las esquinas del
+cuadro caen más cerca, así que un móvil pasó de necesitar 33 filas dibujadas a
+30. Y va en todas las pantallas, no solo en el móvil: un encuadre que depende de
+la forma de la ventana es justo lo que no queremos.
 
 Alejar la cámara obliga a dibujar más filas, y ahí saltó un fallo escondido: el
 techo de filas del nivel dejaba 16 por delante donde la cámara alcanza 20, o sea
@@ -182,6 +208,7 @@ npm run test:viewport      # que la ventana de filas cubra lo que ve la cámara,
                            # ya recortada por el techo de cada nivel gráfico
 npm run test:touch         # los gestos, con toques de verdad sobre un iPhone emulado
 npm run test:mobile        # capturas de las cinco pantallas, en vertical y horizontal
+npm run test:center        # que el personaje quede centrado en doce pantallas distintas
 npm run test:governor      # que el aparato decida: el rápido arriba, el lento abajo y quieto
 npm run test:sharpness     # cómo se ve, a la densidad real de un móvil, con varios ajustes
 npm run test:mobilebench   # los niveles dibujando por software. OJO: exagera el coste del

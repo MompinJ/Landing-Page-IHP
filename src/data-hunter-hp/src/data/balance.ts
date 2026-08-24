@@ -493,7 +493,7 @@ export const CAM_LOOK_Y = 0.4;
  * `1.194·halfH + 0.565·halfW ± 1.545`: tres números medidos UNA vez contra el
  * encuadre de escritorio, con el zoom clavado en 58 y la mira siempre 1.2 por
  * delante. En cuanto el teléfono movió las dos cosas (`camZoomFor` aleja la
- * cámara, `camLookAheadFor` adelanta la mira) los coeficientes pasaron a mentir
+ * cámara) los coeficientes pasaron a mentir
  * — y a mentir CORTO, que es el lado malo: se dibujaban 17 filas donde la
  * cámara alcanzaba 18.5, o sea océano por delante justo en la pantalla nueva.
  *
@@ -509,7 +509,7 @@ export function viewRowsFor(width: number, height: number): { ahead: number; beh
   const halfH = height / zoom / 2;
 
   // Base de la vista, con el jugador en el origen
-  const look: [number, number, number] = [0, CAM_LOOK_Y, -camLookAheadFor(width, height)];
+  const look: [number, number, number] = [0, CAM_LOOK_Y, -CAM_LOOK_AHEAD];
   const dir: [number, number, number] = [
     look[0] - CAM_OFFSET[0],
     look[1] - CAM_OFFSET[1],
@@ -617,23 +617,28 @@ export function camZoomFor(width: number, height: number): number {
 }
 
 /**
- * A DÓNDE MIRA la cámara, medido en unidades por DELANTE del jugador.
+ * A DÓNDE MIRA la cámara: AL JUGADOR, exactamente. Es lo que lo deja en el
+ * centro de la pantalla, como en Crossy Road.
  *
- * El jugador va siempre hacia -z, así que adelantar el punto de mira lo empuja
- * hacia ABAJO en la pantalla y descubre camino por arriba, que es donde está lo
- * que hay que decidir. En una pantalla de escritorio (16:9) 1.2 basta y sobra.
+ * En una cámara ortográfica el punto de mira cae siempre en el centro exacto
+ * del cuadro, así que «centrar al personaje» y «mirarle a él» son la misma
+ * frase. Suena obvio y aquí no lo era: la mira iba 1.2 unidades POR DELANTE del
+ * jugador (y llegué a subirla a 3.4 en pantallas altas, para descubrir camino
+ * por arriba). El efecto secundario es que el desplazamiento de la cámara es
+ * DIAGONAL —(5.2, 9.2, 6.4)—, así que adelantar la mira no baja al personaje en
+ * vertical: lo empuja en diagonal, abajo Y A LA IZQUIERDA. En un teléfono en
+ * vertical se quedaba a un 37% del ancho, descentrado de forma bien visible.
  *
- * En un teléfono en VERTICAL no: el cuadro es más alto que ancho, el jugador
- * caía a media pantalla y la mitad de abajo era suelo ya recorrido — sitio
- * gastado en enseñar lo que ya pasó. El adelanto crece con la relación de
- * aspecto hasta 3.4 unidades (tres filas), que deja al corredor sobre el tercio
- * inferior. El tope existe porque pasado ese punto el personaje se va al borde
- * de abajo y se pierde de vista al saltar.
+ * Se paga con lo que se ganaba: ahora se ve tanto por detrás como por delante,
+ * y lo de detrás ya está jugado. Se acepta porque a cambio el personaje deja de
+ * bailar por el cuadro según la forma de la pantalla — y porque el encuadre
+ * ahora es el mismo en todas: sea cual sea el móvil, el corredor está en el
+ * mismo sitio y lo que cambia es cuánto mundo se ve a su alrededor.
+ *
+ * Es una CONSTANTE y no una función de la ventana, y eso es justo lo que la
+ * hace adaptable: el centro es el centro en cualquier pantalla.
  */
-export function camLookAheadFor(width: number, height: number): number {
-  const alargada = Math.max(0, height / width - 1); // 0 en apaisado, ~0.7 en un móvil vertical
-  return 1.2 + Math.min(2.2, alargada * 3.2);
-}
+export const CAM_LOOK_AHEAD = 0;
 
 /** X del centro de una columna del tablero */
 export function colX(col: number): number {

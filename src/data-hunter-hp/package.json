@@ -46,7 +46,8 @@
     "test:mobileperf": "tsx scripts/mobile-probe.ts",
     "test:mobilebench": "tsx scripts/mobile-bench.ts",
     "test:governor": "tsx scripts/governor-test.ts",
-    "test:sharpness": "tsx scripts/sharpness-shot.ts"
+    "test:sharpness": "tsx scripts/sharpness-shot.ts",
+    "test:center": "tsx scripts/center-test.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

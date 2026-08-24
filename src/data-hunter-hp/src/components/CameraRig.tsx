@@ -2,7 +2,7 @@ import { OrthographicCamera } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { camLookAheadFor, camZoomFor } from '../data/balance';
+import { CAM_LOOK_AHEAD, camZoomFor } from '../data/balance';
 import { debug } from '../debug/debug';
 import { QUALITY } from '../render/quality';
 import { runtime } from '../store/runtime';
@@ -99,24 +99,18 @@ export function CameraRig() {
   const camera = useRef<THREE.OrthographicCamera>(null);
   /**
    * ENCUADRE SEGÚN LA PANTALLA. El zoom era una constante (58) y en un teléfono
-   * eso dejaba seis casillas a lo ancho: no se veía a dónde esquivar. Ahora el
-   * zoom y el adelanto del punto de mira se derivan del tamaño de la ventana
-   * (ver `camZoomFor` y `camLookAheadFor` en `data/balance.ts`, que es donde
-   * viven porque `viewRowsFor` necesita el MISMO zoom para saber cuántas filas
-   * dibujar).
+   * eso dejaba seis casillas a lo ancho: no se veía a dónde esquivar. Ahora sale
+   * del tamaño de la ventana (ver `camZoomFor` en `data/balance.ts`, que es
+   * donde vive porque `viewRowsFor` necesita el MISMO zoom para saber cuántas
+   * filas dibujar). Lo que NO cambia con la pantalla es dónde queda el
+   * personaje: siempre en el centro.
    *
    * Se recalcula solo al cambiar el tamaño —girar el teléfono, rotar la
    * pantalla del stand—, no cada frame: `useThree(s => s.size)` ya reacciona al
    * redimensionado y `useMemo` evita rehacer la cuenta 60 veces por segundo.
    */
   const size = useThree((s) => s.size);
-  const encuadre = useMemo(
-    () => ({
-      zoom: camZoomFor(size.width, size.height),
-      lookAhead: camLookAheadFor(size.width, size.height),
-    }),
-    [size.width, size.height],
-  );
+  const zoom = useMemo(() => camZoomFor(size.width, size.height), [size.width, size.height]);
   const light = useRef<THREE.DirectionalLight>(null);
   const lookTarget = useRef(new THREE.Vector3());
   const shadowCenter = useRef(new THREE.Vector3());
@@ -145,15 +139,15 @@ export function CameraRig() {
       cam.lookAt(lookTarget.current);
       return;
     }
-    if (cam.zoom !== encuadre.zoom) {
-      cam.zoom = encuadre.zoom;
+    if (cam.zoom !== zoom) {
+      cam.zoom = zoom;
       cam.updateProjectionMatrix();
     }
 
     cam.position.set(px + CAM_OFFSET.x, CAM_OFFSET.y, pz + CAM_OFFSET.z);
-    // El jugador avanza hacia -z: adelantar la mira lo baja en pantalla y
-    // descubre camino por arriba, que es donde hay que decidir.
-    lookTarget.current.set(px, 0.4, pz - encuadre.lookAhead);
+    // AL JUGADOR: en una cámara ortográfica el punto de mira es el centro exacto
+    // del cuadro, así que mirarle a él es lo que lo centra (ver CAM_LOOK_AHEAD).
+    lookTarget.current.set(px, 0.4, pz - CAM_LOOK_AHEAD);
 
     if (runtime.shakeTimer > 0) {
       runtime.shakeTimer = Math.max(0, runtime.shakeTimer - dt);
@@ -183,7 +177,7 @@ export function CameraRig() {
 
   return (
     <>
-      <OrthographicCamera ref={camera} makeDefault zoom={encuadre.zoom} near={CAM_NEAR} far={CAM_FAR} />
+      <OrthographicCamera ref={camera} makeDefault zoom={zoom} near={CAM_NEAR} far={CAM_FAR} />
       {/* Ver el bloque de constantes de sombra arriba: cada ajuste corrige un
           artefacto concreto (moteado, sombra despegada, siluetas que hierven). */}
       <directionalLight

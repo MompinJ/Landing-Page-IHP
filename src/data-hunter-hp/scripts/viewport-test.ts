@@ -25,7 +25,7 @@
  *
  *   npx tsx scripts/viewport-test.ts
  */
-import { BALANCE, camLookAheadFor, camZoomFor, clampViewRows, viewRowsFor } from '../src/data/balance';
+import { BALANCE, CAM_LOOK_AHEAD, camZoomFor, clampViewRows, viewRowsFor } from '../src/data/balance';
 import { LEVELS } from '../src/render/quality';
 import { runtime } from '../src/store/runtime';
 import { useGameStore } from '../src/store/useGameStore';
@@ -34,9 +34,9 @@ import { extendRowsIfNeeded, rows, setLookahead } from '../src/world/rows';
 /** Filas de suelo que la cámara ve en cada dirección (esquinas de la caja) */
 function filasVisibles(w: number, h: number) {
   const camOff = [5.2, 9.2, 6.4];
-  // El adelanto de la mira también depende de la ventana: en vertical la cámara
-  // mira más lejos para bajar al jugador en pantalla (ver `camLookAheadFor`).
-  const look = [0, 0.4, -camLookAheadFor(w, h)];
+  // La cámara mira AL JUGADOR, que es lo que lo deja centrado en cualquier
+  // pantalla (ver `CAM_LOOK_AHEAD`).
+  const look = [0, 0.4, -CAM_LOOK_AHEAD];
   const d = [look[0] - camOff[0], look[1] - camOff[1], look[2] - camOff[2]];
   const L = Math.hypot(...d);
   const v = d.map((n) => n / L);
