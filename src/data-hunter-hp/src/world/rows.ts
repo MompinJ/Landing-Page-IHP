@@ -1,4 +1,12 @@
-import { BALANCE, colX, speedFactorForRow } from '../data/balance';
+import {
+  BALANCE,
+  badChanceFor,
+  beltSpeedFor,
+  colX,
+  goodChanceFor,
+  roadStreakLimitFor,
+  speedFactorForRow,
+} from '../data/balance';
 import { badItemsFor, goodItemsFor } from '../data/items';
 import { runtime } from '../store/runtime';
 
@@ -337,8 +345,9 @@ function generateRow(index: number): RowData {
   // ---- LCT (contenedores) y TNG (astillero): patios + tráfico rodado ----
   // Arranque suave: sin tráfico en las primeras filas
   if (index < BALANCE.SAFE_START_ROWS) return generateYardRow(index);
-  // Nunca más de MAX_ROAD_STREAK filas de peligro móvil seguidas
-  if (roadStreak(index) >= BALANCE.MAX_ROAD_STREAK) return generateYardRow(index);
+  // Nunca más filas de peligro móvil seguidas de las que tolera la dificultad
+  // de esta profundidad: 1 al principio, 2 pasada media rampa.
+  if (roadStreak(index) >= roadStreakLimitFor(index)) return generateYardRow(index);
 
   // TNG = taller: la grúa pórtico manda, y se cruza por los andamios.
   // Antes, el sorteo del DIQUE VERTICAL: la seña de identidad del patio.
@@ -365,14 +374,21 @@ function generateRow(index: number): RowData {
  * alguna RTG y tráfico de montacargas.
  */
 function generateShipyardRow(index: number): RowData {
-  // Nota: entre dos filas de peligro siempre cae un patio (MAX_ROAD_STREAK lo
-  // impone antes de llegar aquí), así que estos pesos se aplican sobre la mitad
-  // de las filas del bioma. De ahí que la grúa pórtico se lleve la mitad: es el
-  // peligro que da carácter al astillero.
+  // Nota: entre dos filas de peligro siempre cae un patio (`roadStreakLimitFor`
+  // lo impone antes de llegar aquí), así que estos pesos se aplican sobre la
+  // mitad de las filas del bioma. De ahí que la grúa pórtico se lleve la mayor
+  // parte: es el peligro que da carácter al astillero.
+  //
+  // El patio pelado se quedó en un resto testimonial (6%). Medido con
+  // `scripts/shipyard-audit.ts`, el astillero era el bioma con MENOS peligro
+  // móvil de los cinco —22% de sus filas, empatado con el último— y a la vez el
+  // que más casillas bloqueadas tenía: mucho bulto quieto y poco que esquivar.
+  // Y el patio de más no hacía falta para respirar, porque el respiro ya lo
+  // garantiza el corte de racha de arriba.
   const roll = rand();
-  if (roll < 0.5) return generateGantryRow(index);
-  if (roll < 0.64) return generateCraneRow(index);
-  if (roll < 0.78) return generateRoadRow(index);
+  if (roll < 0.56) return generateGantryRow(index);
+  if (roll < 0.76) return generateCraneRow(index);
+  if (roll < 0.94) return generateRoadRow(index);
   return generateYardRow(index);
 }
 
@@ -548,7 +564,7 @@ function generateMultiRow(index: number): RowData {
   if (index < BALANCE.SAFE_START_ROWS) return generateYardRow(index);
   const roll = rand();
   if (roll < BALANCE.BELT_ROW_CHANCE && !beltNear(index)) return generateBeltRow(index);
-  if (roll < BALANCE.BELT_ROW_CHANCE + BALANCE.BULK_ROW_CHANCE && roadStreak(index) < BALANCE.MAX_ROAD_STREAK) {
+  if (roll < BALANCE.BELT_ROW_CHANCE + BALANCE.BULK_ROW_CHANCE && roadStreak(index) < roadStreakLimitFor(index)) {
     return generateBulkRow(index);
   }
   return generateYardRow(index);
@@ -569,8 +585,10 @@ function generateBeltRow(index: number): RowData {
     decor: makeDecor(index, 'multi'),
     vehicles: [],
     cranes: [],
-    cards: spawnCards('multi', new Set(), 0.65, 0.15),
-    belt: { direction, speed: BALANCE.BELT_SPEED * BALANCE.TILE },
+    cards: spawnCards(index, 'multi', new Set(), 0.65, 0.15),
+    // El arrastre aprieta con la distancia: la misma banda descoloca más
+    // lejos que cerca, así que la corrección hay que hacerla antes.
+    belt: { direction, speed: beltSpeedFor(index) },
   };
 }
 
@@ -602,7 +620,7 @@ function generateBulkRow(index: number): RowData {
     decor: [],
     vehicles,
     cranes: [],
-    cards: spawnCards('multi', new Set(), 0.3, 0.12),
+    cards: spawnCards(index, 'multi', new Set(), 0.3, 0.12),
   };
 }
 
@@ -616,7 +634,7 @@ function clearShipyardYard(index: number): RowData {
     decor: makeDecor(index, 'shipyard'),
     vehicles: [],
     cranes: [],
-    cards: spawnCards('shipyard', new Set(), 0.4, 0.1),
+    cards: spawnCards(index, 'shipyard', new Set(), 0.4, 0.1),
   };
 }
 
@@ -692,7 +710,7 @@ export function megaDockCarry(rowIndex: number, col: number): boolean {
 function generateRailBiomeRow(index: number): RowData {
   const zoneStart = Math.floor(index / BALANCE.ZONE_LENGTH) * BALANCE.ZONE_LENGTH;
   if (index === zoneStart + 1) return generateYardRow(index); // andén de entrada
-  if (roadStreak(index) >= BALANCE.MAX_ROAD_STREAK) return generateYardRow(index);
+  if (roadStreak(index) >= roadStreakLimitFor(index)) return generateYardRow(index);
   return rand() < BALANCE.RAIL_ROW_CHANCE ? generateTrainRow(index) : generateYardRow(index);
 }
 
@@ -716,7 +734,7 @@ function generateTrainRow(index: number): RowData {
       { x: startX, prevX: startX, tiles: BALANCE.TRAIN_TILES, speed, direction, kind: 'train', colorIndex: Math.floor(rand() * 4) },
     ],
     cranes: [],
-    cards: spawnCards('rail', new Set(), 0.3, 0.1),
+    cards: spawnCards(index, 'rail', new Set(), 0.3, 0.1),
   };
 }
 
@@ -827,7 +845,7 @@ function generateYardRow(index: number): RowData {
     decor: makeDecor(index, theme),
     vehicles: [],
     cranes: [],
-    cards: spawnCards(theme, occupied, 0.5, 0.18),
+    cards: spawnCards(index, theme, occupied, 0.5, 0.18),
   };
 }
 
@@ -978,7 +996,7 @@ function generateDockRow(index: number): RowData {
     decor: makeDecor(index, 'cruise'),
     vehicles: [],
     cranes: [],
-    cards: spawnCards('cruise', new Set(), 0.5, 0.2),
+    cards: spawnCards(index, 'cruise', new Set(), 0.5, 0.2),
     deck: pickDeckVariant(index),
   };
 }
@@ -1014,7 +1032,7 @@ function generateRoadRow(index: number): RowData {
     decor: [],
     vehicles,
     cranes: [],
-    cards: spawnCards(zoneOf(index), new Set(), 0.3, 0.12),
+    cards: spawnCards(index, zoneOf(index), new Set(), 0.3, 0.12),
   };
 }
 
@@ -1036,7 +1054,7 @@ function generateCraneRow(index: number): RowData {
         direction: rand() < 0.5 ? 1 : -1,
       },
     ],
-    cards: spawnCards(zoneOf(index), new Set(), 0.6, 0.1),
+    cards: spawnCards(index, zoneOf(index), new Set(), 0.6, 0.1),
   };
 }
 
@@ -1142,16 +1160,25 @@ function makeDecor(index = 0, theme: ZoneTheme = 'port'): StackData[] {
  * convierte el recorrido en cinco terminales distintas y no en una sola con
  * cinco decorados.
  */
-function spawnCards(theme: ZoneTheme, occupied: Set<number>, pGood: number, pBad: number): CardData[] {
+function spawnCards(
+  index: number,
+  theme: ZoneTheme,
+  occupied: Set<number>,
+  pGood: number,
+  pBad: number,
+): CardData[] {
   const cards: CardData[] = [];
-  if (rand() < pGood) {
+  // La densidad NO es fija: las verdes escasean y las rojas abundan conforme
+  // se avanza (ver `difficultyForRow`). `pGood`/`pBad` son el reparto base de
+  // cada tipo de fila; la profundidad los inclina.
+  if (rand() < goodChanceFor(index, pGood)) {
     const col = freeCol(occupied);
     if (col !== null) {
       occupied.add(col);
       cards.push({ col, good: true, label: pick(goodItemsFor(theme)), collected: false });
     }
   }
-  if (rand() < pBad) {
+  if (rand() < badChanceFor(index, pBad)) {
     const col = freeCol(occupied);
     if (col !== null) {
       occupied.add(col);
@@ -1204,6 +1231,25 @@ export function isSheltered(rowIndex: number, col: number): boolean {
 
 export function cardAt(rowIndex: number, col: number): CardData | undefined {
   return rows[rowIndex]?.cards.find((c) => !c.collected && c.col === col);
+}
+
+/**
+ * Tarjeta que el colaborador tiene AHORA MISMO bajo los pies, buscada por
+ * posición real en X y no por casilla lógica.
+ *
+ * Es la que hace falta allí donde el suelo se mueve (la BANDA de TUM, la
+ * cubierta de una barcaza): ahí la X del colaborador es continua y la casilla
+ * es una redondeo, así que preguntar «¿hay tarjeta en mi casilla?» se pierde
+ * las que le pasan por debajo entre frame y frame.
+ *
+ * `PICKUP_RADIUS` es media casilla: se recoge lo que se pisa y ni un dedo más
+ * — con un radio mayor se recogerían tarjetas de la casilla de al lado, que es
+ * justo lo que rompería las rojas (esquivarlas es la mecánica).
+ */
+export function cardNearX(rowIndex: number, x: number): CardData | undefined {
+  return rows[rowIndex]?.cards.find(
+    (c) => !c.collected && Math.abs(colX(c.col) - x) <= BALANCE.PICKUP_RADIUS,
+  );
 }
 
 /** Fila de agua fatal (hay que ir sobre una barcaza) */

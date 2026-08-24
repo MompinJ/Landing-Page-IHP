@@ -1,9 +1,10 @@
 import { OrthographicCamera } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { CAM_ZOOM } from '../data/balance';
+import { camLookAheadFor, camZoomFor } from '../data/balance';
 import { debug } from '../debug/debug';
+import { QUALITY } from '../render/quality';
 import { runtime } from '../store/runtime';
 import { attractState } from './AttractMode';
 
@@ -16,7 +17,6 @@ import { attractState } from './AttractMode';
  */
 const CAM_OFFSET = new THREE.Vector3(5.2, 9.2, 6.4);
 const LIGHT_OFFSET = new THREE.Vector3(-5, 11, 4);
-const BASE_ZOOM = CAM_ZOOM;
 
 /**
  * Volumen de vista. En una cámara ORTOGRÁFICA el plano `near` puede ser
@@ -59,7 +59,10 @@ const CAM_FAR = 200;
  *    propia sombra. `normalBias` desplaza el punto de muestreo a lo largo de la
  *    NORMAL de la superficie, que quita el acné sin mover la sombra de sitio.
  */
-const SHADOW_MAP = 1024;
+// Resolución del mapa de sombras: la marca el nivel gráfico (2048 en 'ultra',
+// 1024 por defecto, 512 en 'rapido'). `TEXEL` se deriva de ella, así que el
+// anclaje a la rejilla de téxeles sigue siendo correcto en los tres niveles.
+const SHADOW_MAP = QUALITY.shadowMap;
 const SHADOW_HALF = 12;
 const SHADOW_NEAR = 1;
 const SHADOW_FAR = 34;
@@ -94,6 +97,26 @@ function snapToShadowTexel(x: number, z: number, out: THREE.Vector3) {
 
 export function CameraRig() {
   const camera = useRef<THREE.OrthographicCamera>(null);
+  /**
+   * ENCUADRE SEGÚN LA PANTALLA. El zoom era una constante (58) y en un teléfono
+   * eso dejaba seis casillas a lo ancho: no se veía a dónde esquivar. Ahora el
+   * zoom y el adelanto del punto de mira se derivan del tamaño de la ventana
+   * (ver `camZoomFor` y `camLookAheadFor` en `data/balance.ts`, que es donde
+   * viven porque `viewRowsFor` necesita el MISMO zoom para saber cuántas filas
+   * dibujar).
+   *
+   * Se recalcula solo al cambiar el tamaño —girar el teléfono, rotar la
+   * pantalla del stand—, no cada frame: `useThree(s => s.size)` ya reacciona al
+   * redimensionado y `useMemo` evita rehacer la cuenta 60 veces por segundo.
+   */
+  const size = useThree((s) => s.size);
+  const encuadre = useMemo(
+    () => ({
+      zoom: camZoomFor(size.width, size.height),
+      lookAhead: camLookAheadFor(size.width, size.height),
+    }),
+    [size.width, size.height],
+  );
   const light = useRef<THREE.DirectionalLight>(null);
   const lookTarget = useRef(new THREE.Vector3());
   const shadowCenter = useRef(new THREE.Vector3());
@@ -122,13 +145,15 @@ export function CameraRig() {
       cam.lookAt(lookTarget.current);
       return;
     }
-    if (cam.zoom !== BASE_ZOOM) {
-      cam.zoom = BASE_ZOOM;
+    if (cam.zoom !== encuadre.zoom) {
+      cam.zoom = encuadre.zoom;
       cam.updateProjectionMatrix();
     }
 
     cam.position.set(px + CAM_OFFSET.x, CAM_OFFSET.y, pz + CAM_OFFSET.z);
-    lookTarget.current.set(px, 0.4, pz - 1.2);
+    // El jugador avanza hacia -z: adelantar la mira lo baja en pantalla y
+    // descubre camino por arriba, que es donde hay que decidir.
+    lookTarget.current.set(px, 0.4, pz - encuadre.lookAhead);
 
     if (runtime.shakeTimer > 0) {
       runtime.shakeTimer = Math.max(0, runtime.shakeTimer - dt);
@@ -158,7 +183,7 @@ export function CameraRig() {
 
   return (
     <>
-      <OrthographicCamera ref={camera} makeDefault zoom={BASE_ZOOM} near={CAM_NEAR} far={CAM_FAR} />
+      <OrthographicCamera ref={camera} makeDefault zoom={encuadre.zoom} near={CAM_NEAR} far={CAM_FAR} />
       {/* Ver el bloque de constantes de sombra arriba: cada ajuste corrige un
           artefacto concreto (moteado, sombra despegada, siluetas que hierven). */}
       <directionalLight

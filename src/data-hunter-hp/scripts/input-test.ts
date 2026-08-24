@@ -12,7 +12,9 @@ const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 page.on('pageerror', (e) => console.error('[pageerror]', String(e)));
 await page.goto(URL, { waitUntil: 'networkidle' });
-await page.getByRole('button', { name: 'Iniciar misión' }).click();
+await page.getByRole('button', { name: 'Jugar', exact: true }).click();
+await page.waitForTimeout(250);
+await page.getByRole('button', { name: 'A jugar' }).click();
 await page.waitForTimeout(1200);
 
 const reset = () =>
@@ -34,12 +36,17 @@ const stats = () => page.evaluate(() => ({ ...(window as any).__DH.debug.stats }
 
 const results: any[] = [];
 
-// 1) Toques sueltos. RETROCEDER NO EXISTE (regla de Crossy Road): ArrowDown y
-//    KeyS se encolan pero la lógica los descarta, así que no dan paso.
+// 1) Toques sueltos. RECULAR SÍ EXISTE, con correa: se puede volver hasta
+//    BACK_STEPS_MAX casillas por detrás del récord (y al pasarse baja la grúa o
+//    la grúa a soltarte un contenedor encima — ver `world/snatch.ts` y
+//    `scripts/back-test.ts`). Este
+//    test esperaba 0 pasos de la época en que retroceder estaba prohibido a
+//    secas, así que marcaba en rojo la mecánica que el briefing enseña como
+//    movimiento número 3. Desde una fila despejada, un toque atrás = un paso.
 const TECLAS: [string, number][] = [
   ['ArrowUp', 1], ['ArrowLeft', 1], ['ArrowRight', 1],
   ['KeyW', 1], ['KeyA', 1], ['KeyD', 1], ['Space', 1],
-  ['ArrowDown', 0], ['KeyS', 0],
+  ['ArrowDown', 1], ['KeyS', 1],
 ];
 for (const [key, esperado] of TECLAS) {
   await reset();
@@ -156,8 +163,8 @@ await page.waitForTimeout(300);
 }
 
 console.table(results);
-// `encolados` siempre debe ser 1 por pulsación (eso mide el 1:1); `pasos`
-// puede ser 0 si la dirección no está permitida (retroceder).
+// `encolados` siempre debe ser 1 por pulsación (eso mide el 1:1); `pasos` puede
+// ser 0 si la lógica descarta ese destino (casilla bloqueada, fuera de correa).
 const fails = results.filter((r) => r.pasos !== r.esperado);
 if (fails.length) {
   console.error(`FALLOS: ${fails.length}/${results.length} casos no son 1 input = 1 paso`);

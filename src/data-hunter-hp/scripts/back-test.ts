@@ -1,16 +1,19 @@
 /**
- * Verificación de la MARCHA ATRÁS con correa y de los DOS castigos por quedarse
- * atrás (dron y contenedor, que se alternan):
+ * Verificación de la MARCHA ATRÁS con correa y del castigo por quedarse atrás
+ * (la grúa pórtico y su contenedor):
  *  - se puede recular hasta BACK_STEPS_MAX filas por detrás de la máxima,
  *  - el paso que se pasa de ahí dispara el castigo (no se descarta en silencio),
- *  - el dron SE LO LLEVA por los aires y la grúa lo APLASTA donde está,
- *  - cada uno cuesta UNA vida y reaparece en una fila pisable cerca del frente.
+ *  - el contenedor lo APLASTA donde está, sin levantarlo del suelo,
+ *  - cuesta UNA vida y reaparece en una fila pisable cerca del frente.
+ *
+ * Se repite DOS veces: el castigo tiene que poder volver a ocurrir en la misma
+ * partida, que es donde se vería si la grúa se queda colgada tras el primero.
  */
 import { BALANCE, rowZ } from '../src/data/balance';
 import { runtime } from '../src/store/runtime';
 import { queueMove, updatePlayer } from '../src/world/playerLogic';
 import { generateRows, isBlocked, resetRows, rows } from '../src/world/rows';
-import { backDanger, backRoomLeft, crane, drone } from '../src/world/snatch';
+import { backDanger, backRoomLeft, crane } from '../src/world/snatch';
 import { useGameStore } from '../src/store/useGameStore';
 
 const err = (msg: string) => {
@@ -59,13 +62,12 @@ function retirada(): { kind: string; alturaMax: number; squashMin: number; segun
     if (pasos > BALANCE.BACK_STEPS_MAX) err('la correa no frena nunca');
   }
   if (!backDanger()) err('no hay aviso con el margen agotado');
-  if (!drone.visible && !crane.visible) err('no se dibuja nada durante el aviso');
+  if (!crane.visible) err('la grúa no se plantó durante el aviso');
 
   queueMove('backward');
   updatePlayer(dt);
   if (!runtime.snatching) err('el paso fuera de la correa no disparó el castigo');
 
-  const kind = runtime.snatchKind;
   let alturaMax = 0;
   let squashMin = 1;
   let frames = 0;
@@ -73,14 +75,12 @@ function retirada(): { kind: string; alturaMax: number; squashMin: number; segun
     updatePlayer(dt);
     alturaMax = Math.max(alturaMax, runtime.y);
     squashMin = Math.min(squashMin, runtime.snatchSquash);
-    if (runtime.snatching && !drone.visible && !crane.visible) {
-      err(`la máquina (${kind}) desapareció a mitad del castigo`);
-    }
+    if (runtime.snatching && !crane.visible) err('la grúa desapareció a mitad del castigo');
     frames++;
   }
-  if (runtime.snatching) err(`el castigo (${kind}) no terminó nunca`);
-  if (drone.visible || crane.visible) err(`la máquina (${kind}) se quedó en pantalla al terminar`);
-  return { kind, alturaMax, squashMin, segundos: frames * dt };
+  if (runtime.snatching) err('el castigo no terminó nunca');
+  if (crane.visible) err('la grúa se quedó en pantalla al terminar');
+  return { alturaMax, squashMin, segundos: frames * dt };
 }
 
 /** Estado sano tras cada castigo: coste, reaparición y partida que sigue */
@@ -102,25 +102,20 @@ function revisaReaparicion(vidasAntes: number, kind: string) {
   if (runtime.row !== antes + 1) err(`${kind}: no avanza después (${antes} → ${runtime.row})`);
 }
 
-const vistos: string[] = [];
-for (let vuelta = 0; vuelta < 2; vuelta++) {
+for (let vuelta = 1; vuelta <= 2; vuelta++) {
   const vidasAntes = useGameStore.getState().lives;
   const r = retirada();
-  vistos.push(r.kind);
 
-  // Cada castigo cuenta una historia distinta y tiene que notarse en los datos
-  if (r.kind === 'drone') {
-    if (r.alturaMax < 5) err(`el dron apenas lo elevó ${r.alturaMax.toFixed(2)}`);
-    if (r.squashMin !== 1) err('el dron no debe aplastar a nadie');
-  } else {
-    if (r.alturaMax > 0.5) err(`el contenedor no puede levantarlo (${r.alturaMax.toFixed(2)})`);
-    if (r.squashMin > 0.2) err(`no quedó aplastado bajo el contenedor (${r.squashMin.toFixed(2)})`);
-  }
-  revisaReaparicion(vidasAntes, r.kind);
-  console.log(`  ${r.kind}: ${r.segundos.toFixed(2)} s · altura ${r.alturaMax.toFixed(1)} · aplaste ${r.squashMin.toFixed(2)}`);
+  // El contenedor APLASTA donde el colaborador está: no puede levantarlo del
+  // suelo (eso era lo que hacía el cabestrante del dron, que ya no existe).
+  if (r.alturaMax > 0.5) err(`el contenedor no puede levantarlo (${r.alturaMax.toFixed(2)})`);
+  if (r.squashMin > 0.2) err(`no quedó aplastado bajo el contenedor (${r.squashMin.toFixed(2)})`);
+
+  revisaReaparicion(vidasAntes, 'contenedor');
+  console.log(
+    `  castigo ${vuelta}: ${r.segundos.toFixed(2)} s · altura ${r.alturaMax.toFixed(1)} · ` +
+      `aplaste ${r.squashMin.toFixed(2)}`,
+  );
 }
 
-if (vistos[0] === vistos[1]) err(`los castigos no se alternan (${vistos.join(', ')})`);
-if (vistos[0] !== 'crane') err(`el primero de la partida debía ser el contenedor, fue ${vistos[0]}`);
-
-console.log(`OK  correa=${BALANCE.BACK_STEPS_MAX} pasos · castigos alternados: ${vistos.join(' → ')}`);
+console.log(`OK  correa=${BALANCE.BACK_STEPS_MAX} pasos · el contenedor cae y la grúa se retira, dos veces`);

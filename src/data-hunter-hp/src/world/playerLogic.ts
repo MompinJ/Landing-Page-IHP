@@ -3,7 +3,15 @@ import { BALANCE, colX, rowZ } from '../data/balance';
 import { debug } from '../debug/debug';
 import { runtime, type MoveDirection } from '../store/runtime';
 import { useGameStore } from '../store/useGameStore';
-import { cardAt, extendRowsIfNeeded, isBlocked, megaDockCarry, zoneOf } from './rows';
+import {
+  cardAt,
+  cardNearX,
+  extendRowsIfNeeded,
+  isBlocked,
+  megaDockCarry,
+  zoneOf,
+  type CardData,
+} from './rows';
 import { backLimitRow, startSnatch, updateSnatch } from './snatch';
 import { vfxBus } from './vfxBus';
 
@@ -47,9 +55,9 @@ export function updatePlayer(dt: number) {
   runtime.prevX = runtime.x;
   runtime.prevZ = runtime.z;
 
-  // EL DRON DE SEGURIDAD patrulla sobre el que se queda atrás y, si se pasa de
-  // la correa, lo engancha y se lo lleva. Mientras dura, la posición la escribe
-  // `snatch.ts`: aquí no hay ni saltos ni cola que atender.
+  // LA GRÚA PÓRTICO se planta sobre el que se queda atrás y, si se pasa de la
+  // correa, le suelta el contenedor encima. Mientras dura, la posición la
+  // escribe `snatch.ts`: aquí no hay ni saltos ni cola que atender.
   if (updateSnatch(dt)) return;
 
   if (runtime.stunTimer > 0) {
@@ -67,7 +75,7 @@ export function updatePlayer(dt: number) {
     // RETROCESO CON CORREA. Se puede recular —para dejar pasar un tren, para
     // esperar la barcaza siguiente— pero solo `BACK_STEPS_MAX` filas por detrás
     // de la máxima alcanzada. El paso que se pasa de ahí NO se descarta en
-    // silencio (eso se lee como que el mando falla): baja el dron.
+    // silencio (eso se lee como que el mando falla): baja el contenedor.
     // El borde del mapa (fila negativa) sí es simple muro, ver `isBlocked`.
     if (direction === 'backward' && target.row >= 0 && target.row < backLimitRow()) {
       startSnatch();
@@ -188,17 +196,48 @@ function completeStep() {
 
   // Tarjeta sobre la casilla de aterrizaje
   const card = cardAt(runtime.row, runtime.col);
-  if (card) {
-    card.collected = true;
-    if (card.good) {
-      store.collectGood(card.label);
-      playGood(useGameStore.getState().multiplier);
-      vfxBus.push({ kind: 'collect', x: runtime.x, y: 1.0, z: runtime.z });
-    } else {
-      store.hitBad(card.label);
-      playBad();
-      runtime.shakeTimer = BALANCE.SHAKE_DURATION;
-      vfxBus.push({ kind: 'impact', x: runtime.x, y: 1.0, z: runtime.z });
-    }
+  if (card) takeCard(card);
+}
+
+/**
+ * Cobra una tarjeta (verde o roja) esté quien esté pisándola y como sea que
+ * haya llegado hasta ella: aterrizando de un salto o pasando por encima
+ * arrastrado. Un solo sitio donde se resuelve, para que las dos maneras de
+ * recogerla suenen, puntúen y suelten las mismas partículas.
+ */
+function takeCard(card: CardData) {
+  card.collected = true;
+  const store = useGameStore.getState();
+  if (card.good) {
+    store.collectGood(card.label);
+    playGood(useGameStore.getState().multiplier);
+    vfxBus.push({ kind: 'collect', x: runtime.x, y: 1.0, z: runtime.z });
+  } else {
+    store.hitBad(card.label);
+    playBad();
+    runtime.shakeTimer = BALANCE.SHAKE_DURATION;
+    vfxBus.push({ kind: 'impact', x: runtime.x, y: 1.0, z: runtime.z });
   }
+}
+
+/**
+ * RECOGIDA AL PASAR POR ENCIMA. Llamar una vez por frame DESPUÉS de que se
+ * hayan movido el suelo y las plataformas (`updateConveyor` /
+ * `updateWaterRiding`), que son las que dejan al colaborador en una X que no
+ * eligió él.
+ *
+ * Corrige lo que se leía como un fallo del juego: en la BANDA de TUM el suelo
+ * te lleva por encima del hexágono verde y no lo recogías — para cogerlo había
+ * que saltar justo encima, o sea que la fila con premio era la única donde el
+ * premio se te escapaba solo. Si el colaborador lo pisa, es suyo.
+ *
+ * Vale igual para las rojas, y así tiene que ser: si la banda te arrastra
+ * hacia un riesgo, quitarte de en medio a tiempo ES la mecánica de la fila.
+ * Durante el salto no se barre — ahí la recogida la resuelve `completeStep` en
+ * la casilla de aterrizaje, y barrer en el aire recogería lo que se sobrevuela.
+ */
+export function sweepPickup() {
+  if (runtime.stepping || runtime.snatching || runtime.stunTimer > 0) return;
+  const card = cardNearX(runtime.row, runtime.x);
+  if (card) takeCard(card);
 }

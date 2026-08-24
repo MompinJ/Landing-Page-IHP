@@ -15,7 +15,7 @@ export const PALETTE = {
   steel: '#8A9BA8',
   /** Blanco técnico — cascos, terminales smart */
   white: '#F5F7FA',
-  /** Cyan smart-port — HUD, drones, acentos Digital Twin */
+  /** Cyan smart-port — HUD y acentos Digital Twin */
   cyan: '#00E5FF',
   /** Naranja seguridad — chaleco reflejante, conos, barreras */
   safetyOrange: '#FF6600',

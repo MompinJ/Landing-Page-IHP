@@ -1,4 +1,4 @@
-# HIGGSFIELD AI — Prompts de Assets para "Data Hunter - Hutchison Ports"
+# HIGGSFIELD AI — Prompts de Assets para "Port Quest - Hutchison Ports"
 
 > **Assets ya generados** (nano_banana_pro, ~2 créditos c/u) y cableados al juego:
 > `public/textures/` → `container.png` (corrugado 1:1 gris neutro, se tiñe),

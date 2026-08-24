@@ -91,6 +91,13 @@ function applyWorldUV(g: THREE.BufferGeometry, size: [number, number, number], p
  *  de manga 2.9 son claves distintas; dos iguales comparten la misma geometría. */
 const cache = new Map<string, THREE.BufferGeometry>();
 
+/** Cuántas variantes de geometría se han fusionado ya. Lo usa el precalentado
+ *  (`Warmup.tsx`) para saber si sigue descubriendo variantes nuevas o si ya ha
+ *  saturado, y `scripts/jank-test.ts` para medirlo. */
+export function mergedCacheSize(): number {
+  return cache.size;
+}
+
 /** Reutiliza el color convertido a espacio lineal (lo que espera el atributo) */
 const tmpColor = new THREE.Color();
 

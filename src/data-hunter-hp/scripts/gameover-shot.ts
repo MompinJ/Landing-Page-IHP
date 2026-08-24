@@ -18,7 +18,9 @@ const browser = await chromium.launch({
 const page = await browser.newPage({ viewport: { width: 1500, height: 950 } });
 page.on('pageerror', (e) => console.error('[pageerror]', String(e)));
 await page.goto(URL, { waitUntil: 'networkidle' });
-await page.getByRole('button', { name: 'Iniciar misión' }).click();
+await page.getByRole('button', { name: 'Jugar', exact: true }).click();
+await page.waitForTimeout(250);
+await page.getByRole('button', { name: 'A jugar' }).click();
 await page.waitForTimeout(1200);
 
 async function capturar(unidades: string[], nombre: string) {

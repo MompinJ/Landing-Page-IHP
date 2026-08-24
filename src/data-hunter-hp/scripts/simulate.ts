@@ -9,9 +9,9 @@
 import { BALANCE } from '../src/data/balance';
 import { runtime, type MoveDirection } from '../src/store/runtime';
 import { useGameStore } from '../src/store/useGameStore';
-import { queueMove, updatePlayer } from '../src/world/playerLogic';
+import { queueMove, sweepPickup, updatePlayer } from '../src/world/playerLogic';
 import { rows } from '../src/world/rows';
-import { checkHits, updateTraffic, updateWaterRiding } from '../src/world/traffic';
+import { checkHits, updateConveyor, updateTraffic, updateWaterRiding } from '../src/world/traffic';
 import { vfxBus } from '../src/world/vfxBus';
 
 const DT = 1 / 60;
@@ -26,12 +26,17 @@ let queuedMoves = 0;
  * Golpes absorbidos por el ESCUDO: emiten VFX de impacto pero, al no costar
  * vida, no incrementan `obstaclesHit`. Hay que contarlos aparte o el cuadre
  * de eventos VFX falla en cuanto el bot recoge un concepto de protección.
+ *
+ * Se cuentan como «eventos de choque que NO subieron el contador de golpes»,
+ * no por los puntos del evento: chocar ya no resta puntos (`SCORE_OBSTACLE`
+ * = 0), así que mirar `points === 0` marcaba como absorbido TODO golpe y el
+ * cuadre salía al doble.
  */
-let shieldAbsorbs = 0;
+let obstacleEvents = 0;
 useGameStore.subscribe(
   (s) => s.lastEvent,
   (e) => {
-    if (e && e.type === 'obstacle' && e.points === 0) shieldAbsorbs++;
+    if (e && e.type === 'obstacle') obstacleEvents++;
   },
 );
 
@@ -55,8 +60,12 @@ while (useGameStore.getState().phase === 'playing' && frames < 60 * 200) {
     queueMove(randomMove());
     queuedMoves++;
   }
+  // El mismo orden EXACTO que <Player/>: si la simulación se salta un paso,
+  // deja de valer como red de seguridad justo en el bioma que ese paso mueve.
   updatePlayer(DT);
   updateWaterRiding(DT); // mecánica río (abordar barcaza / caer al agua)
+  updateConveyor(DT); // TUM: el suelo que se mueve
+  sweepPickup(); // recogida al pasar por encima
   checkHits(); // igual que <Player/>: la colisión va tras mover al jugador
 
   vfxEvents += vfxBus.length;
@@ -77,7 +86,7 @@ const results = {
   vehicleHits: s.obstaclesHit,
   queuedMoves,
   livesLeft: s.lives,
-  shieldAbsorbs,
+  shieldAbsorbs: obstacleEvents - s.obstaclesHit,
   vfxEvents,
 };
 console.table(results);
@@ -89,10 +98,10 @@ if (s.maxRow < 2) failures.push(`el jugador apenas avanzó (maxRow=${s.maxRow})`
 if (rows.length < BALANCE.ROWS_BATCH + 2) failures.push('el mapa no se extendió');
 if (s.maxRow > rows.length - BALANCE.ROWS_EXTEND_AT) failures.push('el mapa se quedó corto frente al jugador');
 if (s.goodCollected + s.badHit + s.obstaclesHit === 0) failures.push('cero interacciones (tarjetas/vehículos sospechosos)');
-if (vfxEvents !== s.goodCollected + s.badHit + s.obstaclesHit + shieldAbsorbs)
+if (vfxEvents !== s.goodCollected + s.badHit + obstacleEvents)
   failures.push(
     `descuadre eventos VFX (${vfxEvents}) vs eventos de juego ` +
-      `(${s.goodCollected}+${s.badHit}+${s.obstaclesHit}+${shieldAbsorbs} escudo)`,
+      `(${s.goodCollected} verdes + ${s.badHit} rojas + ${obstacleEvents} choques)`,
   );
 if (runtime.col < BALANCE.MIN_TILE || runtime.col > BALANCE.MAX_TILE) failures.push('el jugador salió del tablero');
 

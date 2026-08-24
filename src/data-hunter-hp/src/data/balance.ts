@@ -8,6 +8,9 @@
 export const BALANCE = {
   /** Vidas por partida (la partida termina al perderlas, no por tiempo) */
   LIVES: 3,
+  /** Conceptos correctos SEGUIDOS que devuelven una vida (nunca por encima de
+   *  LIVES: la vida extra repone, no acumula). */
+  EXTRA_LIFE_STREAK: 15,
   /** Referencia de duración (ya solo informativa para la simulación) */
   GAME_DURATION: 90,
 
@@ -41,19 +44,7 @@ export const BALANCE = {
    *  antes de que esté montada, `snatch.ts` la deja plantarse primero. */
   BACK_WARN_STEPS: 1,
 
-  // --- RETIRADA DEL DRON DE SEGURIDAD (lo que le pasa al que se queda atrás) ---
-  /** Descenso: el dron cae en vertical sobre el colaborador y frena en seco */
-  DRONE_DIVE_TIME: 0.7,
-  /** Enganche del cabestrante: la garra cierra y el cuerpo despega */
-  DRONE_GRAB_TIME: 0.18,
-  /** Izado y salida de cuadro, con la carga oscilando bajo el dron */
-  DRONE_RISE_TIME: 1.3,
-  /** Largo del cable del cabestrante. Generoso a propósito: con un cable corto
-   *  el colaborador se lee como PARTE del dron y no como alguien colgando de
-   *  él, que es justo lo que la escena tiene que contar. */
-  DRONE_ROPE: 2.0,
-
-  // --- CONTENEDOR SOBRE LA CABEZA (la otra retirada; se alternan) ---
+  // --- CONTENEDOR SOBRE LA CABEZA (lo que le pasa al que se queda atrás) ---
   /** Los twistlocks abren y el spreader suelta */
   DROP_RELEASE_TIME: 0.32,
   /** Caída libre desde la cota de espera */
@@ -78,12 +69,17 @@ export const BALANCE = {
   // --- Biomas (una unidad de negocio cada uno; ver BIOME_SEQUENCE) ---
   /** Filas por unidad de negocio.
    *
-   *  Bajó de 26 a 18 al entrar la quinta terminal (TUM). Con 26 la vuelta
-   *  completa eran 130 filas y la simulación headless muere en la 40: el
-   *  jugador de stand se iba habiendo visto bioma y medio, así que las
-   *  terminales del final no existían en la práctica. Con 18 la vuelta son 90
-   *  filas y una partida decente pasa por todas. */
-  ZONE_LENGTH: 18,
+   *  Bajó de 26 a 18 al entrar la quinta terminal (TUM), y de 18 a 13 por el
+   *  mismo motivo que entonces: la vuelta completa era de 90 filas y las
+   *  terminales del final no llegaban a verse. El ASTILLERO es el cuarto de la
+   *  rotación, o sea que había que sobrevivir hasta la fila 54 para pisarlo por
+   *  primera vez — existía en el código y no en la partida.
+   *
+   *  Con 13 la vuelta son 65 filas y el astillero arranca en la 39: quince
+   *  filas antes. Se paga con terminales más cortas, pero el reparto es mejor
+   *  para un stand — se ven MÁS unidades de negocio en la misma partida, que es
+   *  justo lo que persigue el pasaporte. */
+  ZONE_LENGTH: 13,
 
   // --- Bioma TILH (terminal intermodal ferroviaria) ---
   /** Largo del tren en casillas (locomotora + plataformas) */
@@ -117,15 +113,45 @@ export const BALANCE = {
 
   // --- Vehículos (tutorial: 125/156/188 px/s; rebajados para el stand) ---
   VEHICLE_SPEEDS: [2.0, 2.5, 3.0],
-  /** Factor de dificultad progresiva por profundidad de fila (cap +20%) */
-  SPEED_ROW_FACTOR: 1 / 300,
-  SPEED_FACTOR_CAP: 1.2,
-  /** Máximo de filas de tráfico consecutivas. A 1, detrás de cada fila con
-   *  peligro móvil va siempre una de descanso: nunca hay que encadenar dos
-   *  esquivas sin parar (accesibilidad del stand). */
+
+  // --- DIFICULTAD PROGRESIVA (cuanto más lejos, más difícil) ---
+  /**
+   * Filas que hay que recorrer para llegar a la dificultad MÁXIMA. `RAMP_ROWS`
+   * es la escala de todo lo que sube con la distancia (ver `difficultyForRow`):
+   * velocidades, densidad de riesgo y filas de peligro encadenadas.
+   *
+   * 150 filas ≈ ocho terminales (ZONE_LENGTH 18), o sea vuelta y media larga:
+   * el jugador de stand que cruza dos o tres terminales nota que aprieta, y el
+   * que aguanta la vuelta entera se encuentra el juego al máximo. Que la rampa
+   * acabe en algún punto es deliberado: si no tuviera techo, la partida larga
+   * dejaría de ser difícil para ser imposible, y eso no premia jugar bien.
+   */
+  RAMP_ROWS: 150,
+  /** Velocidad de los vehículos: de ×1 al arrancar a ×1.75 al final de la
+   *  rampa. Antes el techo era ×1.2 alcanzado a la fila 60 — o sea que la
+   *  dificultad estaba resuelta antes de salir de la segunda terminal. */
+  SPEED_FACTOR_CAP: 1.75,
+  /** Filas de tráfico consecutivas: 1 al principio (detrás de cada peligro
+   *  móvil va una de descanso) y 2 pasada la mitad de la rampa. Encadenar dos
+   *  esquivas sin parar es el salto de exigencia más grande que hay, así que
+   *  llega tarde y no sube más de ahí. */
   MAX_ROAD_STREAK: 1,
-  /** Filas iniciales garantizadas sin tráfico */
-  SAFE_START_ROWS: 8,
+  ROAD_STREAK_MAX_LATE: 2,
+  /** Fracción de la rampa a partir de la cual se permite encadenar peligros */
+  ROAD_STREAK_AT: 0.5,
+  /** Tarjetas ROJAS: su probabilidad se multiplica por esto al final de la
+   *  rampa. Más riesgo en el tablero = más lectura antes de saltar. */
+  BAD_CARD_RAMP: 2.0,
+  /** ...y las VERDES escasean un poco (×0.8): el combo se vuelve algo que hay
+   *  que ir a buscar, no algo que cae solo por avanzar. */
+  GOOD_CARD_RAMP: 0.8,
+  /** La banda transportadora arrastra más fuerte cuanto más lejos (×1.55) */
+  BELT_SPEED_RAMP: 1.55,
+
+  /** Filas iniciales garantizadas sin tráfico. Bajó de 8 con las zonas de 13:
+   *  ocupaba más de la mitad de la primera terminal y la TEC se presentaba
+   *  como un patio vacío. Con 5 sigue habiendo arranque de cortesía. */
+  SAFE_START_ROWS: 5,
 
   // --- Zona cruceros (ECV) ---
   /** Largo DIBUJADO del crucero */
@@ -244,15 +270,31 @@ export const BALANCE = {
    *  DE ANDAMIOS: una pasarela por fila, alineadas en la misma columna, o se
    *  rodean por los costados. */
   /** Probabilidad de ARRANCAR un dique vertical en una fila de patio elegible.
-   *  Más baja que la vieja DOCK_CHANCE porque cada dique ocupa varias filas. */
-  VDOCK_CHANCE: 0.34,
+   *  Más baja que la vieja DOCK_CHANCE porque cada dique ocupa varias filas.
+   *  Subida de 0.34: con aquella, el 36% de la zona salía patio pelado que
+   *  podía estar en cualquier otra terminal, y el dique seco —que es LO que
+   *  hace que un astillero se lea como astillero— aparecía 1.45 veces por
+   *  zona. Ver `scripts/shipyard-audit.ts`.
+   *
+   *  OJO al subirla más: cada dique ocupa VDOCK_LEN filas, así que subir esto
+   *  se come el presupuesto de filas del bioma y ahoga el peligro MÓVIL. Con
+   *  0.44 los diques pasaban a 8.4 filas por zona y las grúas pórtico se
+   *  quedaban clavadas en 2.3, que era justo lo contrario de lo que se buscaba. */
+  VDOCK_CHANCE: 0.4,
   /** Ancho en columnas. A ESCALA DEL DIQUE MAYOR: los de 2-3 casillas se
    *  leían como zanjas al lado del colaborador, no como un dique seco.
    *  Tope 5: con 6, el hueco que queda para rodearlo por un costado baja de
    *  5 casillas y el rodeo se vuelve una carrera lateral. */
   VDOCK_WIDTH: [4, 5] as const,
-  /** Fondo en filas — el conjunto de andamios que hay que encadenar */
-  VDOCK_LEN: [5, 6, 7] as const,
+  /** Fondo en filas — el conjunto de andamios que hay que encadenar.
+   *
+   *  Acortado desde [5,6,7]: el bioma tiene 18 filas y de ahí ya salen fijas el
+   *  cartel de entrada, el dique mayor y sus dos filas despejadas. Con diques
+   *  de hasta 7 filas, DOS diques se comían casi todo lo que quedaba y no había
+   *  presupuesto para grúas ni tráfico — el astillero acababa siendo el bioma
+   *  con menos peligro móvil de los cinco. Diques más cortos dejan sitio sin
+   *  quitar ni un dique: siguen apareciendo igual de a menudo. */
+  VDOCK_LEN: [4, 5, 6] as const,
   /** Probabilidad de buque en reparación dentro (solo si len ≥ 4: el casco
    *  monumental necesita eslora para leerse como barco) */
   VDOCK_SHIP_CHANCE: 0.7,
@@ -269,8 +311,16 @@ export const BALANCE = {
   /** Fila del dique dentro de la zona (zpos). Es un TAPÓN total: no se rodea.
    *  Se cruza de dos maneras — por las PASARELAS de andamio que salvan el
    *  buque POR ENCIMA, o poniéndote en el PUNTO DE EMBARQUE para que la grúa
-   *  del dique te aviente al otro lado. */
-  MEGADOCK_POS: 12,
+   *  del dique te aviente al otro lado.
+   *
+   *  TIENE QUE CABER CON SUS DOS VECINAS: la fila de antes y la de después se
+   *  fuerzan despejadas (ver `generateRow`), la primera para que `ensurePassable`
+   *  no perfore el muro y la segunda porque ahí ATERRIZA el lanzamiento de la
+   *  grúa y no puede caer sobre tráfico. Con ZONE_LENGTH 13 y la posición
+   *  antigua (12) el dique caía en la ÚLTIMA fila de la zona y su vecina de
+   *  después ya era la frontera del bioma siguiente, así que se centra: 6 deja
+   *  las tres filas (5, 6 y 7) holgadamente dentro. */
+  MEGADOCK_POS: 6,
   /** Cota de la pasarela de andamio: por ENCIMA de TODO el buque — el cruce a
    *  pie pasa sobre el barco, no lo rodea.
    *
@@ -322,18 +372,49 @@ export const BALANCE = {
   CRANE_LEG_HALF_Z: 0.66,
 
   // --- Puntuación ---
-  SCORE_GOOD: 100,
-  SCORE_BAD: -50,
-  SCORE_OBSTACLE: -25,
-  /** Puntos por cada fila nueva alcanzada (progreso, como el score del tutorial) */
+  /**
+   * TODO SUMA Y RESTA DE DIEZ EN DIEZ, como en Terminal Rally: el marcador del
+   * stand se lee de un vistazo y las dos dinámicas hablan el mismo idioma.
+   * Antes esto iba en centenas (+100/−50) y una partida decente pasaba de
+   * 20.000 puntos: la cifra dejaba de significar nada.
+   */
+  SCORE_GOOD: 10,
+  /** Concepto de riesgo — lo mismo que cuesta en Terminal Rally */
+  SCORE_BAD: -10,
+  /**
+   * CHOCAR NO RESTA PUNTOS: cuesta UNA VIDA y ya. Cobrar las dos cosas era
+   * castigo doble por el mismo error, y encima el único que el jugador no
+   * siempre puede evitar (una grúa que barre la fila entera). La vida es la
+   * moneda de los golpes; los puntos, la de las decisiones.
+   */
+  SCORE_OBSTACLE: 0,
+  /** Puntos de progreso: +10 cada SCORE_ROW_EVERY filas nuevas. No por fila —
+   *  a fila suelta el marcador se convertía en un cuentakilómetros y las
+   *  tarjetas dejaban de decidir la partida. */
   SCORE_ROW: 10,
+  SCORE_ROW_EVERY: 10,
   COMBO_X2_AT: 5,
   COMBO_X3_AT: 10,
   /** PASAPORTE: bonus al sellar una terminal nueva, y premio gordo al
    *  completar las cinco. Es lo que convierte la partida infinita en un
-   *  recorrido con meta. */
-  SCORE_STAMP: 250,
-  SCORE_PASSPORT_COMPLETE: 1500,
+   *  recorrido con meta. Reescalados a la puntuación de decenas: el sello vale
+   *  5 conceptos y el pasaporte entero 30. */
+  SCORE_STAMP: 50,
+  SCORE_PASSPORT_COMPLETE: 300,
+
+  // --- Recogida de tarjetas ---
+  /**
+   * RADIO DE RECOGIDA en X. La tarjeta se recoge cuando el colaborador PASA
+   * POR ENCIMA de ella, no solo cuando aterriza en su casilla: media casilla a
+   * cada lado, o sea justo el ancho de la casilla de la tarjeta.
+   *
+   * Existe porque en las filas donde el suelo se mueve (la BANDA de TUM) la
+   * posición del colaborador es continua, no una casilla: la banda lo pasaba
+   * por encima del hexágono verde y no lo recogía, y para cogerlo había que
+   * saltar en el sitio justo. Eso se lee como que el juego falla, no como
+   * mecánica. Ver `sweepPickup` en `playerLogic.ts`.
+   */
+  PICKUP_RADIUS: 0.55,
 
   // --- Colisión ---
   /** Media caja del colaborador. El torso mide 0.56×0.34; se usan valores algo
@@ -391,33 +472,168 @@ export function hitHalfExtents(kind: string): { x: number; z: number } {
 }
 
 /**
+ * DESPLAZAMIENTO DE LA CÁMARA respecto al jugador y ALTURA del punto de mira.
+ * Son los de `components/CameraRig.tsx` y viven aquí porque `viewRowsFor` tiene
+ * que proyectar el encuadre EXACTO para saber cuántas filas dibujar: si las dos
+ * cuentas se separan, aparece océano en el hueco del mapa.
+ */
+export const CAM_OFFSET: readonly [number, number, number] = [5.2, 9.2, 6.4];
+export const CAM_LOOK_Y = 0.4;
+
+/**
  * Filas que hay que dibujar para que la cámara NUNCA vea océano en el hueco del
  * mapa, en función del tamaño de la ventana.
  *
- * La cámara es ortográfica con zoom FIJO (58): a más resolución, más mundo entra
- * en cuadro. Con la ventana fija de 16/12 filas eso significaba que en cuanto la
- * pantalla pasaba de ~1280×800 el mapa se acababa dentro del encuadre y
- * aparecía el azul del océano de fondo. Medido: 1600×900 ve 17 filas adelante,
- * 1920×1080 ve 20, 2560×1440 ve 26 y 4K ve 39.
+ * Con la ventana fija de 16/12 filas, en cuanto la pantalla pasaba de ~1280×800
+ * el mapa se acababa dentro del encuadre y aparecía el azul del océano de fondo.
+ * Medido: 1600×900 ve 17 filas adelante, 1920×1080 ve 20, 2560×1440 ve 26 y 4K
+ * ve 39.
  *
- * Los coeficientes salen de proyectar las ESQUINAS de la caja ortográfica sobre
- * el plano del suelo con la base de la cámara de `CameraRig` (offset 5.2/9.2/6.4
- * mirando a 0/0.4/-1.2). Adelante y atrás solo difieren en el término constante.
+ * CÓMO SE CUENTA, y por qué ya no son coeficientes ajustados. Antes esto era
+ * `1.194·halfH + 0.565·halfW ± 1.545`: tres números medidos UNA vez contra el
+ * encuadre de escritorio, con el zoom clavado en 58 y la mira siempre 1.2 por
+ * delante. En cuanto el teléfono movió las dos cosas (`camZoomFor` aleja la
+ * cámara, `camLookAheadFor` adelanta la mira) los coeficientes pasaron a mentir
+ * — y a mentir CORTO, que es el lado malo: se dibujaban 17 filas donde la
+ * cámara alcanzaba 18.5, o sea océano por delante justo en la pantalla nueva.
+ *
+ * Así que se proyecta de verdad. En una cámara ORTOGRÁFICA todos los rayos son
+ * paralelos a la dirección de vista, así que basta con lanzar las cuatro
+ * ESQUINAS de la caja de vista contra el plano del suelo y quedarse con la que
+ * más lejos cae en cada sentido. Sale exacto para cualquier zoom y cualquier
+ * mira, sin nada que reajustar la próxima vez que se toque el encuadre.
  */
 export function viewRowsFor(width: number, height: number): { ahead: number; behind: number } {
-  const halfW = width / CAM_ZOOM / 2;
-  const halfH = height / CAM_ZOOM / 2;
-  const span = 1.194 * halfH + 0.565 * halfW; // alcance de la esquina, en unidades
+  const zoom = camZoomFor(width, height);
+  const halfW = width / zoom / 2;
+  const halfH = height / zoom / 2;
+
+  // Base de la vista, con el jugador en el origen
+  const look: [number, number, number] = [0, CAM_LOOK_Y, -camLookAheadFor(width, height)];
+  const dir: [number, number, number] = [
+    look[0] - CAM_OFFSET[0],
+    look[1] - CAM_OFFSET[1],
+    look[2] - CAM_OFFSET[2],
+  ];
+  const dl = Math.hypot(dir[0], dir[1], dir[2]);
+  const v: [number, number, number] = [dir[0] / dl, dir[1] / dl, dir[2] / dl];
+
+  // Derecha de pantalla: perpendicular a la vista y horizontal (no tiene
+  // componente vertical, por eso más abajo solo `U` interviene en la altura).
+  const rl = Math.hypot(v[2], v[0]);
+  const R: [number, number] = [-v[2] / rl, v[0] / rl]; // [x, z]
+
+  // Arriba de pantalla: el vertical del mundo con la parte que mira a cámara
+  // descontada, renormalizado.
+  const d = v[1];
+  const u: [number, number, number] = [-d * v[0], 1 - d * v[1], -d * v[2]];
+  const ul = Math.hypot(u[0], u[1], u[2]);
+  const U: [number, number, number] = [u[0] / ul, u[1] / ul, u[2] / ul];
+
+  let adelante = -Infinity;
+  let atras = -Infinity;
+  for (const sw of [-halfW, halfW]) {
+    for (const sh of [-halfH, halfH]) {
+      // Cuánto hay que avanzar desde la esquina, a lo largo de la vista, hasta
+      // tocar el suelo (y = 0)
+      const t = -(look[1] + sh * U[1]) / v[1];
+      const z = look[2] + sw * R[1] + sh * U[2] + t * v[2];
+      adelante = Math.max(adelante, -z);
+      atras = Math.max(atras, z);
+    }
+  }
+
   const margen = 2; // filas de colchón para que nunca se vea el borde
   const filas = (z: number) => Math.ceil(z / BALANCE.TILE) + margen;
   return {
-    ahead: Math.min(BALANCE.VIEW_MAX, Math.max(BALANCE.VIEW_AHEAD, filas(span + 1.545))),
-    behind: Math.min(BALANCE.VIEW_MAX, Math.max(BALANCE.VIEW_BEHIND, filas(span - 1.545))),
+    ahead: Math.min(BALANCE.VIEW_MAX, Math.max(BALANCE.VIEW_AHEAD, filas(adelante))),
+    behind: Math.min(BALANCE.VIEW_MAX, Math.max(BALANCE.VIEW_BEHIND, filas(atras))),
   };
 }
 
-/** Zoom de la cámara ortográfica (ver CameraRig) */
+/**
+ * RECORTE de la ventana de dibujo al techo del nivel gráfico.
+ *
+ * Cada fila de más son mallas, llamadas de dibujo y —si hay sombra— una segunda
+ * pasada de todas ellas. En una pantalla de 4K con gráfica integrada, dibujar
+ * las 41 filas de puerto que la cámara alcanza es justo lo que no se puede
+ * pagar, así que el nivel pone techo (ver `render/quality.ts`).
+ *
+ * Recortar tiene un coste y hay que verlo: por debajo de lo que la cámara
+ * alcanza, en el hueco del mapa aparece el azul del océano. Por eso se recorta
+ * a proporción pero SIEMPRE se conserva más vista por delante que por detrás —
+ * quedarse corto por delante se ve de frente y quedarse corto por detrás casi
+ * no se mira.
+ *
+ * Vive aquí, y no dentro del componente, para que `scripts/viewport-test.ts`
+ * pueda comprobar el resultado FINAL: la ventana que de verdad se dibuja es
+ * esta, no la que devuelve `viewRowsFor`, y el fallo que hay que cazar es que
+ * el techo se coma lo que la cámara ve.
+ */
+export function clampViewRows(
+  view: { ahead: number; behind: number },
+  maxRows: number,
+): { ahead: number; behind: number } {
+  if (view.ahead + view.behind <= maxRows) return view;
+  const k = maxRows / (view.ahead + view.behind);
+  return {
+    ahead: Math.max(BALANCE.VIEW_AHEAD, Math.round(view.ahead * k)),
+    behind: Math.max(8, Math.round(view.behind * k)),
+  };
+}
+
+/** Zoom de la cámara ortográfica en el caso bueno: pantalla de escritorio.
+ *  Es el TECHO, no el valor: `camZoomFor` solo puede alejarse de aquí. */
 export const CAM_ZOOM = 58;
+
+/**
+ * ANCHO Y ALTO MÍNIMOS DE MUNDO en cuadro, en unidades. Es el contrato de
+ * jugabilidad: pase lo que pase con la pantalla, el jugador ve al menos esto.
+ *
+ * De dónde sale el número. La cámara mira en diagonal, así que una casilla de
+ * columna (eje X, 1.1 de lado) no ocupa 1.1 de ancho de pantalla sino su
+ * proyección sobre el eje horizontal de la vista: con el desplazamiento de
+ * `CameraRig` (5.2/9.2/6.4 mirando al jugador) ese factor es 0.777, o sea 0.855
+ * por casilla. Once unidades son entonces ~13 columnas a la vista, que es lo
+ * que hay que ver para decidir a dónde esquivar (Crossy Road enseña nueve).
+ *
+ * Y ES UN MÍNIMO, NO UN OBJETIVO: en una pantalla ancha el zoom se queda en
+ * `CAM_ZOOM` y se ve MÁS. Lo que arregla es el caso contrario, que era el roto:
+ * con el zoom clavado en 58, un teléfono de 390 px de ancho veía 6.7 unidades
+ * — seis casillas — y esquivar era adivinar.
+ */
+const VISTA_MIN = 11;
+
+/**
+ * Zoom de la cámara ortográfica para un tamaño de ventana dado.
+ *
+ * En una cámara ortográfica el zoom es literalmente «píxeles por unidad de
+ * mundo», así que garantizar que caben N unidades es una división. Se toma el
+ * MENOR de los tres candidatos porque el contrato tiene que cumplirse en los
+ * dos ejes a la vez: en vertical manda el ancho y en horizontal manda el alto.
+ */
+export function camZoomFor(width: number, height: number): number {
+  return Math.min(CAM_ZOOM, width / VISTA_MIN, height / VISTA_MIN);
+}
+
+/**
+ * A DÓNDE MIRA la cámara, medido en unidades por DELANTE del jugador.
+ *
+ * El jugador va siempre hacia -z, así que adelantar el punto de mira lo empuja
+ * hacia ABAJO en la pantalla y descubre camino por arriba, que es donde está lo
+ * que hay que decidir. En una pantalla de escritorio (16:9) 1.2 basta y sobra.
+ *
+ * En un teléfono en VERTICAL no: el cuadro es más alto que ancho, el jugador
+ * caía a media pantalla y la mitad de abajo era suelo ya recorrido — sitio
+ * gastado en enseñar lo que ya pasó. El adelanto crece con la relación de
+ * aspecto hasta 3.4 unidades (tres filas), que deja al corredor sobre el tercio
+ * inferior. El tope existe porque pasado ese punto el personaje se va al borde
+ * de abajo y se pierde de vista al saltar.
+ */
+export function camLookAheadFor(width: number, height: number): number {
+  const alargada = Math.max(0, height / width - 1); // 0 en apaisado, ~0.7 en un móvil vertical
+  return 1.2 + Math.min(2.2, alargada * 3.2);
+}
 
 /** X del centro de una columna del tablero */
 export function colX(col: number): number {
@@ -429,7 +645,45 @@ export function rowZ(row: number): number {
   return -row * BALANCE.TILE;
 }
 
+/**
+ * DIFICULTAD 0..1 según lo lejos que se haya llegado. Es la única fuente de la
+ * curva: todo lo que aprieta con la distancia (velocidades, densidad de
+ * riesgo, peligros encadenados, arrastre de la banda) se deriva de aquí, así
+ * que la curva se retoca en un sitio y no en siete.
+ *
+ * Arranca DESPUÉS de las filas seguras del principio — el jugador que acaba de
+ * coger el mando merece unas filas a ritmo de tutorial — y satura en
+ * `RAMP_ROWS`.
+ */
+export function difficultyForRow(rowIndex: number): number {
+  const t = (rowIndex - BALANCE.SAFE_START_ROWS) / BALANCE.RAMP_ROWS;
+  return Math.max(0, Math.min(1, t));
+}
+
 /** Multiplicador de velocidad de vehículos según profundidad (dificultad progresiva) */
 export function speedFactorForRow(rowIndex: number): number {
-  return Math.min(BALANCE.SPEED_FACTOR_CAP, 1 + rowIndex * BALANCE.SPEED_ROW_FACTOR);
+  return 1 + (BALANCE.SPEED_FACTOR_CAP - 1) * difficultyForRow(rowIndex);
+}
+
+/** Probabilidad de tarjeta VERDE en esta fila (escasean con la distancia) */
+export function goodChanceFor(rowIndex: number, base: number): number {
+  return base * (1 + (BALANCE.GOOD_CARD_RAMP - 1) * difficultyForRow(rowIndex));
+}
+
+/** Probabilidad de tarjeta ROJA en esta fila (abundan con la distancia) */
+export function badChanceFor(rowIndex: number, base: number): number {
+  return Math.min(1, base * (1 + (BALANCE.BAD_CARD_RAMP - 1) * difficultyForRow(rowIndex)));
+}
+
+/** Filas de peligro móvil que se pueden encadenar a esta profundidad */
+export function roadStreakLimitFor(rowIndex: number): number {
+  return difficultyForRow(rowIndex) >= BALANCE.ROAD_STREAK_AT
+    ? BALANCE.ROAD_STREAK_MAX_LATE
+    : BALANCE.MAX_ROAD_STREAK;
+}
+
+/** Velocidad de arrastre de la banda transportadora a esta profundidad */
+export function beltSpeedFor(rowIndex: number): number {
+  const factor = 1 + (BALANCE.BELT_SPEED_RAMP - 1) * difficultyForRow(rowIndex);
+  return BALANCE.BELT_SPEED * factor * BALANCE.TILE;
 }

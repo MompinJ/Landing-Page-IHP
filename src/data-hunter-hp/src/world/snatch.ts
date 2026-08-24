@@ -12,37 +12,24 @@ import { vfxBus } from './vfxBus';
  * máxima alcanzada. Esa correa necesita un guardián que se vea venir, porque un
  * paso que simplemente "no hace nada" se lee como que el mando falla.
  *
- * Hay DOS castigos y se ALTERNAN, para que quien juega dos veces en el stand no
- * vea la misma escena (y porque cada uno enseña un peligro distinto del puerto):
+ * El castigo es el CONTENEDOR: la grúa pórtico entra rodando por sus rieles, se
+ * planta encima del rezagado con un TEU colgando del spreader y una marca de
+ * peligro pintada en el suelo, y si se pasa de la correa abre los twistlocks y
+ * se lo deja caer encima. Cuesta una vida.
  *
- *   DRON DE SEGURIDAD — patrulla en círculos con el foco encima del rezagado y,
- *   si se pasa, baja en vertical, lo engancha con el cabestrante y se lo lleva
- *   fuera de cuadro.
- *
- *   CONTENEDOR — la grúa pórtico se planta encima con un TEU colgando del
- *   spreader y una marca de peligro en el suelo; si se pasa, abre los
- *   twistlocks y se lo deja caer encima.
- *
- * Las dos cuestan una vida. Todo el movimiento se calcula aquí, sin React ni
- * Three, así que la simulación headless pasa por el mismo código que la
- * pantalla; los componentes solo leen las poses `drone` y `crane`.
+ * Todo el movimiento se calcula aquí, sin React ni Three, así que la simulación
+ * headless pasa por el mismo código que la pantalla; el componente solo lee la
+ * pose `crane`.
  */
-export type SnatchKind = 'drone' | 'crane';
-
-const DIVE = BALANCE.DRONE_DIVE_TIME;
-const GRAB = BALANCE.DRONE_GRAB_TIME;
-const RISE = BALANCE.DRONE_RISE_TIME;
-const DRONE_TOTAL = DIVE + GRAB + RISE;
-
 const RELEASE = BALANCE.DROP_RELEASE_TIME;
 const FALL = BALANCE.DROP_FALL_TIME;
 const IMPACT = BALANCE.DROP_IMPACT_TIME;
 const SETTLE = BALANCE.DROP_SETTLE_TIME;
 const CRANE_TOTAL = RELEASE + FALL + IMPACT + SETTLE;
 
-/** Duración de cada retirada (la usa el temporizador de invulnerabilidad) */
-export function snatchDuration(kind: SnatchKind): number {
-  return kind === 'crane' ? CRANE_TOTAL : DRONE_TOTAL;
+/** Duración de la retirada (la usa el temporizador de invulnerabilidad) */
+export function snatchDuration(): number {
+  return CRANE_TOTAL;
 }
 
 const BOX = BALANCE.DROP_BOX;
@@ -70,56 +57,9 @@ const ENTRY_X = colX(BALANCE.MAX_TILE) + 1.2;
 
 /** Cota del enganche: el gancho baja hasta el arnés, a la altura del casco */
 const HOOK_Y = 1.5;
-/** Largo del cable — lo que cuelga el colaborador bajo el dron */
-const ROPE = BALANCE.DRONE_ROPE;
-
-/** De dónde baja, relativo al colaborador: casi en vertical (es un dron, no un
- *  ave: no planea, se deja caer y frena en seco encima). */
-const ENTRY = { x: 1.7, y: 9.5, z: -2.4 };
-/** Por dónde se lo lleva: sube y sale del encuadre por la esquina del fondo */
-const EXIT = { x: -3.6, y: 12.5, z: -9.5 };
-
-/** Vuelo de patrulla del aviso */
-const PATROL_R = 2.7;
-const PATROL_Y = 5.6;
-
-/** Péndulo de la carga: cuánto abre la oscilación y a qué ritmo se apaga */
-const SWING_AMP = 0.42;
-const SWING_FREQ = 7.4;
-const SWING_DECAY = 1.5;
-
 /**
- * Pose del dron para el render (`components/Drone`). Objeto mutable
- * reutilizado: se escribe cada frame y nunca se asigna nada nuevo.
- */
-export const drone = {
-  x: 0,
-  y: 0,
-  z: 0,
-  /** Rumbo del morro (el modelo mira a +z) */
-  yaw: 0,
-  /** Inclinación del chasis: un multirrotor se INCLINA hacia donde acelera */
-  pitch: 0,
-  roll: 0,
-  /** Fase de los rotores (radianes acumulados) */
-  rotor: 0,
-  /** Baliza roja: 0..1, parpadeo más rápido cuando ya va a por alguien */
-  beacon: 0,
-  /** Foco de inspección: 0 apagado, 1 a plena potencia */
-  light: 0,
-  /** Ángulos del cable (péndulo): el render lo usa para orientarlo */
-  ropeX: 0,
-  ropeZ: 0,
-  /** Lleva al colaborador colgado (cable y garra cerrada a la vista) */
-  carrying: false,
-  /** Está patrullando sobre un colaborador rezagado */
-  hunting: false,
-  visible: false,
-};
-
-/**
- * Pose de la GRÚA PÓRTICO y su contenedor (`components/CraneDrop`). Mismo
- * contrato que `drone`: objeto mutable que se reescribe cada frame.
+ * Pose de la GRÚA PÓRTICO y su contenedor (`components/CraneDrop`). Objeto
+ * mutable reutilizado: se escribe cada frame y nunca se asigna nada nuevo.
  */
 export const crane = {
   visible: false,
@@ -144,45 +84,18 @@ export const crane = {
 
 /** Punto del enganche (se congela al arrancar: la carga ya no se mueve sola) */
 const hookAt = { x: 0, y: 0, z: 0 };
-let grabbed = false;
 let dropped = false;
 /** Ángulo del péndulo de la carga (lo produce la aceleración del carro) */
 let swing = 0;
 /** Cota del suelo bajo la carga: la casilla puede ser un andamio, no el patio */
 let groundY = 0;
 
-/**
- * Sorteo de castigo. No es aleatorio: se ALTERNAN, que es lo que garantiza que
- * las dos escenas se vean en un stand donde casi nadie juega más de tres veces.
- * Se decide al ENTRAR en zona de aviso, para que lo que patrulla sobre el
- * jugador sea ya lo que se lo va a llevar.
- */
-let nextKind: SnatchKind = 'crane';
-let warned = false;
 
 runtime.resetCallbacks.push(() => {
-  // Partida nueva: siempre se estrena con el contenedor, que es la más vistosa
-  nextKind = 'crane';
-});
-
-function armKind() {
-  // Solo se ARMA: el turno no avanza hasta que el castigo se ejecuta de verdad
-  // (ver `resolve`). Si no, entrar y salir de la zona de aviso barajaba las dos
-  // máquinas y podía tocar la misma dos veces seguidas.
-  runtime.snatchKind = nextKind;
-}
-
-runtime.resetCallbacks.push(() => {
-  drone.visible = false;
-  drone.hunting = false;
-  drone.carrying = false;
-  drone.light = 0;
   crane.visible = false;
   crane.mark = 0;
   crane.loaded = true;
-  grabbed = false;
   dropped = false;
-  warned = false;
 });
 
 /** Fila por debajo de la cual ya no se puede retroceder */
@@ -190,12 +103,12 @@ export function backLimitRow(): number {
   return runtime.maxRow - BALANCE.BACK_STEPS_MAX;
 }
 
-/** Filas de retroceso que le quedan al jugador antes de que baje el dron */
+/** Filas de retroceso que le quedan al jugador antes de que baje la grúa */
 export function backRoomLeft(): number {
   return runtime.row - backLimitRow();
 }
 
-/** ¿El dron ya está avisando? (lo usan el render y los tests) */
+/** ¿La grúa ya está avisando? (lo usan el render y los tests) */
 export function backDanger(): boolean {
   // Al principio de la partida no hay correa que apretar: con maxRow pequeño
   // el límite cae por debajo de la fila 0 y el borde del mapa ya frena solo.
@@ -205,15 +118,9 @@ export function backDanger(): boolean {
 /** Arranca la retirada. A partir de aquí el jugador no controla nada. */
 export function startSnatch() {
   if (runtime.snatching) return;
-  // Sin aviso previo (llegó al límite de un salto) no se ha sorteado nada aún
-  if (!warned) armKind();
-  warned = false;
   runtime.snatching = true;
   runtime.snatchTime = 0;
   runtime.snatchSquash = 1;
-  runtime.snatchSpin = 0;
-  runtime.snatchRoll = 0;
-  runtime.snatchPitch = 0;
   runtime.stepping = false;
   runtime.carrying = false;
   runtime.carryPhase = -1;
@@ -221,15 +128,10 @@ export function startSnatch() {
   runtime.dragging = false;
   runtime.moveQueue.length = 0;
   runtime.stunTimer = 0;
-  // Inmune mientras lo retiran: un camión atropellando a quien ya se lleva el
-  // dron cobraría dos vidas por el mismo error.
-  runtime.invulnTimer = Math.max(
-    runtime.invulnTimer,
-    snatchDuration(runtime.snatchKind) + 0.05,
-  );
-  grabbed = false;
+  // Inmune mientras lo retiran: un camión atropellando a quien ya está bajo el
+  // contenedor cobraría dos vidas por el mismo error.
+  runtime.invulnTimer = Math.max(runtime.invulnTimer, snatchDuration() + 0.05);
   dropped = false;
-  drone.carrying = false;
 
   hookAt.x = runtime.x;
   hookAt.z = runtime.z;
@@ -239,8 +141,8 @@ export function startSnatch() {
 }
 
 /**
- * Un frame de dron. Devuelve `true` si la retirada tiene tomado el control del
- * jugador (entonces `updatePlayer` no debe tocar posición ni cola).
+ * Un frame de retirada. Devuelve `true` si tiene tomado el control del jugador
+ * (entonces `updatePlayer` no debe tocar posición ni cola).
  */
 export function updateSnatch(dt: number): boolean {
   if (!runtime.snatching) {
@@ -250,107 +152,7 @@ export function updateSnatch(dt: number): boolean {
   // Inmunidad renovada frame a frame: la maniobra puede alargarse esperando a
   // que la grúa llegue, y nadie debe cobrar un segundo golpe mientras tanto.
   runtime.invulnTimer = Math.max(runtime.invulnTimer, 0.3);
-  if (runtime.snatchKind === 'crane') return dropContainer(dt);
-  runtime.snatchTime += dt;
-  return flyAway(dt);
-}
-
-/** DRON — descenso, enganche del cabestrante y salida de cuadro con la carga */
-function flyAway(dt: number): boolean {
-  const t = runtime.snatchTime;
-  crane.visible = false;
-  drone.visible = true;
-  drone.hunting = true;
-  drone.rotor += dt * 58; // a tope: está maniobrando
-  drone.beacon = 0.5 + 0.5 * Math.sin(t * 22);
-  drone.light = Math.min(1, drone.light + dt * 5);
-
-  if (t < DIVE) {
-    // DESCENSO — cae casi en vertical y FRENA EN SECO encima del colaborador.
-    // El easing es smootherstep (arranca y termina con velocidad cero): un
-    // multirrotor no llega de largo, se planta.
-    const p = t / DIVE;
-    const e = p * p * p * (p * (p * 6 - 15) + 10);
-    const k = 1 - e;
-    drone.x = hookAt.x + ENTRY.x * k;
-    drone.y = hookAt.y + ROPE + ENTRY.y * k;
-    drone.z = hookAt.z + ENTRY.z * k;
-    drone.yaw = Math.atan2(-ENTRY.x, -ENTRY.z);
-    // Se inclina en el sentido de la maniobra y se endereza al frenar: la
-    // derivada del easing es la aceleración, y es lo que inclina el chasis.
-    const lean = Math.sin(p * Math.PI);
-    drone.pitch = 0.34 * lean;
-    drone.roll = -0.16 * lean;
-    drone.ropeX = drone.ropeZ = 0;
-    drone.carrying = false;
-    // La carga sigue en el suelo, esperando
-    runtime.x = hookAt.x;
-    runtime.z = hookAt.z;
-    runtime.y = hookAt.y - HOOK_Y;
-    runtime.snatchSpin = runtime.snatchRoll = runtime.snatchPitch = 0;
-    return true;
-  }
-
-  if (t < DIVE + GRAB) {
-    // ENGANCHE — la garra cierra: golpe seco, sacudida de cámara y el cuerpo
-    // despega del suelo hasta quedar colgado del cable.
-    if (!grabbed) {
-      grabbed = true;
-      drone.carrying = true;
-      playImpact();
-      runtime.shakeTimer = BALANCE.SHAKE_DURATION;
-      vfxBus.push({ kind: 'impact', x: hookAt.x, y: hookAt.y, z: hookAt.z });
-    }
-    const p = (t - DIVE) / GRAB;
-    // Acuse de recibo del peso: el dron se hunde un palmo y se recupera
-    const dip = Math.sin(p * Math.PI) * 0.28;
-    drone.x = hookAt.x;
-    drone.y = hookAt.y + ROPE - dip;
-    drone.z = hookAt.z;
-    drone.pitch = 0.06 * Math.sin(p * Math.PI * 2);
-    drone.roll = 0;
-    drone.ropeX = drone.ropeZ = 0;
-    // El cuerpo sube del suelo al extremo del cable con arranque suave
-    const e = p * p * (3 - 2 * p);
-    runtime.x = hookAt.x;
-    runtime.z = hookAt.z;
-    runtime.y = (hookAt.y - HOOK_Y) * (1 - e) + (drone.y - ROPE) * e;
-    runtime.snatchRoll = runtime.snatchPitch = 0;
-    runtime.snatchSpin += dt * 1.2;
-    return true;
-  }
-
-  // IZADO — sube acelerando y sale de cuadro. La carga NO va clavada bajo el
-  // dron: cuelga de un cable y oscila como un péndulo amortiguado, con el
-  // tirón inicial en el sentido contrario a la marcha.
-  const p = Math.min(1, (t - DIVE - GRAB) / RISE);
-  const e = p * p; // acelera al alejarse
-  drone.x = hookAt.x + EXIT.x * e;
-  drone.y = hookAt.y + ROPE + EXIT.y * e;
-  drone.z = hookAt.z + EXIT.z * e;
-  drone.yaw = Math.atan2(EXIT.x, EXIT.z);
-  drone.rotor += dt * 14; // esfuerzo extra: va cargado
-  const lean = 0.3 * (1 - p * 0.5);
-  drone.pitch = lean;
-  drone.roll = 0.12 * Math.sin(p * Math.PI);
-
-  const swing = SWING_AMP * Math.exp(-SWING_DECAY * p * RISE) * Math.sin(p * RISE * SWING_FREQ);
-  // El péndulo se abre en la dirección de la marcha (queda rezagado)
-  const dir = Math.hypot(EXIT.x, EXIT.z) || 1;
-  drone.ropeX = (-EXIT.x / dir) * swing;
-  drone.ropeZ = (-EXIT.z / dir) * swing;
-  drone.carrying = true;
-
-  runtime.x = drone.x + Math.sin(drone.ropeX) * ROPE;
-  runtime.z = drone.z + Math.sin(drone.ropeZ) * ROPE;
-  runtime.y = drone.y - Math.cos(drone.ropeX) * Math.cos(drone.ropeZ) * ROPE;
-  // El cuerpo acompaña al cable (roll/pitch) y gira despacio sobre su eje
-  runtime.snatchRoll = drone.ropeX;
-  runtime.snatchPitch = drone.ropeZ;
-  runtime.snatchSpin += dt * (1.2 + 2.6 * p);
-
-  if (p >= 1) resolve();
-  return true;
+  return dropContainer(dt);
 }
 
 /**
@@ -360,7 +162,6 @@ function flyAway(dt: number): boolean {
  * queda de sello y el cajón pega el bote) y REPOSO antes de reaparecer.
  */
 function dropContainer(dt: number): boolean {
-  drone.visible = false;
   // El colaborador no se mueve de la casilla en ningún momento: esta muerte
   // NO lo desplaza, lo aplasta donde está.
   runtime.x = hookAt.x;
@@ -457,52 +258,18 @@ function dropContainer(dt: number): boolean {
 }
 
 /**
- * AVISO. Lo que patrulla sobre el rezagado es YA el castigo que le tocará: el
- * dron dando vueltas con el foco encima, o la grúa plantada con el contenedor
- * colgando y la marca de peligro pintada en el suelo. Fuera de la zona de
- * aviso no hay nada en pantalla.
+ * AVISO. Lo que se planta sobre el rezagado es YA el castigo que le espera: la
+ * grúa con el contenedor colgando y la marca de peligro pintada en el suelo.
+ * Fuera de la zona de aviso no hay nada en pantalla.
  */
 function warn(dt: number) {
   const alerta = backDanger() && useGameStore.getState().phase === 'playing';
   if (!alerta) {
-    drone.visible = false;
-    drone.hunting = false;
-    drone.light = 0;
-    // La grúa no se apaga: recoge y se va rodando por donde vino
+    // La grúa no se apaga de golpe: recoge y se va rodando por donde vino
     if (crane.visible) craneLeave(dt);
-    warned = false;
-    return;
+      return;
   }
-  // Flanco de entrada en la zona: se sortea (alternando) quién baja esta vez
-  if (!warned) {
-    warned = true;
-    armKind();
-  }
-  if (runtime.snatchKind === 'crane') cranePoised(dt);
-  else dronePatrol(dt);
-}
-
-/** Círculos del dron sobre el rezagado, con la baliza y el foco encendidos */
-function dronePatrol(dt: number) {
-  crane.visible = false;
-  crane.mark = 0;
-  drone.visible = true;
-  drone.hunting = false;
-  drone.carrying = false;
-  drone.rotor += dt * 30;
-  drone.beacon = 0.5 + 0.5 * Math.sin(runtime.elapsed * 9);
-  drone.light = Math.min(0.75, drone.light + dt * 2);
-
-  const a = runtime.elapsed * 1.25;
-  drone.x = runtime.x + Math.cos(a) * PATROL_R;
-  drone.z = runtime.z + Math.sin(a) * PATROL_R - 1.0;
-  drone.y = PATROL_Y + Math.sin(a * 2) * 0.22;
-  // Rumbo tangente a la circunferencia, y alabeo hacia dentro del viraje: un
-  // multirrotor en órbita va inclinado hacia el centro, no plano.
-  drone.yaw = Math.atan2(-Math.sin(a), Math.cos(a));
-  drone.pitch = 0.1;
-  drone.roll = 0.26;
-  drone.ropeX = drone.ropeZ = 0;
+  cranePoised(dt);
 }
 
 /**
@@ -512,8 +279,6 @@ function dronePatrol(dt: number) {
  * el cajón sobre su cabeza. Un eje detrás de otro, cada uno a su velocidad.
  */
 function cranePoised(dt: number) {
-  drone.visible = false;
-  drone.light = 0;
   groundY = standHeight(runtime.row, runtime.col);
   if (!crane.visible) spawnCrane();
   const listo = driveCrane(dt, 1);
@@ -618,21 +383,10 @@ function approach(from: number, to: number, step: number): number {
 function resolve() {
   runtime.snatching = false;
   runtime.snatchTime = 0;
-  runtime.snatchSpin = 0;
-  runtime.snatchRoll = 0;
-  runtime.snatchPitch = 0;
   runtime.snatchSquash = 1;
-  drone.visible = false;
-  drone.hunting = false;
-  drone.carrying = false;
-  drone.light = 0;
   crane.visible = false;
   crane.mark = 0;
   crane.loaded = true;
-  warned = false;
-
-  // Turno consumido: al siguiente rezagado le toca la otra máquina
-  nextKind = runtime.snatchKind === 'crane' ? 'drone' : 'crane';
 
   const store = useGameStore.getState();
   // El texto del popup nombra el motivo: en el stand hay que entender en un

@@ -1,8 +1,9 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { BALANCE, colX, rowZ, viewRowsFor } from '../data/balance';
+import { BALANCE, clampViewRows, colX, rowZ, viewRowsFor } from '../data/balance';
 import { PALETTE } from '../data/palette';
+import { QUALITY } from '../render/quality';
 import { runtime } from '../store/runtime';
 import { useGameStore } from '../store/useGameStore';
 import { rows, setLookahead, type CardData, type CraneData, type RowData, type VehicleData } from '../world/rows';
@@ -202,13 +203,30 @@ function getGroundTextures() {
  * están memoizadas y solo entran/salen por los bordes).
  */
 export function Map() {
+  // Nota para quien lo intente: aquí se probó `useDeferredValue` para que el
+  // montaje de las filas nuevas no bloqueara el frame. NO sirve, y está medido
+  // (`scripts/jank-test.ts`): los tirones salieron idénticos. Con el dibujo
+  // atado al rAF de R3F no hay tiempo ocioso donde repartir el trabajo, así que
+  // diferirlo solo lo reordena — el frame lo sigue pagando entero.
   const currentRow = useGameStore((s) => s.currentRow);
-  // rows se regenera al iniciar partida — la fase fuerza remonte del mapa
+  // rows se regenera al iniciar partida — la fase fuerza remonte del mapa.
+  // El briefing cuenta como portada: pasar de la portada a las instrucciones
+  // no regenera nada, así que remontar el mapa entero ahí sería un parpadeo
+  // gratis en la pantalla que el jugador está leyendo.
   const phase = useGameStore((s) => s.phase);
+  const enPartida = phase === 'playing' || phase === 'gameover';
   // La cámara ortográfica tiene zoom fijo: cuanto mayor es la ventana, más
   // mundo entra en cuadro y más filas hay que dibujar (ver `viewRowsFor`).
   const size = useThree((s) => s.size);
-  const view = useMemo(() => viewRowsFor(size.width, size.height), [size.width, size.height]);
+  // La ventana de dibujo la calcula `viewRowsFor` a partir del tamaño de la
+  // ventana, pero el NIVEL GRÁFICO le pone techo: cada fila de más son mallas,
+  // llamadas de dibujo y, si hay sombra, una segunda pasada de todas ellas. En
+  // una pantalla grande con gráfica integrada, dibujar 44 filas de puerto es
+  // justo lo que no se puede pagar (ver `render/quality.ts`).
+  const view = useMemo(
+    () => clampViewRows(viewRowsFor(size.width, size.height), QUALITY.maxRows),
+    [size.width, size.height],
+  );
   // El generador de filas necesita saber cuánto se ve para ir por delante
   useEffect(() => setLookahead(view.ahead), [view.ahead]);
 
@@ -217,7 +235,7 @@ export function Map() {
   const visible = rows.slice(start, end);
 
   return (
-    <group key={phase === 'menu' ? 'menu' : 'game'}>
+    <group key={enPartida ? 'game' : 'menu'}>
       {/* Océano infinito bajo todo (elimina el vacío negro del horizonte) */}
       <OceanBackground />
       {/* Buque portacontenedores gigante navegando en el horizonte */}
@@ -252,7 +270,10 @@ function HorizonShip() {
   );
 }
 
-const Row = memo(function Row({ data }: { data: RowData }) {
+/** Se exporta para que el PRECALENTADO de shaders (`Warmup.tsx`) monte filas
+ *  reales en vez de una réplica que se desincronizaría en cuanto alguien
+ *  añadiera una pieza nueva a una fila. */
+export const Row = memo(function Row({ data }: { data: RowData }) {
   const cruise = data.theme === 'cruise';
   const mega = data.docks?.some((d) => d.mega) ?? false;
   // Zonas de dique en el astillero: se suprime la decoración del lado del
@@ -489,9 +510,17 @@ function ConveyorDeck({ belt }: { belt: NonNullable<RowData['belt']> }) {
   }, [textures, belt.direction]);
 
   useFrame((_, dt) => {
-    // `vUv = uv * repeat + offset`: subir el offset desplaza el dibujo hacia −x,
-    // así que para que la goma corra hacia +x hay que restar.
-    map.offset.x -= (belt.direction * belt.speed * dt) / BALANCE.TILE;
+    // `vUv = uv * repeat + offset`, así que una marca del dibujo aparece donde
+    // `u = (c − offset) / repeat` y se mueve a `−(Δoffset/Δt) / repeat`.
+    //
+    // SIN `belt.direction` AQUÍ, a propósito: el sentido ya lo lleva el `repeat`
+    // negativo de arriba, que voltea la textura. Multiplicarlo también en el
+    // offset lo aplicaba DOS veces y se cancelaba —quedaba `speed / (TILE *
+    // TILES_ACROSS)` en los dos casos—, así que la goma corría siempre hacia el
+    // mismo lado mientras los galones y el empujón sí se volteaban: con sentido
+    // −1 las flechas y el arrastre iban a un lado y la goma se veía correr al
+    // otro. Medido en `scripts/belt-direction-test.ts`.
+    map.offset.x -= (belt.speed * dt) / BALANCE.TILE;
   });
 
   // Bastidor de acero a los dos costados con su franja de seguridad: es lo que

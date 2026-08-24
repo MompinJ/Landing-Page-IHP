@@ -1,8 +1,10 @@
 /**
- * Captura de los DOS castigos por quedarse atrás, en el orden en que los ve un
- * jugador nuevo: primero el CONTENEDOR que suelta la grúa pórtico y después la
- * RETIRADA DEL DRON. En cada uno el colaborador recula lo que le deja la correa
- * (con la máquina ya avisando encima) y da el paso de más.
+ * Captura del castigo por quedarse atrás: el CONTENEDOR que suelta la grúa
+ * pórtico. El colaborador recula lo que le deja la correa (con la grúa ya
+ * plantada encima) y da el paso de más.
+ *
+ * Se hace DOS VECES en la misma partida, y no por repetir: la segunda es la que
+ * enseña que la grúa se retiró bien de la primera y vuelve a entrar en escena.
  *
  *   npx tsx scripts/hazard-shot.ts [url]
  */
@@ -19,7 +21,9 @@ const browser = await chromium.launch({
 const page = await browser.newPage({ viewport: { width: 1500, height: 900 } });
 page.on('pageerror', (e) => console.error('[pageerror]', String(e)));
 await page.goto(URL, { waitUntil: 'networkidle' });
-await page.getByRole('button', { name: 'Iniciar misión' }).click();
+await page.getByRole('button', { name: 'Jugar', exact: true }).click();
+await page.waitForTimeout(250);
+await page.getByRole('button', { name: 'A jugar' }).click();
 await page.waitForTimeout(1200);
 
 /** Planta al colaborador en un tramo de 5 filas seguidas limpias por la col 0 */
@@ -74,7 +78,6 @@ const estado = () =>
     const dh = (window as any).__DH;
     return {
       row: dh.runtime.row,
-      kind: dh.runtime.snatchKind,
       snatching: dh.runtime.snatching,
       t: dh.runtime.snatchTime,
       lives: dh.store.getState().lives,
@@ -126,7 +129,7 @@ await page.screenshot({ path: `${OUT}/box-2-encima.png` });
 await page.keyboard.press('ArrowDown');
 await esperarSuelta();
 // El tipo se lee AHORA: al reaparecer, el juego ya tiene armada la otra máquina
-const kind1 = (await estado()).kind;
+
 await page.waitForTimeout(180); // twistlocks abiertos, cajón suelto
 await page.screenshot({ path: `${OUT}/box-3-suelta.png` });
 await page.waitForTimeout(260); // caída
@@ -137,13 +140,9 @@ await esperarFin();
 await page.waitForTimeout(500);
 await page.screenshot({ path: `${OUT}/box-6-reaparece.png` });
 const tras1 = await estado();
-console.log(`castigo 1 (${kind1}):`, JSON.stringify(tras1));
-if (kind1 !== 'crane') {
-  console.error(`ERROR: el primero de la partida debía ser el contenedor, fue ${kind1}`);
-  process.exit(1);
-}
+console.log('castigo 1:', JSON.stringify(tras1));
 
-// ---------------------------------------------------------------- 2. el dron
+// ------------------------------------- 2. otra vez: la grúa tiene que volver
 const fila2 = await colocar(fila1 + 20);
 if (fila2 < 0) {
   console.error('ERROR: no se encontró un tramo limpio para la segunda captura');
@@ -151,25 +150,18 @@ if (fila2 < 0) {
 }
 await page.waitForTimeout(1000);
 await recular();
-await page.screenshot({ path: `${OUT}/drone-1-patrulla.png` });
+await page.screenshot({ path: `${OUT}/box2-1-llega.png` });
 await page.keyboard.press('ArrowDown');
 await esperarSuelta();
-const kind2 = (await estado()).kind;
 await page.waitForTimeout(420);
-await page.screenshot({ path: `${OUT}/drone-2-descenso.png` });
+await page.screenshot({ path: `${OUT}/box2-2-suelta.png` });
 await page.waitForTimeout(330);
-await page.screenshot({ path: `${OUT}/drone-3-enganche.png` });
-await page.waitForTimeout(500);
-await page.screenshot({ path: `${OUT}/drone-4-izado.png` });
+await page.screenshot({ path: `${OUT}/box2-3-impacto.png` });
 await esperarFin();
 await page.waitForTimeout(500);
-await page.screenshot({ path: `${OUT}/drone-5-reaparece.png` });
+await page.screenshot({ path: `${OUT}/box2-4-reaparece.png` });
 const tras2 = await estado();
-console.log(`castigo 2 (${kind2}):`, JSON.stringify(tras2));
-if (kind2 !== 'drone') {
-  console.error(`ERROR: el segundo debía ser el dron, fue ${kind2}`);
-  process.exit(1);
-}
+console.log('castigo 2:', JSON.stringify(tras2));
 
 if (tras1.snatching || tras2.snatching) {
   console.error('ERROR: algún castigo no terminó');

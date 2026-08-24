@@ -1,12 +1,42 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Data Hunter — Hutchison Ports</title>
-    <script type="module" crossorigin src="./assets/index-Ba_n1ff_.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BwqXE7ac.css">
+    <!--
+      VIEWPORT DE JUEGO, no de página. Cada trozo arregla algo que en un
+      teléfono se nota jugando:
+
+        viewport-fit=cover  el lienzo llega hasta el borde físico y pasa por
+                            debajo de la muesca y de la barra de gestos; lo que
+                            no puede quedar ahí debajo lo aparta el CSS con
+                            `env(safe-area-inset-*)` (ver index.css).
+        maximum-scale=1     un doble toque rápido para saltar dos casillas es
+                            justo el gesto con el que Safari hace zoom. Sin
+                            esto, el tablero se ampliaba a media partida.
+        user-scalable=no    lo mismo con el pellizco: en una pantalla táctil el
+                            pulgar se apoya y el juego se iba de escala.
+
+      Se desactiva el zoom a sabiendas de que en una página normal eso es un
+      problema de accesibilidad: aquí el contenido no es texto que haya que
+      ampliar sino un tablero que tiene que caber entero, y ampliarlo esconde
+      justo lo que hay que ver para esquivar. Los textos de la interfaz crecen
+      solos con el tamaño de pantalla (`clamp`) en vez de pedir zoom.
+    -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <!-- Barra del navegador del color del juego: sin esto queda una franja
+         blanca sobre un juego nocturno, que es lo primero que se ve al abrirlo -->
+    <meta name="theme-color" content="#061a2e" />
+    <!-- Añadido a la pantalla de inicio, arranca a pantalla completa -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Port Quest — Hutchison Ports</title>
+    <script type="module" crossorigin src="./assets/index-DQVb1urh.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BTIoQ_Wi.css">
   </head>
   <body>
     <div id="root"></div>

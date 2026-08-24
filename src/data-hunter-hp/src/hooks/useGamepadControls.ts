@@ -73,10 +73,24 @@ export function useGamepadControls() {
           }
           break;
         }
+        // Portada: A/Start NO arranca la partida — abre el briefing. En el
+        // stand, el que acaba le pasa el mando al siguiente, y ese siguiente
+        // tiene que pasar por las instrucciones y no caer de golpe dentro de
+        // un juego que no ha visto.
         case 'menu':
           if (pressed('a') || pressed('start')) {
             unlockAudio();
+            store.openBriefing();
+          }
+          break;
+        // Briefing: A/Start entra a jugar, B vuelve a la portada sin tener que
+        // apuntar a un botón con el stick.
+        case 'briefing':
+          if (pressed('a') || pressed('start')) {
+            unlockAudio();
             store.startGame();
+          } else if (pressed('b')) {
+            store.backToMenu();
           }
           break;
         case 'gameover':

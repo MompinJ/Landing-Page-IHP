@@ -16,7 +16,9 @@ const page = await browser.newPage({ viewport: { width: 1600, height: 900 }, dev
 page.on('pageerror', (e) => console.error('[pageerror]', String(e)));
 page.on('console', (m) => m.type() === 'error' && console.error('[console]', m.text()));
 await page.goto('http://localhost:5173/?debug&daily', { waitUntil: 'networkidle' });
-await page.getByRole('button', { name: 'Iniciar misión' }).click();
+await page.getByRole('button', { name: 'Jugar', exact: true }).click();
+await page.waitForTimeout(250);
+await page.getByRole('button', { name: 'A jugar' }).click();
 await page.waitForTimeout(1500);
 
 // Fila de agua con flota pequeña, con los barcos centrados y quietos

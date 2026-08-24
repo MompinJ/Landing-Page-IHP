@@ -12,7 +12,14 @@ function debugStartRow(): number {
   return Number.isFinite(row) && row > 0 ? Math.floor(row) : 0;
 }
 
-export type GamePhase = 'menu' | 'playing' | 'gameover';
+/**
+ * Fases de la partida. `briefing` es la pantalla de instrucciones, y es una
+ * FASE y no un estado interno del menú a propósito: el mando de Xbox arbitra
+ * por fase (`useGamepadControls`), así que si el briefing viviera dentro del
+ * componente, A lo saltaría sin que nadie lo leyera — que es exactamente lo
+ * que pasa en un stand.
+ */
+export type GamePhase = 'menu' | 'briefing' | 'playing' | 'gameover';
 
 export interface RankingEntry {
   name: string;
@@ -74,6 +81,9 @@ interface GameState {
   lastEvent: GameEvent | null;
   ranking: RankingEntry[];
 
+  /** Portada → instrucciones. Las instrucciones NO viven en el menú: son el
+   *  paso previo a la partida, se leen cuando de verdad hacen falta. */
+  openBriefing: () => void;
   startGame: () => void;
   setCurrentRow: (row: number) => void;
   advanceRow: (row: number) => void;
@@ -90,7 +100,15 @@ interface GameState {
   submitScore: (name: string, unit?: string) => void;
 }
 
-const RANKING_KEY = 'data-hunter-hp:ranking';
+/**
+ * Clave del ranking local, VERSIONADA. El `:v2` entra con el reescalado de la
+ * puntuación a decenas: las marcas viejas se guardaron en centenas (+100 por
+ * concepto, 250 por sello) y rondaban los 20.000 puntos, así que en la tabla
+ * nueva serían inalcanzables para siempre y el stand arrancaría con un podio
+ * que nadie puede tocar. Cambiar la clave deja la tabla vieja en el disco sin
+ * borrar nada y empieza una limpia en la escala nueva.
+ */
+const RANKING_KEY = 'data-hunter-hp:ranking:v2';
 
 function loadRanking(): RankingEntry[] {
   try {
@@ -142,6 +160,8 @@ export const useGameStore = create<GameState>()(
     lastEvent: null,
     ranking: loadRanking(),
 
+    openBriefing: () => set({ phase: 'briefing' }),
+
     startGame: () => {
       runtime.reset();
       const startRow = debugStartRow();
@@ -185,9 +205,17 @@ export const useGameStore = create<GameState>()(
       if (row !== get().currentRow) set({ currentRow: row });
     },
 
-    /** Fila nueva alcanzada: puntos de progreso (score del tutorial) */
+    /**
+     * Fila nueva alcanzada. Los puntos de progreso caen CADA `SCORE_ROW_EVERY`
+     * filas, no en todas: con el marcador en decenas, cobrar cada fila
+     * convertía la puntuación en un cuentakilómetros y las tarjetas —que son
+     * la decisión del juego— dejaban de pesar en el resultado.
+     */
     advanceRow: (row) =>
-      set((s) => ({ maxRow: row, score: s.score + BALANCE.SCORE_ROW })),
+      set((s) => ({
+        maxRow: row,
+        score: s.score + (row % BALANCE.SCORE_ROW_EVERY === 0 ? BALANCE.SCORE_ROW : 0),
+      })),
 
     /**
      * ENTRADA A TERMINAL. Idempotente: solo dispara cartel cuando la unidad
@@ -234,7 +262,10 @@ export const useGameStore = create<GameState>()(
         const multiplier = multiplierFor(streak);
         const points = BALANCE.SCORE_GOOD * multiplier;
         // VIDA EXTRA cada 15 conceptos seguidos (máx. 3 corazones)
-        const lives = streak > 0 && streak % 15 === 0 ? Math.min(3, s.lives + 1) : s.lives;
+        const lives =
+          streak > 0 && streak % BALANCE.EXTRA_LIFE_STREAK === 0
+            ? Math.min(BALANCE.LIVES, s.lives + 1)
+            : s.lives;
         // ESCUDO: los conceptos de proteccion activan un escudo de 1 golpe
         const shield = s.shield || isShieldItem(label);
         return {
@@ -273,6 +304,8 @@ export const useGameStore = create<GameState>()(
         }));
         return;
       }
+      // CHOCAR CUESTA UNA VIDA, NO PUNTOS (SCORE_OBSTACLE = 0). El corazón que
+      // se apaga ya es el castigo, y es el que el jugador mira.
       const remaining = get().lives - 1;
       set((s) => ({
         lives: remaining,

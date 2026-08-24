@@ -19,7 +19,9 @@ const browser = await chromium.launch({
 const page = await browser.newPage({ viewport: { width: W, height: H } });
 page.on('pageerror', (e) => console.error('[pageerror]', String(e)));
 await page.goto(URL, { waitUntil: 'networkidle' });
-await page.getByRole('button', { name: 'Iniciar misión' }).click();
+await page.getByRole('button', { name: 'Jugar', exact: true }).click();
+await page.waitForTimeout(300);
+await page.getByRole('button', { name: 'A jugar' }).click();
 await page.waitForTimeout(2000);
 
 /** Instantánea de renderer.info + inventario de la escena en una fila dada */

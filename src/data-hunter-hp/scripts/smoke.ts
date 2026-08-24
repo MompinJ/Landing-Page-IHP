@@ -24,7 +24,11 @@ await page.goto(URL, { waitUntil: 'networkidle' });
 await page.waitForTimeout(1500);
 await page.screenshot({ path: `${OUT}/1-menu.png` });
 
-await page.getByRole('button', { name: 'Iniciar misión' }).click();
+// La portada abre el BRIEFING; la partida arranca desde ahí (ver Menu.tsx)
+await page.getByRole('button', { name: 'Jugar', exact: true }).click();
+await page.waitForTimeout(400);
+await page.screenshot({ path: `${OUT}/1b-briefing.png` });
+await page.getByRole('button', { name: 'A jugar' }).click();
 await page.waitForTimeout(2500);
 await page.screenshot({ path: `${OUT}/2-gameplay.png` });
 

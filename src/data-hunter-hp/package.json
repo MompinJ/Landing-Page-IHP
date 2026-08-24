@@ -31,7 +31,20 @@
     "test:vdock": "tsx scripts/vdock-test.ts",
     "test:carry": "tsx scripts/carry-test.ts",
     "test:back": "tsx scripts/back-test.ts",
-    "test:hazard": "tsx scripts/hazard-shot.ts"
+    "test:hazard": "tsx scripts/hazard-shot.ts",
+    "test:pickup": "tsx scripts/pickup-test.ts",
+    "test:difficulty": "tsx scripts/difficulty-test.ts",
+    "test:belt": "tsx scripts/belt-browser-test.ts",
+    "test:quality": "tsx scripts/quality-bench.ts",
+    "test:qshot": "tsx scripts/quality-shot.ts",
+    "test:jank": "tsx scripts/jank-test.ts",
+    "test:drawcalls": "tsx scripts/drawcall-audit.ts",
+    "test:beltdir": "tsx scripts/belt-direction-test.ts",
+    "test:shipyard": "tsx scripts/shipyard-audit.ts",
+    "test:touch": "tsx scripts/touch-test.ts",
+    "test:mobile": "tsx scripts/mobile-shots.ts",
+    "test:mobileperf": "tsx scripts/mobile-probe.ts",
+    "test:mobilebench": "tsx scripts/mobile-bench.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

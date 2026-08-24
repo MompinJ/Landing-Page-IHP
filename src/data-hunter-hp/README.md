@@ -1,4 +1,4 @@
-# Data Hunter — Hutchison Ports
+# Port Quest — Hutchison Ports
 
 Arcade 3D estilo **Crossy Road** para stand de congreso, basado en la
 arquitectura del tutorial de [javascriptgametutorials.com](https://javascriptgametutorials.com/tutorials/three-js/crossy-road):
@@ -45,12 +45,80 @@ y camiones de 5 con wrap-around, cámara ortográfica y luz pegadas al jugador):
   `public/textures/card-{good,bad}.png` ya generadas con esos prompts
   (nano_banana_pro, 3:4) y aplicadas a las tarjetas del juego.
 
+## Teléfono
+
+Se juega con el dedo, con los controles de **Terminal Rally** (`tronco-runner`
+en el repo de la landing), que es la dinámica del stand que ya había resuelto
+esto: **un gesto = una acción**, sin joystick virtual ni botones en pantalla —
+en 390 px de ancho el dedo ya tapa bastante.
+
+| Gesto | Acción |
+| --- | --- |
+| Tocar | Avanzar (el control original de Crossy Road) |
+| Deslizar arriba / abajo | Avanzar / recular |
+| Deslizar izquierda / derecha | Cambiar de columna |
+
+Dos cosas se hacen distinto que en Terminal Rally, y las dos por la misma razón
+—allí el mundo corre solo y aquí está quieto hasta que el jugador salta
+(`src/hooks/useTouchControls.ts`)—: el gesto se resuelve **al cruzar el umbral**
+y no al levantar el dedo (esperar mete un retardo de gesto delante de cada
+paso), y el origen se reancla, así que arrastrar el dedo despacio encadena
+pasos. Un golpe seco sigue siendo UN paso: lo que separa el golpe del barrido es
+el tiempo, no la distancia, y el freno está atado al ritmo de salto del propio
+personaje.
+
+El briefing enseña el control del aparato que hay delante: la cara del mando de
+Xbox en el stand, el dedo en un teléfono (`TOUCH` en `src/render/device.ts`).
+
+### Rendimiento en teléfono
+
+El nivel gráfico `movil` se elige solo en un teléfono (táctil + lado corto
+≤ 540 px) y se puede forzar con `?q=movil`. Medido con `npm run test:mobilebench`,
+que dibuja por software a resolución de teléfono porque es el peor caso real y
+el mejor sustituto que hay de una GPU de móvil:
+
+| | fps | ms/frame | píxeles dibujados |
+| --- | --- | --- | --- |
+| antes (`rapido`) | 101 | 9.9 | 259 kpx (390×664) |
+| ahora (`movil`) | **150** | **6.7** | **93 kpx** (234×398) |
+
+Un 48% más rápido **dibujando el triple de mundo** — porque en un teléfono la
+cámara se aleja para que quepan las columnas y eso mete más filas en cuadro. La
+ganancia entera viene de los píxeles, y de ahí salieron dos cosas:
+
+- **`scale` no se estaba aplicando donde más falta hacía.** El techo del rango
+  de dpr era `min(maxDpr, scale × densidad)`, así que en un teléfono
+  (densidad 3) el `min(1, 0.75 × 3)` daba 1: el 75% que decía el nivel se
+  perdía entero y solo funcionaba en la máquina del stand, que ya va a
+  densidad 1 y no lo necesitaba. Son dos preguntas distintas —cuánta densidad
+  de pantalla, y qué fracción de ella— y ahora se responden por separado.
+- **La cámara ortográfica tenía el zoom clavado en 58.** En 390 px de ancho eso
+  son **seis casillas** a la vista: no es que se viera pequeño, es que no se veía
+  a dónde esquivar. Ahora el zoom garantiza un ancho mínimo de mundo en cuadro
+  (`camZoomFor`) y en vertical la cámara mira más adelante para bajar al
+  corredor en pantalla (`camLookAheadFor`).
+
+Alejar la cámara obliga a dibujar más filas, y ahí saltó un fallo escondido: el
+techo de filas del nivel dejaba 16 por delante donde la cámara alcanzaba 20, o
+sea océano en el hueco del mapa. `viewRowsFor` dejó de usar coeficientes
+ajustados a un encuadre fijo y proyecta las esquinas de la caja de vista sobre
+el suelo, que sale exacto para cualquier zoom; y `npm run test:viewport` ahora
+comprueba la ventana **ya recortada** por cada nivel, que es la que se dibuja de
+verdad. De paso destapó que una tableta se quedaba corta en las dos direcciones.
+
 ## Verificación
 
 ```bash
 npm run sim      # simula una partida de 90 s headless (lógica pura, asserts)
 npm run build && npx vite preview --port 4189 &
 npm run smoke    # WebKit (motor Safari): carga, juega y verifica consola limpia
+
+npm run test:viewport      # que la ventana de filas cubra lo que ve la cámara,
+                           # ya recortada por el techo de cada nivel gráfico
+npm run test:touch         # los gestos, con toques de verdad sobre un iPhone emulado
+npm run test:mobile        # capturas de las cinco pantallas, en vertical y horizontal
+npm run test:mobilebench   # los niveles gráficos dibujando por software (peor caso)
+npm run test:mobileperf    # una partida en teléfono emulado con la CPU frenada
 ```
 
 ## Estado del plan

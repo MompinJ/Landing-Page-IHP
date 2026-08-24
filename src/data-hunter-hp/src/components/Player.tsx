@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { PALETTE } from '../data/palette';
 import { runtime } from '../store/runtime';
 import { useGameStore } from '../store/useGameStore';
-import { updatePlayer } from '../world/playerLogic';
+import { sweepPickup, updatePlayer } from '../world/playerLogic';
 import { standHeight } from '../world/rows';
 import { checkHits, updateConveyor, updateWaterRiding } from '../world/traffic';
 
@@ -30,20 +30,19 @@ export function Player() {
       updatePlayer(dt);
       updateWaterRiding(dt); // mecánica río: arrastre de barcaza / caída al agua
       updateConveyor(dt); // TUM: la banda transportadora arrastra por el suelo
+      sweepPickup(); // lo que el suelo te pasa por debajo, se recoge igual
       checkHits(); // colisión contra la posición YA actualizada de este frame
     }
 
-    // RETIRADA (dron o contenedor): el cuerpo ya no pisa nada — la posición es
-    // la que escribe `snatch.ts` (mundo absoluto, sin altura de cubierta que
-    // sumar). Colgando del cabestrante acompaña el balanceo del cable
-    // (roll/pitch del péndulo) y gira despacio sobre su propio eje...
+    // RETIRADA (el contenedor): el cuerpo ya no pisa nada — la posición es la
+    // que escribe `snatch.ts` (mundo absoluto, sin altura de cubierta que
+    // sumar). Bajo el cajón no cuelga de nada: queda de sello en el suelo, y el
+    // volumen se conserva a ojo (lo que pierde de alto lo gana de ancho), que
+    // es el aplastado de dibujo animado de toda la vida.
     if (runtime.snatching) {
       deckY.current = 0;
       g.position.set(runtime.x, runtime.y, runtime.z);
-      g.rotation.set(runtime.snatchPitch, Math.PI + runtime.snatchSpin, runtime.snatchRoll);
-      // ...y bajo el CONTENEDOR no cuelga de nada: queda de sello en el suelo.
-      // El volumen se conserva a ojo (lo que pierde de alto lo gana de ancho),
-      // que es el aplastado de dibujo animado de toda la vida.
+      g.rotation.set(0, Math.PI, 0);
       const q = runtime.snatchSquash;
       g.scale.set(1 + (1 - q) * 0.55, q, 1 + (1 - q) * 0.55);
       g.visible = true;

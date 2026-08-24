@@ -60,23 +60,17 @@ export const runtime = {
   dragging: false,
 
   /**
-   * RETIRADA DEL DRON DE SEGURIDAD — el castigo del que se queda atrás (el
-   * papel que en Crossy Road hace el águila). Mientras dura, el jugador NO
-   * controla nada: la lógica de salto, el agua, la banda y el hit test se
-   * apartan y la posición la escribe `world/snatch.ts`.
+   * RETIRADA POR QUEDARSE ATRÁS — el castigo de la correa (el papel que en
+   * Crossy Road hace el águila): la grúa pórtico le suelta un contenedor
+   * encima. Mientras dura, el jugador NO controla nada: la lógica de salto, el
+   * agua, la banda y el hit test se apartan y la posición la escribe
+   * `world/snatch.ts`.
    */
   snatching: false,
-  /** Cuál de las dos retiradas está en curso (se alternan, ver `snatch.ts`) */
-  snatchKind: 'drone' as 'drone' | 'crane',
   /** Segundos transcurridos de la retirada */
   snatchTime: 0,
   /** Aplastamiento del cuerpo bajo el contenedor: 1 normal, ~0.1 de sello */
   snatchSquash: 1,
-  /** Pose del cuerpo colgando del cabestrante: giro sobre su eje y balanceo
-   *  del péndulo (roll en el plano X, pitch en el plano Z). */
-  snatchSpin: 0,
-  snatchRoll: 0,
-  snatchPitch: 0,
 
   /** Cola de movimientos (tutorial: `movesQueue`) */
   moveQueue: [] as MoveDirection[],
@@ -113,12 +107,8 @@ export const runtime = {
     this.rideY = 0;
     this.dragging = false;
     this.snatching = false;
-    this.snatchKind = 'drone';
     this.snatchTime = 0;
     this.snatchSquash = 1;
-    this.snatchSpin = 0;
-    this.snatchRoll = 0;
-    this.snatchPitch = 0;
     this.moveQueue.length = 0;
     this.stunTimer = 0;
     this.invulnTimer = 0;

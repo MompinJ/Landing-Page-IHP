@@ -23,7 +23,9 @@ const browser = await chromium.launch({ args: ['--use-angle=metal', '--enable-gp
 const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
 page.on('pageerror', (e) => console.error('[pageerror]', String(e)));
 await page.goto('http://localhost:5173/?debug&daily', { waitUntil: 'networkidle' });
-await page.getByRole('button', { name: 'Iniciar misión' }).click();
+await page.getByRole('button', { name: 'Jugar', exact: true }).click();
+await page.waitForTimeout(250);
+await page.getByRole('button', { name: 'A jugar' }).click();
 await page.waitForTimeout(1500);
 
 const donde = await page.evaluate(`(() => {

@@ -12,6 +12,8 @@
  * Nada de esto se monta ni se evalúa si `debug.enabled` es false, así que el
  * coste en producción/kiosco es cero (una comparación booleana por frame).
  */
+import { colX, rowZ } from '../data/balance';
+import { mergedCacheSize } from '../render/boxes';
 import { runtime } from '../store/runtime';
 import { useGameStore } from '../store/useGameStore';
 import { extendRowsIfNeeded, rows } from '../world/rows';
@@ -44,6 +46,8 @@ export function initDebug() {
     debug,
     runtime,
     rows,
+    /** Variantes de geometría fusionadas (mide el precalentado) */
+    mergedCacheSize,
     store: useGameStore,
     /** Teletransporte instantáneo usado por los scripts de captura */
     teleport(row: number, col: number) {
@@ -52,10 +56,26 @@ export function initDebug() {
       runtime.col = col;
       // La fila máxima se REESCRIBE (no se acumula): tras un teletransporte
       // hacia atrás, dejar el máximo antiguo pondría al colaborador fuera de
-      // la correa de retroceso y la gaviota bajaría a por él (world/snatch.ts).
+      // la correa de retroceso y bajaría la grúa a por él (world/snatch.ts).
       runtime.maxRow = row;
       runtime.stepping = false;
       runtime.moveQueue.length = 0;
+      // LA POSICIÓN REAL, Y SU ANTERIOR, EN EL MISMO SITIO. Sin esto el
+      // teletransporte solo movía `row`/`col`: al frame siguiente la posición
+      // saltaba desde donde estuviera el colaborador hasta la fila nueva, y
+      // `hitTest` —que barre el segmento `prevZ → z` para que un tren rápido no
+      // pueda atravesar a nadie— tomaba ese salto por un recorrido real y
+      // cobraba atropellos contra vehículos que el jugador nunca tocó.
+      //
+      // Es un fallo del ÚTIL, no del juego, pero envenenaba en silencio a todo
+      // script que teletransporta (que son casi todos): el colaborador perdía
+      // vidas nada más aterrizar y las medidas salían con ruido que nadie
+      // atribuía a esto.
+      runtime.x = colX(col);
+      runtime.z = rowZ(row);
+      runtime.y = 0;
+      runtime.prevX = runtime.x;
+      runtime.prevZ = runtime.z;
       useGameStore.getState().setCurrentRow(row);
     },
   };
