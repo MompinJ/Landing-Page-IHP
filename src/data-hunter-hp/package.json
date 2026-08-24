@@ -52,7 +52,9 @@
     "test:biomes": "tsx scripts/biome-profile.ts",
     "test:jankcause": "tsx scripts/jank-cause.ts",
     "test:cpu": "tsx scripts/cpu-profile.ts",
-    "test:compat": "tsx scripts/compat-test.ts"
+    "test:compat": "tsx scripts/compat-test.ts",
+    "test:music": "tsx scripts/music-test.ts",
+    "test:shadowcost": "tsx scripts/shadow-cost.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

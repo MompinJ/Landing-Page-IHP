@@ -1,4 +1,5 @@
 import { Leva } from 'leva';
+import { BotonSonido } from './ui/BotonSonido';
 import { Game } from './components/Game';
 import { GameOver } from './ui/GameOver';
 import { HUD } from './ui/HUD';
@@ -25,6 +26,8 @@ export default function App() {
         <HUD />
         <Menu />
         <GameOver />
+        {/* Silenciar. Fuera del `.hud`, que no acepta pulsaciones a propósito. */}
+        <BotonSonido />
         {/* Panel de debug — visible solo con ?debug en la URL */}
         <Leva hidden={!window.location.search.includes('debug')} collapsed />
       </div>

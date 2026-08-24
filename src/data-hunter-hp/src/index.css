@@ -978,6 +978,44 @@ kbd {
   .hud-value { font-size: 19px; }
 }
 
+/* ---------- Botón de silencio ----------
+   ABAJO A LA IZQUIERDA, que es la única esquina libre: arriba a la izquierda
+   está el marcador de PUNTOS, arriba en medio las VIDAS, arriba a la derecha el
+   COMBO y abajo a la derecha el contador de fps. El primer intento lo puso
+   arriba a la derecha y se montaba encima de la palabra COMBO.
+
+   (Comparte esquina con el panel de medición, pero ese solo sale con `?perf` y
+   nadie juega con él abierto.)
+
+   Un tamaño para todas las pantallas: 38 px es lo que pide un objetivo táctil
+   cómodo y en una pantalla grande tampoco molesta. El intento de hacerlo más
+   pequeño en escritorio traía además un fallo de orden — la regla del móvil
+   estaba ANTES que esta, así que a igualdad de especificidad ganaba esta y la
+   del móvil no se aplicaba nunca. */
+.btn-sonido {
+  position: fixed;
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  left: calc(10px + env(safe-area-inset-left));
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  color: var(--ink-2);
+  background: rgba(4, 14, 28, 0.55);
+  border: 1px solid rgba(63, 169, 245, 0.28);
+  border-radius: 8px;
+  cursor: pointer;
+  /* El resto de la interfaz de juego deja pasar los gestos al tablero; este
+     botón es la excepción y tiene que recibirlos. */
+  pointer-events: auto;
+  transition: color 0.12s, border-color 0.12s;
+}
+.btn-sonido svg { width: 21px; height: 21px; }
+.btn-sonido:hover { color: var(--ink-1); border-color: rgba(120, 200, 255, 0.5); }
+.btn-sonido[aria-pressed='true'] { color: var(--steel); }
+
 /* Panel de medición (`?perf`) — ver components/Perf.tsx */
 .perf-panel {
   position: fixed;

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { startMusic } from '../audio/music';
 import { unlockAudio } from '../audio/sfx';
 import { ORG_UNITS } from '../data/orgUnits';
 import { postScore } from '../services/scoreService';
@@ -156,6 +157,7 @@ export function GameOver() {
             className="btn-skew"
             onClick={() => {
               unlockAudio();
+              startMusic();
               startGame();
             }}
           >

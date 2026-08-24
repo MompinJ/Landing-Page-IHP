@@ -301,6 +301,51 @@ delante. `color-mix()` es de Safari 16.2 y por debajo la declaración se descart
 **entera**: en un iOS 15 los paneles del HUD se quedaban sin fondo y las
 tarjetas sin el oscurecido de detrás, encima del juego en marcha.
 
+## La música
+
+Sintetizada, como los efectos: **cero archivos de audio**. Tres razones, en
+orden de peso:
+
+1. El stand tiene que funcionar **sin red** — es la misma razón por la que
+   `sfx.ts` ya sintetizaba todo.
+2. El paquete pesa metro y medio y acabamos de arreglar que **no cargaba en
+   teléfonos flojos**. Meterle dos o tres megas de pista deshace parte de ese
+   arreglo justo donde más duele. Esto ocupa unos kilobytes de código.
+3. Y la buena: sintetizada, la música **sabe lo que está pasando**.
+
+No es un bucle sonando por debajo. Cambia de color al entrar en cada terminal,
+aprieta con la dificultad y se aparta cuando el jugador se muere:
+
+| terminal | qué suena, y por qué |
+| --- | --- |
+| **TEC** contenedores | pentatónica menor, cuadrada y motora — el sonido de referencia |
+| **TUM** universal | modo dórico: el menor con la sexta subida, inestable sin sonar mal. Aquí el suelo se mueve |
+| **ECV** cruceros | pentatónica **mayor** y triángulos, casi sin percusión: lo único luminoso de las cinco, y el hueco que deja es lo que hace que se sienta abierto |
+| **TNG** astillero | frigio (segunda bemol), el modo más oscuro sin salirse de tono, y el bajo una octava abajo |
+| **TILH** intermodal | menor natural y percusión seca — la terminal donde el ritmo *es* la mecánica |
+
+Las cinco comparten tónica (re) y cambian de **modo**, no de tono: el cambio se
+nota pero nunca chirría, que es lo que pasaría si cada terminal fuese a su aire
+y la transición cayera a mitad de compás. El tempo va de 84 a 116 bpm con la
+misma curva de dificultad que usa el juego (`difficultyForRow`), así que la
+música y la partida suben a la vez; el charles **entra** a mitad de partida, que
+es información: el jugador nota que la cosa se ha puesto seria antes de verlo.
+
+El ritmo no depende del bucle de dibujo — si dependiera, un tirón se oiría. Se
+usa el reparto clásico de WebAudio: un temporizador basto que mira por delante y
+deja las notas **agendadas** en el reloj del audio, que es de precisión de
+muestra y corre en otro hilo.
+
+Y hay **botón de silencio**, que en un stand no es un extra: la máquina se queda
+encendida todo el día y quien está de pie al lado necesita poder apagarla sin
+buscar un menú. La preferencia se recuerda entre partidas.
+
+`npm run test:music` no la oye —no se puede— así que la comprueba por sus
+efectos: que no suene antes del primer gesto (los navegadores lo exigen), que la
+portada no se quede muda, que las notas por segundo suban con la dificultad
+(4.4 → 13.2), que el volumen se aparte en el remate de muerte (0.50 → 0.10) y
+que silenciar calle de verdad y se recuerde al recargar.
+
 ## Verificación
 
 ```bash
@@ -312,6 +357,8 @@ npm run test:viewport      # que la ventana de filas cubra lo que ve la cámara,
                            # ya recortada por el techo de cada nivel gráfico
 npm run test:touch         # los gestos, con toques de verdad sobre un iPhone emulado
 npm run test:mobile        # capturas de las cinco pantallas, en vertical y horizontal
+npm run test:music         # que la música suene, apriete y se calle cuando toca
+npm run test:shadowcost    # qué cuestan las sombras en el stand, con capturas de las dos
 npm run test:compat        # que cargue en navegadores viejos, y que si no puede lo diga
 npm run test:center        # que el personaje quede centrado en doce pantallas distintas
 npm run test:death         # el remate de muerte: congelado, cámara lenta, acercamiento

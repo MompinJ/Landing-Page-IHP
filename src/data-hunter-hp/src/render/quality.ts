@@ -229,7 +229,7 @@ function askedLevel(): QualityLevel['name'] | null {
 }
 
 /**
- * PALANCAS SUELTAS por URL: `?escala=1.5` y `?msaa=0|1`.
+ * PALANCAS SUELTAS por URL: `?escala=1.5`, `?msaa=0|1` y `?sombras=0|1`.
  *
  * No son para jugar, son para AJUSTAR. La calidad de imagen en un teléfono no
  * se puede decidir desde un banco de fps —hay que mirarla— y no se puede mirar
@@ -242,7 +242,8 @@ function palancas(nivel: QualityLevel): QualityLevel {
   const q = new URLSearchParams(window.location.search);
   const escala = Number(q.get('escala'));
   const msaa = q.get('msaa');
-  if (!Number.isFinite(escala) && msaa === null) return nivel;
+  const sombras = q.get('sombras');
+  if (!Number.isFinite(escala) && msaa === null && sombras === null) return nivel;
   // `?escala=N` quiere decir, literalmente, «dibuja a N veces el tamaño de la
   // página». Eso es UNA cifra, así que se pone en `maxDpr` y `scale` se deja a
   // 1: repartirla entre las dos las multiplicaría (escala 1.5 salía a 2.25).
@@ -254,6 +255,7 @@ function palancas(nivel: QualityLevel): QualityLevel {
     minScale: escala > 0 ? escala : nivel.minScale,
     maxDpr: escala > 0 ? escala : nivel.maxDpr,
     msaa: msaa === null ? nivel.msaa : msaa !== '0',
+    shadows: sombras === null ? nivel.shadows : sombras !== '0',
   };
 }
 

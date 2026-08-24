@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { startMusic } from '../audio/music';
 import { unlockAudio } from '../audio/sfx';
 import { BALANCE } from '../data/balance';
 import { useGameStore } from '../store/useGameStore';
@@ -58,6 +59,7 @@ export function Menu() {
               className="btn-skew"
               onClick={() => {
                 unlockAudio(); // el AudioContext requiere un gesto del usuario
+                startMusic(); // ...y la música, por lo mismo (ver audio/music.ts)
                 openBriefing();
               }}
             >

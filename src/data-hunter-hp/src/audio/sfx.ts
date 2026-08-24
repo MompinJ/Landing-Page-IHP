@@ -16,6 +16,13 @@ export function unlockAudio() {
   ac();
 }
 
+/** El contexto compartido, para que la música (`music.ts`) no abra el suyo:
+ *  dos AudioContext en la misma página compiten por la tarjeta y el navegador
+ *  acaba suspendiendo uno de los dos. */
+export function sharedContext(): AudioContext | null {
+  return ac();
+}
+
 interface ToneOpts {
   type?: OscillatorType;
   gain?: number;
