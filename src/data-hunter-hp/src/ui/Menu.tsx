@@ -23,10 +23,14 @@ export function Menu() {
 
   if (phase !== 'menu' && phase !== 'briefing') return null;
 
+  const enBriefing = phase === 'briefing';
+
   return (
     <motion.div className="overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <motion.div
-        className="card card--tall"
+        /* La misma tarjeta en las dos fases, pero con el briefing dentro la
+           cabecera cede sitio: ver `.card--brief` en `index.css`. */
+        className={enBriefing ? 'card card--tall card--brief' : 'card card--tall'}
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 24 }}
@@ -35,13 +39,18 @@ export function Menu() {
         <h1 className="card-title card-title--hero">
           Port <em>Quest</em>
         </h1>
-        <p className="card-tagline">Salta hacia lo correcto. Esquiva los riesgos.</p>
+        {/* El lema es de la PORTADA. En el briefing sobra —lo dice otra vez el
+            pie de las instrucciones— y ahí cada renglón de cabecera es un
+            renglón menos de instrucciones a la vista. */}
+        {!enBriefing && (
+          <p className="card-tagline">Salta hacia lo correcto. Esquiva los riesgos.</p>
+        )}
 
         {phase === 'menu' ? (
           <>
             <p className="card-lead">
-              Cruza las cinco terminales del Grupo — Contenedores, Universal, Cruceros,
-              Astillero e Intermodal — recolectando los conceptos de valor y
+              Cruza las cinco terminales del Grupo — Contenedores, Multipropósito,
+              Cruceros, Astillero e Intermodal — recolectando los conceptos de valor y
               esquivando los riesgos.
             </p>
 

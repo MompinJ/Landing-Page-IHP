@@ -2,20 +2,21 @@ import { PALETTE } from './palette';
 import type { ZoneTheme } from '../world/rows';
 
 /**
- * CATÁLOGO DE UNIDADES DE NEGOCIO — punto único de verdad de cómo se llama
- * cada terminal en pantalla (arco de entrada, sello del pasaporte, resumen
- * final). Antes cada nombre estaba suelto en un comentario o en una textura.
+ * CATÁLOGO DE TERMINALES — punto único de verdad de cómo se llama cada una en
+ * pantalla (arco de entrada, sello del pasaporte, resumen final). Antes cada
+ * nombre estaba suelto en un comentario o en una textura.
  *
- * OJO: las siglas y las sedes son lo que hay que revisar con comunicación
- * interna antes del congreso. El resto del juego lee de aquí, así que
- * corregir un nombre es tocar UNA línea.
+ * SOLO EL NOMBRE DE LA TERMINAL. Ni siglas (TEC, TUM, TNG, TILH…) ni razones
+ * sociales: el que juega en el stand viene de una unidad de negocio y conoce
+ * las suyas, no las de los demás, así que unas siglas ajenas no le dicen dónde
+ * está — y el nombre sí. Por lo mismo, `detail` cuenta lo que SE HACE en la
+ * terminal, que es lo que el jugador acaba de ver cruzándola, y no dónde está
+ * ni cómo se llama la empresa que la opera.
  */
 export interface UnitInfo {
-  /** Siglas con las que se conoce la unidad dentro del Grupo */
-  code: string;
-  /** Nombre completo para pantalla */
+  /** Nombre de la terminal, tal cual va a pantalla */
   name: string;
-  /** Sede o especialidad, una línea */
+  /** Qué se hace ahí, una línea */
   detail: string;
   /** Color del sello en el pasaporte */
   accent: string;
@@ -23,33 +24,28 @@ export interface UnitInfo {
 
 export const UNITS: Record<ZoneTheme, UnitInfo> = {
   port: {
-    code: 'TEC',
     name: 'Terminal de Contenedores',
     detail: 'Patios, grúas STS y RTG',
     accent: PALETTE.hpSky,
   },
   multi: {
-    code: 'TUM',
-    name: 'Terminal Universal',
-    detail: 'Carga general y granel',
+    name: 'Terminal Multipropósito',
+    detail: 'Carga general, granel y Ro-Ro',
     accent: PALETTE.sunsetOrange,
   },
   cruise: {
-    code: 'ECV',
     name: 'Terminal de Cruceros',
-    detail: 'Ensenada Cruiseport Village',
+    detail: 'Muelle de pasaje y turismo',
     accent: PALETTE.cyan,
   },
   shipyard: {
-    code: 'TNG',
     name: 'Astillero Naval',
-    detail: 'Talleres Navales del Golfo',
+    detail: 'Diques, gradas y talleres',
     accent: PALETTE.safetyOrange,
   },
   rail: {
-    code: 'TILH',
     name: 'Terminal Intermodal',
-    detail: 'Tula, Hidalgo',
+    detail: 'Vías, trenes y patio de maniobras',
     accent: PALETTE.glowGood,
   },
 };

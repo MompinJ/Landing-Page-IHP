@@ -30,6 +30,12 @@ import { useGameStore } from '../store/useGameStore';
  *    `render/device.ts`), una sola vez y para las tres tarjetas;
  *  - y lo que sale al paso son órdenes cortas con su coste a la derecha, en
  *    una columna que se puede leer sola.
+ *
+ * CABE EN LA PANTALLA, SIEMPRE. Esto no termina en la tarjeta: lo que se lee
+ * aquí tiene tope de altura y scroll propio (`.howto`), y la tarjeta que lo
+ * contiene no pasa nunca del alto de la pantalla. Por eso el texto de cada
+ * línea es corto a propósito —una orden y su coste— en vez de una frase
+ * explicada: cada renglón que se ahorra es un renglón que se ve sin desplazar.
  */
 
 /** Flechas DIBUJADAS, no glifos tipográficos: ninguna fuente garantiza el
@@ -162,9 +168,13 @@ function BoardStrip() {
 
 /** Muestra REAL del vocabulario de cada tipo de tarjeta: sale de `items.ts`,
  *  que es la misma lista que siembra el mapa. Si el glosario cambia, el
- *  briefing cambia con él en vez de mentir con una lista escrita a mano. */
-const MUESTRA_BUENAS = goodItemsFor('port').slice(0, 3).concat(goodItemsFor('shipyard').slice(0, 2));
-const MUESTRA_MALAS = badItemsFor('port').slice(0, 2).concat(badItemsFor('multi').slice(0, 2));
+ *  briefing cambia con él en vez de mentir con una lista escrita a mano.
+ *
+ *  TRES Y TRES. Son una MUESTRA, no el glosario: con cinco etiquetas la ficha
+ *  verde se iba a dos renglones y la roja se quedaba en uno, y las dos juntas
+ *  costaban media pantalla de scroll para decir lo que ya dicen tres. */
+const MUESTRA_BUENAS = goodItemsFor('port').slice(0, 2).concat(goodItemsFor('shipyard').slice(0, 1));
+const MUESTRA_MALAS = badItemsFor('port').slice(0, 2).concat(badItemsFor('multi').slice(0, 1));
 
 export function Briefing() {
   const startGame = useGameStore((s) => s.startGame);
@@ -177,8 +187,14 @@ export function Briefing() {
       <div className="howto">
         <BoardStrip />
 
-        {/* 1 — LO ÚNICO QUE HAY QUE SABER. Tres tarjetas numeradas: el icono se
-            mueve como el movimiento que pide y enseña el botón del mando. */}
+        {/* 1 — LO ÚNICO QUE HAY QUE SABER. Dos tarjetas numeradas: el icono se
+            mueve como el movimiento que pide y enseña el botón del mando.
+            RECULAR no sale aquí: es el movimiento que nadie necesita para
+            empezar a jugar —se descubre solo al chocar con algo— y ocupaba un
+            tercio de la fila para explicar lo que hace la flecha contraria a
+            la que ya está explicada arriba. Lo que sí hay que saber de ir
+            hacia atrás (que solo se puede tres casillas) sigue estando abajo,
+            entre lo que te sale al paso. */}
         <div className="how-sec">
           <p className="how-title">Lo único que hay que saber</p>
           <div className="how-cards">
@@ -222,25 +238,6 @@ export function Briefing() {
                 </>
               )}
             </div>
-            <div className="how-card">
-              <span className="how-step">3</span>
-              <Arrow dir="down" className="how-glyph glyph-back anim-back" />
-              <b>RECULA</b>
-              {TOUCH ? (
-                <span className="pad-row">
-                  <Gesto dirs={['down']} />
-                </span>
-              ) : (
-                <>
-                  <span className="pad-row">
-                    <DPad dirs={['down']} />
-                  </span>
-                  <span className="alt-keys">
-                    o <kbd>↓</kbd> <kbd>S</kbd> — con correa
-                  </span>
-                </>
-              )}
-            </div>
           </div>
         </div>
 
@@ -275,14 +272,15 @@ export function Briefing() {
             </div>
           </div>
           <p className="how-foot">
-            Lo que PISAS es tuyo: si el suelo te lleva por encima de una ficha, la recoges igual —
-            verde o roja. {BALANCE.COMBO_X2_AT} verdes seguidas <b className="t-warn">x2</b>,{' '}
-            {BALANCE.COMBO_X3_AT} <b className="t-warn">x3</b>.
+            Lo que pisas es tuyo, verde o roja. {BALANCE.COMBO_X2_AT} verdes seguidas{' '}
+            <b className="t-warn">x2</b>, {BALANCE.COMBO_X3_AT} <b className="t-warn">x3</b>.
           </p>
         </div>
 
         {/* 3 — LO QUE TE SALE AL PASO. Órdenes cortas con su coste a la
-            derecha, en una columna que se puede leer sola. */}
+            derecha, en una columna que se puede leer sola. Cada línea empieza
+            por el sitio donde pasa y sigue con lo que hay que hacer: es lo que
+            deja la lista en un renglón por riesgo. */}
         <div className="how-sec">
           <p className="how-title">Lo que te sale al paso</p>
           <ul className="cues">
@@ -296,50 +294,43 @@ export function Briefing() {
             <li>
               <span className="cue-ico cue-ico--water" />
               <span>
-                En <b>Cruceros</b> se acaba el suelo: salta de casco en casco
+                <b>Cruceros</b>: se acaba el suelo, salta de casco en casco
               </span>
               <b className="cue-cost">1 vida</b>
             </li>
             <li>
               <span className="cue-ico cue-ico--belt" />
               <span>
-                En la <b>Universal</b> el suelo se mueve: te descoloca, no te mata
+                <b>Multipropósito</b>: el suelo se mueve y te descoloca
               </span>
               <b className="cue-cost cue-cost--free">libre</b>
             </li>
             <li>
               <span className="cue-ico cue-ico--dock" />
               <span>
-                En el <b>Astillero</b> el dique tapa el paso: pasarela o punto de embarque
+                <b>Astillero</b>: el dique corta el paso, cruza por la pasarela
               </span>
               <b className="cue-cost cue-cost--free">libre</b>
             </li>
             <li>
               <span className="cue-ico cue-ico--back" />
               <span>
-                Atrás solo <b>{BALANCE.BACK_STEPS_MAX} casillas</b>: al que se queda le cae un
-                contenedor
+                Atrás solo <b>{BALANCE.BACK_STEPS_MAX} casillas</b>, o te cae un contenedor
               </span>
               <b className="cue-cost">1 vida</b>
             </li>
             <li>
               <span className="cue-ico cue-ico--stamp" />
               <span>
-                <b>Pasaporte</b>: cada terminal nueva sella, las cinco lo completan
+                <b>Pasaporte</b>: cada terminal nueva sella
               </span>
               <b className="cue-cost cue-cost--good">
                 +{BALANCE.SCORE_STAMP} / +{BALANCE.SCORE_PASSPORT_COMPLETE}
               </b>
             </li>
           </ul>
-          <p className="how-foot">
-            Cuanto más lejos llegas, más aprieta: todo va más rápido y salen más fichas rojas.
-          </p>
+          <p className="how-foot">Cuanto más lejos, más rápido va todo y más fichas rojas salen.</p>
         </div>
-
-        <p className="how-goal">
-          <b>{BALANCE.LIVES} vidas.</b> <b>5 terminales.</b> Salta hacia lo correcto.
-        </p>
       </div>
 
       <div className="brief-btns">

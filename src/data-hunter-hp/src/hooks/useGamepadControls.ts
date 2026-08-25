@@ -3,6 +3,7 @@ import { unlockAudio } from '../audio/sfx';
 import type { MoveDirection } from '../store/runtime';
 import { useGameStore } from '../store/useGameStore';
 import { pressMove, releaseMove, SOURCE } from '../world/input';
+import { emiteAccion, marcaConectado, repiteDireccion } from '../world/gamepadUi';
 
 /**
  * Web Gamepad API (estándar W3C — Chrome/Edge/Firefox/Safari en cualquier OS,
@@ -10,8 +11,13 @@ import { pressMove, releaseMove, SOURCE } from '../world/input';
  *
  *  - Menú:      A o Start → iniciar misión
  *  - Jugando:   D-Pad / stick izquierdo para saltar (edge-triggered), A → avanzar
- *  - Game over: A → jugar de nuevo, B → volver al menú (con guardia de 1 s
- *               para no reiniciar por un botón que venía presionado del gameplay)
+ *  - Game over: la cruceta deja de saltar y pasa a MOVER EL CURSOR por la
+ *               tarjeta (teclado en pantalla, unidades, botones), A confirma lo
+ *               que hay bajo el cursor y B borra una letra. Start sigue siendo
+ *               el atajo a jugar otra vez sin apuntar a nada — en el stand hace
+ *               falta una tecla que no dependa de dónde quedó el cursor. Todo
+ *               con guardia de 1 s, para no saltarse la pantalla de resultados
+ *               con un botón que venía machacado del gameplay.
  *
  * Vibración de 200 ms en cada golpe (actuador del mando + fallback
  * navigator.vibrate). Se sondea por rAF: la Gamepad API no emite eventos de
@@ -31,12 +37,19 @@ function activeGamepad(): Gamepad | null {
 export function useGamepadControls() {
   const prev = useRef({ up: false, down: false, left: false, right: false, a: false, b: false, start: false });
   const gameoverAt = useRef(0);
+  /** Instante en que toca la próxima repetición de cada dirección mientras se
+   *  navega la tarjeta final (ver `repiteDireccion`). */
+  const repite = useRef({ up: 0, down: 0, left: 0, right: 0 });
 
   useEffect(() => {
     let raf = 0;
     const poll = () => {
       raf = requestAnimationFrame(poll);
       const gp = activeGamepad();
+      // El estado de conexión se publica SIEMPRE, también cuando no hay mando:
+      // es lo que decide si la pantalla final saca el teclado en pantalla, y
+      // sacarlo sin mando estorba (el campo de texto es más rápido).
+      marcaConectado(!!gp);
       if (!gp) return;
 
       const ax = gp.axes[0] ?? 0;
@@ -93,18 +106,27 @@ export function useGamepadControls() {
             store.backToMenu();
           }
           break;
-        case 'gameover':
+        // AQUÍ LA CRUCETA YA NO SALTA: mueve el cursor. Lo que sale por
+        // `emiteAccion` lo recoge la rejilla de la tarjeta final (ver
+        // `hooks/useGamepadUi.ts`), que es quien sabe qué hay debajo — este
+        // bucle solo traduce botones a intenciones y no conoce la interfaz.
+        case 'gameover': {
           // Guardia: ignora pulsaciones el primer segundo tras morir para que
-          // el machaqueo del gameplay no salte la pantalla de resultados
-          if (performance.now() - gameoverAt.current > 1000) {
-            if (pressed('a') || pressed('start')) {
+          // el machaqueo del gameplay no salte la pantalla de resultados.
+          const ahora = performance.now();
+          if (ahora - gameoverAt.current > 1000) {
+            repiteDireccion(repite.current, cur, ahora);
+            if (pressed('a')) emiteAccion('confirm');
+            else if (pressed('b')) emiteAccion('back');
+            // Start NO pasa por el cursor: es el atajo de kiosco para volver a
+            // jugar sin tener que llevar el cursor hasta el botón.
+            else if (pressed('start')) {
               unlockAudio();
               store.startGame();
-            } else if (pressed('b')) {
-              store.backToMenu();
             }
           }
           break;
+        }
       }
       prev.current = cur;
     };

@@ -54,7 +54,12 @@
     "test:cpu": "tsx scripts/cpu-profile.ts",
     "test:compat": "tsx scripts/compat-test.ts",
     "test:music": "tsx scripts/music-test.ts",
-    "test:shadowcost": "tsx scripts/shadow-cost.ts"
+    "test:briefing": "tsx scripts/briefing-fit.ts",
+    "test:briefingperf": "tsx scripts/briefing-perf.ts",
+    "test:firma": "tsx scripts/firma-mando-test.ts",
+    "test:arranque": "tsx scripts/arranque-jank.ts",
+    "test:shadowcost": "tsx scripts/shadow-cost.ts",
+    "qr": "tsx scripts/qr/gen-qr.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
@@ -75,6 +80,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/three": "^0.185.1",
     "@vitejs/plugin-react": "^6.0.3",
+    "jsqr": "^1.4.0",
     "oxlint": "^1.71.0",
     "playwright": "^1.61.1",
     "tsx": "^4.23.1",

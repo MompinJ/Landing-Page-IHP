@@ -12,8 +12,23 @@ const ZONE_SPAN = BALANCE.ZONE_LENGTH * BALANCE.TILE;
  * Mapa de NORMALES de oleaje (canvas, seamless). Da brillo especular animado
  * de la luz direccional → el agua se lee como agua aunque el reflejo sea sutil
  * (p. ej. en GPU por software). Se combina con los reflejos reales.
+ *
+ * EL LIENZO SE PINTA UNA VEZ POR SESIÓN, y esto costó un tirón encontrarlo.
+ * Son 16 384 píxeles y cada uno pide cuatro alturas, o sea unas 65 000 llamadas
+ * a `sin`: no es gratis. Y se pagaba DOS veces —lo usan el océano de fondo y el
+ * agua de cruceros— y otras dos en cada partida nueva, porque `<Map>` se
+ * remonta al arrancar y con él sus dos aguas. Caía justo en el fotograma de
+ * pasar del briefing a la partida, que es el peor sitio: el primer salto de
+ * cada partida.
+ *
+ * Lo que NO se puede compartir es la textura: cada agua desplaza su `offset`
+ * por su cuenta y una sola las acoplaría. Se comparte el lienzo —que es lo caro—
+ * y cada una envuelve el suyo en una `CanvasTexture` propia, que es un objeto
+ * vacío hasta que se dibuja.
  */
-function makeRippleNormalMap(size = 128): THREE.CanvasTexture {
+let lienzoOleaje: HTMLCanvasElement | null = null;
+
+function pintaLienzoOleaje(size: number): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d')!;
@@ -42,7 +57,12 @@ function makeRippleNormalMap(size = 128): THREE.CanvasTexture {
     }
   }
   ctx.putImageData(img, 0, 0);
-  const tex = new THREE.CanvasTexture(canvas);
+  return canvas;
+}
+
+function makeRippleNormalMap(size = 128): THREE.CanvasTexture {
+  lienzoOleaje ??= pintaLienzoOleaje(size);
+  const tex = new THREE.CanvasTexture(lienzoOleaje);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(9, 9);
   return tex;

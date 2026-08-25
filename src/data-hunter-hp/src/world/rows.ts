@@ -37,7 +37,7 @@ export type VehicleKind =
  * cambió de negocio.
  *
  *  - 'port'     → TEC, Terminal de Contenedores: esquivar tráfico y rodear pilas
- *  - 'multi'    → TUM, Terminal Universal: el SUELO SE MUEVE (bandas
+ *  - 'multi'    → Terminal Multipropósito: el SUELO SE MUEVE (bandas
  *                 transportadoras) y el convoy de tolvas de granel cruza el patio
  *  - 'cruise'   → ECV, Terminal de Cruceros: montarse en plataformas móviles
  *  - 'shipyard' → TNG, Astillero Naval: refugiarse en andamios, cronometrar la
@@ -551,7 +551,7 @@ function beltNear(index: number): boolean {
 }
 
 /**
- * Fila de la TERMINAL UNIVERSAL (TUM). Tres sabores:
+ * Fila de la TERMINAL MULTIPROPÓSITO. Tres sabores:
  *  - BANDA transportadora: no mata, arrastra. Es el verbo del bioma.
  *  - PATIO DE MANIOBRA: convoy de tolvas de granel (pegadas, con un solo hueco
  *    por vuelta) o cargadoras de pala repartidas cruzando el patio.

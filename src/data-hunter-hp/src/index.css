@@ -51,16 +51,7 @@
                                    esconde y se muestra. `vh` queda de reserva
                                    para navegadores que no entiendan `dvh`.
    ========================================================================== */
-html, body, #root {
-  height: 100%;
-  overflow: hidden;
-  background: var(--deep-sea);
-  overscroll-behavior: none;
-  touch-action: none;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-user-select: none;
-  user-select: none;
-}
+html, body, #root { height: 100%; overflow: hidden; background: var(--deep-sea); overscroll-behavior: none; touch-action: none; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
 
 /* COLOR-MIX CON RESPALDO. `color-mix()` es de Safari 16.2 y por debajo de ahí
    una declaración que lo use se descarta ENTERA — no cae a un color por
@@ -89,7 +80,12 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   align-items: center;
   gap: 2px;
   padding: 10px 22px;
-  background: rgba(0, 46, 109, 0.72); /* respaldo para navegadores sin color-mix */
+  background: rgba(
+    0,
+    46,
+    109,
+    0.72
+  ); /* respaldo para navegadores sin color-mix */
   background: color-mix(in srgb, var(--hp-navy) 72%, transparent);
   border: 1px solid rgba(0, 229, 255, 0.45);
   border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
@@ -107,7 +103,9 @@ input, textarea { -webkit-user-select: text; user-select: text; }
    —que es lo que se quiere para el tablero— pero eso mete el HUD debajo de la
    muesca y de las esquinas redondeadas. `env(safe-area-inset-*)` vale 0 en
    cualquier pantalla normal, así que esto no cambia nada en el stand. */
-.hud-panel { top: calc(18px + env(safe-area-inset-top)); }
+.hud-panel {
+  top: calc(18px + env(safe-area-inset-top));
+}
 .hud-score { left: calc(22px + env(safe-area-inset-left)); }
 .hud-combo { right: calc(22px + env(safe-area-inset-right)); }
 
@@ -126,7 +124,9 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 }
 
 .hud-timer--critical .hud-value { color: var(--glow-bad); animation: pulse 0.5s infinite alternate; }
-@keyframes pulse { from { opacity: 1; } to { opacity: 0.55; } }
+@keyframes pulse { from { opacity: 1; }
+  to { opacity: 0.55; }
+}
 
 .hud-combo-x2 { color: var(--glow-good); }
 .hud-combo-x3 { color: var(--safety-orange); text-shadow: 0 0 12px var(--safety-orange); }
@@ -159,10 +159,18 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   align-items: center;
   justify-content: center;
   overflow-y: auto;
-  padding: calc(22px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right))
-    calc(22px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
-  background: rgba(6, 26, 46, 0.8);
-  background: color-mix(in srgb, var(--deep-sea) 80%, transparent);
+  padding: calc(22px + env(safe-area-inset-top))
+    calc(12px + env(safe-area-inset-right))
+    calc(22px + env(safe-area-inset-bottom))
+    calc(12px + env(safe-area-inset-left));
+  /* SE VE EL JUEGO DETRÁS, como en Terminal Rally. El velo no está aquí para
+     tapar la escena sino para separarla del texto: al 72% el mapa, las grúas y
+     el vuelo de presentación siguen leyéndose, y el jugador entiende antes de
+     pulsar a qué está entrando. Los mismos números que usa Terminal Rally
+     (`.overlay` a 0.72 con 4 px de desenfoque), que es la referencia que se
+     está copiando. */
+  background: rgba(6, 26, 46, 0.72);
+  background: color-mix(in srgb, var(--deep-sea) 72%, transparent);
   backdrop-filter: blur(4px);
   /* El overlay es lo único de la página que se desplaza, y tiene que poder
      hacerlo con el dedo: `touch-action: none` está puesto en la raíz para que
@@ -186,18 +194,46 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   padding: 30px 38px 34px;
   text-align: center;
   color: var(--ink-1);
-  background: linear-gradient(165deg, #0c2244 0%, #08172c 58%, #050e1c 100%);
+  /* La tarjeta tampoco es opaca: deja pasar la escena igual que el `.panel` de
+     Terminal Rally (0.92). Es lo justo para que se adivine el puerto por
+     debajo sin que el texto pierda contraste — el degradado se oscurece hacia
+     abajo, que es donde más letra pequeña hay. */
+  background: linear-gradient(
+    165deg,
+    rgba(12, 34, 68, 0.88) 0%,
+    rgba(8, 23, 44, 0.92) 58%,
+    rgba(5, 14, 28, 0.94) 100%
+  );
   border: 1px solid rgba(63, 169, 245, 0.24);
   /* Esquinas biseladas: el marco del material del congreso */
-  clip-path: polygon(
-    28px 0, 100% 0, 100% calc(100% - 28px),
-    calc(100% - 28px) 100%, 0 100%, 0 28px
-  );
+  clip-path: polygon(28px 0, 100% 0, 100% calc(100% - 28px), calc(100% - 28px) 100%, 0 100%, 0 28px);
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.65), inset 0 0 70px rgba(0, 80, 160, 0.14);
 }
 
 .card--wide { width: min(94vw, 620px); }
 .card--tall { gap: 12px; }
+
+/* ---------- La tarjeta cuando lleva el briefing dentro ----------
+   La cabecera de la portada (antetítulo + título a 58 px + lema) mide unos
+   150 px, y en el briefing esos 150 px se los quita a lo único que la gente ha
+   venido a leer aquí. En esta pantalla el título ya no presenta el juego —eso
+   pasó en la pantalla anterior— así que baja a tamaño de encabezado y el lema
+   directamente no sale (ver `Menu.tsx`). */
+/* LA TARJETA DEL BRIEFING NUNCA PASA DE LA PANTALLA. Es lo que hace que el
+   scroll caiga donde tiene que caer: al tope, quien cede es la columna de
+   instrucciones —lo único de esta tarjeta que puede desplazarse sola— y no la
+   tarjeta entera, que se llevaría el botón de jugar fuera de cuadro. El 100%
+   es del hueco del overlay ya descontado su relleno, porque el overlay tiene
+   altura cierta (`inset: 0`) y esto es un hijo flex suyo.
+
+   Y va SOLO aquí, no en `.card`. Las demás tarjetas no llevan dentro ninguna
+   columna con scroll: ponerles tope de altura no las hace caber, las hace
+   RECORTARSE contra su propio bisel —y la tarjeta final, con el teclado del
+   mando montado, es la que más crece—. Esas siguen creciendo y es el overlay
+   el que se desplaza, que es como estaban. */
+.card--brief { gap: 9px; padding: 20px 30px 22px; max-height: 100%; min-height: 0; }
+.card--brief .card-title--hero { font-size: clamp(24px, 3.4vw, 32px); }
+.card--brief .card-kicker { font-size: 10.5px; letter-spacing: 0.22em; }
 
 .card-kicker {
   font-size: 12px;
@@ -220,18 +256,9 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 .card-title em { font-style: italic; color: var(--blue-bright); }
 .card-title--hero { font-size: clamp(38px, 7vw, 58px); }
 
-.card-tagline {
-  font-size: clamp(15px, 2.3vw, 18px);
-  font-weight: 800;
-  color: var(--amber);
-}
+.card-tagline { font-size: clamp(15px, 2.3vw, 18px); font-weight: 800; color: var(--amber); }
 
-.card-lead {
-  max-width: 46ch;
-  font-size: 15px;
-  line-height: 1.55;
-  color: var(--ink-2);
-}
+.card-lead { max-width: 46ch; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
 
 /* Entradilla de cada regla de la portada: da un ancla visual para escanear */
 .rule-lead { color: var(--cyan); font-weight: 800; margin-right: 4px; }
@@ -250,7 +277,13 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   margin-top: 2px;
   text-align: left;
 }
-.rule { display: flex; gap: 9px; font-size: 14px; line-height: 1.5; color: var(--ink-1); }
+.rule {
+  display: flex;
+  gap: 9px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-1);
+}
 .rule::before { content: '>'; flex: none; font-weight: 900; color: var(--blue-bright); }
 .rule strong { color: #fff; }
 
@@ -280,8 +313,16 @@ kbd {
   text-transform: uppercase;
 }
 .chip > span { display: block; transform: skewX(12deg); }
-.chip--good { color: #8bf3ac; background: rgba(28, 104, 60, 0.35); border: 1px solid rgba(110, 231, 135, 0.5); }
-.chip--bad { color: #ff9b9b; background: rgba(122, 30, 42, 0.35); border: 1px solid rgba(255, 107, 107, 0.45); }
+.chip--good {
+  color: #8bf3ac;
+  background: rgba(28, 104, 60, 0.35);
+  border: 1px solid rgba(110, 231, 135, 0.5);
+}
+.chip--bad {
+  color: #ff9b9b;
+  background: rgba(122, 30, 42, 0.35);
+  border: 1px solid rgba(255, 107, 107, 0.45);
+}
 
 /* ---------- Botones ---------- */
 .btn-skew {
@@ -325,7 +366,8 @@ kbd {
   cursor: pointer;
   transition: color 0.12s;
 }
-.btn-ghost::before, .btn-ghost::after {
+.btn-ghost::before,
+.btn-ghost::after {
   content: '';
   position: absolute;
   left: 6px;
@@ -411,8 +453,51 @@ kbd {
   color: var(--green);
 }
 
-.signup { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
-.submit-row { display: flex; gap: 10px; align-items: stretch; }
+.signup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.submit-row { display: flex; gap: 10px; align-items: stretch; justify-content: center; }
+
+/* ---------- Teclado en pantalla para firmar con el mando ----------
+   Copiado de Terminal Rally. Solo sale con un mando conectado (ver
+   `GameOver.tsx`): sin mando, el campo de texto es más rápido y esto estorba.
+   Las teclas son botones normales, así que también se tocan con el dedo o con
+   el ratón — el mando solo mueve el cursor por encima. */
+.keys { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.keys-row { display: flex; gap: 6px; justify-content: center; }
+.key {
+  width: 36px;
+  height: 34px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--white);
+  background: rgba(14, 42, 78, 0.7);
+  border: 1px solid rgba(120, 175, 225, 0.35);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+.key:hover:not(:disabled) { background: rgba(36, 96, 165, 0.75); border-color: rgba(120, 200, 255, 0.6); }
+.key:disabled { opacity: 0.32; cursor: default; }
+.key--wide { width: auto; padding: 0 16px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* EL CURSOR DEL MANDO. Va como clase sobre el propio elemento y no como estado
+   de React (ver `useRejillaMando`): moverlo no tiene por qué re-dibujar el
+   panel. El contorno va POR FUERA (`outline`) a propósito — un borde cambiaría
+   el tamaño de la tecla y la fila entera bailaría al pasar el cursor. */
+.gp-cursor {
+  position: relative;
+  z-index: 2;
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+  filter: brightness(1.2) drop-shadow(0 0 10px rgba(0, 229, 255, 0.7));
+  transition: filter 0.08s ease;
+}
 
 /* Fichas seleccionables (unidad de negocio del jugador) */
 .chips--pick { gap: 8px; max-width: 520px; }
@@ -481,24 +566,19 @@ kbd {
   transition: color 0.3s, border-color 0.3s;
 }
 
-/* Siglas de apoyo sobre el nombre: quien las conoce las reconoce de un vistazo,
-   quien no, lee el nombre y no se pierde nada. */
-.passport-stamp-code {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  opacity: 0.72;
-}
-.passport-stamp-name {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-}
+/* Solo el nombre: la línea de siglas que iba encima se ha ido (ver
+   `Passport.tsx`), así que el sello es de una sola línea y se centra él. */
+.passport-stamp-name { font-size: 11px; font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; }
 
 .passport-stamp--on { border-style: solid; }
 
-.passport-block { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+.passport-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
 
 /* ---------- Cartel de entrada a terminal ---------- */
 .term-sign {
@@ -521,19 +601,12 @@ kbd {
   background: linear-gradient(165deg, rgba(11, 33, 64, 0.95), rgba(4, 13, 26, 0.92));
   border: 1px solid rgba(63, 169, 245, 0.4);
   border: 1px solid color-mix(in srgb, var(--accent, #3fa9f5) 40%, transparent);
-  clip-path: polygon(
-    20px 0, 100% 0, 100% calc(100% - 20px),
-    calc(100% - 20px) 100%, 0 100%, 0 20px
-  );
+  clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
   /* La sombra es UNA sola propiedad, así que el respaldo se repite entera en
      vez de partirse: no se puede dar el color plano por un lado y la mezcla
      por otro. */
-  box-shadow:
-    0 20px 55px rgba(0, 0, 0, 0.6),
-    0 0 40px rgba(63, 169, 245, 0.18);
-  box-shadow:
-    0 20px 55px rgba(0, 0, 0, 0.6),
-    0 0 40px color-mix(in srgb, var(--accent, #3fa9f5) 18%, transparent);
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.6), 0 0 40px rgba(63, 169, 245, 0.18);
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.6), 0 0 40px color-mix(in srgb, var(--accent, #3fa9f5) 18%, transparent);
   backdrop-filter: blur(6px);
 }
 
@@ -597,15 +670,38 @@ kbd {
 .howto {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 13px;
   width: 100%;
-  max-height: min(70vh, 640px);
+  /* `1 1 auto` + `min-height: 0` es el par que reparte el recorte: la tarjeta
+     tiene tope de altura (ver `.card`) y de todos sus hijos ESTE es el único
+     que puede encogerse por debajo de su contenido, porque es un contenedor
+     con scroll. Así el recorte cae siempre aquí y nunca en el pie de botones.
+     El tope propio es solo estético: en una pantalla muy alta la columna deja
+     de crecer y la tarjeta no se estira hasta el borde. */
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: min(62vh, 560px);
   overflow-y: auto;
+  /* Que el rebote del borde no se propague al overlay ni al lienzo de detrás */
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  /* El hueco de la barra se reserva SIEMPRE: sin esto, el texto se reacomoda
+     entero en cuanto aparece la barra, y ese reflujo es un frame perdido justo
+     al empezar a desplazar. */
+  scrollbar-gutter: stable;
+  /* Lo que pasa dentro (desplazar, los iconos que se mueven) no obliga a
+     recalcular ni a repintar el resto de la tarjeta: es lo que deja el scroll
+     en el compositor y el hilo principal libre para dibujar la escena. */
+  contain: layout paint;
   padding-right: 4px;
   text-align: left;
 }
-.howto::-webkit-scrollbar { width: 6px; }
-.howto::-webkit-scrollbar-thumb { background: rgba(63, 169, 245, 0.35); border-radius: 3px; }
+/* Barra visible y siempre presente: en el stand hay que VER que hay más
+   abajo, y una barra que solo asoma al desplazar no lo cuenta. */
+.howto { scrollbar-width: thin; scrollbar-color: rgba(63, 169, 245, 0.45) transparent; }
+.howto::-webkit-scrollbar { width: 7px; }
+.howto::-webkit-scrollbar-track { background: rgba(63, 169, 245, 0.08); border-radius: 4px; }
+.howto::-webkit-scrollbar-thumb { background: rgba(63, 169, 245, 0.45); border-radius: 4px; }
 
 /* ---------- Cabecera: la retícula del tablero con las dos fichas ---------- */
 .brief-track {
@@ -626,21 +722,28 @@ kbd {
 .brief-lane:nth-of-type(1) { left: 30%; }
 .brief-lane:nth-of-type(2) { left: 50%; }
 .brief-lane:nth-of-type(3) { left: 70%; }
+/* Las fichas caen con `transform`, NO con `top`. Es la misma caída en
+   pantalla y no el mismo coste: mover `top` obliga a recolocar y repintar en
+   cada fotograma, y eso lo paga el hilo principal —el mismo que está dibujando
+   la escena detrás del briefing—. Con `transform` + `opacity` la animación se
+   la queda el compositor y no le quita un solo milisegundo al juego. */
 .brief-tile {
   position: absolute;
+  top: -20px;
   width: 15px;
   height: 17px;
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
   animation: brief-drift 3.4s linear infinite;
+  will-change: transform, opacity;
 }
 .brief-tile--good { left: calc(30% - 7px); background: var(--glow-good); }
 .brief-tile--bad { left: calc(70% - 7px); background: var(--glow-bad); animation-delay: -1.7s; }
 
 @keyframes brief-drift {
-  from { top: -20px; opacity: 0; }
+  from { transform: translateY(0); opacity: 0; }
   15% { opacity: 1; }
   85% { opacity: 1; }
-  to { top: 56px; opacity: 0; }
+  to { transform: translateY(76px); opacity: 0; }
 }
 
 /* ---------- Secciones ---------- */
@@ -653,18 +756,11 @@ kbd {
   color: var(--steel);
 }
 .how-foot { font-size: 12px; line-height: 1.5; color: var(--ink-2); }
-.how-goal {
-  flex: none;
-  padding-top: 4px;
-  font-size: 14px;
-  text-align: center;
-  color: var(--ink-1);
-  border-top: 1px solid rgba(63, 169, 245, 0.18);
-}
-.how-goal b { color: var(--cyan); }
-
 /* ---------- Las tres tarjetas numeradas ---------- */
-.how-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+/* Dos columnas desde que RECULA salió de la fila (ver `Briefing.tsx`): con
+   `repeat(3, …)` las dos tarjetas que quedan se apretaban contra el borde
+   izquierdo y dejaban un tercio de hueco a la derecha. */
+.how-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .how-card {
   position: relative;
   display: flex;
@@ -689,7 +785,6 @@ kbd {
 .how-glyph { width: 26px; height: 26px; }
 .glyph-fwd { color: var(--green); }
 .glyph-side { width: 36px; color: var(--cyan); }
-.glyph-back { color: var(--amber); }
 
 .pad-row { display: flex; align-items: center; gap: 6px; }
 .alt-keys { font-size: 10.5px; line-height: 1.6; color: var(--steel); }
@@ -819,12 +914,7 @@ kbd {
 .brief-btns { display: flex; align-items: center; gap: 16px; margin-top: 4px; }
 
 .facts { display: flex; gap: 26px; justify-content: center; margin: 4px 0 2px; }
-.fact {
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-}
+.fact { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
 .fact b {
   display: block;
   font-size: 26px;
@@ -843,18 +933,17 @@ kbd {
   0%, 100% { transform: translateX(-4px); }
   50% { transform: translateX(4px); }
 }
-@keyframes anim-back {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(4px); }
-}
 .anim-hop { animation: anim-hop 1.5s ease-in-out infinite; }
 .anim-side { animation: anim-side 1.6s ease-in-out infinite; }
-.anim-back { animation: anim-back 1.8s ease-in-out infinite; }
+/* Los iconos se suben a su propia capa: son dos rectángulos de 26 px, no
+   cuesta nada tenerlos aparte, y a cambio moverlos deja de repintar la tarjeta
+   entera 120 veces por segundo. */
+.anim-hop, .anim-side { will-change: transform; }
 
 /* Movimiento reducido: se quedan quietos, no desaparecen — el icono sigue
    diciendo lo mismo parado. */
 @media (prefers-reduced-motion: reduce) {
-  .anim-hop, .anim-side, .anim-back, .brief-tile { animation: none; }
+  .anim-hop, .anim-side, .brief-tile { animation: none; will-change: auto; }
 }
 
 /* ==========================================================================
@@ -877,10 +966,7 @@ kbd {
     width: 100%;
     gap: 10px;
     padding: 20px 16px 22px;
-    clip-path: polygon(
-      18px 0, 100% 0, 100% calc(100% - 18px),
-      calc(100% - 18px) 100%, 0 100%, 0 18px
-    );
+    clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px);
   }
   .card--wide { width: 100%; }
 
@@ -899,10 +985,19 @@ kbd {
   }
   .how-card b { flex: 1; }
   .how-step { top: 50%; left: 8px; transform: translateY(-50%); }
-  .alt-keys { display: none; } /* no hay teclado que ofrecer */
+  .alt-keys {
+    display: none;
+  } /* no hay teclado que ofrecer */
 
-  /* La columna de instrucciones se lleva el scroll y deja fuera el pie */
-  .howto { max-height: 48dvh; gap: 12px; }
+  /* La columna de instrucciones se lleva el scroll y deja fuera el pie. El
+     tope YA NO SE PONE A MANO (era `48dvh`): la tarjeta tiene tope propio y la
+     columna encoge lo que haga falta, así que un número fijo aquí solo servía
+     para dejar sin usar los píxeles que sí había. */
+  /* En un teléfono la barra de desplazamiento no se ve —el sistema la esconde
+     hasta que se toca—, así que la señal de «hay más abajo» la da el propio
+     texto difuminándose en el borde. Aquí siempre hay más abajo: el contenido
+     mide el doble que el hueco en la pantalla más grande de este tramo. */
+  .howto { gap: 11px; mask-image: linear-gradient(180deg, #000 92%, transparent); }
 
   /* Cifras y títulos: bajan de tamaño de cartel a tamaño de pantalla */
   .final-score { font-size: clamp(46px, 17vw, 72px); }
@@ -912,11 +1007,7 @@ kbd {
 
   /* Los pies de botones se parten en dos líneas antes que salirse: el botón
      principal manda y el secundario baja debajo. */
-  .actions, .brief-btns, .submit-row {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
+  .actions, .brief-btns, .submit-row { flex-wrap: wrap; justify-content: center; gap: 10px; }
   .btn-skew { padding: 13px 30px; }
   .btn-ghost { padding: 11px 20px; }
   /* `white-space: nowrap` en el botón grande: es lo que impedía que «JUGAR
@@ -924,7 +1015,10 @@ kbd {
   .btn-skew > span { white-space: nowrap; }
 
   .submit-row { width: 100%; }
-  .name-input { flex: 1; min-width: 0; }
+  .name-input {
+    flex: 1;
+    min-width: 0;
+  }
 
   /* El pasaporte tenía sellos de ancho fijo (162 px): dos no caben en 390 con
      el relleno de la tarjeta. Se sueltan a rejilla de dos columnas iguales. */
@@ -939,14 +1033,27 @@ kbd {
 
   /* HUD: los tres paneles ocupaban un quinto de la pantalla y el de en medio
      tocaba a los otros dos. Se estrechan y se pegan a los bordes. */
-  .hud-panel { padding: 6px 12px; border-radius: 8px; }
-  .hud-value { font-size: 21px; }
-  .hud-label { font-size: 9px; letter-spacing: 0.12em; }
+  .hud-panel {
+    padding: 6px 12px;
+    border-radius: 8px;
+  }
+  .hud-value {
+    font-size: 21px;
+  }
+  .hud-label {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
   .hud-streak { font-size: 9px; }
   .hud-score { left: calc(10px + env(safe-area-inset-left)); }
   .hud-combo { right: calc(10px + env(safe-area-inset-right)); }
-  .hud-panel { top: calc(10px + env(safe-area-inset-top)); }
-  .event-popup { top: 30%; font-size: 19px; }
+  .hud-panel {
+    top: calc(10px + env(safe-area-inset-top));
+  }
+  .event-popup {
+    top: 30%;
+    font-size: 19px;
+  }
 
   /* El cartel de terminal cruzaba la pantalla entera */
   .term-sign { top: 17%; width: min(92vw, 340px); }
@@ -960,10 +1067,16 @@ kbd {
    distinto del de arriba, y por eso son dos bloques y no uno.
    ========================================================================== */
 @media (max-height: 520px) {
-  .overlay { padding-top: calc(8px + env(safe-area-inset-top)); padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+  .overlay {
+    padding-top: calc(8px + env(safe-area-inset-top));
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
   .card { gap: 7px; padding: 14px 18px 16px; }
   .card-title, .card-title--hero { font-size: clamp(22px, 4.4vh, 34px); }
-  .howto { max-height: 46dvh; gap: 9px; }
+  /* Mismo trato que en el teléfono en vertical: sin tope a mano, y el borde
+     de abajo difuminado como señal de que la lista sigue. Con 390 px de alto
+     no cabe ni la mitad, así que aquí siempre hay más abajo. */
+  .howto { gap: 9px; mask-image: linear-gradient(180deg, #000 90%, transparent); }
   .brief-track { height: 34px; }
   .final-score { font-size: clamp(34px, 11vh, 60px); }
   .facts { gap: 14px; margin: 0; }
@@ -974,8 +1087,13 @@ kbd {
   /* En horizontal el pasaporte tiene ancho de sobra: cinco sellos en fila */
   .passport { display: flex; }
   .passport-stamp { width: auto; flex: 1; min-width: 0; padding: 4px 5px; }
-  .hud-panel { top: calc(8px + env(safe-area-inset-top)); padding: 5px 11px; }
-  .hud-value { font-size: 19px; }
+  .hud-panel {
+    top: calc(8px + env(safe-area-inset-top));
+    padding: 5px 11px;
+  }
+  .hud-value {
+    font-size: 19px;
+  }
 }
 
 /* ---------- Botón de silencio ----------

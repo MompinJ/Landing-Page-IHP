@@ -2379,7 +2379,7 @@ export function HarbourMouth({
   );
 }
 
-/* ============ TUM · TERMINAL UNIVERSAL (carga general, granel, Ro-Ro) ===== */
+/* ======== TERMINAL MULTIPROPÓSITO (carga general, granel, Ro-Ro) ========= */
 
 /**
  * CAMIÓN TOLVA de granel. El tráfico de TUM no son coches: es lo que mueve una

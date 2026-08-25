@@ -64,7 +64,7 @@ export const PALETAS: Record<ZoneTheme, Paleta> = {
   // TEC, contenedores: la terminal de casa. Pentatónica menor, cuadrada y
   // motora — es el sonido de referencia contra el que suenan las otras cuatro.
   port: { escala: [0, 3, 5, 7, 10], arpegio: 'square', bajo: 'sawtooth', percusion: 1, transporte: 0 },
-  // TUM, universal: aquí el SUELO SE MUEVE. Modo dórico, que es el menor con la
+  // Multipropósito: aquí el SUELO SE MUEVE. Modo dórico, que es el menor con la
   // sexta subida: suena inestable sin llegar a sonar mal, como ir sobre una
   // banda transportadora.
   multi: { escala: [0, 2, 3, 5, 7, 9, 10], arpegio: 'triangle', bajo: 'sawtooth', percusion: 0.85, transporte: 0 },

@@ -1,5 +1,5 @@
 import { useFrame, useThree } from '@react-three/fiber';
-import { memo, useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { BALANCE, clampViewRows, colX, rowZ, viewRowsFor } from '../data/balance';
 import { PALETTE } from '../data/palette';
@@ -228,12 +228,35 @@ export function Map() {
     () => clampViewRows(viewRowsFor(size.width, size.height), QUALITY.maxRows),
     [size.width, size.height],
   );
-  // El generador de filas necesita saber cuánto se ve para ir por delante
-  useEffect(() => setLookahead(view.ahead), [view.ahead]);
+  /**
+   * EL MAPA SE LLENA POR MUTACIÓN, Y ESO HAY QUE CONTÁRSELO A REACT.
+   *
+   * `rows` es un array de módulo que arranca VACÍO: quien lo llena la primera
+   * vez es este mismo efecto, al decirle al generador cuánto hay que ver por
+   * delante. Pero llenarlo es mutarlo, y mutar no dispara ningún re-dibujo, así
+   * que el primer render del mapa salía con CERO filas y ahí se quedaba: la
+   * portada se veía sobre el vacío —fondo de niebla y nada más— y el puerto
+   * aparecía de golpe al pulsar JUGAR, que era el siguiente re-render por
+   * cambio de fase y no un momento elegido.
+   *
+   * Medido con la misma cámara y las 792 filas ya generadas: 18 llamadas de
+   * dibujo en la portada contra 159 en el briefing. `generacion` es lo que
+   * cierra el círculo — sube una vez cuando el mapa ya tiene filas y el
+   * `useMemo` de abajo vuelve a cortar la ventana visible.
+   */
+  const [generacion, setGeneracion] = useState(0);
+  useEffect(() => {
+    setLookahead(view.ahead);
+    setGeneracion((n) => n + 1);
+  }, [view.ahead]);
 
   const start = Math.max(0, currentRow - view.behind);
   const end = Math.min(rows.length, currentRow + view.ahead + 1);
-  const visible = rows.slice(start, end);
+  // `generacion` es dependencia A PROPÓSITO y el analizador no puede saberlo:
+  // no se lee dentro, pero es la única señal de que `rows` —que es mutable y
+  // externo— ya tiene contenido que cortar.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const visible = useMemo(() => rows.slice(start, end), [start, end, generacion]);
 
   return (
     <group key={enPartida ? 'game' : 'menu'}>

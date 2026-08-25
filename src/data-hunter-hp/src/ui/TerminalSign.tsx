@@ -51,9 +51,7 @@ export function TerminalSign() {
               {head && <span>{head} </span>}
               <em>{tail}</em>
             </h2>
-            <span className="term-sign-detail">
-              <b>{info.code}</b> · {info.detail}
-            </span>
+            <span className="term-sign-detail">{info.detail}</span>
             {entered.fresh && (
               <span className="term-sign-badge">
                 Sello nuevo +{BALANCE.SCORE_STAMP}

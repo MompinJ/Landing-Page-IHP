@@ -32,7 +32,7 @@ export interface TerminalVocabulario {
 export const TERMINAL_ITEMS: readonly TerminalVocabulario[] = [
   {
     terminal: 'port',
-    etiqueta: 'TEC · Terminal de Contenedores',
+    etiqueta: 'Terminal de Contenedores',
     bloques: [
       {
         tema: 'Ciberseguridad',
@@ -61,7 +61,7 @@ export const TERMINAL_ITEMS: readonly TerminalVocabulario[] = [
   },
   {
     terminal: 'multi',
-    etiqueta: 'TUM · Terminal Universal',
+    etiqueta: 'Terminal Multipropósito',
     bloques: [
       {
         tema: 'Operaciones',
@@ -113,7 +113,7 @@ export const TERMINAL_ITEMS: readonly TerminalVocabulario[] = [
   },
   {
     terminal: 'cruise',
-    etiqueta: 'ECV · Terminal de Cruceros',
+    etiqueta: 'Terminal de Cruceros',
     bloques: [
       {
         tema: 'Nomenclatura naval',
@@ -152,7 +152,7 @@ export const TERMINAL_ITEMS: readonly TerminalVocabulario[] = [
   },
   {
     terminal: 'shipyard',
-    etiqueta: 'TNG · Astillero Naval',
+    etiqueta: 'Astillero Naval',
     bloques: [
       {
         tema: 'Filosofia HP',
@@ -185,7 +185,7 @@ export const TERMINAL_ITEMS: readonly TerminalVocabulario[] = [
   },
   {
     terminal: 'rail',
-    etiqueta: 'TILH · Terminal Intermodal',
+    etiqueta: 'Terminal Intermodal',
     bloques: [
       {
         tema: 'Sostenibilidad',

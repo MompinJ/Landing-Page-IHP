@@ -23,20 +23,20 @@ export function PassportStrip() {
   );
 }
 
-/** Sello del pasaporte: NOMBRE de la terminal, con sus siglas de apoyo. Las
- *  siglas solas (TEC/TUM/ECV/TNG/TILH) solo las descifra quien ya trabaja en
- *  esa unidad; el nombre es lo que cuenta por dónde pasaste. */
+/** Sello del pasaporte: SOLO el nombre de la terminal. Las siglas que llevaba
+ *  encima (TEC/TUM/ECV/TNG/TILH) solo las descifra quien ya trabaja en esa
+ *  unidad, así que ocupaban un renglón del sello para no decirle nada a la
+ *  mitad de la gente del stand. El nombre es lo que cuenta por dónde pasaste. */
 function Stamp({ unit, stamped }: { unit: ZoneTheme; stamped: boolean }) {
   const info = UNITS[unit];
   return (
     <motion.span
       className={`passport-stamp ${stamped ? 'passport-stamp--on' : ''}`}
-      title={`${info.code} · ${info.name} — ${info.detail}`}
+      title={`${info.name} — ${info.detail}`}
       animate={stamped ? { scale: [1, 1.25, 1] } : { scale: 1 }}
       transition={{ duration: 0.45 }}
       style={stamped ? { borderColor: info.accent, color: info.accent, boxShadow: `0 0 12px ${info.accent}66` } : undefined}
     >
-      <span className="passport-stamp-code">{info.code}</span>
       <span className="passport-stamp-name">{info.name}</span>
     </motion.span>
   );

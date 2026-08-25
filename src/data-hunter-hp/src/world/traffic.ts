@@ -276,7 +276,7 @@ export function updateWaterRiding(dt: number) {
 }
 
 /**
- * BANDA TRANSPORTADORA (TUM) — el verbo propio de la terminal universal: el
+ * BANDA TRANSPORTADORA — el verbo propio de la terminal multipropósito: el
  * suelo se mueve. A diferencia del agua no mata, te DESCOLOCA: te saca de la
  * columna desde la que ibas a saltar y te obliga a corregir.
  *

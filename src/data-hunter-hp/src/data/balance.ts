@@ -256,7 +256,7 @@ export const BALANCE = {
   BOAT_SINK_STIFFNESS: 90,
   BOAT_SINK_DAMPING: 11,
 
-  // --- Bioma TUM (terminal universal: carga general, granel y Ro-Ro) ---
+  // --- Bioma multipropósito (carga general, granel y Ro-Ro) ---
   /** BANDA TRANSPORTADORA: el suelo se mueve. Es el verbo propio de TUM —
    *  ni esquivar (TEC) ni montarse (ECV): dejarse llevar y corregir. No mata,
    *  te descoloca, y por eso la fila lleva premio encima. */
