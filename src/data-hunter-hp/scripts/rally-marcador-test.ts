@@ -115,7 +115,7 @@ await page.locator('.unit', { hasText: 'ICAVE' }).first().click();
 await page.getByRole('button', { name: 'GUARDAR' }).click();
 await page.waitForTimeout(4000);
 comprueba(
-  (await page.locator('.board-empty', { hasText: /Sin conexion/ }).count()) === 0,
+  (await page.locator('.board-empty', { hasText: /No se pudo guardar/ }).count()) === 0,
   'firmando desde la interfaz, la marca llega al congreso',
 );
 comprueba(
@@ -154,7 +154,7 @@ await kiosco.getByRole('button', { name: 'GUARDAR' }).click();
 await kiosco.waitForTimeout(3500);
 comprueba(await kiosco.locator('.board').isVisible(), 'sin red, la pantalla final avanza igual y enseña la tabla');
 comprueba(
-  (await kiosco.locator('.board-empty', { hasText: /Sin conexion/ }).count()) > 0,
+  (await kiosco.locator('.board-empty', { hasText: /No se pudo guardar/ }).count()) > 0,
   'sin red, se avisa de que la marca se quedó en este equipo',
 );
 await kiosco.close();

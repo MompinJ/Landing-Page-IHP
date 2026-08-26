@@ -83,6 +83,27 @@ comprueba(/CONGRESO/i.test(kicker), `el ranking se anuncia como del congreso (di
 const enTabla = await page.locator('.board-name', { hasText: NOMBRE }).count();
 comprueba(enTabla > 0, 'la marca recién firmada sale en el Top 10');
 
+// UNA PARTIDA MALA TAMBIÉN CUENTA. Port Quest resta SCORE_BAD 10 por ficha roja
+// y no pone suelo: quien no entiende los controles acaba en negativo, y es a
+// quien más le importa salir en la tabla. La primera versión de la tabla los
+// rechazaba con un `puntos >= 0` puesto sin pensar, y se llevó por delante los
+// registros de Terminal Rally durante horas antes de que se viera.
+const negativa: boolean = await page.evaluate(async (nombre) => {
+  const clave = 'sb_publishable_5VnRKtG9NF1BUWWUS85ekA_tzlmDm4H';
+  const r = await fetch('https://ifkkmlzjtdjkqmekticb.supabase.co/rest/v1/port_quest_scores', {
+    method: 'POST',
+    headers: {
+      apikey: clave,
+      Authorization: `Bearer ${clave}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify({ nombre, unidad: 'ICAVE', puntos: -60, fila_maxima: 40, duracion_ms: 45000 }),
+  });
+  return r.ok;
+}, `N${NOMBRE.slice(1)}`);
+comprueba(negativa, 'una partida MALA (puntos negativos) se registra igual');
+
 // ------------------------------------------- otra pestaña: ¿lo ve todo el mundo?
 const otra = await browser.newPage({ viewport: { width: 1400, height: 950 } });
 await otra.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -125,7 +146,7 @@ comprueba(
   'sin red, la pantalla final avanza igual y enseña un ranking',
 );
 comprueba(
-  (await kiosco.locator('.how-foot', { hasText: /Sin conexión/ }).count()) > 0,
+  (await kiosco.locator('.how-foot', { hasText: /No se pudo guardar/ }).count()) > 0,
   'sin red, se avisa de que la marca se quedó en este equipo',
 );
 comprueba(
