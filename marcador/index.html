@@ -20,12 +20,25 @@
   de 30.3 grados. Guia en ~/Documents/hutchison-ports-brand-guidelines-md/
 
   Los controles de administracion estan escondidos detras del punto del pie de
-  pagina y detras de una clave que NO vive aqui, sino en Postgres. Ver la
-  seccion "BORRADO DE ADMINISTRACION" en
-  src/data-hunter-hp/supabase/marcadores.sql.
+  pagina y detras de una clave que vive en marcador.js, a la vista. Es una tapa
+  contra lo accidental, no una cerradura; esta explicado alli y en la seccion
+  "BORRADO" de src/data-hunter-hp/supabase/marcadores.sql.
 -->
-<link rel="stylesheet" href="fuentes.css">
-<link rel="stylesheet" href="marcador.css">
+<!--
+  LAS RUTAS VAN DESDE LA RAIZ (/marcador/...) Y NO RELATIVAS, A PROPOSITO.
+
+  Vercel sirve esta pagina lo mismo en /marcador/ que en /marcador, y en el
+  segundo caso NO redirige: responde 200 con el index.html tal cual. Con rutas
+  relativas, el navegador resuelve entonces `marcador.css` contra la raiz del
+  sitio -> /marcador.css -> 404, y la pagina sale en blanco y negro, sin QR, sin
+  logotipo y ensenando hasta los controles de administracion (que se ocultan por
+  CSS). Desde la raiz funciona con barra y sin ella.
+
+  Dentro de fuentes.css las rutas SI son relativas y esta bien: las url() de una
+  hoja se resuelven contra la hoja, no contra la pagina.
+-->
+<link rel="stylesheet" href="/marcador/fuentes.css">
+<link rel="stylesheet" href="/marcador/marcador.css">
 </head>
 <body>
 
@@ -50,7 +63,7 @@
   <!-- -------------------------------- CENTRO -------------------------------- -->
   <section class="centro">
 
-    <img class="instituto" src="instituto-hp-blanco.png"
+    <img class="instituto" src="/marcador/instituto-hp-blanco.png"
          alt="Instituto Hutchison Ports">
 
     <!--
@@ -65,12 +78,12 @@
     -->
     <div class="video">
       <video class="video__pista video__pista--on" data-video autoplay muted playsinline
-             preload="auto" poster="gameplay-poster.jpg">
-        <source src="gameplay-1.mp4" type="video/mp4">
+             preload="auto" poster="/marcador/gameplay-poster.jpg">
+        <source src="/marcador/gameplay-1.mp4" type="video/mp4">
       </video>
       <video class="video__pista" data-video muted playsinline
-             preload="auto" poster="gameplay-poster.jpg">
-        <source src="gameplay-2.mp4" type="video/mp4">
+             preload="auto" poster="/marcador/gameplay-poster.jpg">
+        <source src="/marcador/gameplay-2.mp4" type="video/mp4">
       </video>
       <div class="video__falta" data-video-falta hidden>
         <p>gameplay-1.mp4 / gameplay-2.mp4</p>
@@ -82,11 +95,11 @@
 
     <div class="qrs">
       <figure class="qr">
-        <img src="qr-port-quest.svg" alt="Codigo QR de Port Quest" data-qr>
+        <img src="/marcador/qr-port-quest.svg" alt="Codigo QR de Port Quest" data-qr>
         <figcaption>Port&nbsp;Quest</figcaption>
       </figure>
       <figure class="qr">
-        <img src="qr-terminal-rally.svg" alt="Codigo QR de Terminal Rally" data-qr>
+        <img src="/marcador/qr-terminal-rally.svg" alt="Codigo QR de Terminal Rally" data-qr>
         <figcaption>Terminal&nbsp;Rally</figcaption>
       </figure>
     </div>
@@ -150,6 +163,6 @@
 
 <div class="brindis" data-brindis hidden></div>
 
-<script src="marcador.js"></script>
+<script src="/marcador/marcador.js"></script>
 </body>
 </html>
