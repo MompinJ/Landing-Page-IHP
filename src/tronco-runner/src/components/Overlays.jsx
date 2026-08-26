@@ -564,9 +564,18 @@ function GameOver() {
   // delante de un boton mientras se resuelve una peticion es lo que hace que el
   // siguiente no juegue: la subida sigue por detras y el aviso de si entro o no
   // llega cuando llega, ya sobre la tabla.
+  // EL BOTON Y EL GUARDADO TIENEN QUE OPINAR LO MISMO. Aqui no lo hacian: el
+  // boton se activaba con `name.trim()` y el guardado exigia `limpiaNombre(name)`,
+  // que es mas estricto -- quita todo lo que la tabla no acepta. Un nombre que
+  // pasara el primer filtro y no el segundo dejaba el boton pulsable y el
+  // guardado se salia por el `return` sin decir nada: se pulsaba GUARDAR y no
+  // pasaba absolutamente nada, ni marca ni aviso.
+  const nombreLimpio = limpiaNombre(name)
+  const puedeGuardar = Boolean(nombreLimpio && unit)
+
   const save = () => {
-    const clean = limpiaNombre(name)
-    if (!clean || !unit) return
+    const clean = nombreLimpio
+    if (!puedeGuardar) return
     const entry = { id: Date.now(), name: clean, unit, score }
     // sin recorte: la tabla guarda a todo el que se registra, no solo al top
     const next = [...loadBoard(), entry].sort((a, b) => b.score - a.score)
@@ -655,6 +664,9 @@ function GameOver() {
                 onBack={() => setName((v) => v.slice(0, -1))}
               />
             )}
+            {name.trim() && !nombreLimpio && (
+              <p className="reg-label">Usa letras y numeros: A-Z, 0-9, espacio o guion</p>
+            )}
             <UnitPicker value={unit} onPick={setUnit} rowOffset={unitRow} unidades={unidades} />
             {/* un unico GUARDAR para los dos casos: va debajo de las unidades
                 porque el registro no esta completo hasta elegir terminal */}
@@ -662,7 +674,7 @@ function GameOver() {
               className="btn-secondary btn-save"
               data-gp-row={saveRow}
               onClick={save}
-              disabled={!name.trim() || !unit}
+              disabled={!puedeGuardar}
             >
               GUARDAR
             </button>

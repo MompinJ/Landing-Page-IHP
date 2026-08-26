@@ -58,6 +58,9 @@
     "test:briefingperf": "tsx scripts/briefing-perf.ts",
     "test:firma": "tsx scripts/firma-mando-test.ts",
     "test:arranque": "tsx scripts/arranque-jank.ts",
+    "test:estable": "tsx scripts/arranque-estable-test.ts",
+    "test:marcador": "tsx scripts/marcador-test.ts",
+    "test:marcadorrally": "tsx scripts/rally-marcador-test.ts",
     "test:shadowcost": "tsx scripts/shadow-cost.ts",
     "qr": "tsx scripts/qr/gen-qr.ts"
   },

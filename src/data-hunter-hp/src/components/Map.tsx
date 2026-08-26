@@ -245,9 +245,28 @@ export function Map() {
    * `useMemo` de abajo vuelve a cortar la ventana visible.
    */
   const [generacion, setGeneracion] = useState(0);
+  /** Cuántas filas tenía el mapa la última vez que se avisó */
+  const filasAvisadas = useRef(-1);
   useEffect(() => {
     setLookahead(view.ahead);
-    setGeneracion((n) => n + 1);
+    // SOLO SE AVISA SI EL MAPA CRECIÓ DE VERDAD, y esta guarda no es una
+    // optimización: es lo que impide un bucle infinito de renders.
+    //
+    // La dependencia es `view.ahead`, y ese valor puede ser NaN — sale de
+    // `viewRowsFor(size.width, size.height)`, que divide por el tamaño del
+    // lienzo, y en el primer fotograma el lienzo todavía puede medir 0. React
+    // compara dependencias con `Object.is`, y NaN NO es igual a NaN, así que
+    // con un NaN ahí el efecto se reejecuta en CADA render: subir el contador
+    // sin condición pedía otro render, que volvía a ejecutar el efecto, y así
+    // hasta que React se planta con «Maximum update depth exceeded».
+    //
+    // Salía una de cada tres cargas —depende de si el lienzo ya se midió— y por
+    // eso no apareció en desarrollo ni en el primer despliegue: en producción
+    // tumbaba el juego entero antes de pintar la portada.
+    if (rows.length !== filasAvisadas.current) {
+      filasAvisadas.current = rows.length;
+      setGeneracion((n) => n + 1);
+    }
   }, [view.ahead]);
 
   const start = Math.max(0, currentRow - view.behind);
