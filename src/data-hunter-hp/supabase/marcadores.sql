@@ -22,7 +22,10 @@
 -- La diferencia práctica es que lo primero lo hace cualquiera en treinta
 -- segundos desde la consola del navegador, y lo segundo hay que quererlo hacer.
 --
--- Se pega entero en el editor SQL de Supabase. Es idempotente.
+-- Se pega entero en el editor SQL de Supabase, y CREA una base desde cero. Para
+-- CAMBIAR una que ya existe NO SIRVE: `create table if not exists` sobre una
+-- tabla que existe no hace nada, restricciones incluidas, así que repegarlo sale
+-- «bien» sin cambiar una coma. Un cambio de esquema va con `alter`, siempre.
 -- =====================================================================
 
 
@@ -85,15 +88,15 @@ create table if not exists public.port_quest_scores (
   terminales    text[]  not null default '{}',
 
   -- Empieza por letra o número, y solo letras, dígitos, espacio y guion. El
-  -- punto se quitó al ver que dejaba pasar «VISITA-XXX.C».
-  -- No pretende filtrar groserías: caben de sobra y ninguna expresión regular lo
-  -- va a evitar. Cierra lo mecánico — emojis, caracteres invisibles y
-  -- direcciones web—, que es lo que se pone solo.
+  -- punto se quitó al ver que dejaba pasar «VISITA-XXX.C». No pretende filtrar
+  -- groserías —caben, y ninguna expresión regular lo va a evitar—: cierra lo
+  -- mecánico, que es emojis, caracteres invisibles y direcciones web.
   --
-  -- TREINTA, no doce. Con doce no cabía un nombre y un apellido («MARIA
-  -- FERNANDEZ» son quince), y en una tabla que se lee para reconocer a alguien
-  -- un nombre cortado a la mitad es peor que uno largo. La Ü entró de paso:
-  -- estaba fuera de la clase y se comía la diéresis de AGÜERO.
+  -- TREINTA, no doce. Doce daban para el nombre de pila y poco más: «MARIA
+  -- FERNANDEZ» son quince, y la tabla le rechazaba la marca a cualquiera que
+  -- escribiera nombre y apellido — se quedaba fuera del marcador sin saber por
+  -- qué. Y la Ü entra aparte porque estaba fuera del conjunto y se comía la
+  -- diéresis de apellidos como AGÜERO.
   constraint pq_nombre_valido check (nombre ~ '^[A-ZÑÁÉÍÓÚÜ0-9][A-ZÑÁÉÍÓÚÜ0-9 -]{0,29}$'),
 
   -- EL TECHO: más puntos que filas cruzadas es imposible (ver arriba).
@@ -147,7 +150,7 @@ create table if not exists public.terminal_rally_scores (
   distancia   integer not null,
   duracion_ms integer not null,
 
-  -- Ver la nota de `pq_nombre_valido`: treinta caracteres, y la Ü dentro.
+  -- Ver la nota de `pq_nombre_valido`: treinta caracteres y con Ü.
   constraint tr_nombre_valido    check (nombre ~ '^[A-ZÑÁÉÍÓÚÜ0-9][A-ZÑÁÉÍÓÚÜ0-9 -]{0,29}$'),
   constraint tr_puntos_posibles  check (puntos <= 2 * distancia + 500),
   -- Ver la nota larga en `pq_puntos_posibles_min`: aquí se resta 10 por riesgo
@@ -200,12 +203,26 @@ grant execute on function private.tr_ritmo_ok() to anon, authenticated;
 
 
 -- ---------------------------------------------------------------------
--- RLS — LO QUE DE VERDAD CIERRA LA PUERTA
+-- RLS
 --
--- Dos verbos y solo dos: leer e insertar. No hay política de UPDATE ni de
--- DELETE, y en RLS lo que no tiene política está PROHIBIDO. Nadie puede editar
--- el marcador de otro ni vaciar la tabla a media jornada, que es el daño que de
--- verdad no tendría arreglo durante el congreso.
+-- LEER, INSERTAR y BORRAR. No hay política de UPDATE, y en RLS lo que no tiene
+-- política está prohibido: nadie puede editar la marca de otro.
+--
+-- EL BORRADO ES UNA PUERTA ABIERTA A CONCIENCIA, no un descuido, y es lo único
+-- de este esquema sin vuelta atrás durante el evento. Lo pide la pantalla
+-- `/marcador`, que es la que se proyecta en el stand y desde la que se limpian
+-- las tablas entre jornadas.
+--
+-- Esa pantalla pide una contraseña antes de enseñar los botones, pero la
+-- contraseña vive en el JavaScript del sitio: es una tapa contra lo ACCIDENTAL
+-- —que alguien se tope con la URL y pulse por curiosidad—, no una cerradura.
+-- Cualquiera con la clave publishable, que va a la vista, puede vaciar las dos
+-- tablas desde la consola del navegador.
+--
+-- Una fila falsa se quita en diez segundos desde el panel; un borrado sin
+-- `where` a media jornada se lleva las marcas de todo el mundo y no hay de
+-- dónde recuperarlas. Mientras la puerta esté abierta, conviene un respaldo
+-- periódico de las dos tablas durante el congreso.
 -- ---------------------------------------------------------------------
 alter table public.unidades              enable row level security;
 alter table public.port_quest_scores     enable row level security;
@@ -231,80 +248,7 @@ drop policy if exists tr_insertar on public.terminal_rally_scores;
 create policy tr_insertar on public.terminal_rally_scores
   for insert to anon, authenticated with check (private.tr_ritmo_ok());
 
-
--- ---------------------------------------------------------------------
--- PERMISOS EXPLÍCITOS
---
--- Hacen falta porque al crear el proyecto se desmarcó «Automatically expose new
--- tables»: las tablas nuevas ya no se publican solas, que es lo que se quería.
--- El precio es decir aquí, a mano, qué se publica. NO se concede update ni
--- delete: aunque mañana alguien añadiera una política por despiste, sin el
--- GRANT no habría por dónde.
--- ---------------------------------------------------------------------
-grant usage on schema public to anon, authenticated;
-grant select         on public.unidades              to anon, authenticated;
-grant select, insert on public.port_quest_scores     to anon, authenticated;
-grant select, insert on public.terminal_rally_scores to anon, authenticated;
-
--- `rls_auto_enable()` la crea Supabase al marcar «Enable automatic RLS»: la
--- llama un disparador de eventos al crear una tabla. Ningún navegador tiene por
--- qué invocarla, y hay que revocar a PUBLIC — en Postgres el EXECUTE de una
--- función nueva se concede a PUBLIC por omisión, así que quitárselo a un rol
--- concreto no le quita lo que tiene POR SER PUBLIC.
-revoke execute on function public.rls_auto_enable() from public, anon, authenticated;
-
-
--- ---------------------------------------------------------------------
--- BORRADO — para la pantalla `/marcador`
---
--- Más arriba este fichero presume de no conceder DELETE a nadie. Esto lo abre:
--- `anon` pasa a poder borrar cualquier fila de los dos marcadores.
---
--- QUÉ PROTEGE Y QUÉ NO, PARA QUE NADIE SE LLEVE UNA SORPRESA. La pantalla del
--- marcador pide una contraseña antes de enseñar los botones de borrar, pero esa
--- contraseña vive en el JavaScript del sitio: es una TAPA, no una cerradura.
--- Quien abra el inspector la lee, y quien sepa mandar un DELETE contra la API
--- REST no la necesita siquiera.
---
--- LO QUE SÍ EVITA es lo accidental y lo casual, que es el riesgo real de un
--- stand: que alguien se tope con la URL, pulse por curiosidad y se lleve la
--- jornada por delante. Para eso basta una tapa.
---
--- Decisión tomada a conciencia, para no depender de la base de datos cada vez
--- que haya que depurar un nombre repetido en mitad del congreso.
---
--- SI ALGÚN DÍA IMPORTA DE VERDAD, la vuelta es conocida: quitar estas dos
--- políticas y los dos grants, y volver a la versión con funciones
--- `security definer` que validaban la clave dentro de Postgres. Está en el
--- historial de git, no hay que reinventarla.
--- ---------------------------------------------------------------------
--- ---------------------------------------------------------------------
--- MIGRACIÓN DE LAS RESTRICCIONES DE NOMBRE
---
--- ESTO NO ES REDUNDANTE con la definición de arriba, aunque lo parezca. Las dos
--- tablas YA EXISTEN, así que su `create table if not exists` no hace nada: el
--- cuerpo entero se ignora, restricciones incluidas. Sin este bloque se podría
--- pegar el fichero mil veces y el nombre seguiría topado en doce caracteres,
--- que es exactamente la clase de desfase que denuncia la cabecera.
---
--- `drop constraint if exists` + `add constraint` lo deja idempotente: se puede
--- ejecutar sobre una base recién creada (donde ya está bien) y sobre la de
--- ahora (donde hay que cambiarla).
---
--- SE EJECUTA ANTES DE DESPLEGAR LOS JUEGOS. El orden importa en un sentido y no
--- en el otro: una tabla que acepta treinta con juegos que solo mandan doce no
--- rompe nada, pero juegos que mandan treinta contra una tabla que topa en doce
--- rechazan la marca de quien escriba su apellido.
--- ---------------------------------------------------------------------
-alter table public.port_quest_scores     drop constraint if exists pq_nombre_valido;
-alter table public.port_quest_scores     add  constraint pq_nombre_valido
-  check (nombre ~ '^[A-ZÑÁÉÍÓÚÜ0-9][A-ZÑÁÉÍÓÚÜ0-9 -]{0,29}$');
-
-alter table public.terminal_rally_scores drop constraint if exists tr_nombre_valido;
-alter table public.terminal_rally_scores add  constraint tr_nombre_valido
-  check (nombre ~ '^[A-ZÑÁÉÍÓÚÜ0-9][A-ZÑÁÉÍÓÚÜ0-9 -]{0,29}$');
-
-
+-- El borrado que pide `/marcador` (ver la nota larga de arriba)
 drop policy if exists pq_borrar on public.port_quest_scores;
 create policy pq_borrar on public.port_quest_scores
   for delete to anon, authenticated using (true);
@@ -313,6 +257,24 @@ drop policy if exists tr_borrar on public.terminal_rally_scores;
 create policy tr_borrar on public.terminal_rally_scores
   for delete to anon, authenticated using (true);
 
-grant delete on public.port_quest_scores     to anon, authenticated;
-grant delete on public.terminal_rally_scores to anon, authenticated;
 
+-- ---------------------------------------------------------------------
+-- PERMISOS EXPLÍCITOS
+--
+-- Hacen falta porque al crear el proyecto se desmarcó «Automatically expose new
+-- tables»: las tablas nuevas ya no se publican solas, que es lo que se quería.
+-- El precio es decir aquí, a mano, qué se publica. NO se concede UPDATE:
+-- aunque mañana alguien añadiera una política por despiste, sin el GRANT no
+-- habría por dónde. El DELETE sí, y se explica arriba.
+-- ---------------------------------------------------------------------
+grant usage on schema public to anon, authenticated;
+grant select                 on public.unidades              to anon, authenticated;
+grant select, insert, delete on public.port_quest_scores     to anon, authenticated;
+grant select, insert, delete on public.terminal_rally_scores to anon, authenticated;
+
+-- `rls_auto_enable()` la crea Supabase al marcar «Enable automatic RLS»: la
+-- llama un disparador de eventos al crear una tabla. Ningún navegador tiene por
+-- qué invocarla, y hay que revocar a PUBLIC — en Postgres el EXECUTE de una
+-- función nueva se concede a PUBLIC por omisión, así que quitárselo a un rol
+-- concreto no le quita lo que tiene POR SER PUBLIC.
+revoke execute on function public.rls_auto_enable() from public, anon, authenticated;
