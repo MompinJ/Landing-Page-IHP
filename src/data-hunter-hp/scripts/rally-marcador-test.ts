@@ -93,6 +93,10 @@ comprueba(negativa === true, 'una carrera MALA (puntos negativos) se registra ig
 // --- 2b. LA INTERFAZ DE VERDAD ----------------------------------------------
 // Se salta a la pantalla final por el store en vez de correr los 120 s: lo que
 // se comprueba aquí es el formulario, no el juego.
+// Se ESPERA al gancho en vez de darlo por puesto: la pagina de produccion tarda
+// lo que tarda, y una espera fija por tiempo convierte una prueba en una
+// moneda al aire.
+await page.waitForFunction(() => Boolean((window as any).__TR), null, { timeout: 30000 });
 await page.evaluate(() => {
   (window as any).__TR.store.setState({ phase: 'gameover', score: 480, distShown: 1200, timeShown: 0 });
 });
@@ -155,6 +159,7 @@ const kiosco = await browser.newPage({ viewport: { width: 1400, height: 950 } })
 await kiosco.goto(URL, { waitUntil: 'domcontentloaded' });
 await kiosco.waitForTimeout(3500);
 await kiosco.route('**/ifkkmlzjtdjkqmekticb.supabase.co/**', (r) => r.abort());
+await kiosco.waitForFunction(() => Boolean((window as any).__TR), null, { timeout: 30000 });
 await kiosco.evaluate(() => {
   (window as any).__TR.store.setState({ phase: 'gameover', score: 300, distShown: 900, timeShown: 0 });
 });
