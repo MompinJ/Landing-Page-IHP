@@ -103,8 +103,22 @@ export async function leeTop10(): Promise<FilaMarcador[] | null> {
 }
 
 /**
- * Nombre admisible para la tabla: mayúsculas, dígitos, espacio y guion, hasta
- * doce, empezando por letra o número.
+ * TREINTA caracteres, no doce.
+ *
+ * Con doce no cabía un nombre y un apellido —«MARIA FERNANDEZ» son quince— y en
+ * un congreso donde la tabla se lee para reconocer a alguien, un nombre cortado
+ * a la mitad es peor que uno largo. Treinta da de sobra para nombre y apellido
+ * sin abrir la puerta a que alguien escriba un párrafo en el marcador.
+ *
+ * Se exporta porque el teclado en pantalla y el `maxLength` del campo tienen
+ * que usar EXACTAMENTE este número: estuvieron un tiempo con su propia copia
+ * del doce, que es la clase de pareja que se desincroniza en cuanto uno cambia.
+ */
+export const MAX_NOMBRE = 30;
+
+/**
+ * Nombre admisible para la tabla: mayúsculas, dígitos, espacio y guion,
+ * empezando por letra o número.
  *
  * Se valida AQUÍ además de en la base de datos, y no por desconfianza del
  * servidor sino al revés: la restricción de la tabla es la que manda, y esto
@@ -114,9 +128,9 @@ export async function leeTop10(): Promise<FilaMarcador[] | null> {
 export function limpiaNombre(nombre: string): string {
   return nombre
     .toUpperCase()
-    .replace(/[^A-ZÑÁÉÍÓÚ0-9 -]/g, '')
-    .replace(/^[^A-ZÑÁÉÍÓÚ0-9]+/, '')
-    .slice(0, 12)
+    .replace(/[^A-ZÑÁÉÍÓÚÜ0-9 -]/g, '')
+    .replace(/^[^A-ZÑÁÉÍÓÚÜ0-9]+/, '')
+    .slice(0, MAX_NOMBRE)
     .trim();
 }
 

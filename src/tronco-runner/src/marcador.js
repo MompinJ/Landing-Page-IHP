@@ -39,8 +39,20 @@ function conLimite(ms) {
   return ctrl.signal
 }
 
-// Nombre admisible para la tabla: mayusculas, digitos, espacio y guion, hasta
-// doce, empezando por letra o numero.
+// TREINTA caracteres, no doce.
+//
+// Con doce no cabia un nombre y un apellido -"MARIA FERNANDEZ" son quince- y en
+// un congreso donde la tabla se lee para reconocer a alguien, un nombre cortado
+// a la mitad es peor que uno largo. Treinta da de sobra para nombre y apellido
+// sin abrir la puerta a que alguien escriba un parrafo en el marcador.
+//
+// Se exporta porque el teclado en pantalla y el `maxLength` del campo tienen que
+// usar EXACTAMENTE este numero: estuvieron un tiempo con su propia copia del
+// doce, que es la clase de pareja que se desincroniza en cuanto uno cambia.
+export const MAX_NOMBRE = 30
+
+// Nombre admisible para la tabla: mayusculas, digitos, espacio y guion,
+// empezando por letra o numero.
 //
 // Se valida AQUI ademas de en la base de datos, y no por desconfianza del
 // servidor sino al reves: la restriccion de la tabla es la que manda, y esto
@@ -48,9 +60,9 @@ function conLimite(ms) {
 export function limpiaNombre(nombre) {
   return nombre
     .toUpperCase()
-    .replace(/[^A-ZÑÁÉÍÓÚ0-9 -]/g, '')
-    .replace(/^[^A-ZÑÁÉÍÓÚ0-9]+/, '')
-    .slice(0, 12)
+    .replace(/[^A-ZÑÁÉÍÓÚÜ0-9 -]/g, '')
+    .replace(/^[^A-ZÑÁÉÍÓÚÜ0-9]+/, '')
+    .slice(0, MAX_NOMBRE)
     .trim()
 }
 

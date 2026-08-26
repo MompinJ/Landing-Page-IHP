@@ -1,0 +1,53 @@
+/*
+  MONTSERRAT, SERVIDA DESDE EL PROPIO REPO y no desde Google Fonts.
+
+  La guia de marca pide Montserrat ExtraBold para el logotipo y da el import de
+  Google. Aqui NO se usa ese import, y es por donde va a estar puesta esta
+  pagina: un stand cuyo wifi ya se da por poco fiable en todo el resto del
+  codigo. Con el import, un corte de red deja el logotipo de Gateway compuesto
+  en Arial -- que es justo lo que la guia prohibe en el punto 10.
+
+  Solo el subconjunto LATINO de los cinco pesos (400-800). Los subconjuntos
+  cirilico, griego y vietnamita que sirve Google no pintan nada en una pantalla
+  en espanol y multiplicaban el peso por cuatro.
+*/
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fuentes/montserrat-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fuentes/montserrat-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('fuentes/montserrat-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('fuentes/montserrat-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('fuentes/montserrat-800.woff2') format('woff2');
+}

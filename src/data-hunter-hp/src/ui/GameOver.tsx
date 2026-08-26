@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { startMusic } from '../audio/music';
 import { unlockAudio } from '../audio/sfx';
 import { ORG_UNITS } from '../data/orgUnits';
-import { leeUnidades } from '../services/scoreService';
+import { MAX_NOMBRE, leeUnidades } from '../services/scoreService';
 import { useGameStore } from '../store/useGameStore';
 import { useAccionMando, useMandoConectado, useRejillaMando } from '../hooks/useGamepadUi';
 import { PassportStrip } from './Passport';
@@ -34,8 +34,10 @@ import { PassportStrip } from './Passport';
  * teclado físico sigue escribiendo en el campo como siempre.
  */
 
-/** Doce letras es lo que acepta el campo, y lo que cabe en la fila del Top 10 */
-const MAX_NOMBRE = 12;
+/* El tope del nombre lo define `scoreService`, que es donde vive `limpiaNombre`
+   y por tanto quien tiene que estar de acuerdo con la restricción de la tabla.
+   Aquí había una copia con su propio número y es la clase de pareja que se
+   desincroniza en cuanto uno de los dos cambia. */
 
 /** Las teclas, en filas de siete. La rejilla del mando lee las filas del DOM,
  *  así que este reparto es también el que recorre la cruceta. */

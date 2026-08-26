@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marcador del congreso - Instituto Hutchison Ports</title>
+<!--
+  PANTALLA DEL MARCADOR - temporal, para el stand del congreso.
+
+  Junta los dos marcadores que hasta ahora solo se veian dentro de su propio
+  juego: Port Quest a la izquierda, Terminal Rally a la derecha, y en medio el
+  gameplay en bucle con los dos QR para que el que pasa sepa que puede jugar.
+
+  Esta pensada para estar PUESTA TODO EL DIA en una pantalla y que nadie la
+  atienda: se refresca sola, las listas se desplazan solas y si el wifi se cae
+  no se rompe, se queda con lo ultimo que leyo y lo dice.
+
+  IDENTIDAD: Hutchison Ports Brand Guidelines v4.1. Fondo Ports Sea Blue,
+  logotipo del Instituto en blanco y paneles construidos con el angulo de marca
+  de 30.3 grados. Guia en ~/Documents/hutchison-ports-brand-guidelines-md/
+
+  Los controles de administracion estan escondidos detras del punto del pie de
+  pagina y detras de una clave que NO vive aqui, sino en Postgres. Ver la
+  seccion "BORRADO DE ADMINISTRACION" en
+  src/data-hunter-hp/supabase/marcadores.sql.
+-->
+<link rel="stylesheet" href="fuentes.css">
+<link rel="stylesheet" href="marcador.css">
+</head>
+<body>
+
+<main class="pantalla">
+
+  <!-- ------------------------------ PORT QUEST ------------------------------ -->
+  <section class="tabla" id="col-port-quest">
+    <header class="tabla__cab">
+      <h1 class="tabla__titulo">Port Quest</h1>
+      <p class="tabla__cuenta" data-cuenta></p>
+    </header>
+    <div class="lista" data-lista tabindex="0">
+      <ol class="filas" data-filas></ol>
+      <p class="aviso" data-aviso>Cargando marcador...</p>
+    </div>
+    <footer class="tabla__pie admin-solo">
+      <span class="tabla__pista">Pulsa una fila para borrarla</span>
+      <button class="btn btn--vaciar" data-vaciar>Vaciar todo</button>
+    </footer>
+  </section>
+
+  <!-- -------------------------------- CENTRO -------------------------------- -->
+  <section class="centro">
+
+    <img class="instituto" src="instituto-hp-blanco.png"
+         alt="Instituto Hutchison Ports">
+
+    <!--
+      DOS PISTAS QUE SE TURNAN, no una con `loop`. Van en dos elementos <video>
+      distintos y no en uno al que se le cambia el `src` porque cambiar la
+      fuente obliga al navegador a volver a cargar y deja un parpadeo en negro
+      justo en el corte. Con dos, la que espera ya esta cargada y el relevo es
+      instantaneo: se apaga una y se enciende la otra.
+
+      Sin `loop` a proposito: `loop` impide que salte el evento `ended`, que es
+      justo la senal con la que se pasa el turno.
+    -->
+    <div class="video">
+      <video class="video__pista video__pista--on" data-video autoplay muted playsinline
+             preload="auto" poster="gameplay-poster.jpg">
+        <source src="gameplay-1.mp4" type="video/mp4">
+      </video>
+      <video class="video__pista" data-video muted playsinline
+             preload="auto" poster="gameplay-poster.jpg">
+        <source src="gameplay-2.mp4" type="video/mp4">
+      </video>
+      <div class="video__falta" data-video-falta hidden>
+        <p>gameplay-1.mp4 / gameplay-2.mp4</p>
+        <small>Coloca los videos en esta carpeta</small>
+      </div>
+    </div>
+
+    <p class="escanea">Escanea y compite</p>
+
+    <div class="qrs">
+      <figure class="qr">
+        <img src="qr-port-quest.svg" alt="Codigo QR de Port Quest" data-qr>
+        <figcaption>Port&nbsp;Quest</figcaption>
+      </figure>
+      <figure class="qr">
+        <img src="qr-terminal-rally.svg" alt="Codigo QR de Terminal Rally" data-qr>
+        <figcaption>Terminal&nbsp;Rally</figcaption>
+      </figure>
+    </div>
+
+    <footer class="pie">
+      <span class="pie__estado" data-estado></span>
+      <button class="pie__punto" data-admin-abre title="" aria-label="Opciones"></button>
+    </footer>
+  </section>
+
+  <!-- ---------------------------- TERMINAL RALLY ---------------------------- -->
+  <section class="tabla" id="col-terminal-rally">
+    <header class="tabla__cab">
+      <h1 class="tabla__titulo">Terminal Rally</h1>
+      <p class="tabla__cuenta" data-cuenta></p>
+    </header>
+    <div class="lista" data-lista tabindex="0">
+      <ol class="filas" data-filas></ol>
+      <p class="aviso" data-aviso>Cargando marcador...</p>
+    </div>
+    <footer class="tabla__pie admin-solo">
+      <span class="tabla__pista">Pulsa una fila para borrarla</span>
+      <button class="btn btn--vaciar" data-vaciar>Vaciar todo</button>
+    </footer>
+  </section>
+
+</main>
+
+
+<!-- ---------------------------- ENTRADA DE CLAVE ---------------------------- -->
+<div class="modal" data-modal-clave hidden>
+  <form class="tarjeta" data-form-clave>
+    <h2>Opciones de desarrollador</h2>
+    <p class="tarjeta__nota">Solo para depurar el marcador.</p>
+    <input type="password" data-clave autocomplete="off" placeholder="Clave" required>
+    <p class="tarjeta__error" data-clave-error hidden>Clave incorrecta.</p>
+    <div class="tarjeta__botones">
+      <button type="button" class="btn" data-cancela>Cancelar</button>
+      <button type="submit" class="btn btn--cta" data-entra>Entrar</button>
+    </div>
+  </form>
+</div>
+
+
+<!-- ------------------------ CONFIRMACION DE VACIADO ------------------------ -->
+<div class="modal" data-modal-vaciar hidden>
+  <form class="tarjeta" data-form-vaciar>
+    <h2>Vaciar <span data-vaciar-juego></span></h2>
+    <p class="tarjeta__nota">
+      Esto borra <strong data-vaciar-cuenta></strong> y no se puede deshacer.
+      Escribe <strong>VACIAR</strong> para confirmar.
+    </p>
+    <input type="text" data-vaciar-texto autocomplete="off" placeholder="VACIAR" required>
+    <div class="tarjeta__botones">
+      <button type="button" class="btn" data-vaciar-cancela>Cancelar</button>
+      <button type="submit" class="btn btn--peligro">Vaciar</button>
+    </div>
+  </form>
+</div>
+
+
+<div class="brindis" data-brindis hidden></div>
+
+<script src="marcador.js"></script>
+</body>
+</html>

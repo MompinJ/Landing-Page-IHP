@@ -85,11 +85,16 @@ create table if not exists public.port_quest_scores (
   terminales    text[]  not null default '{}',
 
   -- Empieza por letra o número, y solo letras, dígitos, espacio y guion. El
-  -- punto se quitó al ver que dejaba pasar «VISITA-XXX.C» en doce caracteres.
-  -- No pretende filtrar groserías: en doce caracteres caben y ninguna expresión
-  -- regular lo va a evitar. Cierra lo mecánico — emojis, caracteres invisibles
-  -- y direcciones web—, que es lo que se pone solo.
-  constraint pq_nombre_valido check (nombre ~ '^[A-ZÑÁÉÍÓÚ0-9][A-ZÑÁÉÍÓÚ0-9 -]{0,11}$'),
+  -- punto se quitó al ver que dejaba pasar «VISITA-XXX.C».
+  -- No pretende filtrar groserías: caben de sobra y ninguna expresión regular lo
+  -- va a evitar. Cierra lo mecánico — emojis, caracteres invisibles y
+  -- direcciones web—, que es lo que se pone solo.
+  --
+  -- TREINTA, no doce. Con doce no cabía un nombre y un apellido («MARIA
+  -- FERNANDEZ» son quince), y en una tabla que se lee para reconocer a alguien
+  -- un nombre cortado a la mitad es peor que uno largo. La Ü entró de paso:
+  -- estaba fuera de la clase y se comía la diéresis de AGÜERO.
+  constraint pq_nombre_valido check (nombre ~ '^[A-ZÑÁÉÍÓÚÜ0-9][A-ZÑÁÉÍÓÚÜ0-9 -]{0,29}$'),
 
   -- EL TECHO: más puntos que filas cruzadas es imposible (ver arriba).
   constraint pq_puntos_posibles check (puntos <= 70 * fila_maxima + 500),
@@ -142,7 +147,8 @@ create table if not exists public.terminal_rally_scores (
   distancia   integer not null,
   duracion_ms integer not null,
 
-  constraint tr_nombre_valido    check (nombre ~ '^[A-ZÑÁÉÍÓÚ0-9][A-ZÑÁÉÍÓÚ0-9 -]{0,11}$'),
+  -- Ver la nota de `pq_nombre_valido`: treinta caracteres, y la Ü dentro.
+  constraint tr_nombre_valido    check (nombre ~ '^[A-ZÑÁÉÍÓÚÜ0-9][A-ZÑÁÉÍÓÚÜ0-9 -]{0,29}$'),
   constraint tr_puntos_posibles  check (puntos <= 2 * distancia + 500),
   -- Ver la nota larga en `pq_puntos_posibles_min`: aquí se resta 10 por riesgo
   -- y 15 por choque, así que una carrera mala termina bajo cero.
@@ -246,3 +252,67 @@ grant select, insert on public.terminal_rally_scores to anon, authenticated;
 -- función nueva se concede a PUBLIC por omisión, así que quitárselo a un rol
 -- concreto no le quita lo que tiene POR SER PUBLIC.
 revoke execute on function public.rls_auto_enable() from public, anon, authenticated;
+
+
+-- ---------------------------------------------------------------------
+-- BORRADO — para la pantalla `/marcador`
+--
+-- Más arriba este fichero presume de no conceder DELETE a nadie. Esto lo abre:
+-- `anon` pasa a poder borrar cualquier fila de los dos marcadores.
+--
+-- QUÉ PROTEGE Y QUÉ NO, PARA QUE NADIE SE LLEVE UNA SORPRESA. La pantalla del
+-- marcador pide una contraseña antes de enseñar los botones de borrar, pero esa
+-- contraseña vive en el JavaScript del sitio: es una TAPA, no una cerradura.
+-- Quien abra el inspector la lee, y quien sepa mandar un DELETE contra la API
+-- REST no la necesita siquiera.
+--
+-- LO QUE SÍ EVITA es lo accidental y lo casual, que es el riesgo real de un
+-- stand: que alguien se tope con la URL, pulse por curiosidad y se lleve la
+-- jornada por delante. Para eso basta una tapa.
+--
+-- Decisión tomada a conciencia, para no depender de la base de datos cada vez
+-- que haya que depurar un nombre repetido en mitad del congreso.
+--
+-- SI ALGÚN DÍA IMPORTA DE VERDAD, la vuelta es conocida: quitar estas dos
+-- políticas y los dos grants, y volver a la versión con funciones
+-- `security definer` que validaban la clave dentro de Postgres. Está en el
+-- historial de git, no hay que reinventarla.
+-- ---------------------------------------------------------------------
+-- ---------------------------------------------------------------------
+-- MIGRACIÓN DE LAS RESTRICCIONES DE NOMBRE
+--
+-- ESTO NO ES REDUNDANTE con la definición de arriba, aunque lo parezca. Las dos
+-- tablas YA EXISTEN, así que su `create table if not exists` no hace nada: el
+-- cuerpo entero se ignora, restricciones incluidas. Sin este bloque se podría
+-- pegar el fichero mil veces y el nombre seguiría topado en doce caracteres,
+-- que es exactamente la clase de desfase que denuncia la cabecera.
+--
+-- `drop constraint if exists` + `add constraint` lo deja idempotente: se puede
+-- ejecutar sobre una base recién creada (donde ya está bien) y sobre la de
+-- ahora (donde hay que cambiarla).
+--
+-- SE EJECUTA ANTES DE DESPLEGAR LOS JUEGOS. El orden importa en un sentido y no
+-- en el otro: una tabla que acepta treinta con juegos que solo mandan doce no
+-- rompe nada, pero juegos que mandan treinta contra una tabla que topa en doce
+-- rechazan la marca de quien escriba su apellido.
+-- ---------------------------------------------------------------------
+alter table public.port_quest_scores     drop constraint if exists pq_nombre_valido;
+alter table public.port_quest_scores     add  constraint pq_nombre_valido
+  check (nombre ~ '^[A-ZÑÁÉÍÓÚÜ0-9][A-ZÑÁÉÍÓÚÜ0-9 -]{0,29}$');
+
+alter table public.terminal_rally_scores drop constraint if exists tr_nombre_valido;
+alter table public.terminal_rally_scores add  constraint tr_nombre_valido
+  check (nombre ~ '^[A-ZÑÁÉÍÓÚÜ0-9][A-ZÑÁÉÍÓÚÜ0-9 -]{0,29}$');
+
+
+drop policy if exists pq_borrar on public.port_quest_scores;
+create policy pq_borrar on public.port_quest_scores
+  for delete to anon, authenticated using (true);
+
+drop policy if exists tr_borrar on public.terminal_rally_scores;
+create policy tr_borrar on public.terminal_rally_scores
+  for delete to anon, authenticated using (true);
+
+grant delete on public.port_quest_scores     to anon, authenticated;
+grant delete on public.terminal_rally_scores to anon, authenticated;
+

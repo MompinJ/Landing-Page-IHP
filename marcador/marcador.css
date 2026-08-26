@@ -1,0 +1,607 @@
+/*
+  MARCADOR DEL CONGRESO - identidad Hutchison Ports.
+
+  Todo lo de aqui sale del manual de marca v4.1, en
+  ~/Documents/hutchison-ports-brand-guidelines-md/
+
+  EL ANGULO DE 30.3 GRADOS ES LA PIEZA CENTRAL. Sale del propio logotipo -- la
+  linea blanca que sube -- y el manual lo llama "the cornerstone of our
+  identity" (02, pagina 24). Aqui construye los paneles: en vez de esquinas
+  redondeadas, cada bloque lleva dos cortes en ese angulo exacto.
+
+  QUE **NO** SE HACE, Y ES DELIBERADO. La pagina 31 del manual ("Shapes:
+  Don'ts") prohibe varias cosas que la version anterior de este fichero hacia:
+    - nada de sombras ("Don't use effects like shadow");
+    - nada de formas en contorno ("Don't use the shapes as outlines"), por eso
+      los paneles van RELLENOS y sin borde;
+    - nada de transparencias sobre las formas;
+    - ni Sky ni Sea repetidas en la misma pagina, por eso no hay super-grafico
+      de fondo: con tres paneles angulados ya se repetiria tres veces.
+  El angulo si se puede usar en componentes y graficos, que es lo que se hace.
+
+  TODO ESTA DIMENSIONADO EN vmin, no en px. Esta pagina no se ve de cerca en un
+  portatil: se ve de lejos en la pantalla que haya, que lo mismo es un monitor
+  de 24" que un televisor. Con vmin el mismo CSS llena las dos sin una sola
+  media query de tamano.
+*/
+
+:root {
+  /* --- Primarios (02, pagina 17) --- */
+  --sky:        #009BDE;   /* Ports Sky Blue   PMS 2925 */
+  --sea:        #002E6D;   /* Ports Sea Blue   PMS 294  */
+
+  /* --- Secundarios --- */
+  --horizon:    #9ACAEB;   /* Horizon Blue     PMS 291  */
+  --aqua:       #54BBAB;   /* Aqua Green       PMS 3258 */
+  --sunray:     #FFC627;   /* Sunray Yellow    PMS 123  */
+  --sunset:     #EE7523;   /* Sunset Orange    PMS 158  */
+
+  /* --- Fondos y texto sobre Sea Blue --- */
+  --panel:      #06376E;   /* panel dentro del Sea Blue */
+  --panel-alto: #084488;   /* cabecera del panel */
+  --tinta:      #ffffff;
+  --tinta-2:    #B9CBE2;
+  --tinta-3:    #7E96B6;
+
+  /*
+    EL CORTE, EN EL ANGULO EXACTO DE MARCA.
+
+    tan(30.3) = 0.5844, o sea que por cada unidad que baja el corte avanza
+    1.711 en horizontal. Los dos valores van en la MISMA unidad (vmin) a
+    proposito: con porcentajes cada eje escala por su lado y el angulo dejaria
+    de ser 30.3 en cuanto el panel no fuera cuadrado -- que es siempre.
+  */
+  --corte-y:    2.6vmin;
+  --corte-x:    4.45vmin;   /* = 2.6 / tan(30.3) */
+
+  --corte-y-s:  1.5vmin;    /* version corta, para botones y avisos */
+  --corte-x-s:  2.57vmin;
+
+  /*
+    LA FORMA, definida UNA sola vez.
+
+    Se cortan la esquina de ARRIBA A LA IZQUIERDA y la de ABAJO A LA DERECHA.
+    Las dos aristas resultantes SUBEN hacia la derecha, igual que la linea del
+    logotipo. Cortar las otras dos daria aristas que bajan, y la pagina 31 lo
+    prohibe expresamente: "Don't use the shapes at opposite angles".
+  */
+  --forma: polygon(
+    var(--corte-x) 0,
+    100% 0,
+    100% calc(100% - var(--corte-y)),
+    calc(100% - var(--corte-x)) 100%,
+    0 100%,
+    0 var(--corte-y)
+  );
+  --forma-s: polygon(
+    var(--corte-x-s) 0,
+    100% 0,
+    100% calc(100% - var(--corte-y-s)),
+    calc(100% - var(--corte-x-s)) 100%,
+    0 100%,
+    0 var(--corte-y-s)
+  );
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;                 /* pantalla fija: quien hace scroll son las listas */
+  background: var(--sea);
+  color: var(--tinta);
+  font-family: 'Montserrat', Arial, sans-serif;   /* 02, tipografia web */
+  -webkit-font-smoothing: antialiased;
+}
+
+.pantalla {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 0.74fr 1.8fr 0.74fr;
+  gap: 2vmin;
+  padding: 2.2vmin;
+}
+
+
+/* ============================== LAS DOS TABLAS ==============================
+   Paneles RELLENOS, sin borde y sin sombra: ver la nota de arriba.            */
+
+.tabla {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;                    /* sin esto la lista no puede encogerse y el scroll se va al body */
+  background: var(--panel);
+  overflow: hidden;
+  clip-path: var(--forma);
+}
+
+/* La cabecera se separa del cuerpo por CAMBIO DE TONO, no por una linea: una
+   regla horizontal chocaria con una composicion que va toda en diagonal. */
+.tabla__cab {
+  padding: 3.2vmin 2.2vmin 1.6vmin;
+  background: var(--panel-alto);
+}
+
+.tabla__titulo {
+  font-size: 3vmin;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--tinta);
+}
+
+.tabla__cuenta {
+  margin-top: 0.4vmin;
+  font-size: 1.3vmin;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--horizon);
+}
+
+.lista {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(154, 202, 235, 0.28) transparent;
+}
+.lista::-webkit-scrollbar { width: 0.6vmin; }
+.lista::-webkit-scrollbar-thumb { background: rgba(154, 202, 235, 0.28); }
+
+.filas { list-style: none; }
+
+/* Las filas se separan alternando el fondo. Sin lineas, por lo mismo que la
+   cabecera: aqui no hay horizontales. */
+.fila {
+  display: grid;
+  grid-template-columns: 3.4vmin 1fr auto auto;
+  align-items: center;
+  gap: 1vmin;
+  padding: 0.95vmin 2.2vmin;
+  font-size: 1.7vmin;
+  line-height: 1.25;
+}
+.fila:nth-child(even) { background: rgba(255, 255, 255, 0.04); }
+
+.fila__pos {
+  font-size: 1.4vmin;
+  font-weight: 700;
+  color: var(--tinta-3);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* La celda de la persona. `min-width: 0` no es adorno: por omision un elemento
+   de rejilla no baja de su contenido, asi que un nombre largo ensanchaba la
+   columna y empujaba los puntos fuera del panel en vez de partirse. */
+.fila__quien { min-width: 0; }
+
+.fila__nombre {
+  font-weight: 700;
+  color: var(--tinta);
+  letter-spacing: -0.01em;
+  /* Nombre y apellido caben en treinta caracteres, pero no siempre en el ancho
+     de la columna: se parte en dos lineas antes que recortarse. En una tabla
+     que se lee para reconocer a alguien, media palabra no sirve de nada. */
+  overflow-wrap: anywhere;
+}
+
+.fila__unidad {
+  display: block;
+  margin-top: 0.15vmin;
+  font-size: 1.15vmin;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+}
+
+.fila__puntos {
+  font-size: 2vmin;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--horizon);
+}
+/*
+  Una partida en negativo es legitima y hay que poder leerla como tal. Va en
+  Sunset Orange y no en rojo porque en la paleta v4.1 NO HAY ROJO. El naranja
+  cumple el papel de "esto es distinto" sin salirse del manual.
+*/
+.fila--neg .fila__puntos { color: var(--sunset); }
+
+/* El podio se distingue sin cambiar la ALTURA de fila: si las tres primeras
+   fueran mas altas, la lista daria un salto cada vez que se refresca. */
+.fila--podio-1 .fila__pos,
+.fila--podio-1 .fila__puntos { color: var(--sunray); }
+.fila--podio-2 .fila__pos    { color: var(--horizon); }
+.fila--podio-3 .fila__pos    { color: var(--sunset); }
+
+/*
+  Repetido: la misma persona (nombre + unidad) mas de una vez. La barra al
+  costado sirve para localizarlos de un vistazo bajando la lista.
+
+  NO SE BORRA SOLO. Dos personas pueden llamarse igual y ser de la misma
+  terminal, y alguien puede querer conservar dos intentos. La pantalla senala;
+  quien decide es quien esta delante.
+*/
+.fila--dup { box-shadow: inset 0.3vmin 0 0 var(--sunray); }
+
+/* Cuantas veces jugo. "x10" se lee de un vistazo; "repetido" no distinguia
+   entre dos partidas y diez, que es justo lo que hay que decidir. */
+.fila__veces {
+  margin-left: 0.7vmin;
+  padding: 0.1vmin 0.6vmin;
+  font-size: 1.1vmin;
+  font-weight: 800;
+  color: var(--sea);
+  background: var(--sunray);
+  vertical-align: middle;
+}
+
+.aviso {
+  padding: 2.8vmin 2.2vmin;
+  font-size: 1.5vmin;
+  font-weight: 500;
+  color: var(--tinta-3);
+  text-align: center;
+  text-wrap: pretty;
+}
+.aviso--error { color: var(--sunset); }
+
+.tabla__pista {
+  font-size: 1.2vmin;
+  font-weight: 600;
+  color: var(--tinta-3);
+  align-self: center;
+}
+
+.tabla__pie {
+  display: flex;
+  gap: 0.8vmin;
+  padding: 1.4vmin 2.2vmin 2.4vmin;
+  background: var(--panel-alto);
+}
+
+
+/* ================================= CENTRO ================================= */
+
+.centro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.6vmin;
+  min-height: 0;
+  text-align: center;
+}
+
+/* Logotipo del Instituto, version blanca sobre Sea Blue. Area de proteccion
+   holgada: es el `gap` de la columna. */
+.instituto {
+  width: 34vmin;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+
+/* ---------------------------------- VIDEO ---------------------------------- */
+
+.video {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  /*
+    El tope de alto no es estetico: sin el, la suma de logotipo + video + QR
+    grandes pasa de los 100vmin y la columna se recorta por abajo, que es donde
+    esta el pie. Con `object-fit: cover` perder algo de encuadre no se nota;
+    perder el pie si.
+  */
+  max-height: 33vmin;
+  overflow: hidden;
+  background: #041f45;
+  clip-path: var(--forma);
+}
+
+/* Las dos pistas ocupan el mismo hueco, apiladas. El relevo es un fundido
+   corto: un corte seco entre dos gameplays distintos da un latigazo que en una
+   pantalla que lleva horas puesta se nota mucho. */
+.video__pista {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 350ms ease;
+}
+.video__pista--on { opacity: 1; }
+
+/* Si el mp4 todavia no esta, se dice claramente en vez de dejar un hueco negro
+   que parece un fallo de la pantalla. Las rayas van en el angulo de marca. */
+.video__falta {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 0.6vmin;
+  color: var(--tinta-3);
+  font-size: 1.5vmin;
+  font-weight: 600;
+  background: repeating-linear-gradient(329.7deg,
+    #052a58, #052a58 1.4vmin, #06376E 1.4vmin, #06376E 2.8vmin);
+}
+.video__falta small { font-size: 1.2vmin; font-weight: 500; opacity: 0.75; }
+
+/*
+  ESTA LINEA NO ES OPCIONAL, y su falta tapo el video entero.
+
+  El atributo `hidden` funciona porque la hoja del navegador trae
+  `[hidden] { display: none }`. Esa regla tiene la MISMA especificidad que un
+  selector de clase, y cuando hay empate gana la hoja del autor -- o sea, el
+  `display: grid` de aqui arriba. Resultado: el cartel de "faltan los mp4"
+  estaba pintado encima del video desde el primer momento, con los dos mp4
+  cargando perfectamente por debajo.
+*/
+.video__falta[hidden] { display: none; }
+
+
+/* ----------------------------------- QR ----------------------------------- */
+
+.escanea {
+  font-size: 1.6vmin;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--sky);
+}
+
+.qrs { display: flex; gap: 3.4vmin; }
+
+.qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1vmin;
+}
+/*
+  Fondo blanco solido y margen propio: un QR sobre navy con transparencia es un
+  QR que la mitad de los telefonos no lee.
+
+  Y AQUI NO SE CORTA LA ESQUINA. Es el unico bloque de la pagina que se queda
+  rectangular, a proposito: el margen blanco alrededor del codigo es parte del
+  codigo -- comerselo en dos esquinas es arriesgarse a que un lector dude. La
+  marca no vale un QR que no escanea.
+*/
+.qr img {
+  width: 25vmin;
+  height: 25vmin;
+  padding: 1.4vmin;
+  background: #fff;
+  display: block;
+}
+.qr figcaption {
+  font-size: 1.5vmin;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--tinta-2);
+}
+
+/* El hueco de "QR pendiente" vive aqui, pegado a la regla del QR que sustituye:
+   estuvo un rato como estilo en linea dentro de marcador.js y el tamano se
+   quedo desfasado en cuanto crecieron los QR. */
+.qr__falta {
+  width: 25vmin;
+  height: 25vmin;
+  display: grid;
+  place-content: center;
+  background: var(--panel);
+  font-size: 1.35vmin;
+  font-weight: 600;
+  color: var(--tinta-3);
+  text-align: center;
+}
+
+
+/* ----------------------------------- PIE ----------------------------------- */
+
+.pie {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 1.2vmin;
+  font-size: 1.2vmin;
+  font-weight: 500;
+  color: var(--tinta-3);
+}
+
+/* El punto de administracion. Deliberadamente casi invisible: no es un secreto
+   -- quien lea el HTML lo encuentra -- pero tampoco algo que un visitante pulse
+   por curiosidad estando la pantalla a la vista de todos. */
+.pie__punto {
+  width: 1.1vmin;
+  height: 1.1vmin;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(126, 150, 182, 0.35);
+  cursor: default;
+}
+body.admin .pie__punto { background: var(--sunray); }
+
+
+/* ============================ MODO ADMINISTRADOR ============================ */
+
+/* Fuera del modo admin no existen: `hidden` no basta porque son botones y
+   seguirian siendo enfocables con el tabulador. */
+.admin-solo { display: none; }
+body.admin .admin-solo { display: flex; }
+
+/*
+  En modo administrador la fila entera es el boton: pulsarla la ARMA y los
+  controles salen ahi mismo, junto al nombre. Cuanto mas cerca este el boton de
+  borrar del nombre que se esta leyendo, menos posibilidades hay de llevarse por
+  delante al de al lado.
+*/
+body.admin .fila { cursor: pointer; }
+body.admin .fila:hover { background: rgba(154, 202, 235, 0.14); }
+
+/* La fila armada se saca del resto con el naranja de la paleta y ocupa el ancho
+   que necesiten sus botones. */
+.fila--armada {
+  background: rgba(238, 117, 35, 0.18);
+  box-shadow: inset 0.3vmin 0 0 var(--sunset);
+}
+
+.fila__acc { display: flex; gap: 0.5vmin; }
+
+.mini {
+  padding: 0.5vmin 1vmin;
+  border: 0;
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--tinta-2);
+  font-family: inherit;
+  font-size: 1.15vmin;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.mini:hover:not(:disabled) { background: rgba(255, 255, 255, 0.26); }
+.mini:disabled { opacity: 0.4; cursor: default; }
+
+.mini--borrar { color: var(--sea); background: var(--sunset); font-weight: 800; }
+.mini--borrar:hover:not(:disabled) { background: #F98B41; }
+
+/* El boton del caso JUAN. Va en Sunray para distinguirse del borrado de una
+   sola fila: se lleva varias de golpe y eso tiene que verse distinto. */
+.mini--grupo { color: var(--sea); background: var(--sunray); font-weight: 800; }
+.mini--grupo:hover:not(:disabled) { background: #FFD65C; }
+
+/* Cancelar se queda en el estilo neutro y sin relleno de color: de los tres
+   botones es el unico que no hace nada, y tiene que parecerlo. */
+.mini--cancelar { background: transparent; color: var(--tinta-3); }
+
+
+/* -------------------------------- BOTONES --------------------------------
+   Tambien angulados, con el corte corto. Sin bordes: relleno o plano.        */
+
+.btn {
+  padding: 0.9vmin 1.7vmin;
+  border: 0;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--tinta-2);
+  font-family: inherit;
+  font-size: 1.3vmin;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 150ms ease;
+  clip-path: var(--forma-s);
+}
+.btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.2); }
+.btn:disabled { opacity: 0.35; cursor: default; }
+
+/* CTA en Ports Sky Blue, el primario del manual. */
+.btn--cta { color: var(--tinta); background: var(--sky); font-weight: 800; }
+.btn--cta:hover:not(:disabled) { background: #17ACEA; }
+
+.btn--vaciar { color: var(--tinta-3); margin-left: auto; }
+
+/* No hay rojo en la paleta v4.1: el papel de "esto es irreversible" lo hace el
+   Sunset Orange, que es el acento mas caliente que existe en el sistema. */
+.btn--peligro { color: var(--sea); background: var(--sunset); font-weight: 800; }
+
+
+/* ================================= MODALES ================================= */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 18, 45, 0.82);
+  z-index: 10;
+}
+.modal[hidden] { display: none; }
+
+.tarjeta {
+  width: min(48vmin, 90vw);
+  display: flex;
+  flex-direction: column;
+  gap: 1.6vmin;
+  padding: 4vmin;
+  background: var(--panel);
+  clip-path: var(--forma);
+}
+
+.tarjeta h2 {
+  font-size: 2.3vmin;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.tarjeta__nota {
+  font-size: 1.45vmin;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--tinta-2);
+  text-wrap: pretty;
+}
+.tarjeta__nota strong { font-weight: 800; color: var(--tinta); }
+
+.tarjeta__error { font-size: 1.35vmin; font-weight: 700; color: var(--sunset); }
+.tarjeta__error[hidden] { display: none; }
+
+.tarjeta input {
+  padding: 1.2vmin 1.5vmin;
+  border: 0;
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--tinta);
+  font-family: inherit;
+  font-size: 1.8vmin;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.tarjeta input::placeholder { color: var(--tinta-3); font-weight: 500; }
+.tarjeta input:focus { outline: 2px solid var(--sky); outline-offset: -2px; }
+
+.tarjeta__botones { display: flex; gap: 0.9vmin; justify-content: flex-end; }
+
+
+/* ============================== AVISO FLOTANTE ============================== */
+
+.brindis {
+  position: fixed;
+  left: 50%;
+  bottom: 3vmin;
+  transform: translateX(-50%);
+  padding: 1.4vmin 2.8vmin;
+  background: var(--panel-alto);
+  font-size: 1.5vmin;
+  font-weight: 700;
+  z-index: 20;
+  clip-path: var(--forma-s);
+}
+.brindis[hidden] { display: none; }
+.brindis--mal { color: var(--sunset); }
+
+
+/* En una pantalla vertical (un totem, por ejemplo) las tres columnas no caben:
+   se apilan con el centro arriba, que es lo que se quiere ver primero. */
+@media (max-aspect-ratio: 1/1) {
+  .pantalla { grid-template-columns: 1fr; grid-template-rows: auto 1fr 1fr; }
+  .centro { order: -1; }
+  .qr img, .qr__falta { width: 32vmin; height: 32vmin; }
+  .video { max-height: 30vmin; }
+  .instituto { width: 44vmin; }
+}
+
+/* Nota: `prefers-reduced-motion` NO toca el video. Aqui el video en bucle es el
+   contenido, no un adorno, y ocultarlo dejaria a la vista el fondo rayado de
+   "falta el mp4" -- o sea, la pantalla del stand pareciendo averiada. Lo que si
+   se respeta es el desplazamiento automatico de las listas, y eso se decide en
+   marcador.js, que es donde vive ese movimiento. */

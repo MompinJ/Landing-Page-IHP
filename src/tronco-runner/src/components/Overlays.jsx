@@ -3,7 +3,7 @@ import { useGame } from '../store'
 import { sfx } from '../audio'
 import { useGamepadAction, useGamepadConnected, useGamepadGrid } from '../useGamepad'
 import { LEGEND_GOOD, LEGEND_BAD, RANKS, LEADERBOARD_KEY, BUSINESS_UNITS, GAME_DURATION } from '../constants'
-import { guardaMarca, leeTabla, leeUnidades, limpiaNombre } from '../marcador'
+import { MAX_NOMBRE, guardaMarca, leeTabla, leeUnidades, limpiaNombre } from '../marcador'
 
 // Flechas dibujadas, no texto: son las mismas que van rotuladas encima de los
 // obstaculos en pista, asi que la instruccion y el juego dicen lo mismo con la
@@ -437,7 +437,10 @@ function Paused() {
   )
 }
 
-const MAX_NAME = 12
+// El tope del nombre lo define `marcador.js`, que es donde vive `limpiaNombre`
+// y por tanto quien tiene que estar de acuerdo con la restriccion de la tabla.
+// Aqui habia una copia con su propio numero, y es la clase de pareja que se
+// desincroniza en cuanto uno de los dos cambia.
 
 // Teclado en pantalla para escribir el nombre con el mando. Solo aparece con un
 // mando conectado: sin el, el campo de texto de siempre es mejor y mas rapido.
@@ -664,7 +667,7 @@ function GameOver() {
             <div className="save-row">
               <input
                 value={name}
-                maxLength={MAX_NAME}
+                maxLength={MAX_NOMBRE}
                 placeholder="TU NOMBRE"
                 onChange={(e) => setName(e.target.value.toUpperCase())}
                 onKeyDown={(e) => e.key === 'Enter' && save()}
@@ -674,7 +677,7 @@ function GameOver() {
               <NameKeys
                 value={name}
                 rowOffset={0}
-                onType={(ch) => setName((v) => (v + ch).slice(0, MAX_NAME))}
+                onType={(ch) => setName((v) => (v + ch).slice(0, MAX_NOMBRE))}
                 onBack={() => setName((v) => v.slice(0, -1))}
               />
             )}
