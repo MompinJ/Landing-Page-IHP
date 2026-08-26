@@ -41,31 +41,39 @@ await page.waitForTimeout(3500);
 comprueba((await page.locator('button', { hasText: 'JUGAR' }).count()) > 0, 'la portada carga sin errores');
 
 // --- 1. guardar una carrera plausible, con el módulo del propio juego --------
-const guardada = await page.evaluate(async (nombre) => {
-  const m = await import('/src/marcador.js');
-  return m.guardaMarca({
-    nombre,
-    unidad: 'ICAVE',
-    puntos: 480,       // ~0.4 puntos/metro: por encima de lo que da un bot,
-    distancia: 1200,   // por debajo del techo de 2/metro. Una buena carrera.
-    duracionMs: 120000,
+const API = 'https://ifkkmlzjtdjkqmekticb.supabase.co/rest/v1/terminal_rally_scores';
+const CLAVE = 'sb_publishable_5VnRKtG9NF1BUWWUS85ekA_tzlmDm4H';
+const guardada = await page.evaluate(async ([api, clave, nombre]) => {
+  const r = await fetch(api, {
+    method: 'POST',
+    headers: { apikey: clave, Authorization: `Bearer ${clave}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    body: JSON.stringify({ nombre, unidad: 'ICAVE', puntos: 480, distancia: 1200, duracion_ms: 120000 }),
   });
-}, NOMBRE);
+  return r.ok;
+}, [API, CLAVE, NOMBRE]);
 comprueba(guardada === true, 'una carrera buena se registra en el congreso');
 
 // --- 2. las defensas, vistas desde el navegador -----------------------------
-const ataques = await page.evaluate(async () => {
-  const m = await import('/src/marcador.js');
-  const casos = [
-    ['puntos imposibles para la distancia', { nombre: 'TRAMPA', unidad: 'ICAVE', puntos: 999999, distancia: 100, duracionMs: 120000 }],
-    ['carrera sin tiempo',                  { nombre: 'BOT',    unidad: 'ICAVE', puntos: 100,    distancia: 1200, duracionMs: 500 }],
-    ['unidad inventada',                    { nombre: 'ANA',    unidad: 'PIRATA', puntos: 100,   distancia: 500,  duracionMs: 60000 }],
-    ['anuncio en el nombre',                { nombre: 'VER-XXX.COM', unidad: 'ICAVE', puntos: 100, distancia: 500, duracionMs: 60000 }],
-  ] as const;
+// Sin funciones con nombre dentro de `evaluate`: el transpilador las envuelve
+// con un ayudante (`__name`) que no existe en la página y revienta ahí dentro.
+const ataques: Array<[string, boolean]> = await page.evaluate(async ([api, clave]) => {
+  const casos: Array<[string, Record<string, unknown>]> = [
+    ['puntos imposibles para la distancia', { nombre: 'TRAMPA', unidad: 'ICAVE', puntos: 999999, distancia: 100, duracion_ms: 120000 }],
+    ['carrera sin tiempo',                  { nombre: 'BOT',    unidad: 'ICAVE', puntos: 100,    distancia: 1200, duracion_ms: 500 }],
+    ['unidad inventada',                    { nombre: 'ANA',    unidad: 'PIRATA', puntos: 100,   distancia: 500,  duracion_ms: 60000 }],
+    ['anuncio en el nombre',                { nombre: 'VER-XXX.COM', unidad: 'ICAVE', puntos: 100, distancia: 500, duracion_ms: 60000 }],
+  ];
   const out: Array<[string, boolean]> = [];
-  for (const [caso, fila] of casos) out.push([caso, await m.guardaMarca(fila as never)]);
+  for (const [caso, fila] of casos) {
+    const r = await fetch(api, {
+      method: 'POST',
+      headers: { apikey: clave, Authorization: `Bearer ${clave}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify(fila),
+    });
+    out.push([caso, r.ok]);
+  }
   return out;
-});
+}, [API, CLAVE]);
 for (const [caso, entro] of ataques) comprueba(entro === false, `rechazado: ${caso}`);
 
 // --- 2b. LA INTERFAZ DE VERDAD ----------------------------------------------
@@ -77,10 +85,10 @@ await page.evaluate(() => {
 await page.waitForTimeout(1500);
 
 const unidadesEnPantalla = (await page.locator('.unit').allInnerTexts()).map((t) => t.trim()).sort();
-const enTabla = await page.evaluate(async () => {
-  const m = await import('/src/marcador.js');
-  return (await m.leeUnidades()) ?? [];
-});
+const enTabla: string[] = await page.evaluate(async ([clave]) => {
+  const r = await fetch('https://ifkkmlzjtdjkqmekticb.supabase.co/rest/v1/unidades?select=codigo', { headers: { apikey: clave } });
+  return (await r.json()).map((u: { codigo: string }) => u.codigo);
+}, [CLAVE]);
 console.log(`   unidades ofrecidas: ${unidadesEnPantalla.join(' ')}`);
 comprueba(
   JSON.stringify(unidadesEnPantalla) === JSON.stringify([...enTabla].sort()),
@@ -105,22 +113,37 @@ comprueba(
 const otra = await browser.newPage({ viewport: { width: 1400, height: 950 } });
 await otra.goto(URL, { waitUntil: 'domcontentloaded' });
 await otra.waitForTimeout(3000);
-const visto = await otra.evaluate(async (nombre) => {
-  const m = await import('/src/marcador.js');
-  const filas = await m.leeTabla();
-  return Array.isArray(filas) && filas.some((f: { name: string }) => f.name === nombre);
-}, NOMBRE);
+const visto = await otra.evaluate(async ([clave, nombre]) => {
+  const r = await fetch('https://ifkkmlzjtdjkqmekticb.supabase.co/rest/v1/terminal_rally_scores?select=nombre', { headers: { apikey: clave } });
+  return (await r.json()).some((f: { nombre: string }) => f.nombre === nombre);
+}, [CLAVE, NOMBRE]);
 comprueba(visto, 'otra pestaña ve la marca recién registrada');
 await otra.close();
 
 // --- 4. sin red, ni se cuelga ni miente -------------------------------------
-await page.route('**/ifkkmlzjtdjkqmekticb.supabase.co/**', (r) => r.abort());
-const sinRed = await page.evaluate(async () => {
-  const m = await import('/src/marcador.js');
-  return { guardar: await m.guardaMarca({ nombre: 'SINRED', unidad: 'ICAVE', puntos: 10, distancia: 100, duracionMs: 60000 }), leer: await m.leeTabla() };
+// El caso del stand: se cae el wifi. Se firma otra carrera con la red cortada y
+// se exige que la pantalla avance igual y que LO DIGA.
+// PESTAÑA NUEVA a propósito: la anterior ya firmó, y el formulario no vuelve
+// —el componente pasa a enseñar la tabla y ahí se queda—. Reutilizarla probaría
+// otra cosa.
+const kiosco = await browser.newPage({ viewport: { width: 1400, height: 950 } });
+await kiosco.goto(URL, { waitUntil: 'domcontentloaded' });
+await kiosco.waitForTimeout(3500);
+await kiosco.route('**/ifkkmlzjtdjkqmekticb.supabase.co/**', (r) => r.abort());
+await kiosco.evaluate(() => {
+  (window as any).__TR.store.setState({ phase: 'gameover', score: 300, distShown: 900, timeShown: 0 });
 });
-comprueba(sinRed.guardar === false, 'sin red, guardar devuelve fallo en vez de colgarse');
-comprueba(sinRed.leer === null, 'sin red, leer devuelve «no lo sé» y no una tabla vacía falsa');
+await kiosco.waitForTimeout(1500);
+await kiosco.locator('.register input').fill('SINRED');
+await kiosco.locator('.unit', { hasText: 'ICAVE' }).first().click();
+await kiosco.getByRole('button', { name: 'GUARDAR' }).click();
+await kiosco.waitForTimeout(3500);
+comprueba(await kiosco.locator('.board').isVisible(), 'sin red, la pantalla final avanza igual y enseña la tabla');
+comprueba(
+  (await kiosco.locator('.board-empty', { hasText: /Sin conexion/ }).count()) > 0,
+  'sin red, se avisa de que la marca se quedó en este equipo',
+);
+await kiosco.close();
 
 await page.close();
 await browser.close();

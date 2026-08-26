@@ -29,7 +29,8 @@ const comprueba = (ok: boolean, que: string) => {
 // ---------------------------------------------------------------- con red
 const page = await browser.newPage({ viewport: { width: 1400, height: 950 } });
 page.on('pageerror', (e) => console.error('[pageerror]', String(e)));
-await page.goto(URL, { waitUntil: 'networkidle' });
+await page.goto(URL, { waitUntil: 'domcontentloaded' });
+await page.waitForTimeout(3000);
 await page.getByRole('button', { name: 'Jugar', exact: true }).click();
 await page.waitForTimeout(200);
 await page.getByRole('button', { name: 'A jugar' }).click();
@@ -84,7 +85,7 @@ comprueba(enTabla > 0, 'la marca recién firmada sale en el Top 10');
 
 // ------------------------------------------- otra pestaña: ¿lo ve todo el mundo?
 const otra = await browser.newPage({ viewport: { width: 1400, height: 950 } });
-await otra.goto(URL, { waitUntil: 'networkidle' });
+await otra.goto(URL, { waitUntil: 'domcontentloaded' });
 await otra.waitForTimeout(2500);
 const visto = await otra.evaluate((n) => {
   const r = (window as any).__DH.store.getState().ranking as Array<{ name: string }>;
@@ -101,7 +102,8 @@ await page.close();
 // El caso del stand: el wifi se cae. El juego NO puede colgarse y tiene que
 // decir que la marca se quedó en el equipo.
 const kiosco = await browser.newPage({ viewport: { width: 1400, height: 950 } });
-await kiosco.goto(URL, { waitUntil: 'networkidle' });
+await kiosco.goto(URL, { waitUntil: 'domcontentloaded' });
+await kiosco.waitForTimeout(3000);
 await kiosco.route('**/ifkkmlzjtdjkqmekticb.supabase.co/**', (r) => r.abort());
 await kiosco.getByRole('button', { name: 'Jugar', exact: true }).click();
 await kiosco.waitForTimeout(200);
