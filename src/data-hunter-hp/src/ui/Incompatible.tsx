@@ -1,4 +1,4 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { Component, Fragment, type ErrorInfo, type ReactNode } from 'react';
 
 /**
  * CUANDO EL JUEGO NO PUEDE ARRANCAR, QUE LO DIGA.
@@ -99,21 +99,51 @@ export function SinWebGL() {
  * que ser una clase: es la única forma que da React de capturar un error de
  * render, no hay equivalente con hooks.
  */
-export class Salvavidas extends Component<{ children: ReactNode }, { fallo: Error | null }> {
-  state: { fallo: Error | null } = { fallo: null };
+export class Salvavidas extends Component<
+  { children: ReactNode },
+  { fallo: Error | null; intento: number }
+> {
+  state: { fallo: Error | null; intento: number } = { fallo: null, intento: 0 };
 
   static getDerivedStateFromError(fallo: Error) {
     return { fallo };
   }
 
   componentDidCatch(fallo: Error, info: ErrorInfo) {
-    // A la consola SIEMPRE, aunque en pantalla salga el mensaje amable: es lo
-    // único que va a tener quien intente reproducirlo desde fuera del stand.
+    // A la consola SIEMPRE, aunque en pantalla no salga nada: es lo único que va
+    // a tener quien intente reproducirlo desde fuera del stand.
     console.error('[Port Quest] el juego se cayó:', fallo, info.componentStack);
+
+    /**
+     * UN REINTENTO, Y SOLO UNO.
+     *
+     * Hay un fallo de ARRANQUE que se dispara aproximadamente una de cada cinco
+     * cargas: «Maximum update depth exceeded» dentro de `<CanvasImpl>` de
+     * react-three-fiber, en un `set` que su propio store hace al ver que la
+     * cámara cambió de identidad — que es lo que provoca el `makeDefault` de la
+     * cámara de drei al montarse. Es anterior a este salvavidas y está medido:
+     * quitando del medio todo lo que se tocó por encima, se seguía cayendo 2 de
+     * cada 10 cargas.
+     *
+     * Lo que lo dispara es una CARRERA entre que React monta y que el lienzo se
+     * mide, y por eso salía en producción y casi nunca en local: se gana o se
+     * pierde por milisegundos de latencia. Y por eso mismo un reintento la gana
+     * casi siempre — al remontar, el lienzo ya tiene tamaño.
+     *
+     * Cambiar la `key` es lo que fuerza el remonte de verdad: sin ella React
+     * reutilizaría el árbol y volvería a caer en el mismo estado. Al segundo
+     * intento se deja de insistir y se enseña el aviso: repetir sin fin dejaría
+     * al jugador delante de una pantalla que parpadea sin decir nada.
+     */
+    if (this.state.intento < 1) {
+      this.setState((previo) => ({ fallo: null, intento: previo.intento + 1 }));
+    }
   }
 
   render() {
-    if (!this.state.fallo) return this.props.children;
+    if (!this.state.fallo) {
+      return <Fragment key={this.state.intento}>{this.props.children}</Fragment>;
+    }
     return (
       <Aviso
         titulo="El juego se ha caído"
