@@ -577,10 +577,24 @@ function GameOver() {
     const clean = nombreLimpio
     if (!puedeGuardar) return
     const entry = { id: Date.now(), name: clean, unit, score }
-    // sin recorte: la tabla guarda a todo el que se registra, no solo al top
-    const next = [...loadBoard(), entry].sort((a, b) => b.score - a.score)
-    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(next))
-    setBoard(next)
+
+    // La copia LOCAL se escribe siempre, y sin recorte: es la red para cuando
+    // el wifi del stand falle, y guarda a todo el que se registra.
+    const local = [...loadBoard(), entry].sort((a, b) => b.score - a.score)
+    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(local))
+
+    // PERO LO QUE SE ENSEÑA NO ES LA LOCAL. Aqui habia un `setBoard(local)` y
+    // hacia justo lo contrario de lo que promete la pantalla: al pulsar GUARDAR
+    // la tabla del congreso -que llevaba ahi desde que se abrio la pantalla-
+    // desaparecia de golpe y en su sitio salian los corredores viejos de ESTE
+    // equipo. El que acababa de firmar veia esfumarse a todos sus companeros y
+    // daba por hecho que no se habia guardado nada.
+    //
+    // Lo correcto es meter la marca nueva en la tabla que YA ESTA en pantalla y
+    // dejar que la relectura de abajo la sustituya por la del servidor cuando
+    // llegue. Si la subida falla, se sigue viendo el congreso con la marca
+    // propia dentro, que es lo mas parecido a la verdad que se puede enseñar.
+    setBoard((previa) => [...previa, entry].sort((a, b) => b.score - a.score))
     setSavedId(entry.id)
 
     guardaMarca({

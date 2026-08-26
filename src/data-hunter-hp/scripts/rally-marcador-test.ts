@@ -123,6 +123,17 @@ comprueba(
   'firmando desde la interfaz, la marca sale en la tabla',
 );
 
+// Y AL FIRMAR NO PUEDE DESAPARECER EL CONGRESO. Aquí había un fallo que no
+// cazaba ninguna prueba porque todas miraban solo la marca propia: al pulsar
+// GUARDAR la tabla del congreso se sustituía por la LOCAL de ese equipo, así
+// que el corredor veía esfumarse a todos sus compañeros justo al firmar y daba
+// por hecho que no se había guardado. Se comprueba con una marca ajena, metida
+// antes por la API, que tiene que seguir en pantalla después de firmar.
+comprueba(
+  (await page.locator('.board').innerText()).includes(NOMBRE),
+  'al firmar, las marcas de los demás siguen en la tabla',
+);
+
 // --- 3. ¿lo ve todo el mundo? -----------------------------------------------
 const otra = await browser.newPage({ viewport: { width: 1400, height: 950 } });
 await otra.goto(URL, { waitUntil: 'domcontentloaded' });
