@@ -290,11 +290,15 @@ export function GameOver() {
             </span>
             {/* Si la marca no salió del equipo hay que DECIRLO: el jugador se
                 va creyendo que compite con todo el congreso y su nombre no está
-                en ninguna parte. No es un error del jugador ni hay nada que
-                pueda hacer, así que se cuenta en una línea y sin alarma. */}
+                en ninguna parte. No es un error suyo ni hay nada que pueda
+                hacer, así que se cuenta en una línea y sin alarma.
+                Y NO SE LE ECHA LA CULPA A LA RED: decía «sin conexión» y la
+                primera vez que falló de verdad había conexión de sobra — era la
+                tabla rechazando la fila. Un aviso que nombra una causa
+                equivocada manda a quien lo lea a mirar donde no es. */}
             {subido === false && (
               <p className="how-foot">
-                Sin conexión con el marcador del congreso: tu marca quedó guardada en este equipo.
+                No se pudo guardar en el marcador del congreso: tu marca quedó guardada en este equipo.
               </p>
             )}
             <div className="board">

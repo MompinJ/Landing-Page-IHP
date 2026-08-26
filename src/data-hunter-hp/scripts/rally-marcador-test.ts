@@ -76,6 +76,20 @@ const ataques: Array<[string, boolean]> = await page.evaluate(async ([api, clave
 }, [API, CLAVE]);
 for (const [caso, entro] of ataques) comprueba(entro === false, `rechazado: ${caso}`);
 
+// UNA CARRERA MALA TAMBIÉN CUENTA. Terminal Rally resta 10 por riesgo y 15 por
+// choque: el que se acerca por primera vez y choca acaba en negativo, y esa es
+// justo la gente a la que más le importa ver su nombre en la tabla. La primera
+// versión de la tabla los rechazaba con un `puntos >= 0` puesto sin pensar.
+const negativa = await page.evaluate(async ([api, clave, nombre]) => {
+  const r = await fetch(api, {
+    method: 'POST',
+    headers: { apikey: clave, Authorization: `Bearer ${clave}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    body: JSON.stringify({ nombre, unidad: 'ICAVE', puntos: -75, distancia: 400, duracion_ms: 120000 }),
+  });
+  return r.ok;
+}, [API, CLAVE, `N${NOMBRE.slice(1)}`]);
+comprueba(negativa === true, 'una carrera MALA (puntos negativos) se registra igual');
+
 // --- 2b. LA INTERFAZ DE VERDAD ----------------------------------------------
 // Se salta a la pantalla final por el store en vez de correr los 120 s: lo que
 // se comprueba aquí es el formulario, no el juego.

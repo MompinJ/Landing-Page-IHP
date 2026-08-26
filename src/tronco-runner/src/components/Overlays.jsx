@@ -685,10 +685,15 @@ function GameOver() {
             {/* Si la marca no salio del equipo hay que DECIRLO: el corredor se
                 va creyendo que compite con todo el congreso y su nombre no esta
                 en ninguna parte. No hay nada que pueda hacer, asi que se cuenta
-                en una linea y sin alarma. */}
+                en una linea y sin alarma.
+                Y NO SE LE ECHA LA CULPA A LA RED: decia "sin conexion" y la
+                primera vez que fallo de verdad habia conexion de sobra -- era la
+                tabla rechazando la fila porque la puntuacion era negativa. Un
+                aviso que nombra una causa equivocada manda a quien lo lea a
+                mirar donde no es. */}
             {subida === false && (
               <p className="board-empty">
-                Sin conexion con el marcador del congreso: tu marca quedo guardada en este equipo.
+                No se pudo guardar en el marcador del congreso: tu marca quedo guardada en este equipo.
               </p>
             )}
           </>
