@@ -4,6 +4,7 @@ import { BALANCE } from '../data/balance';
 import { isShieldItem } from '../data/items';
 import { BIOME_SEQUENCE, generateRows, rows, zoneOf, type ZoneTheme } from '../world/rows';
 import { startDying } from '../world/death';
+import { guardaScore, leeTop10, limpiaNombre } from '../services/scoreService';
 import { runtime } from './runtime';
 
 /** Fila de arranque de depuración (?row=N en la URL) — 0 en producción/kiosco */
@@ -97,9 +98,21 @@ interface GameState {
 
   endGame: () => void;
   backToMenu: () => void;
-  /** `unit` son las siglas de la unidad de negocio que elige el jugador */
-  submitScore: (name: string, unit?: string) => void;
+  /** `unit` son las siglas de la unidad de negocio que elige el jugador.
+   *  Devuelve si la partida quedó registrada en el marcador del congreso; si
+   *  no (sin red), se ha guardado igual en el ranking local de este equipo. */
+  submitScore: (name: string, unit?: string) => Promise<boolean>;
+  /** Trae el Top 10 del congreso. Se llama al abrir y tras guardar. */
+  cargaMarcador: () => Promise<void>;
 }
+
+/**
+ * CUÁNDO EMPEZÓ LA PARTIDA. No es telemetría: es la mitad de la prueba de que
+ * la partida ocurrió. La tabla exige `duracion_ms >= 150 × fila_maxima` porque
+ * cada salto son STEP_TIME 0.2 s, así que un marcador de 200 filas enviado en
+ * un segundo lo rechaza la base de datos (ver `supabase/marcadores.sql`).
+ */
+let inicioPartida = 0;
 
 /**
  * Clave del ranking local, VERSIONADA. El `:v2` entra con el reescalado de la
@@ -165,6 +178,7 @@ export const useGameStore = create<GameState>()(
 
     startGame: () => {
       runtime.reset();
+      inicioPartida = Date.now();
       const startRow = debugStartRow();
       if (startRow > 0) {
         while (rows.length < startRow + BALANCE.VIEW_AHEAD + 2) generateRows(BALANCE.ROWS_BATCH);
@@ -333,27 +347,74 @@ export const useGameStore = create<GameState>()(
     backToMenu: () => set({ phase: 'menu' }),
 
     /**
-     * Guarda el score en el ranking local. Estructura lista para sustituir
-     * por un POST a una API REST de high-scores (mismo shape RankingEntry).
+     * Firma la partida en el marcador del congreso.
+     *
+     * SE GUARDA LOCAL SIEMPRE Y REMOTO SI SE PUEDE, en ese orden. El stand no
+     * puede depender de que el wifi aguante ocho horas: si la red falla, el
+     * jugador ve su marca igual —la de este equipo— y nadie se queda mirando
+     * una pantalla colgada. Si la red va, el Top 10 que se le enseña pasa a ser
+     * el de verdad, el de todo el congreso.
      */
-    submitScore: (name, unit) => {
+    submitScore: async (name, unit) => {
       const s = get();
+      const nombre = limpiaNombre(name) || 'ANON';
       const entry: RankingEntry = {
-        name: name.trim() || 'ANON',
+        name: nombre,
         score: s.score,
         accuracy: accuracyOf(s),
         date: new Date().toISOString(),
         unit: unit?.trim() || undefined,
       };
-      const ranking = [...s.ranking, entry]
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 10);
+      const local = [...s.ranking, entry].sort((a, b) => b.score - a.score).slice(0, 10);
       try {
-        localStorage.setItem(RANKING_KEY, JSON.stringify(ranking));
+        localStorage.setItem(RANKING_KEY, JSON.stringify(local));
       } catch {
         /* almacenamiento no disponible (modo kiosco) — ranking solo en memoria */
       }
-      set({ ranking });
+      set({ ranking: local });
+
+      // Sin unidad no se puede subir: la tabla la exige con clave foránea, y
+      // preferimos no mandar una fila que va a rebotar.
+      if (!unit) return false;
+
+      const ok = await guardaScore({
+        nombre,
+        unidad: unit,
+        puntos: s.score,
+        fila_maxima: s.maxRow,
+        // El reloj arranca en `startGame`. Si por lo que sea no arrancó, se
+        // manda 0 y que decida la tabla: mejor que inventar una duración.
+        duracion_ms: inicioPartida ? Date.now() - inicioPartida : 0,
+        precision_pct: Math.round(accuracyOf(s)),
+        terminales: s.visitedUnits,
+      });
+      if (ok) await get().cargaMarcador();
+      return ok;
+    },
+
+    /**
+     * El Top 10 del congreso. Si no se puede consultar NO se toca lo que hay:
+     * el ranking local en pantalla vale más que una tabla vacía, y una tabla
+     * vacía de verdad (nadie ha jugado aún) sí se respeta — por eso el servicio
+     * distingue `null` de lista vacía.
+     */
+    cargaMarcador: async () => {
+      const filas = await leeTop10();
+      if (!filas) return;
+      set({
+        ranking: filas.map((f) => ({
+          name: f.nombre,
+          score: f.puntos,
+          accuracy: 0,
+          date: f.creado_en,
+          unit: f.unidad,
+        })),
+      });
     },
   })),
 );
+
+// El marcador se pide AL ABRIR, no al morir: así el que llega al stand ve
+// contra quién compite antes de tocar el mando, y la pantalla final no tiene
+// que esperar a una petición cuando ya hay a alguien mirándola.
+void useGameStore.getState().cargaMarcador();

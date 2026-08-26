@@ -73,11 +73,10 @@ export const LEGEND_GOOD = ['VALOR', 'CULTURA', 'LIDERAZGO', 'INCLUSIÓN', 'EXCE
 export const LEGEND_BAD = ['AMENAZA', 'DERRAME', 'ESTRÉS', 'RIESGO']
 
 // Escalados al curso real: recogerlo todo sin chocar da 1920 puntos (180 fichas
-// mas los tres bonos de andamio), asi que el rango maximo pide poco mas de la
-// mitad del techo. Se recalculan cada vez que cambia el reparto de fichas: al
+// mas los tres bonos de andamio), asi que el rango maximo pide poco mas de un
+// tercio del techo. Se recalculan cada vez que cambia el reparto de fichas: al
 // quitar las de los tableros del astillero el techo bajo un 10%.
 export const RANKS = [
-  { min: 1080, name: 'GUARDIÁN DE LA CULTURA' },
   { min: 770, name: 'EMBAJADOR DEL TRONCO COMÚN' },
   { min: 500, name: 'PROMOTOR DE VALORES' },
   { min: 230, name: 'EXPLORADOR HP' },
@@ -96,18 +95,28 @@ export const COLORS = {
 
 // Unidades de negocio del grupo. Se guardan junto al nombre y el puntaje para
 // poder leer el TOP 10 por terminal en el stand.
+// UNIDADES DE NEGOCIO. Esta lista ya no manda: manda la tabla `unidades` de
+// Supabase, que la leen los dos juegos del stand al abrir (ver marcador.js).
+// Corregir una sigla es editarla alli una vez y que cambie en Terminal Rally y
+// en Port Quest a la vez, en vez de en dos repositorios con dos despliegues.
+//
+// Lo de aqui es la RED DE SEGURIDAD para cuando el wifi del stand falle. Se
+// mantiene igual a la tabla; si alguna vez se separan, la que decide es la
+// tabla, porque es contra ella contra la que valida la clave foranea al
+// guardar una marca. (Sin HPM: la tabla se quedo con HPMX y HPML.)
 export const BUSINESS_UNITS = [
-  'LCT',
-  'LCMT',
+  'CCI',
   'ECV',
   'EIT',
-  'HPMX',
   'HPML',
-  'TNG',
+  'HPMX',
   'ICAVE',
+  'INVITADO',
+  'LCMT',
+  'LCT',
   'TILH',
   'TIMSA',
-  'CCI',
+  'TNG',
 ]
 
 // Clave nueva: las tablas viejas no traen unidad de negocio, asi que arrancan

@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { startMusic } from '../audio/music';
 import { unlockAudio } from '../audio/sfx';
 import { ORG_UNITS } from '../data/orgUnits';
-import { postScore } from '../services/scoreService';
-import { accuracyOf, useGameStore } from '../store/useGameStore';
+import { leeUnidades } from '../services/scoreService';
+import { useGameStore } from '../store/useGameStore';
 import { useAccionMando, useMandoConectado, useRejillaMando } from '../hooks/useGamepadUi';
 import { PassportStrip } from './Passport';
 
@@ -23,9 +23,15 @@ import { PassportStrip } from './Passport';
  * SE FIRMA CON EL MANDO, como en Terminal Rally. En el stand se juega con mando
  * casi siempre y esta pantalla pide escribir un nombre: sin teclado en pantalla
  * hay que soltar el mando y buscar el teclado físico, y con gente esperando
- * turno eso es exactamente lo que hace que nadie firme su marcador. El teclado
- * SOLO sale con un mando conectado — sin él, el campo de texto de siempre es
- * más rápido y este estorba.
+ * turno eso es exactamente lo que hace que nadie firme su marcador.
+ *
+ * EL TECLADO ESTÁ SIEMPRE, no solo cuando el juego ya ha visto un mando. Salía
+ * bajo esa condición y ahí estaba la trampa: el navegador no reconoce un mando
+ * hasta que se pulsa un botón EN ESA PÁGINA, así que quien llegaba a la tarjeta
+ * con el mando recién cogido veía un campo de texto y ningún sitio donde
+ * escribir —justo en el momento en que hace falta—. Puesto siempre, la cruceta
+ * lo encuentra ya montado, el dedo puede teclear en el kiosco táctil, y el
+ * teclado físico sigue escribiendo en el campo como siempre.
  */
 
 /** Doce letras es lo que acepta el campo, y lo que cabe en la fila del Top 10 */
@@ -96,12 +102,8 @@ function TecladoNombre({
 export function GameOver() {
   const phase = useGameStore((s) => s.phase);
   const score = useGameStore((s) => s.score);
-  const goodCollected = useGameStore((s) => s.goodCollected);
-  const badHit = useGameStore((s) => s.badHit);
-  const obstaclesHit = useGameStore((s) => s.obstaclesHit);
   const foundConcepts = useGameStore((s) => s.foundConcepts);
   const ranking = useGameStore((s) => s.ranking);
-  const visitedUnits = useGameStore((s) => s.visitedUnits);
   const submitScore = useGameStore((s) => s.submitScore);
   const startGame = useGameStore((s) => s.startGame);
   const backToMenu = useGameStore((s) => s.backToMenu);
@@ -109,6 +111,27 @@ export function GameOver() {
   const [name, setName] = useState('');
   const [unit, setUnit] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  /** `null` mientras no se ha intentado; luego, si la marca llegó al congreso
+   *  o se quedó en el ranking de este equipo. */
+  const [subido, setSubido] = useState<boolean | null>(null);
+  const [guardando, setGuardando] = useState(false);
+  /**
+   * LAS UNIDADES SALEN DE LA TABLA, no del código. Es la misma lista contra la
+   * que la clave foránea valida al guardar, así que traerla de ahí es lo único
+   * que garantiza que lo que se puede elegir es lo que se puede guardar. Se
+   * arranca con la copia local para que el picker no parpadee vacío, y se
+   * sustituye si la consulta llega.
+   */
+  const [unidades, setUnidades] = useState(ORG_UNITS.map((u) => ({ codigo: u.code, nombre: u.name })));
+  useEffect(() => {
+    let vivo = true;
+    void leeUnidades().then((lista) => {
+      if (vivo && lista?.length) setUnidades(lista);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, []);
 
   /**
    * LA REJILLA DEL MANDO vive en la tarjeta entera y no en el formulario: al
@@ -139,18 +162,14 @@ export function GameOver() {
 
   if (phase !== 'gameover') return null;
 
-  // El teclado en pantalla solo mientras se escribe Y con mando conectado.
-  // Las filas de la rejilla se numeran de arriba abajo con una sola cuenta,
-  // para que los tres casos (con teclado, sin teclado, ya guardado) queden
-  // alineados sin listas paralelas.
-  const conTeclado = !submitted && mando;
+  // El teclado en pantalla, mientras se escribe (ver la nota de arriba: no se
+  // condiciona a que haya mando detectado). Las filas de la rejilla se numeran
+  // de arriba abajo con una sola cuenta, para que los dos casos —escribiendo y
+  // ya guardado— queden alineados sin listas paralelas.
+  const conTeclado = !submitted;
   const filaUnidades = conTeclado ? FILAS_TECLADO.length + 1 : 0;
   const filaGuardar = filaUnidades + 1;
   const filaAcciones = submitted ? 0 : filaGuardar + 1;
-
-  // La precisión ya no se enseña en pantalla, pero sigue viajando con el score
-  // (ranking local y POST a la API de high-scores).
-  const accuracy = accuracyOf({ goodCollected, badHit, obstaclesHit });
 
   const myName = (name.trim() || 'ANON').toUpperCase();
 
@@ -201,19 +220,17 @@ export function GameOver() {
             className="signup"
             onSubmit={(e) => {
               e.preventDefault();
-              submitScore(name, unit);
-              postScore({
-                name: name.trim() || 'ANON',
-                score,
-                accuracy,
-                maxRow: useGameStore.getState().maxRow,
-                concepts: foundConcepts,
-                units: visitedUnits,
-                unit: unit || undefined,
-                date: new Date().toISOString(),
-                event: 'congreso-hutchison-ports',
-              });
+              // La pantalla pasa al Top 10 EN EL ACTO y la subida sigue por
+              // detrás: en un stand con cola, hacer esperar a alguien delante
+              // de un botón mientras se resuelve una petición es lo que hace
+              // que el siguiente no juegue. El aviso de si subió o no llega
+              // cuando llega, ya en la pantalla del ranking.
               setSubmitted(true);
+              setGuardando(true);
+              void submitScore(name, unit).then((ok) => {
+                setSubido(ok);
+                setGuardando(false);
+              });
             }}
           >
             {/* El campo va ARRIBA del teclado: se escribe mirando lo que sale,
@@ -241,27 +258,45 @@ export function GameOver() {
                 en varias filas de cursor sería mentir, porque en pantalla se
                 acomodan solas según el ancho. */}
             <div className="chips chips--pick">
-              {ORG_UNITS.map((u) => (
+              {unidades.map((u) => (
                 <button
-                  key={u.code}
+                  key={u.codigo}
                   type="button"
-                  title={u.name}
+                  title={u.nombre}
                   data-gp-row={filaUnidades}
-                  className={`chip chip--pick${unit === u.code ? ' chip--on' : ''}`}
-                  onClick={() => setUnit(unit === u.code ? '' : u.code)}
+                  className={`chip chip--pick${unit === u.codigo ? ' chip--on' : ''}`}
+                  onClick={() => setUnit(unit === u.codigo ? '' : u.codigo)}
                 >
-                  <span>{u.code}</span>
+                  <span>{u.codigo}</span>
                 </button>
               ))}
             </div>
 
-            <button className="btn-skew btn-skew--sm" type="submit" data-gp-row={filaGuardar}>
-              <span>Guardar</span>
+            {/* Sin unidad la tabla del congreso rechaza la fila (la exige con
+                clave foránea), así que el botón no deja mandarla a rebotar. */}
+            <button
+              className="btn-skew btn-skew--sm"
+              type="submit"
+              disabled={!unit}
+              data-gp-row={filaGuardar}
+            >
+              <span>{unit ? 'Guardar' : 'Elige tu unidad'}</span>
             </button>
           </form>
         ) : (
           <>
-            <span className="card-kicker card-kicker--sm">Top 10 del congreso</span>
+            <span className="card-kicker card-kicker--sm">
+              {guardando ? 'Guardando…' : subido === false ? 'Top 10 de este equipo' : 'Top 10 del congreso'}
+            </span>
+            {/* Si la marca no salió del equipo hay que DECIRLO: el jugador se
+                va creyendo que compite con todo el congreso y su nombre no está
+                en ninguna parte. No es un error del jugador ni hay nada que
+                pueda hacer, así que se cuenta en una línea y sin alarma. */}
+            {subido === false && (
+              <p className="how-foot">
+                Sin conexión con el marcador del congreso: tu marca quedó guardada en este equipo.
+              </p>
+            )}
             <div className="board">
               {ranking.map((r, i) => (
                 <div

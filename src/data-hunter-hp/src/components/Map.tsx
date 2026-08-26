@@ -285,6 +285,15 @@ export function Map() {
   );
 }
 
+/**
+ * Escala del transatlántico del horizonte. Va en una constante porque la usan
+ * DOS sitios que tienen que decir lo mismo: el grupo que lo dibuja grande y el
+ * propio modelo, que la necesita para compensar la retícula de camarotes (si no
+ * la recibe, sus ventanas salen 2.4 veces más grandes que las de los cruceros
+ * de la dársena y los dos barcos se leen como texturas distintas).
+ */
+const HORIZON_SCALE = 2.4;
+
 /** Buque lejano que acompaña al jugador por el horizonte marítimo */
 function HorizonShip() {
   const g = useRef<THREE.Group>(null);
@@ -292,8 +301,8 @@ function HorizonShip() {
     if (g.current) g.current.position.z = THREE.MathUtils.damp(g.current.position.z, runtime.z - 8, 0.5, dt);
   });
   return (
-    <group ref={g} position={[40, -0.35, 0]} scale={2.4} rotation={[0, Math.PI / 2.3, 0]}>
-      <CruiseShipModel speed={0} beam={2.9} resort />
+    <group ref={g} position={[40, -0.35, 0]} scale={HORIZON_SCALE} rotation={[0, Math.PI / 2.3, 0]}>
+      <CruiseShipModel speed={0} beam={2.9} resort escala={HORIZON_SCALE} />
       <FunnelSmoke position={[-BALANCE.SHIP_TILES * BALANCE.TILE * 0.22, 2.6, 0]} />
     </group>
   );

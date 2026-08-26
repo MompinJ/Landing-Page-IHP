@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../store'
 import { sfx } from '../audio'
 import { useGamepadAction, useGamepadConnected, useGamepadGrid } from '../useGamepad'
-import { LEGEND_GOOD, LEGEND_BAD, RANKS, LEADERBOARD_KEY, BUSINESS_UNITS } from '../constants'
+import { LEGEND_GOOD, LEGEND_BAD, RANKS, LEADERBOARD_KEY, BUSINESS_UNITS, GAME_DURATION } from '../constants'
+import { guardaMarca, leeTabla, leeUnidades, limpiaNombre } from '../marcador'
 
 // Flechas dibujadas, no texto: son las mismas que van rotuladas encima de los
 // obstaculos en pista, asi que la instruccion y el juego dicen lo mismo con la
@@ -233,12 +234,30 @@ function PadBadge({ pad }) {
   )
 }
 
+// La tabla LOCAL es ahora la red de seguridad, no la fuente: la buena vive en
+// Supabase (ver marcador.js). Esta se sigue escribiendo y leyendo para que el
+// stand no dependa de que el wifi aguante ocho horas seguidas.
 function loadBoard() {
   try {
     return JSON.parse(localStorage.getItem(LEADERBOARD_KEY)) || []
   } catch {
     return []
   }
+}
+
+// Trae la tabla del congreso y se queda con ella si llega. Se usa en la portada
+// y en el final; devuelve una funcion de limpieza porque el componente puede
+// desmontarse mientras la peticion vuela.
+function useTablaCongreso(setBoard) {
+  useEffect(() => {
+    let vivo = true
+    leeTabla().then((filas) => {
+      if (vivo && filas) setBoard(filas)
+    })
+    return () => {
+      vivo = false
+    }
+  }, [setBoard])
 }
 
 // Tabla de records. Es la misma en la portada y en el final de partida, asi que
@@ -302,7 +321,11 @@ function Intro() {
   const startCountdown = useGame((s) => s.startCountdown)
   const pad = useGamepadConnected()
   const [view, setView] = useState('menu')
-  const [board] = useState(loadBoard)
+  // Arranca con lo local para que la portada no parpadee, y se sustituye por la
+  // del congreso en cuanto llegue: el que se acerca al stand ve contra quien
+  // compite antes de tocar el mando.
+  const [board, setBoard] = useState(loadBoard)
+  useTablaCongreso(setBoard)
   const ref = useRef(null)
   useGamepadGrid(ref)
 
@@ -427,20 +450,40 @@ const KEY_ROWS = [
   ['V', 'W', 'X', 'Y', 'Z', 'Ñ', '-'],
 ]
 
-// Las once unidades en filas de cuatro. La rejilla del mando lee las filas del
-// DOM, asi que el reparto de aqui es tambien el que recorre la cruceta.
-const UNIT_ROWS = [
-  BUSINESS_UNITS.slice(0, 4),
-  BUSINESS_UNITS.slice(4, 8),
-  BUSINESS_UNITS.slice(8),
-]
+// Las unidades en filas de cuatro. La rejilla del mando lee las filas del DOM,
+// asi que el reparto de aqui es tambien el que recorre la cruceta -- y por eso
+// se reparte sobre la lista que se este usando y no sobre un numero fijo: si la
+// tabla trae una unidad mas, la cruceta la alcanza sin tocar nada.
+function enFilasDeCuatro(lista) {
+  const filas = []
+  for (let i = 0; i < lista.length; i += 4) filas.push(lista.slice(i, i + 4))
+  return filas
+}
 
-function UnitPicker({ value, onPick, rowOffset }) {
+// LAS UNIDADES SALEN DE LA TABLA, no del codigo: es la misma lista contra la
+// que la clave foranea valida al guardar, asi que traerla de ahi es lo unico
+// que garantiza que lo que se puede elegir es lo que se puede guardar. Se
+// arranca con la copia local para que el picker no parpadee vacio.
+function useUnidades() {
+  const [lista, setLista] = useState(BUSINESS_UNITS)
+  useEffect(() => {
+    let vivo = true
+    leeUnidades().then((remota) => {
+      if (vivo && remota && remota.length) setLista(remota)
+    })
+    return () => {
+      vivo = false
+    }
+  }, [])
+  return lista
+}
+
+function UnitPicker({ value, onPick, rowOffset, unidades }) {
   return (
     <div className="units">
       <p className="units-label">UNIDAD DE NEGOCIO</p>
       <div className="units-grid">
-        {UNIT_ROWS.map((row, r) => (
+        {enFilasDeCuatro(unidades).map((row, r) => (
           <div className="units-row" key={r}>
             {row.map((u) => (
               <button
@@ -497,6 +540,7 @@ function GameOver() {
   const bads = useGame((s) => s.bads)
   const crashes = useGame((s) => s.crashes)
   const distShown = useGame((s) => s.distShown)
+  const timeShown = useGame((s) => s.timeShown)
   const goIntro = useGame((s) => s.goIntro)
   const pad = useGamepadConnected()
 
@@ -504,14 +548,24 @@ function GameOver() {
   const [unit, setUnit] = useState('')
   const [savedId, setSavedId] = useState(null)
   const [board, setBoard] = useState(loadBoard)
+  // null mientras no se ha intentado; luego, si la marca llego al congreso o se
+  // quedo en la tabla de este equipo.
+  const [subida, setSubida] = useState(null)
+  useTablaCongreso(setBoard)
+  const unidades = useUnidades()
 
   const ref = useRef(null)
   useGamepadGrid(ref)
 
   const rank = RANKS.find((r) => score >= r.min)
 
+  // SE GUARDA LOCAL SIEMPRE Y REMOTO SI SE PUEDE, en ese orden, y la pantalla
+  // pasa a la tabla EN EL ACTO. En un stand con cola, hacer esperar a alguien
+  // delante de un boton mientras se resuelve una peticion es lo que hace que el
+  // siguiente no juegue: la subida sigue por detras y el aviso de si entro o no
+  // llega cuando llega, ya sobre la tabla.
   const save = () => {
-    const clean = name.trim().toUpperCase().slice(0, MAX_NAME)
+    const clean = limpiaNombre(name)
     if (!clean || !unit) return
     const entry = { id: Date.now(), name: clean, unit, score }
     // sin recorte: la tabla guarda a todo el que se registra, no solo al top
@@ -519,6 +573,28 @@ function GameOver() {
     localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(next))
     setBoard(next)
     setSavedId(entry.id)
+
+    guardaMarca({
+      nombre: clean,
+      unidad: unit,
+      puntos: score,
+      distancia: distShown,
+      // La carrera dura GAME_DURATION y el reloj baja: lo corrido es la resta.
+      // No es telemetria, es media prueba de que la carrera ocurrio -- la tabla
+      // cruza metros y tiempo para rechazar lo imposible.
+      duracionMs: (GAME_DURATION - timeShown) * 1000,
+    }).then(async (ok) => {
+      setSubida(ok)
+      if (!ok) return
+      const filas = await leeTabla()
+      if (!filas) return
+      // Al releer, la fila propia es otra: la del servidor, con su id. Se busca
+      // por nombre y puntos para que el desplazamiento a "donde quede" siga
+      // apuntando al corredor y no a un id local que ya no existe en la lista.
+      const mia = filas.find((f) => f.name === clean && f.score === score)
+      setBoard(filas)
+      if (mia) setSavedId(mia.id)
+    })
   }
 
   const typing = savedId === null
@@ -527,7 +603,7 @@ function GameOver() {
   // pantalla (solo con mando), unidades de negocio, GUARDAR y los botones del
   // final. Con una sola cuenta se mantienen alineados los tres casos.
   const unitRow = keysShown ? KEY_ROWS.length + 1 : 0
-  const saveRow = unitRow + UNIT_ROWS.length
+  const saveRow = unitRow + Math.ceil(unidades.length / 4)
   const btnRow = typing ? saveRow + 1 : 0
 
   return (
@@ -579,7 +655,7 @@ function GameOver() {
                 onBack={() => setName((v) => v.slice(0, -1))}
               />
             )}
-            <UnitPicker value={unit} onPick={setUnit} rowOffset={unitRow} />
+            <UnitPicker value={unit} onPick={setUnit} rowOffset={unitRow} unidades={unidades} />
             {/* un unico GUARDAR para los dos casos: va debajo de las unidades
                 porque el registro no esta completo hasta elegir terminal */}
             <button
@@ -592,7 +668,18 @@ function GameOver() {
             </button>
           </div>
         ) : (
-          <Board entries={board} meId={savedId} />
+          <>
+            <Board entries={board} meId={savedId} />
+            {/* Si la marca no salio del equipo hay que DECIRLO: el corredor se
+                va creyendo que compite con todo el congreso y su nombre no esta
+                en ninguna parte. No hay nada que pueda hacer, asi que se cuenta
+                en una linea y sin alarma. */}
+            {subida === false && (
+              <p className="board-empty">
+                Sin conexion con el marcador del congreso: tu marca quedo guardada en este equipo.
+              </p>
+            )}
+          </>
         )}
 
         {/* Un solo boton y devuelve al inicio: en el stand el que acaba le pasa

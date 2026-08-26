@@ -206,15 +206,19 @@ function getHullTexture(): THREE.CanvasTexture {
   // esta línea marca la separación entre cubierta y cubierta)
   ctx.fillStyle = '#d7e0e9';
   ctx.fillRect(0, 0, 128, 3);
-  // Hilera de ventanas de camarote: 4 por mosaico
-  for (let i = 0; i < 4; i++) {
-    const x = 6 + i * 32;
+  // Hilera de ventanas de camarote: 3 por mosaico. Eran 4, y a esa medida la
+  // ventana caía en dos o tres píxeles a la distancia de juego: el mipmap las
+  // promediaba con el blanco de la caseta y el barco se veía LISO, como si le
+  // faltara la textura. Con tres se leen las ventanas sin dejar de ser un
+  // crucero (que es lo que las distingue de un edificio de oficinas).
+  for (let i = 0; i < 3; i++) {
+    const x = 7 + i * 42;
     ctx.fillStyle = '#22364e';
-    ctx.fillRect(x, 14, 20, 22);
+    ctx.fillRect(x, 14, 28, 22);
     // Reflejo de cielo en el tercio de arriba: sin él el cristal se lee como
     // un agujero negro desde la cámara isométrica
     ctx.fillStyle = '#41729c';
-    ctx.fillRect(x, 14, 20, 7);
+    ctx.fillRect(x, 14, 28, 7);
   }
   // Antepecho bajo las ventanas
   ctx.fillStyle = '#ccd6e0';
@@ -298,9 +302,19 @@ function poolWater(x: number, y: number, z: number, w: number, d: number): BoxPa
  */
 const WATER_BEAM = 1.24;
 
-/** Medidas derivadas del barco — las comparten el constructor de geometría y el
- *  componente, así no hay dos sitios donde puedan desincronizarse. */
-function cruiseDims(beam: number) {
+/**
+ * Medidas derivadas del barco — las comparten el constructor de geometría y el
+ * componente, así no hay dos sitios donde puedan desincronizarse.
+ *
+ * `escala` es el tamaño al que se DIBUJA el barco (el `scale` del grupo que lo
+ * envuelve). La retícula de camarotes se mide en unidades del MODELO, así que
+ * un barco pintado al 2.4 sacaba las ventanas 2.4 veces más grandes que el de
+ * al lado: misma textura, dos tamaños, y en pantalla eso se lee como dos
+ * texturas distintas —o directamente como que al pequeño le falta. Dividiendo
+ * la retícula por la escala, la ventana mide lo mismo EN EL PUERTO en todos los
+ * cruceros, tenga cada uno la eslora que tenga.
+ */
+function cruiseDims(beam: number, escala = 1) {
   const len = BALANCE.SHIP_TILES * BALANCE.TILE;
   const deck = BALANCE.SHIP_DECK_Y;
   /** Media cubierta abierta: cubre con holgura el tramo abordable */
@@ -316,9 +330,15 @@ function cruiseDims(beam: number) {
    * textura de camarotes se repite a escala de mundo, así que una caseta con
    * altura "suelta" cortaría la última hilera de ventanas por la mitad.
    */
-  const aftH = HOUSE_DECK * 3;
-  const aftUpH = HOUSE_DECK * 2;
-  const bowH = HOUSE_DECK * 3;
+  const deckH = HOUSE_DECK / escala;
+  // Cubiertas ENTERAS por caseta. Se redondean contra la escala para que el
+  // castillo conserve su altura de siempre (tres y dos cubiertas al 1) sin
+  // partir por la mitad la última hilera de ventanas.
+  const aftDecks = Math.max(1, Math.round(3 * escala));
+  const aftUpDecks = Math.max(1, Math.round(2 * escala));
+  const aftH = deckH * aftDecks;
+  const aftUpH = deckH * aftUpDecks;
+  const bowH = deckH * aftDecks;
   return {
     len,
     deck,
@@ -327,6 +347,9 @@ function cruiseDims(beam: number) {
     deckW,
     half,
     lane,
+    deckH,
+    /** Ancho del mosaico de camarotes, ya compensado por la escala */
+    tileU: HOUSE_TILE / escala,
     aftH,
     aftUpH,
     bowH,
@@ -351,8 +374,8 @@ function cruiseSlots(len: number): number[] {
 }
 
 /** Piezas opacas del crucero (casco, cubierta, castillos y mobiliario) */
-function cruiseHullParts(beam: number, resort: boolean): BoxPart[] {
-  const d = cruiseDims(beam);
+function cruiseHullParts(beam: number, resort: boolean, escala: number): BoxPart[] {
+  const d = cruiseDims(beam, escala);
   const { len, deck, open, house, deckW, half, lane, water, flare, wing } = d;
   const navy = PALETTE.hpNavy;
   const parts: BoxPart[] = [
@@ -455,8 +478,8 @@ function cruiseHullParts(beam: number, resort: boolean): BoxPart[] {
 }
 
 /** Piezas que deben ENCENDER el bloom: las láminas de agua de las albercas */
-function cruiseGlowParts(beam: number, resort: boolean): BoxPart[] {
-  const { len, deck, open, house, deckW, half, lane, wing, aftTop } = cruiseDims(beam);
+function cruiseGlowParts(beam: number, resort: boolean, escala: number): BoxPart[] {
+  const { len, deck, open, house, deckW, half, lane, wing, aftTop } = cruiseDims(beam, escala);
   const parts: BoxPart[] = [];
   cruiseSlots(len).forEach((x, i) => {
     if (i % 4 !== 3) return;
@@ -481,11 +504,11 @@ function cruiseGlowParts(beam: number, resort: boolean): BoxPart[] {
  * cubiertas es la del barco, no la de cada caja, así la caseta de arriba
  * continúa las hileras de la de abajo en vez de arrancar su propio patrón.
  */
-function cruiseHouseParts(beam: number): BoxPart[] {
-  const { deck, open, house, aftH, aftUpH, bowH } = cruiseDims(beam);
+function cruiseHouseParts(beam: number, escala: number): BoxPart[] {
+  const { deck, open, house, aftH, aftUpH, bowH, deckH, tileU } = cruiseDims(beam, escala);
   const aft = -(open + house / 2);
   const bow = open + house / 2;
-  const uvWorld = { tile: [HOUSE_TILE, HOUSE_DECK] as [number, number], originY: deck, cap: HOUSE_CAP_UV };
+  const uvWorld = { tile: [tileU, deckH] as [number, number], originY: deck, cap: HOUSE_CAP_UV };
   return [
     { size: [house, aftH, beam * 0.62], pos: [aft, deck + aftH / 2, 0], color: '#ffffff', uvWorld },
     { size: [house * 0.78, aftUpH, beam * 0.5], pos: [aft + 0.05, deck + aftH + aftUpH / 2, 0], color: '#ffffff', uvWorld },
@@ -508,10 +531,15 @@ export function CruiseShipModel({
   speed,
   beam = 1.8,
   resort = false,
+  escala = 1,
 }: {
   speed: number;
   beam?: number;
   resort?: boolean;
+  /** Escala a la que lo dibuja quien lo monta. Solo se usa para compensar la
+   *  retícula de camarotes (ver `cruiseDims`): el `scale` de verdad lo pone el
+   *  grupo de fuera. */
+  escala?: number;
 }) {
   const group = useRef<THREE.Group>(null);
   const bob = useRef(Math.random() * Math.PI * 2);
@@ -526,10 +554,19 @@ export function CruiseShipModel({
     g.rotation.x = Math.sin(bob.current * 0.7) * (moving ? 0.006 : 0.012);
   });
 
-  const key = `cruise:${beam.toFixed(2)}:${resort ? 'r' : ''}`;
-  const hull = useMemo(() => mergedBoxes(`${key}:hull`, () => cruiseHullParts(beam, resort)), [key, beam, resort]);
-  const glow = useMemo(() => mergedBoxes(`${key}:glow`, () => cruiseGlowParts(beam, resort)), [key, beam, resort]);
-  const houses = useMemo(() => mergedBoxes(`${key}:house`, () => cruiseHouseParts(beam)), [key, beam]);
+  const key = `cruise:${beam.toFixed(2)}:${escala.toFixed(2)}:${resort ? 'r' : ''}`;
+  const hull = useMemo(
+    () => mergedBoxes(`${key}:hull`, () => cruiseHullParts(beam, resort, escala)),
+    [key, beam, resort, escala],
+  );
+  const glow = useMemo(
+    () => mergedBoxes(`${key}:glow`, () => cruiseGlowParts(beam, resort, escala)),
+    [key, beam, resort, escala],
+  );
+  const houses = useMemo(
+    () => mergedBoxes(`${key}:house`, () => cruiseHouseParts(beam, escala)),
+    [key, beam, escala],
+  );
   const houseMat = useMemo(getHullMaterial, []);
   const len = BALANCE.SHIP_TILES * BALANCE.TILE;
 
