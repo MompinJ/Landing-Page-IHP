@@ -244,38 +244,47 @@ export function Map() {
    * cierra el círculo — sube una vez cuando el mapa ya tiene filas y el
    * `useMemo` de abajo vuelve a cortar la ventana visible.
    */
-  const [generacion, setGeneracion] = useState(0);
-  /** Cuántas filas tenía el mapa la última vez que se avisó */
-  const filasAvisadas = useRef(-1);
+  /**
+   * UN SOLO REDIBUJO, Y NO PUEDE SER NINGUNO MÁS.
+   *
+   * El problema que resuelve: `rows` es un array de módulo que arranca VACÍO y
+   * se llena por mutación, y mutar no avisa a React. Sin esto, el primer dibujo
+   * del mapa salía con cero filas y ahí se quedaba — la portada se veía sobre
+   * el vacío y el puerto aparecía de golpe al pulsar JUGAR, que era el
+   * siguiente re-render por cambio de fase y no un momento elegido.
+   *
+   * Y por qué un interruptor de un solo uso y no un contador, que es lo que
+   * puse primero y tumbó el juego en producción una de cada tres cargas:
+   *
+   *   - La dependencia de este efecto puede ser NaN. `viewRowsFor` divide por
+   *     el tamaño del lienzo y en el primer fotograma el lienzo puede medir 0.
+   *     React compara dependencias con `Object.is`, donde NaN NO es igual a
+   *     NaN, así que con un NaN ahí el efecto se reejecuta en CADA render.
+   *   - Y `<Warmup>` hace CRECER `rows` en cada fotograma mientras se está en
+   *     el menú, precalentando shaders. O sea que la guarda «avisa solo si el
+   *     mapa creció» —que parecía suficiente— se cumplía siempre: cada render
+   *     encontraba filas nuevas, pedía otro render, y vuelta a empezar hasta
+   *     que React se planta con «Maximum update depth exceeded».
+   *
+   * Con un `ref` que se levanta una vez, el bucle es imposible por
+   * construcción, mida lo que mida el lienzo y crezca lo que crezca el mapa.
+   */
+  const [, redibuja] = useState(0);
+  const yaAvisado = useRef(false);
   useEffect(() => {
+    // Con el lienzo aún sin medir no hay ventana que calcular ni nada que
+    // sembrar: se espera al fotograma en que ya tenga tamaño.
+    if (!Number.isFinite(view.ahead)) return;
     setLookahead(view.ahead);
-    // SOLO SE AVISA SI EL MAPA CRECIÓ DE VERDAD, y esta guarda no es una
-    // optimización: es lo que impide un bucle infinito de renders.
-    //
-    // La dependencia es `view.ahead`, y ese valor puede ser NaN — sale de
-    // `viewRowsFor(size.width, size.height)`, que divide por el tamaño del
-    // lienzo, y en el primer fotograma el lienzo todavía puede medir 0. React
-    // compara dependencias con `Object.is`, y NaN NO es igual a NaN, así que
-    // con un NaN ahí el efecto se reejecuta en CADA render: subir el contador
-    // sin condición pedía otro render, que volvía a ejecutar el efecto, y así
-    // hasta que React se planta con «Maximum update depth exceeded».
-    //
-    // Salía una de cada tres cargas —depende de si el lienzo ya se midió— y por
-    // eso no apareció en desarrollo ni en el primer despliegue: en producción
-    // tumbaba el juego entero antes de pintar la portada.
-    if (rows.length !== filasAvisadas.current) {
-      filasAvisadas.current = rows.length;
-      setGeneracion((n) => n + 1);
+    if (!yaAvisado.current && rows.length > 0) {
+      yaAvisado.current = true;
+      redibuja(1);
     }
   }, [view.ahead]);
 
   const start = Math.max(0, currentRow - view.behind);
   const end = Math.min(rows.length, currentRow + view.ahead + 1);
-  // `generacion` es dependencia A PROPÓSITO y el analizador no puede saberlo:
-  // no se lee dentro, pero es la única señal de que `rows` —que es mutable y
-  // externo— ya tiene contenido que cortar.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const visible = useMemo(() => rows.slice(start, end), [start, end, generacion]);
+  const visible = rows.slice(start, end);
 
   return (
     <group key={enPartida ? 'game' : 'menu'}>

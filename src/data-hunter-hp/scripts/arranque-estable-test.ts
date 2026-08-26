@@ -35,11 +35,16 @@ let fallos = 0;
 for (let i = 0; i < VUELTAS; i++) {
   const v = TAMANOS[i % TAMANOS.length];
   const page = await browser.newPage({ viewport: v });
+  // SIN FRENO DE CPU, y esto se probó: frenarla hace el fallo MENOS probable,
+  // no más. Con la máquina lenta el lienzo llega medido al primer efecto y la
+  // condición no se da; lo que lo dispara es la carrera entre que React monta y
+  // que el lienzo se mide, y esa se gana o se pierde por milisegundos. La única
+  // red que lo caza es repetir la carga muchas veces.
   const errores: string[] = [];
   page.on('pageerror', (e) => errores.push(String(e).split('\n')[0]));
   page.on('console', (m) => m.type() === 'error' && errores.push(m.text().split('\n')[0]));
   await page.goto(URL, { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(3500);
+  await page.waitForTimeout(4000);
   const jugar = await page.getByRole('button', { name: 'Jugar', exact: true }).count();
   const ok = jugar > 0 && errores.length === 0;
   if (!ok) {
