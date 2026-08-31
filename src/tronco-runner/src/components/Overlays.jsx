@@ -117,7 +117,7 @@ function HowTo() {
       <TrackStrip />
 
       <div className="how-sec">
-        <p className="how-title">Lo unico que hay que saber</p>
+        <p className="how-title">Lo único que hay que saber</p>
         <div className="how-cards">
           <div className="how-card">
             <span className="how-step">1</span>
@@ -154,11 +154,11 @@ function HowTo() {
       </div>
 
       <div className="how-sec">
-        <p className="how-title">Que recoger</p>
+        <p className="how-title">Qué recoger</p>
         <div className="loot">
           <div className="loot-card loot-good">
             <Chip good />
-            <b>RECOGELO</b>
+            <b>RECÓGELO</b>
             <span className="loot-val">+10</span>
             <span className="loot-tags">
               {LEGEND_GOOD.map((l) => (
@@ -189,20 +189,20 @@ function HowTo() {
           <li>
             <PadFace k="A" sm />
             <span>
-              Boton <b className="txt-cue-jump">A verde</b>: salta o te lo llevas puesto
+              Botón <b className="txt-cue-jump">A verde</b>: salta o te lo llevas puesto
             </span>
             <b className="cue-cost">-15</b>
           </li>
           <li>
             <PadFace k="B" sm />
             <span>
-              Boton <b className="txt-cue-roll">B rojo</b>: agachate y rueda
+              Botón <b className="txt-cue-roll">B rojo</b>: agáchate y rueda
             </span>
             <b className="cue-cost">-15</b>
           </li>
           <li>
             <span className="cue-ico cue-block" />
-            <span>Sin boton: cierra el carril, cambiate</span>
+            <span>Sin botón: cierra el carril, cámbiate</span>
             <b className="cue-cost">-15</b>
           </li>
           <li>
@@ -220,7 +220,7 @@ function HowTo() {
             <b className="cue-cost cost-good">BONO</b>
           </li>
         </ul>
-        <p className="how-foot">El boton flotando sobre la pieza es el que hay que apretar, igual en las cinco terminales.</p>
+        <p className="how-foot">El botón flotando sobre la pieza es el que hay que apretar, igual en las cinco terminales.</p>
       </div>
 
       <p className="how-goal">
@@ -288,7 +288,7 @@ function Board({ entries, meId }) {
     return (
       <div className="board">
         <h3>TABLA DEL CONGRESO</h3>
-        <p className="board-empty">Todavia no hay marcas. La primera es tuya.</p>
+        <p className="board-empty">Todavía no hay marcas. La primera es tuya.</p>
       </div>
     )
   }
@@ -363,7 +363,7 @@ function Intro() {
         {view === 'menu' ? (
           <>
             <p className="mission">
-              Cruza las cinco terminales del grupo &mdash; Usos Multiples, Contenedores, Intermodal, Cruceros y
+              Cruza las cinco terminales del grupo &mdash; Usos Múltiples, Contenedores, Intermodal, Cruceros y
               Astillero &mdash; recogiendo los valores del Tronco Comun y esquivando los riesgos.
             </p>
             <div className="facts">
@@ -546,6 +546,12 @@ function NameKeys({ value, onType, onBack, rowOffset }) {
   )
 }
 
+// Lo que tarda el modal en salir solo despues de firmar. Medido contra lo que
+// hace falta, no elegido redondo: por debajo de un segundo pisa la entrada de
+// la tabla y se lee como un fallo; muy por encima, al corredor ya le dio tiempo
+// de soltar el mando y el que se encuentra el modal es el siguiente de la cola.
+const ESPERA_RESENA = 1200
+
 /* ============================== RESEÑAS ==============================
 
   Calificar la carrera al terminar. Existe porque en el stand la gente decia en
@@ -631,11 +637,17 @@ function ModalResena({ onEnvia, onCierra }) {
   })
 
   return (
-    <div className="overlay overlay-modal" onClick={onCierra}>
-      {/* el clic de dentro no cierra: solo el del fondo */}
-      <div className="panel panel-modal" ref={ref} onClick={(e) => e.stopPropagation()}>
+    <div className="overlay overlay-modal">
+      {/* EL FONDO NO CIERRA, y antes si. Se quito al hacer que el modal salga
+          solo: ahora aparece delante de alguien que no lo pidio, en una
+          pantalla tactil de un stand, donde un roce en el borde es lo mas
+          facil del mundo. Cerrarse por un roce -- sin que quien lo sufre
+          entienda siquiera que habia algo -- es peor que pedir un toque de
+          mas. Se sale por AHORA NO o por B, que estan a la vista y dicen lo
+          que hacen. */}
+      <div className="panel panel-modal" ref={ref}>
         <p className="kicker">Antes de irte</p>
-        <h2 className="modal-title">¿QUE TE PARECIO?</h2>
+        <h2 className="modal-title">¿QUÉ TE PARECIÓ?</h2>
         <p className="modal-sub">Toca las estrellas. El comentario es opcional.</p>
 
         <EstrellasPicker value={estrellas} onPick={setEstrellas} row={0} />
@@ -645,7 +657,7 @@ function ModalResena({ onEnvia, onCierra }) {
           value={comentario}
           maxLength={MAX_COMENTARIO}
           rows={3}
-          placeholder="Cuentanos en una linea (opcional)"
+          placeholder="Cuéntanos en una línea (opcional)"
           onChange={(e) => setComentario(e.target.value)}
         />
         <p className="resena-cuenta">
@@ -754,6 +766,44 @@ function GameOver() {
   const [resenaAbierta, setResenaAbierta] = useState(false)
   const [resenaHecha, setResenaHecha] = useState(false)
   const [resenas, recargaResenas] = useResenas()
+
+  /*
+    EL MODAL SALE SOLO AL FIRMAR, UNA SOLA VEZ.
+
+    Con el boton a secas casi nadie lo pulsaba: el que acaba de firmar ya ha
+    visto lo que venia a ver y le pasa el mando al siguiente. Preguntar de
+    frente es lo que hace la diferencia entre recoger reseñas y tener un boton
+    que nadie toca.
+
+    PERO NO PISA EL MOMENTO. Espera a que la tabla lleve un segundo largo en
+    pantalla: lo que el corredor acaba de ganarse es ver su puesto, y taparlo en
+    el mismo instante en que aparece convierte el premio en un tramite.
+
+    LA DEPENDENCIA ES `firmado`, UN BOOLEANO, Y NO `savedId`. Parece lo mismo y
+    no lo es: `savedId` cambia DOS veces -- primero el id local que se pone al
+    pulsar GUARDAR, y otra vez cuando vuelve la tabla del servidor y la fila
+    propia resulta ser otra, con su id de verdad. Con `savedId` en la lista, esa
+    segunda vez React limpiaba el efecto -- o sea, mataba el temporizador que
+    estaba a punto de saltar -- y lo volvia a ejecutar, donde el pestillo lo
+    paraba en seco. Resultado: el modal no salia NUNCA, y solo en produccion,
+    porque hace falta que el servidor conteste con la fila para que ocurra.
+    Reducido a "ha firmado o no", el efecto entra una sola vez y su limpieza
+    queda para lo unico que debe cancelarlo, que es irse de la pantalla.
+
+    Y SOLO UNA VEZ: cerrado con AHORA NO se queda cerrado; el boton CALIFICAR
+    sigue ahi para el que se arrepienta. El pestillo es una ref porque acordarse
+    de que ya salio no tiene por que redibujar nada.
+  */
+  const firmado = savedId !== null
+  const yaSalioSolo = useRef(false)
+  useEffect(() => {
+    if (!firmado || yaSalioSolo.current) return
+    yaSalioSolo.current = true
+    const t = setTimeout(() => setResenaAbierta(true), ESPERA_RESENA)
+    // Si se pulsa JUGAR OTRA VEZ antes de que salte, esto se desmonta y el
+    // modal no llega a abrirse sobre una pantalla que ya no existe.
+    return () => clearTimeout(t)
+  }, [firmado])
 
   const ref = useRef(null)
   // Con el modal abierto se apaga la rejilla de la tarjeta: el modal trae la
@@ -900,7 +950,7 @@ function GameOver() {
               />
             )}
             {name.trim() && !nombreLimpio && (
-              <p className="reg-label">Usa letras y numeros: A-Z, 0-9, espacio o guion</p>
+              <p className="reg-label">Usa letras y números: A-Z, 0-9, espacio o guion</p>
             )}
             <UnitPicker value={unit} onPick={setUnit} rowOffset={unitRow} unidades={unidades} />
             {/* un unico GUARDAR para los dos casos: va debajo de las unidades
@@ -928,7 +978,7 @@ function GameOver() {
                 mirar donde no es. */}
             {subida === false && (
               <p className="board-empty">
-                No se pudo guardar en el marcador del congreso: tu marca quedo guardada en este equipo.
+                No se pudo guardar en el marcador del congreso: tu marca quedó guardada en este equipo.
               </p>
             )}
 
@@ -938,10 +988,10 @@ function GameOver() {
                 el agradecimiento — dejar el boton puesto invita a mandar la
                 misma opinion tres veces. */}
             {resenaHecha ? (
-              <p className="resena-gracias">Gracias. Tu reseña queda con las demas.</p>
+              <p className="resena-gracias">Gracias. Tu reseña queda con las demás.</p>
             ) : (
               <div className="resena-cta">
-                <p className="reg-label">¿QUE TE PARECIO EL JUEGO?</p>
+                <p className="reg-label">¿QUÉ TE PARECIÓ EL JUEGO?</p>
                 <button className="btn-secondary" data-gp-row={0} onClick={() => setResenaAbierta(true)}>
                   CALIFICAR
                 </button>

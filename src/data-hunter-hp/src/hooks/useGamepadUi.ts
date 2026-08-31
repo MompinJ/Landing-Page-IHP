@@ -34,6 +34,34 @@ export function useMandoConectado(): boolean {
   );
 }
 
+/** Las teclas que mueven el cursor de los menús, por POSICIÓN física (`e.code`)
+ *  y no por la letra que imprimen: así la W sigue estando encima de la S en un
+ *  teclado que no sea el latino, que es como se juega con WASD en todas
+ *  partes. Es el mismo criterio que `useKeyboardControls` usa para el juego. */
+const TECLAS_REJILLA: Record<string, AccionMando> = {
+  ArrowUp: 'up',
+  KeyW: 'up',
+  ArrowDown: 'down',
+  KeyS: 'down',
+  ArrowLeft: 'left',
+  KeyA: 'left',
+  ArrowRight: 'right',
+  KeyD: 'right',
+};
+
+/** ¿El foco está en un campo de texto? Entonces las teclas son ESCRITURA, no
+ *  navegación (ver la nota gemela en `useKeyboardControls`). */
+function escribiendo(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null;
+  if (!el || !el.tagName) return false;
+  return (
+    el.tagName === 'INPUT' ||
+    el.tagName === 'TEXTAREA' ||
+    el.tagName === 'SELECT' ||
+    el.isContentEditable
+  );
+}
+
 /**
  * REJILLA DE MENÚ.
  *
@@ -99,28 +127,68 @@ export function useRejillaMando(ref: React.RefObject<HTMLElement | null>, activo
     pinta(false);
   }, [activo, pinta]);
 
-  useAccionMando((accion) => {
-    const rejilla = filas();
-    if (!rejilla.length) return;
-    const p = pos.current;
-    if (accion === 'up') p.fila -= 1;
-    else if (accion === 'down') p.fila += 1;
-    else if (accion === 'left') p.col -= 1;
-    else if (accion === 'right') p.col += 1;
-    else if (accion === 'confirm') {
-      const el = rejilla[Math.max(0, Math.min(rejilla.length - 1, p.fila))]?.[p.col];
-      el?.click();
-      return;
-    } else return;
+  const mueve = useCallback(
+    (accion: AccionMando) => {
+      const rejilla = filas();
+      if (!rejilla.length) return;
+      const p = pos.current;
+      if (accion === 'up') p.fila -= 1;
+      else if (accion === 'down') p.fila += 1;
+      else if (accion === 'left') p.col -= 1;
+      else if (accion === 'right') p.col += 1;
+      else if (accion === 'confirm') {
+        const el = rejilla[Math.max(0, Math.min(rejilla.length - 1, p.fila))]?.[p.col];
+        el?.click();
+        return;
+      } else return;
 
-    // Las filas se recorren en vertical con memoria de columna, pero cada una
-    // tiene su propio ancho (el teclado son siete teclas y el pie de botones
-    // dos), así que la columna se recorta AL ENTRAR en la fila nueva.
-    p.fila = Math.max(0, Math.min(rejilla.length - 1, p.fila));
-    p.col = Math.max(0, Math.min(rejilla[p.fila].length - 1, p.col));
-    tocado.current = true;
-    pinta(true);
-  }, activo);
+      // Las filas se recorren en vertical con memoria de columna, pero cada una
+      // tiene su propio ancho (el teclado son siete teclas y el pie de botones
+      // dos), así que la columna se recorta AL ENTRAR en la fila nueva.
+      p.fila = Math.max(0, Math.min(rejilla.length - 1, p.fila));
+      p.col = Math.max(0, Math.min(rejilla[p.fila].length - 1, p.col));
+      tocado.current = true;
+      pinta(true);
+    },
+    [filas, pinta],
+  );
+
+  useAccionMando(mueve, activo);
+
+  /*
+    LA MISMA REJILLA, CON EL TECLADO.
+
+    WASD y las flechas mueven el cursor igual que la cruceta. En el stand se
+    juega con mando, pero quien prueba el juego desde un portátil —o el que se
+    queda sin pilas a media jornada— se encontraba una pantalla final donde no
+    había forma de llegar a un botón más que con el ratón. Y desde que el modal
+    de reseña sale solo, eso es peor: te aparece algo delante y el teclado no lo
+    toca.
+
+    NO HACE FALTA MAPEAR CONFIRMAR: al moverse, `pinta(true)` le da el foco de
+    verdad al elemento, así que Enter y Espacio ya lo activan por su cuenta —son
+    botones nativos—. Duplicarlo aquí solo serviría para que una pulsación
+    contara dos veces.
+
+    Y SE CALLA MIENTRAS SE ESCRIBE, por lo mismo que `useKeyboardControls`: sin
+    ese filtro, la W del nombre movía el cursor y le robaba el foco al campo a
+    mitad de palabra.
+  */
+  useEffect(() => {
+    if (!activo) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (escribiendo(e.target)) return;
+      const accion = TECLAS_REJILLA[e.code];
+      if (!accion) return;
+      // Sin esto, ArrowDown mueve el cursor Y ademas desplaza la tarjeta, que
+      // tiene scroll propio: pegaba un salto por cada pulsación.
+      e.preventDefault();
+      mueve(accion);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [activo, mueve]);
 
   // El contenido del panel cambia SIN desmontarlo (al guardar el nombre
   // desaparece el teclado y aparece el Top 10). Repintar tras cada render

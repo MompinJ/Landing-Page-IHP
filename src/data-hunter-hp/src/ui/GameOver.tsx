@@ -108,6 +108,13 @@ function TecladoNombre({
     </div>
   );
 }
+/** Lo que tarda el modal en salir solo después de firmar. Medido contra lo que
+ *  hace falta, no elegido redondo: por debajo de un segundo pisa la entrada del
+ *  Top 10 y se lee como un fallo; muy por encima, al jugador ya le dio tiempo
+ *  de soltar el mando y el que se encuentra el modal es el siguiente de la
+ *  cola. */
+const ESPERA_RESENA = 1200;
+
 /* ============================== RESEÑAS ==============================
  *
  * Calificar la partida al terminar. Existe porque en el stand la gente decía en
@@ -212,16 +219,18 @@ function ModalResena({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
-      onClick={onCierra}
     >
-      {/* el clic de dentro no cierra: solo el del fondo */}
+      {/* EL FONDO NO CIERRA, y antes sí. Se quitó al hacer que el modal salga
+          solo: ahora aparece delante de alguien que no lo pidió, en un kiosco
+          táctil, donde un roce en el borde es lo más fácil del mundo. Cerrarse
+          por un roce —sin que quien lo sufre entienda siquiera que había algo—
+          es peor que pedir un toque de más. Se sale por «Ahora no» o por B. */}
       <motion.div
         ref={caja}
         className="card card--modal"
         initial={{ y: 24, scale: 0.96, opacity: 0 }}
         animate={{ y: 0, scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 280, damping: 26 }}
-        onClick={(e) => e.stopPropagation()}
       >
         <span className="card-kicker">Antes de irte</span>
         <span className="card-title">¿Qué te pareció?</span>
@@ -364,6 +373,31 @@ export function GameOver() {
   const [resenaAbierta, setResenaAbierta] = useState(false);
   const [resenaHecha, setResenaHecha] = useState(false);
   const [resenas, recargaResenas] = useResenas();
+
+  /*
+    EL MODAL SALE SOLO AL FIRMAR, UNA SOLA VEZ.
+
+    Con el botón a secas casi nadie lo pulsaba: el que acaba de firmar ya vio lo
+    que venía a ver y le pasa el mando al siguiente. Preguntar de frente es lo
+    que hay entre recoger reseñas y tener un botón que nadie toca.
+
+    PERO NO PISA EL MOMENTO: espera a que el Top 10 lleve un segundo largo en
+    pantalla. Lo que el jugador acaba de ganarse es ver su puesto, y taparlo en
+    el mismo instante en que aparece convierte el premio en un trámite.
+
+    Y SOLO UNA VEZ: cerrado con «Ahora no» se queda cerrado, y el botón
+    «Calificar» sigue ahí para el que se arrepienta. El pestillo va en una ref
+    porque no debe provocar un redibujado — solo recuerda que ya salió.
+  */
+  const yaSalioSolo = useRef(false);
+  useEffect(() => {
+    if (!submitted || yaSalioSolo.current) return;
+    yaSalioSolo.current = true;
+    const t = setTimeout(() => setResenaAbierta(true), ESPERA_RESENA);
+    // Si se pulsa «Jugar otra vez» antes de que salte, esto se desmonta y el
+    // modal no llega a abrirse sobre una pantalla que ya no existe.
+    return () => clearTimeout(t);
+  }, [submitted]);
 
   // Con el modal abierto se apaga la rejilla de la tarjeta: el modal trae la
   // suya, y dos rejillas vivas mueven dos cursores con la misma cruceta.
