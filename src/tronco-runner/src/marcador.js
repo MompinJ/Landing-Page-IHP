@@ -134,3 +134,102 @@ export async function leeUnidades() {
     return null
   }
 }
+
+/* ============================== RESEÑAS ==============================
+
+  Las estrellas y el comentario de la pantalla final. Viven en una tabla
+  APARTE y COMPARTIDA con Port Quest -- al reves que los marcadores, que son
+  dos tablas separadas a proposito. No es una incoherencia: los marcadores son
+  dos competiciones distintas y mezclarlas seria un error, pero la reseña es la
+  MISMA pregunta hecha en dos sitios y al cerrar el congreso lo que se va a
+  querer es leerlas juntas. La columna `juego` separa cuando hace falta, que es
+  cuando cada juego enseña las suyas. Ver supabase/marcadores.sql en el repo de
+  Port Quest, que es donde vive la tabla y lo explica entero.
+
+  Y GUARDAR UNA RESEÑA NO PUEDE ROMPER NADA, igual que guardar una marca: si
+  falla, falla en silencio y la pantalla sigue. Nadie se queda sin poder volver
+  a jugar porque el wifi del stand se cayo mientras opinaba.
+*/
+
+const TABLA_RESENAS = 'resenas'
+const JUEGO = 'terminal_rally'
+
+// CIENTO CUARENTA, no mas.
+//
+// Da para una frase entera y no para un parrafo que reviente la tarjeta, que
+// es la que hay que mirar: el comentario se pinta en la pantalla final, en una
+// lista donde caben varios. Se exporta porque el `maxLength` del campo tiene
+// que decir EXACTAMENTE lo mismo que la restriccion de la tabla.
+export const MAX_COMENTARIO = 140
+
+// Comentario admisible para la tabla.
+//
+// A diferencia del nombre, aqui SI se respetan las minusculas: el nombre va en
+// versales porque es una tabla de marcador, pero un comentario en mayusculas se
+// lee como un grito.
+//
+// Lo que se quita no son groserias -- caben, y ninguna expresion regular lo va
+// a evitar. Se cierra lo mecanico: emojis, caracteres invisibles y, al no
+// admitir ni dos puntos ni barra, las direcciones web, que es lo que convierte
+// una reseña en un anuncio. La restriccion de la tabla es la que manda; esto
+// solo evita que un comentario imposible viaje para volver rechazado.
+export function limpiaComentario(texto) {
+  return texto
+    .replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 .,;!¡¿?'"()-]/g, '')
+    .replace(/\s+/g, ' ')
+    .slice(0, MAX_COMENTARIO)
+    .trim()
+}
+
+// Guarda una reseña. Devuelve true si quedo registrada.
+//
+// `nombre` y `unidad` son los que esa misma persona acaba de firmar en el
+// marcador y viajan sin volver a pedirse: preguntarlos otra vez dentro del
+// modal es la forma mas rapida de que nadie lo rellene. Van vacios si la firma
+// no llego a completarse, y la tabla los admite nulos por eso -- la
+// calificacion vale igual sin saber de quien es.
+export async function guardaResena({ estrellas, comentario, nombre, unidad }) {
+  const limpio = limpiaComentario(comentario || '')
+  try {
+    const r = await fetch(`${URL_BASE}/rest/v1/${TABLA_RESENAS}`, {
+      method: 'POST',
+      headers: { ...CABECERAS, Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        juego: JUEGO,
+        estrellas,
+        // Cadena vacia NO: la tabla exige que el comentario, si esta, diga
+        // algo. Se manda null y la fila queda como lo que es, una calificacion
+        // sin comentario.
+        comentario: limpio || null,
+        nombre: nombre || null,
+        unidad: unidad || null,
+      }),
+      signal: conLimite(TIEMPO_LIMITE),
+    })
+    return r.ok
+  } catch {
+    return false // sin red: la reseña se pierde, la pantalla no
+  }
+}
+
+// Las reseñas de ESTE juego, la mas reciente primero. `null` si no se pudo
+// consultar -- y null NO es lista vacia: vacia significa "todavia no ha opinado
+// nadie" y se enseña, null significa "no lo se" y se calla.
+//
+// Se traen las cincuenta ultimas y no todas: al contrario que el marcador,
+// donde la gracia es buscarse en la lista, aqui nadie va a bajar hasta la
+// reseña doscientos.
+export async function leeResenas() {
+  const cols = 'id,estrellas,comentario,nombre,unidad'
+  const consulta = `select=${cols}&juego=eq.${JUEGO}&order=creado_en.desc&limit=50`
+  try {
+    const r = await fetch(`${URL_BASE}/rest/v1/${TABLA_RESENAS}?${consulta}`, {
+      headers: CABECERAS,
+      signal: conLimite(TIEMPO_LIMITE),
+    })
+    if (!r.ok) return null
+    return await r.json()
+  } catch {
+    return null
+  }
+}

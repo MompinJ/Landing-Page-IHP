@@ -1191,3 +1191,141 @@ kbd {
 
 /* Con `?perf`, el panel grande va abajo a la IZQUIERDA y el contador abajo a la
    derecha: comparten fila pero no se pisan. */
+
+/* ---------- Reseñas (pantalla final) ----------
+   El modal va POR ENCIMA de la tarjeta final, que ya es un `.overlay`. Se
+   oscurece un poco más que aquel: si los dos velos pesaran lo mismo, el de
+   arriba no se distinguiría del de abajo y el modal parecería pegado a la
+   tarjeta en vez de estar delante. */
+.overlay--modal { z-index: 30; background: rgba(3, 10, 20, 0.82); }
+
+/* Más estrecha que la tarjeta normal: aquí solo se piden dos cosas, y 560 px
+   con cinco estrellas dentro se leen como una pantalla a medio llenar. */
+.card--modal { width: min(94vw, 430px); gap: 9px; padding: 26px 30px 28px; }
+.card-lead--sm { font-size: 13px; color: var(--ink-2); }
+
+/* La estrella hereda el color del contorno y la encendida lo pisa: el mismo
+   dibujo sirve para leer y para pulsar sin dos svg distintos. */
+.star { display: block; width: 100%; height: 100%; color: rgba(120, 175, 225, 0.28); }
+.star-on { color: var(--amber); }
+
+/* Estrellas de LECTURA, en línea con el nombre dentro de la lista */
+.stars { display: inline-flex; gap: 2px; flex: none; }
+.stars .star { width: 13px; height: 13px; }
+
+/* Estrellas de PULSAR. Grandes a propósito: es un objetivo táctil en un kiosco
+   y quien las toca lleva prisa. 46 px es el mínimo con el que un dedo acierta
+   sin mirar. */
+.stars-pick { display: flex; justify-content: center; gap: 6px; margin: 6px 0 2px; }
+.star-btn {
+  width: 46px;
+  height: 46px;
+  padding: 7px;
+  background: rgba(14, 42, 78, 0.7);
+  border: 1px solid rgba(120, 175, 225, 0.35);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, transform 0.1s;
+}
+.star-btn:hover { background: rgba(36, 96, 165, 0.75); transform: translateY(-2px); }
+.star-btn--on { background: rgba(255, 206, 74, 0.14); border-color: rgba(255, 206, 74, 0.6); }
+
+.resena-texto {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--white);
+  background: rgba(4, 16, 30, 0.85);
+  border: 1px solid rgba(120, 175, 225, 0.4);
+  border-radius: 3px;
+  outline: none;
+  resize: none;
+  /* El campo es opcional y se escribe con el dedo o con teclado físico, así que
+     se le devuelve la selección que la base táctil le quita a todo el juego. */
+  -webkit-user-select: text;
+  user-select: text;
+}
+.resena-texto:focus { border-color: var(--blue-bright); }
+.resena-cuenta {
+  align-self: flex-end;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--steel);
+}
+
+/* La llamada a opinar, entre el Top 10 y la tabla de reseñas */
+.resena-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  margin-top: 6px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(63, 169, 245, 0.16);
+}
+.resena-gracias {
+  width: 100%;
+  margin-top: 6px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(63, 169, 245, 0.16);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green);
+}
+
+.resenas { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+/* Lista con scroll propio: la tarjeta no puede crecer con cada reseña nueva */
+.resenas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-height: 32vh;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(63, 169, 245, 0.45) transparent;
+}
+.resenas-list::-webkit-scrollbar { width: 6px; }
+.resenas-list::-webkit-scrollbar-thumb { background: rgba(63, 169, 245, 0.45); }
+
+/* Una reseña es una tarjeta de dos renglones, no una fila del ranking: por eso
+   no reaprovecha `.board-row` ni su sesgado, que con un párrafo dentro deja el
+   texto en cursiva torcida. */
+.resena {
+  padding: 9px 14px;
+  background: linear-gradient(90deg, rgba(18, 52, 96, 0.75), rgba(12, 34, 64, 0.45));
+  border: 1px solid rgba(63, 169, 245, 0.14);
+  border-radius: 3px;
+}
+.resena-cab { display: flex; align-items: center; gap: 9px; }
+.resena-quien {
+  flex: 1;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Sin nombre, la unidad se iría contra las estrellas: el hueco lo empuja el
+   propio renglón para que las etiquetas queden siempre a la derecha. */
+.resena-cab .board-unit { margin-left: auto; }
+.resena-quien + .board-unit { margin-left: 0; }
+
+/* El comentario en redonda y a la izquierda: es la única prosa de toda la
+   pantalla y centrarla la volvería un eslogan. */
+.resena-dice {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+  color: var(--ink-2);
+  /* Una palabra de 140 caracteres sin espacios existe y rompe la tarjeta */
+  overflow-wrap: anywhere;
+}

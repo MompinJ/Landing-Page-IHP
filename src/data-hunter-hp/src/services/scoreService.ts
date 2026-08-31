@@ -164,3 +164,124 @@ export async function leeUnidades(): Promise<Unidad[] | null> {
     return null;
   }
 }
+
+/* ============================== RESEÑAS ==============================
+ *
+ * Las estrellas y el comentario de la pantalla final. Viven en una tabla APARTE
+ * y COMPARTIDA con Terminal Rally —al revés que los marcadores, que son dos
+ * tablas separadas a propósito—. No es una incoherencia: los marcadores son dos
+ * competiciones distintas y mezclarlas en una consulta sería un error, pero la
+ * reseña es la MISMA pregunta hecha en dos sitios y al cerrar el congreso lo
+ * que se va a querer es leerlas juntas. La columna `juego` separa cuando hace
+ * falta, que es cuando cada juego enseña las suyas. Ver `supabase/marcadores.sql`.
+ *
+ * Y GUARDAR UNA RESEÑA NO PUEDE ROMPER NADA, igual que guardar una marca: si
+ * falla, falla en silencio y la pantalla sigue. Nadie se queda sin poder volver
+ * a jugar porque el wifi del stand se cayó mientras opinaba.
+ */
+
+const TABLA_RESENAS = 'resenas';
+const JUEGO = 'port_quest';
+
+/** Una reseña tal como la devuelve la tabla */
+export interface Resena {
+  id: number;
+  estrellas: number;
+  comentario: string | null;
+  nombre: string | null;
+  unidad: string | null;
+}
+
+/** Lo que se manda al calificar. `nombre` y `unidad` son los que esa misma
+ *  persona acaba de firmar en el marcador: no se vuelven a pedir. */
+export interface ResenaNueva {
+  estrellas: number;
+  comentario: string;
+  nombre: string;
+  unidad: string;
+}
+
+/**
+ * CIENTO CUARENTA, no más.
+ *
+ * Da para una frase entera y no para un párrafo que reviente la tarjeta, que es
+ * la que hay que mirar: el comentario se pinta en la pantalla final, en una
+ * lista donde caben varios. Se exporta porque el `maxLength` del campo tiene
+ * que decir EXACTAMENTE lo mismo que la restricción de la tabla.
+ */
+export const MAX_COMENTARIO = 140;
+
+/**
+ * Comentario admisible para la tabla.
+ *
+ * A diferencia del nombre, aquí SÍ se respetan las minúsculas: el nombre va en
+ * versales porque es una tabla de marcador, pero un comentario en mayúsculas se
+ * lee como un grito.
+ *
+ * Lo que se quita no son groserías —caben, y ninguna expresión regular lo va a
+ * evitar—. Se cierra lo mecánico: emojis, caracteres invisibles y, al no
+ * admitir ni dos puntos ni barra, las direcciones web, que es lo que convierte
+ * una reseña en un anuncio. La restricción de la tabla es la que manda; esto
+ * solo evita que un comentario imposible viaje para volver rechazado.
+ */
+export function limpiaComentario(texto: string): string {
+  return texto
+    .replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 .,;!¡¿?'"()-]/g, '')
+    .replace(/\s+/g, ' ')
+    .slice(0, MAX_COMENTARIO)
+    .trim();
+}
+
+/**
+ * Guarda una reseña. Devuelve `true` si quedó registrada.
+ *
+ * `nombre` y `unidad` van vacíos si la firma no llegó a completarse, y la tabla
+ * los admite nulos por eso: la calificación vale igual sin saber de quién es.
+ */
+export async function guardaResena(r: ResenaNueva): Promise<boolean> {
+  const limpio = limpiaComentario(r.comentario);
+  try {
+    const res = await fetch(`${URL_BASE}/rest/v1/${TABLA_RESENAS}`, {
+      method: 'POST',
+      headers: { ...CABECERAS, Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        juego: JUEGO,
+        estrellas: r.estrellas,
+        // Cadena vacía NO: la tabla exige que el comentario, si está, diga
+        // algo. Se manda null y la fila queda como lo que es, una calificación
+        // sin comentario.
+        comentario: limpio || null,
+        nombre: limpiaNombre(r.nombre) || null,
+        unidad: r.unidad || null,
+      }),
+      signal: conLimite(TIEMPO_LIMITE),
+    });
+    return res.ok;
+  } catch {
+    return false; // sin red: la reseña se pierde, la pantalla no
+  }
+}
+
+/**
+ * Las reseñas de ESTE juego, la más reciente primero. `null` si no se pudo
+ * consultar — y `null` no es lista vacía: vacía significa «todavía no ha
+ * opinado nadie» y se enseña, `null` significa «no lo sé» y se calla.
+ *
+ * Se traen las cincuenta últimas y no todas: al contrario que el marcador,
+ * donde la gracia es buscarse en la lista, aquí nadie va a bajar hasta la
+ * reseña doscientos.
+ */
+export async function leeResenas(): Promise<Resena[] | null> {
+  const cols = 'id,estrellas,comentario,nombre,unidad';
+  const consulta = `select=${cols}&juego=eq.${JUEGO}&order=creado_en.desc&limit=50`;
+  try {
+    const r = await fetch(`${URL_BASE}/rest/v1/${TABLA_RESENAS}?${consulta}`, {
+      headers: CABECERAS,
+      signal: conLimite(TIEMPO_LIMITE),
+    });
+    if (!r.ok) return null;
+    return (await r.json()) as Resena[];
+  } catch {
+    return null;
+  }
+}

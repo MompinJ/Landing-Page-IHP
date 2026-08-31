@@ -1604,3 +1604,219 @@ body,
   white-space: pre;
   pointer-events: none;
 }
+
+/* ---------- Reseñas ---------- */
+
+/* El modal va POR ENCIMA de la tarjeta final, que ya es un `.overlay` con
+   z-index 10. Se oscurece un poco más que aquel: si los dos velos pesaran lo
+   mismo, el de arriba no se distinguiría del de abajo y el modal parecería
+   pegado a la tarjeta en vez de estar delante. */
+.overlay-modal {
+  z-index: 20;
+  background: rgba(2, 8, 20, 0.82);
+}
+
+/* Más estrecho que el panel normal: aquí solo se piden dos cosas, y un panel
+   de 560 px con cinco estrellas dentro se lee como una pantalla a medio
+   llenar. */
+.panel-modal {
+  width: min(420px, 94vw);
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+.modal-sub {
+  margin: 6px 0 4px;
+  font-size: 12.5px;
+  color: #8fa9c8;
+}
+
+/* La estrella hereda el color del contorno; la encendida lo pisa. Así el mismo
+   dibujo sirve para leer y para pulsar sin dos svg distintos. */
+.star {
+  width: 100%;
+  height: 100%;
+  display: block;
+  color: rgba(53, 211, 255, 0.22);
+}
+
+.star-on {
+  color: var(--amber);
+}
+
+/* Estrellas de LECTURA, dentro de la lista: pequeñas y en línea con el nombre */
+.stars {
+  display: inline-flex;
+  gap: 2px;
+  flex: none;
+}
+
+.stars .star {
+  width: 13px;
+  height: 13px;
+}
+
+/* Estrellas de PULSAR. Grandes a propósito: es un objetivo táctil en un kiosco
+   y el que las toca lleva prisa. 44 px es el mínimo con el que un dedo acierta
+   sin mirar. */
+.stars-pick {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 14px 0 10px;
+}
+
+.star-btn {
+  width: 46px;
+  height: 46px;
+  padding: 6px;
+  background: rgba(0, 46, 109, 0.4);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    transform 0.1s ease;
+}
+
+.star-btn:hover {
+  background: rgba(0, 155, 222, 0.3);
+  transform: translateY(-2px);
+}
+
+.star-btn-on {
+  background: rgba(255, 198, 39, 0.14);
+  border-color: var(--amber);
+}
+
+.resena-texto {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #fff;
+  background: rgba(0, 46, 109, 0.4);
+  border: 1px solid var(--border);
+  outline: none;
+  resize: none;
+  /* El campo es opcional y se escribe con el dedo o con teclado físico, así que
+     se le devuelve la selección que el `body` le quita a todo el juego. */
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.resena-texto:focus {
+  border-color: var(--sky);
+}
+
+.resena-cuenta {
+  margin: 4px 0 10px;
+  text-align: right;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  color: #8fa9c8;
+}
+
+/* La llamada a opinar, entre la tabla de puntos y la de reseñas */
+.resena-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0 4px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(53, 211, 255, 0.18);
+}
+
+.resena-gracias {
+  margin: 20px 0 4px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(53, 211, 255, 0.18);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--good);
+}
+
+/* La tabla de reseñas reaprovecha `.board` (misma cabecera, mismo ancho) y solo
+   cambia la lista: una reseña es una tarjeta de dos renglones, no una fila. */
+.resenas {
+  margin-top: 18px;
+}
+
+.resenas-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 34vh;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(53, 211, 255, 0.45) transparent;
+}
+
+.resenas-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.resenas-list::-webkit-scrollbar-thumb {
+  background: rgba(53, 211, 255, 0.45);
+}
+
+/* VA CALIFICADA CON `.resenas` Y NO SUELTA COMO `.resena`, y no es manía: la
+   reseña es un <li> dentro de un `.board`, y `.board li` —escrito para las
+   filas del marcador, que son cuatro celdas en línea— pesa más que una clase a
+   secas por llevar además el tipo de elemento. Suelta, la regla perdía y el
+   <li> seguía siendo un flex en fila: el comentario se pintaba AL LADO de las
+   estrellas, en una columna de cuatro caracteres, con el texto cayendo en
+   vertical. Aquí la reseña son dos renglones apilados. */
+.resenas .resena {
+  display: block;
+  padding: 8px 12px;
+  background: rgba(0, 46, 109, 0.35);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.resena-cab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resena-quien {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Sin nombre, la unidad se iría contra las estrellas: el hueco lo empuja el
+   propio renglón para que las etiquetas queden siempre a la derecha. */
+.resena-cab .punit {
+  margin-left: auto;
+}
+
+.resena-quien + .punit {
+  margin-left: 0;
+}
+
+/* El comentario en redonda y a la izquierda: es la única prosa de toda la
+   pantalla y centrarla la volvería un eslogan. */
+.resena-dice {
+  margin-top: 5px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  text-align: left;
+  color: #cfe0f2;
+  /* Una palabra de 140 caracteres sin espacios existe y rompe la tarjeta */
+  overflow-wrap: anywhere;
+}

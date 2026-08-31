@@ -167,6 +167,78 @@ create index if not exists tr_top on public.terminal_rally_scores (puntos desc, 
 
 
 -- ---------------------------------------------------------------------
+-- RESEÑAS
+--
+-- De 1 a 5 estrellas y, si a quien juega le apetece, un comentario corto. Lo
+-- pide la pantalla final de los dos juegos, en un modal que se abre al acabar
+-- —después de firmar la marca, nunca antes: no se le pregunta a nadie qué le
+-- pareció mientras todavía está mirando su puntuación.
+--
+-- SALIÓ DE UNA CARENCIA CONCRETA DEL STAND. La gente decía en voz alta que el
+-- juego le había gustado y eso no quedaba en ninguna parte: al desmontar el
+-- congreso lo único que había para enseñar era una lista de puntuaciones, que
+-- dice cuánta gente jugó pero no qué le pareció a nadie.
+--
+-- UNA SOLA TABLA PARA LOS DOS JUEGOS, al revés que los marcadores, y no es una
+-- incoherencia con lo de arriba: los marcadores son dos competiciones distintas
+-- y mezclarlas en una consulta sería un error de verdad; las reseñas son LA
+-- MISMA pregunta hecha en dos sitios, y lo que se va a querer al cerrar el
+-- congreso es precisamente leerlas juntas y comparar. La columna `juego` separa
+-- cuando hace falta, que es cuando cada juego enseña las suyas.
+--
+-- NOMBRE Y UNIDAD VIAJAN, pero son OPCIONALES y no se piden aparte: se copian
+-- de lo que esa misma persona acaba de firmar en el marcador. Volver a pedirlos
+-- dentro del modal sería la forma más rápida de que nadie lo rellenara. Son
+-- nulables porque la reseña tiene que poder guardarse aunque la firma no haya
+-- llegado a la tabla —el wifi del stand— y porque la calificación vale igual
+-- sin saber de quién es.
+-- ---------------------------------------------------------------------
+create table if not exists public.resenas (
+  id         bigint generated always as identity primary key,
+  creado_en  timestamptz not null default now(),
+  juego      text     not null,
+  estrellas  smallint not null,
+  comentario text,
+  nombre     text,
+  unidad     text references public.unidades(codigo),
+
+  -- Los dos juegos del stand y nada más. Un juego nuevo entra por `alter`, que
+  -- es justo lo que obliga a decidir si sus reseñas pintan algo en esta lista.
+  constraint rs_juego_valido check (juego in ('port_quest', 'terminal_rally')),
+
+  constraint rs_estrellas_validas check (estrellas between 1 and 5),
+
+  -- EL COMENTARIO SE PINTA EN LA PANTALLA FINAL, delante de quien está haciendo
+  -- cola, así que se le pone la misma clase de cerco que al nombre y por la
+  -- misma razón: no pretende filtrar groserías —caben, y ninguna expresión
+  -- regular lo va a evitar—, cierra lo mecánico. Fuera quedan los emojis, los
+  -- caracteres invisibles y, al no admitir ni `:` ni `/`, las direcciones web,
+  -- que es lo que convierte una reseña en un anuncio.
+  --
+  -- Ciento cuarenta caracteres: da para una frase entera y no para un párrafo
+  -- que reviente la tarjeta. Y minúsculas SÍ, al revés que el nombre — el
+  -- nombre va en versales porque es una tabla de marcador; un comentario en
+  -- mayúsculas se lee como un grito.
+  constraint rs_comentario_valido check (
+    comentario is null
+    or (length(btrim(comentario)) > 0
+        and comentario ~ '^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 .,;!¡¿?''"()-]{1,140}$')
+  ),
+
+  -- Ver la nota de `pq_nombre_valido`: es el mismo nombre que firmó el marcador
+  -- y tiene que pasar exactamente el mismo filtro, o la reseña se guardaría con
+  -- un nombre que la tabla de al lado habría rechazado.
+  constraint rs_nombre_valido check (
+    nombre is null or nombre ~ '^[A-ZÑÁÉÍÓÚÜ0-9][A-ZÑÁÉÍÓÚÜ0-9 -]{0,29}$'
+  )
+);
+
+-- Se leen SIEMPRE por juego y SIEMPRE por lo más reciente primero: las últimas
+-- reseñas son las que hablan de la versión que está corriendo ahora mismo.
+create index if not exists rs_recientes on public.resenas (juego, creado_en desc);
+
+
+-- ---------------------------------------------------------------------
 -- FRENO DE CAUDAL
 --
 -- Un tramposo con paciencia puede fabricar UN registro coherente; lo que no
@@ -198,8 +270,17 @@ create or replace function private.tr_ritmo_ok() returns boolean
     where creado_en > now() - interval '1 minute';
 $$;
 
+-- Las reseñas comparten techo con los marcadores: no puede haber más reseñas
+-- por minuto que partidas, porque cada reseña sale de una partida terminada.
+create or replace function private.rs_ritmo_ok() returns boolean
+  language sql security invoker stable set search_path = public as $$
+    select count(*) < 60 from public.resenas
+    where creado_en > now() - interval '1 minute';
+$$;
+
 grant execute on function private.pq_ritmo_ok() to anon, authenticated;
 grant execute on function private.tr_ritmo_ok() to anon, authenticated;
+grant execute on function private.rs_ritmo_ok() to anon, authenticated;
 
 
 -- ---------------------------------------------------------------------
@@ -227,6 +308,7 @@ grant execute on function private.tr_ritmo_ok() to anon, authenticated;
 alter table public.unidades              enable row level security;
 alter table public.port_quest_scores     enable row level security;
 alter table public.terminal_rally_scores enable row level security;
+alter table public.resenas               enable row level security;
 
 drop policy if exists unidades_leer on public.unidades;
 create policy unidades_leer on public.unidades
@@ -257,20 +339,61 @@ drop policy if exists tr_borrar on public.terminal_rally_scores;
 create policy tr_borrar on public.terminal_rally_scores
   for delete to anon, authenticated using (true);
 
+drop policy if exists rs_leer on public.resenas;
+create policy rs_leer on public.resenas
+  for select to anon, authenticated using (true);
+
+drop policy if exists rs_insertar on public.resenas;
+create policy rs_insertar on public.resenas
+  for insert to anon, authenticated with check (private.rs_ritmo_ok());
+
+-- El borrado de una reseña es lo mismo que el de una marca, pero por un motivo
+-- más probable: aquí lo que se guarda es TEXTO LIBRE y se pinta en la pantalla
+-- final delante de la cola. Si alguien escribe algo que no puede quedarse ahí,
+-- tiene que poder quitarse en el acto desde el panel de Supabase, sin esperar a
+-- una migración ni a que termine la jornada.
+drop policy if exists rs_borrar on public.resenas;
+create policy rs_borrar on public.resenas
+  for delete to anon, authenticated using (true);
+
 
 -- ---------------------------------------------------------------------
 -- PERMISOS EXPLÍCITOS
 --
 -- Hacen falta porque al crear el proyecto se desmarcó «Automatically expose new
 -- tables»: las tablas nuevas ya no se publican solas, que es lo que se quería.
--- El precio es decir aquí, a mano, qué se publica. NO se concede UPDATE:
--- aunque mañana alguien añadiera una política por despiste, sin el GRANT no
--- habría por dónde. El DELETE sí, y se explica arriba.
+-- El precio es decir aquí, a mano, qué se publica.
+--
+-- ESTOS `grant` NO RESTAN NADA, Y ESO ES UNA SORPRESA QUE CONVIENE NO OLVIDAR.
+-- Aquí decía que «no se concede UPDATE: aunque mañana alguien añadiera una
+-- política por despiste, sin el GRANT no habría por dónde», y es FALSO —
+-- comprobado contra la base el 2026-08-31, las cuatro tablas tienen concedido a
+-- `anon` y `authenticated` DELETE, INSERT, REFERENCES, SELECT, TRIGGER,
+-- TRUNCATE y UPDATE. El motivo es que el esquema `public` trae unos DEFAULT
+-- PRIVILEGES que conceden ALL en cada tabla nueva, y un `grant` de tres verbos
+-- encima de un ALL que ya está puesto no quita los otros cuatro. La casilla que
+-- se desmarcó controla otra cosa (que PostgREST publique la tabla), no esto.
+--
+-- QUÉ SIGNIFICA EN LA PRÁCTICA: ningún agujero abierto hoy. RLS tapa el UPDATE
+-- —no hay política de UPDATE en ninguna tabla, y lo que no tiene política está
+-- prohibido— y PostgREST no expone TRUNCATE. Lo que NO existe es la segunda
+-- línea de defensa que este párrafo prometía: si mañana alguien añade una
+-- política de UPDATE por despiste, el GRANT ya está puesto y no frena nada.
+--
+-- En `resenas` sí se cerró, con el `revoke` de abajo. En las dos tablas de
+-- marcadores NO se ha tocado: están en producción con las marcas del congreso
+-- dentro y no es algo que se cambie a media jornada por una mejora que hoy no
+-- arregla ningún fallo. Pendiente para cuando el stand cierre.
 -- ---------------------------------------------------------------------
 grant usage on schema public to anon, authenticated;
 grant select                 on public.unidades              to anon, authenticated;
 grant select, insert, delete on public.port_quest_scores     to anon, authenticated;
 grant select, insert, delete on public.terminal_rally_scores to anon, authenticated;
+grant select, insert, delete on public.resenas               to anon, authenticated;
+
+-- Y lo que de verdad deja a `resenas` con los tres verbos y nada más (ver la
+-- nota de arriba: sin esto, los DEFAULT PRIVILEGES le habían dado ALL).
+revoke update, truncate, references, trigger on public.resenas from anon, authenticated;
 
 -- `rls_auto_enable()` la crea Supabase al marcar «Enable automatic RLS»: la
 -- llama un disparador de eventos al crear una tabla. Ningún navegador tiene por

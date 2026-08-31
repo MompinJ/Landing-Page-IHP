@@ -1,9 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useGame } from '../store'
 import { sfx } from '../audio'
 import { useGamepadAction, useGamepadConnected, useGamepadGrid } from '../useGamepad'
 import { LEGEND_GOOD, LEGEND_BAD, RANKS, LEADERBOARD_KEY, BUSINESS_UNITS, GAME_DURATION } from '../constants'
-import { MAX_NOMBRE, guardaMarca, leeTabla, leeUnidades, limpiaNombre } from '../marcador'
+import {
+  MAX_COMENTARIO,
+  MAX_NOMBRE,
+  guardaMarca,
+  guardaResena,
+  leeResenas,
+  leeTabla,
+  leeUnidades,
+  limpiaNombre,
+} from '../marcador'
 
 // Flechas dibujadas, no texto: son las mismas que van rotuladas encima de los
 // obstaculos en pista, asi que la instruccion y el juego dicen lo mismo con la
@@ -537,6 +546,186 @@ function NameKeys({ value, onType, onBack, rowOffset }) {
   )
 }
 
+/* ============================== RESEÑAS ==============================
+
+  Calificar la carrera al terminar. Existe porque en el stand la gente decia en
+  voz alta que el juego le habia gustado y eso no quedaba en ninguna parte: al
+  desmontar el congreso lo unico que habia para enseñar era una lista de
+  puntuaciones, que dice cuanta gente jugo pero no que le parecio a nadie.
+
+  SE PREGUNTA DESPUES DE FIRMAR, nunca antes. Quien acaba de correr esta
+  mirando su puntuacion y su puesto en la tabla; interrumpir eso con un
+  formulario es la mejor forma de que no conteste ni a lo uno ni a lo otro.
+*/
+
+// La estrella, dibujada. En glifo tipografico (★) ninguna fuente garantiza el
+// trazo y la mitad de los sistemas la pintan como emoji a color, que es justo
+// lo que rompe la paleta de la tarjeta.
+function Star({ on }) {
+  return (
+    <svg className={on ? 'star star-on' : 'star'} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 2.2 L14.9 8.7 L21.9 9.5 L16.7 14.2 L18.2 21.1 L12 17.5 L5.8 21.1 L7.3 14.2 L2.1 9.5 L9.1 8.7 Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
+// Estrellas para LEER: se pintan siempre las cinco y se encienden las que
+// valgan. Pintar solo las llenas obliga a contarlas para saber si son tres de
+// cinco o tres de tres.
+function Estrellas({ n }) {
+  return (
+    <span className="stars" role="img" aria-label={`${n} de 5 estrellas`}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Star key={i} on={i <= n} />
+      ))}
+    </span>
+  )
+}
+
+// Estrellas para PULSAR. Son botones normales: valen para el dedo, el raton y
+// la rejilla del mando por igual, como el selector de unidad.
+function EstrellasPicker({ value, onPick, row }) {
+  return (
+    <div className="stars-pick">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <button
+          key={i}
+          type="button"
+          className={i <= value ? 'star-btn star-btn-on' : 'star-btn'}
+          data-gp-row={row}
+          aria-label={i === 1 ? '1 estrella' : `${i} estrellas`}
+          onClick={() => onPick(i)}
+        >
+          <Star on={i <= value} />
+        </button>
+      ))}
+    </div>
+  )
+}
+
+/*
+  EL MODAL. Se abre sobre la tarjeta final y tiene SU PROPIA rejilla de mando:
+  mientras esta abierto, la de la tarjeta de abajo se apaga (ver `GameOver`).
+  Con las dos vivas, la cruceta movia dos cursores a la vez y confirmar pulsaba
+  el boton de detras.
+
+  EL COMENTARIO NO ENTRA EN LA REJILLA A PROPOSITO. Escribir 140 caracteres
+  letra a letra con la cruceta no lo hace nadie, asi que el campo se deja para
+  el dedo (el kiosco es tactil y saca el teclado del sistema) y para el teclado
+  fisico. Con mando se califica con las estrellas y se envia, que es lo que de
+  verdad se va a usar y no cuesta ni cinco segundos.
+*/
+function ModalResena({ onEnvia, onCierra }) {
+  const [estrellas, setEstrellas] = useState(0)
+  const [comentario, setComentario] = useState('')
+  const ref = useRef(null)
+  useGamepadGrid(ref)
+
+  // B cierra, como en cualquier menu del juego. Que salirse sea lo facil
+  // importa: nadie tiene que sentir que el juego le retiene por no opinar.
+  useGamepadAction((action) => {
+    if (action === 'back') onCierra()
+  })
+
+  return (
+    <div className="overlay overlay-modal" onClick={onCierra}>
+      {/* el clic de dentro no cierra: solo el del fondo */}
+      <div className="panel panel-modal" ref={ref} onClick={(e) => e.stopPropagation()}>
+        <p className="kicker">Antes de irte</p>
+        <h2 className="modal-title">¿QUE TE PARECIO?</h2>
+        <p className="modal-sub">Toca las estrellas. El comentario es opcional.</p>
+
+        <EstrellasPicker value={estrellas} onPick={setEstrellas} row={0} />
+
+        <textarea
+          className="resena-texto"
+          value={comentario}
+          maxLength={MAX_COMENTARIO}
+          rows={3}
+          placeholder="Cuentanos en una linea (opcional)"
+          onChange={(e) => setComentario(e.target.value)}
+        />
+        <p className="resena-cuenta">
+          {comentario.length}/{MAX_COMENTARIO}
+        </p>
+
+        <div className="btn-row">
+          {/* Sin estrellas no hay reseña que mandar, y el boton lo dice en vez
+              de aceptar el clic y no hacer nada. Deshabilitado ademas sale de
+              la rejilla del mando, asi que el cursor no se posa en el. */}
+          <button
+            className="btn-primary"
+            data-gp-row={1}
+            disabled={!estrellas}
+            onClick={() => onEnvia({ estrellas, comentario })}
+          >
+            ENVIAR
+          </button>
+          <button className="btn-ghost" data-gp-row={1} onClick={onCierra}>
+            AHORA NO
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// La tabla de reseñas de la pantalla final: la media arriba y las ultimas
+// debajo. Va DESPUES de la tabla de puntos porque es lo segundo que interesa —
+// primero donde quede uno, luego que opina el resto.
+function TablaResenas({ lista }) {
+  if (!lista.length) return null
+
+  const media = lista.reduce((t, r) => t + r.estrellas, 0) / lista.length
+
+  return (
+    <div className="board resenas">
+      <h3>
+        RESEÑAS DEL CONGRESO
+        <span className="board-count">
+          {media.toFixed(1)} de 5 &middot; {lista.length === 1 ? '1 reseña' : `${lista.length} reseñas`}
+        </span>
+      </h3>
+      <ul className="resenas-list">
+        {lista.map((r) => (
+          <li key={r.id} className="resena">
+            <div className="resena-cab">
+              <Estrellas n={r.estrellas} />
+              {r.nombre && <span className="resena-quien">{r.nombre}</span>}
+              {r.unidad && <span className="punit">{r.unidad}</span>}
+            </div>
+            {r.comentario && <p className="resena-dice">{r.comentario}</p>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+// Trae las reseñas y devuelve tambien la forma de volver a pedirlas: al enviar
+// la propia hay que releer para que aparezca arriba de la lista.
+function useResenas() {
+  const [lista, setLista] = useState([])
+
+  const recarga = useCallback(() => {
+    let vivo = true
+    leeResenas().then((filas) => {
+      // null es "no lo se", no "no hay ninguna": se conserva lo que hubiera.
+      if (vivo && filas) setLista(filas)
+    })
+    return () => {
+      vivo = false
+    }
+  }, [])
+
+  useEffect(() => recarga(), [recarga])
+
+  return [lista, recarga]
+}
+
 function GameOver() {
   const score = useGame((s) => s.score)
   const goods = useGame((s) => s.goods)
@@ -557,8 +746,19 @@ function GameOver() {
   useTablaCongreso(setBoard)
   const unidades = useUnidades()
 
+  // La reseña. `resenaHecha` no distingue si llego al servidor a proposito: al
+  // que acaba de opinar se le da las gracias y punto. Su reseña no es una marca
+  // en una tabla que vaya a buscar despues, asi que un aviso de "no se pudo
+  // guardar tu opinion" solo serviria para dejarle mal sabor de una cosa que
+  // hizo por gusto.
+  const [resenaAbierta, setResenaAbierta] = useState(false)
+  const [resenaHecha, setResenaHecha] = useState(false)
+  const [resenas, recargaResenas] = useResenas()
+
   const ref = useRef(null)
-  useGamepadGrid(ref)
+  // Con el modal abierto se apaga la rejilla de la tarjeta: el modal trae la
+  // suya, y dos rejillas vivas mueven dos cursores con la misma cruceta.
+  useGamepadGrid(ref, !resenaAbierta)
 
   const rank = RANKS.find((r) => score >= r.min)
 
@@ -623,6 +823,18 @@ function GameOver() {
     })
   }
 
+  // Se manda lo que se firmo, sin volver a preguntarlo: pedir otra vez nombre
+  // y unidad dentro del modal es la forma mas rapida de que nadie lo rellene.
+  const enviaResena = ({ estrellas, comentario }) => {
+    setResenaAbierta(false)
+    setResenaHecha(true)
+    guardaResena({ estrellas, comentario, nombre: nombreLimpio, unidad: unit }).then((ok) => {
+      // Solo se relee si entro: si no, la lista se quedaria igual y la
+      // relectura seria un viaje para nada.
+      if (ok) recargaResenas()
+    })
+  }
+
   const typing = savedId === null
   const keysShown = typing && pad
   // Las filas de la rejilla van en el mismo orden que la tarjeta: teclado en
@@ -630,7 +842,13 @@ function GameOver() {
   // final. Con una sola cuenta se mantienen alineados los tres casos.
   const unitRow = keysShown ? KEY_ROWS.length + 1 : 0
   const saveRow = unitRow + Math.ceil(unidades.length / 4)
-  const btnRow = typing ? saveRow + 1 : 0
+  // YA GUARDADO, EL CURSOR CAE EN CALIFICAR Y NO EN JUGAR OTRA VEZ. La rejilla
+  // se recoloca en la fila 0 cuando encoge (ver `useGamepadGrid`), asi que la
+  // fila 0 es la que se lleva el cursor al firmar, y es exactamente donde se
+  // quiere que este: pulsar A abre el modal, no arranca otra partida. En cuanto
+  // la reseña esta hecha, el boton desaparece, la rejilla vuelve a encoger y el
+  // cursor cae solo sobre JUGAR OTRA VEZ, que pasa a ser la unica fila.
+  const btnRow = typing ? saveRow + 1 : 1
 
   return (
     <div className="overlay">
@@ -713,6 +931,24 @@ function GameOver() {
                 No se pudo guardar en el marcador del congreso: tu marca quedo guardada en este equipo.
               </p>
             )}
+
+            {/* LA LLAMADA A OPINAR, entre la tabla propia y la de reseñas: se
+                pregunta cuando ya se ha visto el puesto, que es cuando la
+                carrera esta de verdad terminada. Una vez enviada se cambia por
+                el agradecimiento — dejar el boton puesto invita a mandar la
+                misma opinion tres veces. */}
+            {resenaHecha ? (
+              <p className="resena-gracias">Gracias. Tu reseña queda con las demas.</p>
+            ) : (
+              <div className="resena-cta">
+                <p className="reg-label">¿QUE TE PARECIO EL JUEGO?</p>
+                <button className="btn-secondary" data-gp-row={0} onClick={() => setResenaAbierta(true)}>
+                  CALIFICAR
+                </button>
+              </div>
+            )}
+
+            <TablaResenas lista={resenas} />
           </>
         )}
 
@@ -726,6 +962,10 @@ function GameOver() {
           </button>
         </div>
       </div>
+
+      {/* Fuera del panel: es una capa por encima de la tarjeta, no un trozo de
+          ella, y asi el scroll de la tarjeta no se lo lleva por delante. */}
+      {resenaAbierta && <ModalResena onEnvia={enviaResena} onCierra={() => setResenaAbierta(false)} />}
     </div>
   )
 }
