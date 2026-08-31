@@ -115,7 +115,14 @@ export function useRejillaMando(ref: React.RefObject<HTMLElement | null>, activo
       el.classList.add('gp-cursor');
       // Sin `preventScroll` a propósito: la tarjeta tiene scroll propio y al
       // bajar por el teclado en pantalla tiene que arrastrarlo.
-      if (enfocar) el.focus();
+      //
+      // PERO NO SE LE QUITA EL FOCO A QUIEN ESTÁ ESCRIBIENDO. Esto se repinta
+      // después de CADA render, y escribir una letra provoca uno: si el cursor
+      // ya venía «tocado», la primera letra del nombre disparaba el repintado,
+      // el foco saltaba al botón y el resto de la palabra se perdía. Quien está
+      // en un campo lo eligió a propósito; el cursor puede pintarse igual, pero
+      // el foco es suyo hasta que lo suelte.
+      if (enfocar && !escribiendo(document.activeElement)) el.focus();
     },
     [ref, filas],
   );

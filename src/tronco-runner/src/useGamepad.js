@@ -37,7 +37,12 @@ const TECLAS_REJILLA = {
 }
 
 // Con el foco en un campo, las teclas son ESCRITURA y no controles.
-function escribiendo(target) {
+//
+// SE EXPORTA PARA QUE HAYA UNA SOLA COPIA. La usan esta rejilla y el manejador
+// de teclas de la partida (`Game.jsx`), y son justo las dos que se pisan: si
+// una se olvidara del filtro, la otra se comeria las letras del nombre y el
+// sintoma -- "no me deja escribir la W" -- no apuntaria a ninguna de las dos.
+export function escribiendo(target) {
   const el = target
   if (!el || !el.tagName) return false
   return (
@@ -96,7 +101,14 @@ export function useGamepadGrid(ref, active = true) {
       el.classList.add('gp-cursor')
       // sin preventScroll a proposito: el panel tiene scroll propio y al bajar
       // por el teclado en pantalla tiene que arrastrarlo
-      if (focus) el.focus()
+      //
+      // PERO NO SE LE QUITA EL FOCO A QUIEN ESTA ESCRIBIENDO. Esto se repinta
+      // despues de CADA render, y escribir una letra provoca uno: si el cursor
+      // ya venia "tocado", la primera letra del nombre disparaba el repintado,
+      // el foco saltaba al boton y el resto de la palabra se perdia. Quien esta
+      // en un campo lo eligio a proposito; el cursor puede pintarse igual, pero
+      // el foco es suyo hasta que lo suelte.
+      if (focus && !escribiendo(document.activeElement)) el.focus()
     },
     [ref, rows],
   )

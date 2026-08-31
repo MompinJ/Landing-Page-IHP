@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import { useGame } from '../store'
-import { useGamepadAction } from '../useGamepad'
+import { escribiendo, useGamepadAction } from '../useGamepad'
 import { runtime, scroll, scrollSpeed, SKIP } from '../runtime'
 import { zoneIndexAt, deckAt, seaLevelAt } from '../course'
 import { Boats } from './Boats'
@@ -411,6 +411,20 @@ function slide() {
 function useInputs() {
   useEffect(() => {
     const onKey = (e) => {
+      // ESCRIBIENDO NO SE JUEGA.
+      //
+      // Sin esta linea, el `preventDefault` de mas abajo se comia la W, la S y
+      // el ESPACIO del nombre en la pantalla final: se tecleaba "SUSANA WEST" y
+      // quedaba "UANA ET". Y la H abria la ayuda a media palabra, asi que un
+      // JOHN te sacaba de la pantalla. No se veia en las pruebas porque
+      // rellenaban el campo con `fill()`, que asigna el valor sin teclear.
+      //
+      // El filtro va ANTES que nada, incluido el `preventDefault`: el problema
+      // no era que el juego reaccionara -- `move`, `jump` y `slide` ya
+      // comprueban la fase y no hacian nada --, era que la tecla no llegaba al
+      // campo. Port Quest tuvo este mismo fallo y lo arreglo igual (ver la nota
+      // de `escribiendo` en su `useKeyboardControls`).
+      if (escribiendo(e.target)) return
       // el auto-repeat del teclado disparaba varios cambios de carril con una
       // sola pulsacion sostenida; aqui cada tecla vale un carril
       if (e.repeat) return
