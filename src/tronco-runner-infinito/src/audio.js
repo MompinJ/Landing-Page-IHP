@@ -1,3 +1,6 @@
+import { runtime } from './runtime'
+import { BASE_SPEED, MAX_SPEED } from './constants'
+
 let ctx = null
 
 function ac() {
@@ -21,7 +24,6 @@ function ac() {
 if (typeof window !== 'undefined') {
   const prime = () => {
     ac()
-    primeTrack()
     window.removeEventListener('pointerdown', prime)
     window.removeEventListener('keydown', prime)
   }
@@ -115,66 +117,253 @@ export const sfx = {
   },
 }
 
-// --- Musica de fondo -------------------------------------------------------
-// La cancion dura 2:17 y la carrera 2:00, asi que arranca con la cuenta atras y
-// se deja terminar sola: sigue sonando encima del marcador final y solo se
-// rebobina cuando alguien lanza otra cuenta atras.
-const TRACK_SRC = './audio/musica.mp3'
-let track = null
+/* --- Musica de fondo -------------------------------------------------------
 
-function trackEl() {
-  if (typeof Audio === 'undefined') return null
-  if (!track) {
-    track = new Audio(TRACK_SRC)
-    track.preload = 'auto'
-    // Debajo de los efectos: el pitido de recoger o chocar tiene que oirse por
-    // encima de la cancion en un stand con ruido alrededor.
-    track.volume = 0.42
+  LA MUSICA SE TOCA, NO SE REPRODUCE.
+
+  Aqui habia un mp3 de tres megas y tenia dos problemas. El de fondo: era una
+  cancion ajena, y esto se proyecta en el stand de un congreso. Y el de forma:
+  duraba 2:17 porque venia del Terminal Rally POR TIEMPO, donde la carrera
+  duraba 2:00 exactas y la cancion se acababa justo con ella. Este juego no
+  tiene final, asi que cualquier carrera decente pasaba de largo el final de la
+  cancion y seguia en silencio -- precisamente en los metros donde mas tension
+  hay, que son los ultimos.
+
+  Se sintetiza con los mismos osciladores que los efectos: no se acaba nunca,
+  no pesa un byte y no es de nadie. Y ademas hace lo que un archivo no puede,
+  que es CRECER CON LA CARRERA: las capas entran segun la velocidad, y en este
+  juego la velocidad es la unica medida de lo lejos que has llegado. En la
+  portada suena un bajo y poco mas; a 29 m/s suena entera. Al chocar, el mundo
+  frena y la musica se deshace con el, porque lee la misma velocidad.
+*/
+
+const BPM = 126
+const NEGRA = 60 / BPM
+const PASO = NEGRA / 4 // semicorchea: la rejilla de todo lo que suena aqui
+// Segundos que se programan por delante del reloj. Cuanto mas, mas aguanta un
+// temporizador que llegue tarde sin que se oiga un hueco -- y llegan tarde: el
+// navegador compila un shader, pasa el recolector de basura, la pestaña se
+// esconde. Medio segundo cubre de sobra esos tirones, y lo unico que cuesta es
+// que la musica tarde ese medio segundo en enterarse de que se va mas rapido,
+// que sobre una rampa de velocidad de 2800 m no lo nota nadie.
+const HORIZONTE = 0.5
+
+// VOLUMEN por debajo de los efectos: el pitido de recoger o el golpe de chocar
+// tienen que oirse por encima de la musica en un stand con ruido alrededor. Por
+// eso ademas los efectos van directos a la salida y la musica pasa por su bus.
+const VOLUMEN = 0.5
+
+// Dm - Bb - F - C. Cuatro acordes que giran sin resolver nunca, que es lo que
+// tiene que hacer la musica de algo que no se acaba: una cadencia que cerrara
+// pediria un final, y aqui no hay ninguno.
+const D2 = 73.416
+const PROGRESION = [
+  { raiz: 0, triada: [0, 3, 7] }, // Dm
+  { raiz: -4, triada: [0, 4, 7] }, // Bb
+  { raiz: 3, triada: [0, 4, 7] }, // F
+  { raiz: -2, triada: [0, 4, 7] }, // C
+]
+
+const hz = (semis) => D2 * Math.pow(2, semis / 12)
+
+let bus = null
+function musicaBus() {
+  const c = ac()
+  if (!c) return null
+  if (!bus) {
+    bus = c.createGain()
+    bus.gain.value = 0 // entra con una rampa en music.start
+    bus.connect(c.destination)
   }
-  return track
+  return bus
 }
 
-// Un archivo de audio solo se puede arrancar desde un gesto real, y la carrera
-// se lanza a menudo con el mando, que no cuenta como tal. Asi que en el primer
-// gesto que pase por la pagina se reproduce en mudo y se para al instante: eso
-// deja el elemento "desbloqueado" y ya se le puede dar al play mas tarde por
-// codigo, con sonido y sin gesto.
-let wanted = false
-
-function primeTrack() {
-  const el = trackEl()
-  if (!el) return
-  el.muted = true
-  const p = el.play()
-  // El play() del desbloqueo devuelve una promesa que puede resolverse DESPUES
-  // de que la carrera haya arrancado la cancion de verdad: si el primer gesto
-  // de la pagina es el propio clic de "A CORRER", el pointerdown desbloquea y
-  // el click lanza la cuenta atras en el mismo gesto. Por eso se comprueba
-  // 'wanted' antes de parar: sin ello, el desbloqueo silenciaba la carrera.
-  const settle = () => {
-    if (wanted) return
-    el.pause()
-    el.currentTime = 0
-    el.muted = false
+// Ruido blanco para el charles. Se genera una vez y se reaprovecha: son cuatro
+// decimas de muestra y de ahi salen todos los golpes de la partida.
+let ruido = null
+function bufferRuido(c) {
+  if (!ruido) {
+    ruido = c.createBuffer(1, Math.floor(c.sampleRate * 0.4), c.sampleRate)
+    const d = ruido.getChannelData(0)
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1
   }
-  if (p && p.then) p.then(settle).catch(() => { if (!wanted) el.muted = false })
-  else settle()
+  return ruido
+}
+
+// Una nota de la musica. Como `tone`, pero con filtro y al bus de musica.
+function nota(t0, freq, dur, { type = 'sawtooth', gain = 0.1, corte = 0, q = 1 } = {}) {
+  const c = ac()
+  const b = musicaBus()
+  if (!c || !b) return
+  const osc = c.createOscillator()
+  const g = c.createGain()
+  osc.type = type
+  osc.frequency.setValueAtTime(freq, t0)
+  g.gain.setValueAtTime(0, t0)
+  g.gain.linearRampToValueAtTime(gain, t0 + 0.01)
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur)
+  osc.connect(g)
+  if (corte) {
+    const f = c.createBiquadFilter()
+    f.type = 'lowpass'
+    f.frequency.setValueAtTime(corte, t0)
+    f.Q.value = q
+    g.connect(f)
+    f.connect(b)
+  } else {
+    g.connect(b)
+  }
+  osc.start(t0)
+  osc.stop(t0 + dur + 0.05)
+}
+
+// Bombo: una sinusoide que se desploma. Es lo unico de la musica sin altura
+// reconocible, y por eso es lo que puede marcar el paso sin chocar con nada.
+function bombo(t0) {
+  const c = ac()
+  const b = musicaBus()
+  if (!c || !b) return
+  const osc = c.createOscillator()
+  const g = c.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(125, t0)
+  osc.frequency.exponentialRampToValueAtTime(44, t0 + 0.11)
+  g.gain.setValueAtTime(0.34, t0)
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.24)
+  osc.connect(g)
+  g.connect(b)
+  osc.start(t0)
+  osc.stop(t0 + 0.3)
+}
+
+function charles(t0, gain) {
+  const c = ac()
+  const b = musicaBus()
+  if (!c || !b) return
+  const src = c.createBufferSource()
+  src.buffer = bufferRuido(c)
+  src.playbackRate.value = 1.7
+  const f = c.createBiquadFilter()
+  f.type = 'highpass'
+  f.frequency.value = 7200
+  const g = c.createGain()
+  g.gain.setValueAtTime(gain, t0)
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.045)
+  src.connect(f)
+  f.connect(g)
+  g.connect(b)
+  src.start(t0, 0, 0.08)
+}
+
+// Cuanto de la musica suena: 0 en la portada y con la carrera frenada, 1 a la
+// velocidad maxima. Se lee de runtime y no del store a proposito -- el store
+// importa este modulo, y pedirselo de vuelta seria un ciclo.
+function intensidad() {
+  const k = (runtime.speed - BASE_SPEED) / (MAX_SPEED - BASE_SPEED)
+  return Math.max(0, Math.min(1, k))
+}
+
+// Que suena en la semicorchea n. Cada capa mira la intensidad y decide si le
+// toca: asi la cancion se construye sola segun se corre, sin transiciones que
+// programar ni secciones que encajar.
+function programa(t, n) {
+  const k = intensidad()
+  const acorde = PROGRESION[Math.floor(n / 16) % PROGRESION.length]
+  const p = n % 16
+  const raiz = acorde.raiz
+
+  // BAJO: corcheas con salto de octava a mitad de compas. Es el suelo de todo y
+  // suena siempre, tambien parado: es lo que mantiene el stand vivo entre
+  // partida y partida. El filtro se abre con la velocidad, que es lo que hace
+  // que la misma nota suene mas agresiva cuanto mas lejos se ha llegado.
+  if (p % 2 === 0) {
+    nota(t, hz(raiz + (p === 4 || p === 12 ? 12 : 0)), 0.24, {
+      type: 'sawtooth',
+      gain: 0.1,
+      corte: 300 + 900 * k,
+      q: 5,
+    })
+  }
+
+  // BOMBO en 1 y 3, y un tercero antes del compas siguiente cuando ya se corre.
+  if (p === 0 || p === 8 || (k > 0.45 && p === 14)) bombo(t)
+
+  // CHARLES en las semicorcheas impares. Entra pronto porque es lo primero que
+  // dice que esto ya no es la portada.
+  if (k > 0.12 && p % 2 === 1) charles(t, 0.028 + 0.03 * k)
+
+  // ARPEGIO de la triada. Es la capa que hace que suene a carrera.
+  if (k > 0.3 && p % 2 === 0) {
+    const grado = acorde.triada[[0, 1, 2, 1][(p / 2) % 4]]
+    nota(t, hz(raiz + grado + 24), 0.17, { type: 'triangle', gain: 0.045 + 0.03 * k })
+  }
+
+  // ACORDE tenido, uno por compas. Entra en la ultima parte de la rampa de
+  // velocidad: es lo que dice "esto ya es una carrera larga".
+  if (k > 0.6 && p === 0) {
+    for (const s of acorde.triada) {
+      nota(t, hz(raiz + s + 12), NEGRA * 3.6, {
+        type: 'sawtooth',
+        gain: 0.02,
+        corte: 900 + 1400 * k,
+        q: 0.7,
+      })
+    }
+  }
+
+  // Y a tope de velocidad, la triada una octava mas arriba en blancas. Solo se
+  // oye pasados los 2500 m, asi que es tambien un aviso de que se va lejos.
+  if (k > 0.85 && p % 8 === 0) {
+    nota(t, hz(raiz + acorde.triada[(n / 8) % 3] + 36), 0.4, { type: 'square', gain: 0.016 })
+  }
+}
+
+let reloj = null
+let paso = 0
+let proximo = 0
+
+// Programador con vista adelante: el temporizador de la pagina no es puntual,
+// pero el reloj del audio si, asi que aqui solo se decide QUE suena y el cuando
+// se le da al audio con su propio reloj. Sin esto la musica cojea en cuanto el
+// navegador se pone a dibujar.
+function bucle() {
+  const c = ac()
+  if (!c) return
+  // Si el temporizador llego tarde -- la pestaña estuvo escondida, el navegador
+  // se puso a compilar algo -- lo programado se habria quedado en el pasado y
+  // saldria de golpe, todo amontonado en el mismo instante. Se resincroniza y se
+  // pierde el trozo, que es infinitamente mejor que oirlo entero de una vez.
+  if (proximo < c.currentTime) proximo = c.currentTime + 0.02
+  while (proximo < c.currentTime + HORIZONTE) {
+    programa(proximo, paso)
+    proximo += PASO
+    paso++
+  }
 }
 
 export const music = {
-  // Siempre desde el principio: cada carrera estrena cancion.
+  // Cada carrera empieza en el primer tiempo del primer acorde: la cuenta atras
+  // y el compas arrancan juntos.
   start() {
-    const el = trackEl()
-    if (!el) return
-    wanted = true
-    el.muted = false
-    el.currentTime = 0
-    el.play().catch(() => {})
+    const c = ac()
+    const b = musicaBus()
+    if (!c || !b) return
+    b.gain.cancelScheduledValues(c.currentTime)
+    b.gain.setValueAtTime(b.gain.value, c.currentTime)
+    b.gain.linearRampToValueAtTime(VOLUMEN, c.currentTime + 0.5)
+    paso = 0
+    proximo = c.currentTime + 0.06
+    if (!reloj) reloj = setInterval(bucle, 25)
   },
   stop() {
-    wanted = false
-    if (!track) return
-    track.pause()
-    track.currentTime = 0
+    const c = ac()
+    if (!c || !bus) return
+    bus.gain.cancelScheduledValues(c.currentTime)
+    bus.gain.setValueAtTime(bus.gain.value, c.currentTime)
+    bus.gain.linearRampToValueAtTime(0, c.currentTime + 0.4)
+    if (reloj) {
+      clearInterval(reloj)
+      reloj = null
+    }
   },
 }
