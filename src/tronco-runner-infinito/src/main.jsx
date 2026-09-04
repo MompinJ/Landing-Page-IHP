@@ -1,4 +1,5 @@
 import { createRoot } from 'react-dom/client'
+import { configureTextBuilder } from 'troika-three-text'
 import '@fontsource/montserrat/latin-400.css'
 import '@fontsource/montserrat/latin-700.css'
 import '@fontsource/montserrat/latin-800.css'
@@ -30,5 +31,31 @@ if (typeof window !== 'undefined' && new URLSearchParams(location.search).has('d
   // es como se acaba comprobando contra un valor que el juego ya no usa.
   window.__TR = { store: useGame, curso, constantes }
 }
+
+/* TEXTO 3D DETRAS DE UNA CSP ESTRICTA -----------------------------------------
+
+  Las etiquetas de las fichas, los porticos y los carteles de la pista los
+  dibuja troika (el <Text> de drei), que por defecto compila la tipografia en un
+  WEB WORKER creado a partir de un blob. Un sitio con `default-src 'self'`
+  bloquea eso -- `worker-src` no suele declararse y cae en `script-src`, donde
+  `blob:` no esta -- y el destrozo no es quedarse sin letras: la interfaz entera
+  deja de responder. Medido contra la CSP real del sitio que lo aloja: pulsar
+  JUGAR no hacia absolutamente nada.
+
+  Aqui hubo una sonda que intentaba crear un worker de mentira para decidir. NO
+  FUNCIONA, y conviene dejarlo escrito para que nadie lo reintente: Chrome
+  bloquea el worker pero NO lanza ninguna excepcion, asi que la sonda decia que
+  si. Y no hay forma sincrona de preguntarlo -- la violacion de CSP llega como
+  evento, despues --, mientras que esto hay que decidirlo ANTES del primer
+  render (troika ignora la configuracion en cuanto se le ha pedido una fuente).
+
+  La otra salida era pedirle al sitio que abriera su CSP. No: el juego es el
+  invitado, y un invitado no cambia la cerradura de la casa.
+
+  Asi que se compone en el hilo principal SIEMPRE. Lo que cuesta esta medido y
+  es al arrancar, no en carrera: troika parsea la fuente una vez y luego cachea
+  cada palabra ya compuesta, y el glosario entero son 363 palabras cortas.
+*/
+configureTextBuilder({ useWorker: false })
 
 createRoot(document.getElementById('root')).render(<App />)
