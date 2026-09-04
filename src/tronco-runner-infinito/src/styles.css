@@ -475,14 +475,16 @@ body,
   color: var(--amber);
 }
 
-/* INFINITO va debajo del titulo y no dentro: el nombre del juego sigue siendo
-   Terminal Rally y lo que hay que leer aparte es en que se diferencia. */
+/* El 2.0 va debajo del titulo y no dentro: el nombre del juego sigue siendo
+   Terminal Rally y lo que hay que leer aparte es que esta es la otra.
+   Menos separacion entre letras que la que llevaba la palabra que habia aqui:
+   con 0.28em un numero corto se lee "2 . 0" en vez de "dos punto cero". */
 .title-sub {
   margin-top: 2px;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 900;
   font-style: italic;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.06em;
   color: var(--good);
 }
 

@@ -12,6 +12,11 @@ export const MAX_SPEED = 29
 export const SPEED_RAMP = 2800
 export const SEGMENT_LENGTH = 30
 export const NUM_SEGMENTS = 7
+// Borde frontal de la franja k=0 del escenario cuando el scroll esta a cero.
+// Vive aqui y no en World porque el curso tambien lo necesita: es lo que dice
+// en que metro empieza cada franja, y las terminales se alinean con ellas para
+// que el paisaje cambie exactamente en el portico (ver alineaFranja).
+export const SEGMENT_START = 16
 // metros de curso vivos por delante del corredor: mas alla la niebla lo tapa
 export const VIEW_AHEAD = 135
 

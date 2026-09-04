@@ -1,7 +1,7 @@
 {
   "name": "tronco-runner-infinito",
   "version": "1.0.0",
-  "description": "Terminal Rally Infinito - endless runner 3D procedural con los valores de Hutchison Ports",
+  "description": "Terminal Rally 2.0 - endless runner 3D procedural con los valores de Hutchison Ports",
   "private": true,
   "scripts": {
     "dev": "vite",

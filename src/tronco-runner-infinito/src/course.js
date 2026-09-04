@@ -10,6 +10,13 @@ import {
   RIG_BONUS,
   FLY_LEN,
   FLY_H,
+  BASE_SPEED,
+  MAX_SPEED,
+  SPEED_RAMP,
+  JUMP_V,
+  GRAVITY,
+  SEGMENT_LENGTH,
+  SEGMENT_START,
 } from './constants'
 import { ZONE_WORDS } from './words'
 
@@ -122,6 +129,42 @@ let proxCamion = 0 // metro a partir del cual se puede volver a soltar un convoy
 let proxEscudo = 0 // metro en el que toca el siguiente casco reforzado
 
 /* ============================== LECTURAS ============================== */
+
+// VELOCIDAD Y ALCANCE DEL SALTO EN UN METRO DADO.
+//
+// Viven aqui porque es el CURSO quien coloca los huecos, y un hueco solo es
+// justo en relacion con lo que el salto alcanza justo ahi. En este juego la
+// velocidad la marcan los metros y no el reloj, asi que se sabe de antemano a
+// que velocidad se va a llegar a cada metro: se puede colocar un hueco sabiendo
+// exactamente cuanto va a costar saltarlo.
+export function velocidadEn(d) {
+  return BASE_SPEED + (MAX_SPEED - BASE_SPEED) * Math.min(1, d / SPEED_RAMP)
+}
+
+// Metros que cubre un salto en el metro d, aterrizando a la misma altura de la
+// que se salio. Tiempo de vuelo = 2 v0 / g, y el mundo avanza a lo suyo.
+export function alcanceSalto(d) {
+  return velocidadEn(d) * ((2 * JUMP_V) / GRAVITY)
+}
+
+// LAS TERMINALES EMPIEZAN DONDE EMPIEZA UNA FRANJA DEL ESCENARIO.
+//
+// World dibuja el paisaje en franjas de 30 m y pinta cada franja ENTERA con el
+// tema del metro que le cae en el centro. Una terminal que empezara a mitad de
+// franja se veria empezar hasta quince metros antes o despues de su portico, y
+// eso es lo que hacia leer "TERMINAL DE CRUCEROS" con un patio de vias
+// alrededor. Empezando cada terminal justo donde empieza una franja, el
+// paisaje cambia exactamente en el portico y no hay nada que no cuadre.
+//
+// El desfase sale de la propia colocacion de las franjas: la franja k va del
+// metro SEGMENT_START*(-1) + PLAYER_Z + 30k en adelante (ver World).
+const FRANJA_OFF = ((PLAYER_Z - SEGMENT_START) % SEGMENT_LENGTH + SEGMENT_LENGTH) % SEGMENT_LENGTH
+
+function alineaFranja(d) {
+  const k = Math.ceil((d - FRANJA_OFF) / SEGMENT_LENGTH)
+  return FRANJA_OFF + k * SEGMENT_LENGTH
+}
+
 
 export function deckAt(d) {
   if (d <= 0) return 0
@@ -1379,12 +1422,71 @@ function generaLlana(z, ctx) {
 
 /* ---------- Terminal de cruceros: muelle, travesia y cubierta ---------- */
 const BOAT_LEN = 14
+
+// Largo de la rampa de la orilla, del fondo del mar a la altura del muelle.
+const ORILLA = 8
+
+// METROS DE ESA RAMPA QUE TODAVIA SON AGUA.
+//
+// El otro lado del ultimo salto NO es boatsEnd. La orilla sube desde el fondo
+// del mar, y mientras el suelo siga por debajo de la lamina el corredor se moja
+// -- o sea que se cae al mar, o sea que con una sola vida se acabo. El sitio
+// donde de verdad se aterriza es este trozo mas adelante, y es contra el que
+// hay que medir el hueco.
+const ORILLA_MOJADA = (ORILLA * (SEA_LEVEL - SEA_FLOOR)) / (0 - SEA_FLOOR)
+
+// HUECO SALTABLE EN EL METRO d.
+//
+// Aqui habia un hueco fijo de 4.5 a 6 m y estaba mal, porque el salto no mide
+// siempre lo mismo: cubre 6.8 m a 13 m/s y 15.1 m a 29, y la velocidad de este
+// juego la marcan los METROS recorridos. En una travesia de los primeros metros
+// de la carrera, un hueco de 6 m dejaba menos de una decima de segundo para
+// pulsar el salto -- medido, 89 ms --, que no lo acierta nadie.
+//
+// Pidiendo una FRACCION del alcance, lo que sale constante es lo unico que el
+// jugador nota: la ventana para pulsar, que queda entre dos y tres decimas de
+// segundo corra despacio o corra rapido. El hueco en metros cambia, y tiene que
+// cambiar: es lo que hace que la travesia se sienta igual de dificil a 13 que
+// a 29 m/s.
+function huecoSaltable(d) {
+  return alcanceSalto(d) * rf(0.42, 0.58)
+}
+
 function generaCrucero(z, ctx) {
   const { items, boats } = ctx
 
   z.muelleEnd = z.start + 34
-  const travesia = ri(140, 200)
-  z.boatsEnd = z.muelleEnd + travesia
+
+  /* ---------- LAS LANCHAS PRIMERO, Y LA ORILLA DONDE LAS DEJEN ----------
+
+    Antes era al reves: boatsEnd se fijaba de antemano (muelleEnd + travesia) y
+    la cadena de lanchas paraba donde le tocara, asi que lo que sobraba entre la
+    ultima lancha y la orilla era lo que quedara -- medido, hasta 13.5 m cuando
+    el salto alcanzaba 11.4. Ese salto no se puede dar, y con una sola vida un
+    salto que no se puede dar es la carrera entera. Es justo lo que pasaba al
+    llegar al crucero.
+
+    Ahora la travesia pedida es un objetivo, no un limite: se van poniendo
+    lanchas hasta acercarse a el y el final de la travesia sale de la ULTIMA,
+    dejando el mismo hueco que hay entre dos lanchas cualesquiera. No sobra mar.
+  */
+  const objetivo = z.muelleEnd + ri(140, 200)
+  const cadena = []
+  let d = z.muelleEnd
+  let lane = 1
+  let hueco = 0
+  while (d + BOAT_LEN <= objetivo) {
+    cadena.push({ d0: d, lane })
+    // El carril cambia, pero nunca dos carriles de golpe -- eso pedia saltar y
+    // cruzar la pista entera en el mismo vuelo.
+    const otros = [lane - 1, lane + 1].filter((l) => l >= 0 && l <= 2)
+    lane = R() < 0.25 ? lane : pick(otros)
+    hueco = huecoSaltable(d + BOAT_LEN)
+    d += BOAT_LEN + hueco
+  }
+  const finUltima = cadena[cadena.length - 1].d0 + BOAT_LEN
+  z.boatsEnd = finUltima + hueco + ORILLA_MOJADA
+
   z.rampEnd = z.boatsEnd + 38
   z.downStart = z.rampEnd + ri(150, 250)
   z.downEnd = z.downStart + 30
@@ -1394,26 +1496,20 @@ function generaCrucero(z, ctx) {
   // fondo del mar durante la travesia, pasarela a cubierta y desembarco.
   perfil(z.muelleEnd - 0.6, 0)
   perfil(z.muelleEnd, SEA_FLOOR)
-  perfil(z.boatsEnd - 8, SEA_FLOOR)
+  perfil(z.boatsEnd - ORILLA, SEA_FLOOR)
   perfil(z.boatsEnd, 0)
   perfil(z.rampEnd, DECK_Y)
   perfil(z.downStart, DECK_Y)
   perfil(z.downEnd, 0)
   perfil(z.end, 0)
 
-  // Cadena de lanchas: cada una ocupa UN carril y entre una y otra hay mar
-  // abierto, asi que no basta con saltar el hueco: hay que caer en el carril
-  // donde esta la siguiente. El carril cambia, pero nunca dos carriles de golpe
-  // -- eso pedia saltar y cruzar la pista entera en el mismo vuelo.
-  let d = z.muelleEnd
-  let lane = 1
-  while (d + BOAT_LEN < z.boatsEnd) {
-    boats.push({ d: d + BOAT_LEN / 2, len: BOAT_LEN, lane, dy: 0 })
-    items.push({ d: d + 4, lane, kind: 'good', dy: 0, label: palabra(z.key, true) })
-    items.push({ d: d + 9.5, lane, kind: 'good', dy: 0, label: palabra(z.key, true) })
-    const salto = [lane - 1, lane, lane + 1].filter((l) => l >= 0 && l <= 2 && l !== lane)
-    lane = R() < 0.25 ? lane : pick(salto)
-    d += BOAT_LEN + rf(4.5, 6)
+  // Cada lancha ocupa UN carril y entre una y otra hay mar abierto, asi que no
+  // basta con saltar el hueco: hay que caer en el carril donde esta la
+  // siguiente.
+  for (const b of cadena) {
+    boats.push({ d: b.d0 + BOAT_LEN / 2, len: BOAT_LEN, lane: b.lane, dy: 0 })
+    items.push({ d: b.d0 + 4, lane: b.lane, kind: 'good', dy: 0, label: palabra(z.key, true) })
+    items.push({ d: b.d0 + 9.5, lane: b.lane, kind: 'good', dy: 0, label: palabra(z.key, true) })
   }
 
   // la pasarela es respiro: se sube sin nada que esquivar, con valores en fila
@@ -1563,6 +1659,10 @@ function generaAstillero(z, ctx) {
 function generaZona() {
   const zi = siguienteZona()
   const zone = ZONES[zi]
+  // El portico y el cambio de paisaje tienen que caer en el mismo metro: ver
+  // alineaFranja. Lo que se anade son unos pocos metros de la terminal
+  // anterior, que ya acaba llana.
+  built = alineaFranja(built)
   const z = {
     i: CHAIN.length,
     key: zone.key,

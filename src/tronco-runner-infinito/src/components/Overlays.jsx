@@ -327,7 +327,7 @@ function Intro() {
         <h1 className="title">
           TERMINAL <span className="title-accent">RALLY</span>
         </h1>
-        <p className="title-sub">INFINITO</p>
+        <p className="title-sub">2.0</p>
         <p className="subtitle">Una vida. Sin meta. Corre hasta donde aguantes.</p>
         <PadBadge pad={pad} />
 

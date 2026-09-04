@@ -3,14 +3,13 @@ import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { useGame } from '../store'
 import { scroll } from '../runtime'
-import { SEGMENT_LENGTH as L, NUM_SEGMENTS, LANES, COLORS } from '../constants'
+import { SEGMENT_LENGTH as L, SEGMENT_START as START, NUM_SEGMENTS, LANES, COLORS } from '../constants'
 import { ZONES, zoneKeyAt, shipRange, cruStage, astStage, deckAt, DECK_Y, DOCK_Y } from '../course'
 import { useGameTextures, tiledTexture } from '../textures'
 import { QUALITY } from '../quality'
 import { mergeParts } from '../merge'
 import { bakedDetail } from '../detail'
 
-const START = 16 // borde frontal del segmento k=0 cuando scroll=0
 
 
 function mulberry32(a) {
