@@ -1,0 +1,1798 @@
+:root {
+  --bg: #04122b;
+  --navy: #002e6d;
+  --sky: #009bde;
+  --neon: #35d3ff;
+  --good: #2ee06f;
+  --bad: #ff4757;
+  --amber: #ffc627;
+  --panel: rgba(4, 18, 43, 0.92);
+  --border: rgba(53, 211, 255, 0.35);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: 'Montserrat', sans-serif;
+  color: #fff;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: none;
+}
+
+.app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.app canvas {
+  display: block;
+}
+
+/* Viñeta: oscurece esquinas y periferia para que la vista caiga sola sobre
+   los tres carriles. Va sobre el canvas y por debajo del HUD. */
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 78% 68% at 50% 52%, rgba(4, 18, 43, 0) 55%, rgba(4, 18, 43, 0.55) 100%),
+    linear-gradient(to bottom, rgba(4, 18, 43, 0.35) 0%, rgba(4, 18, 43, 0) 18%);
+}
+
+/* ---------- HUD ---------- */
+
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Cartel de zona: entra al cruzar el limite y se va solo. Va bajo los chips y
+   sobre el carril, pero solo 2.4 s y con el centro de la pista despejado. */
+.zone-card {
+  position: absolute;
+  top: 22%;
+  left: 50%;
+  width: min(640px, 90vw);
+  transform: translateX(-50%);
+  text-align: center;
+  padding: 12px 26px;
+  /* panel opaco a proposito: sobre el cielo del atardecer un fondo traslucido
+     dejaba el texto ilegible justo en el momento que hay que leerlo */
+  background: linear-gradient(160deg, rgba(4, 18, 43, 0.97), rgba(0, 46, 109, 0.92));
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: 3px solid var(--zone);
+  box-shadow: 0 18px 46px rgba(4, 18, 43, 0.6);
+  clip-path: polygon(18px 0, 100% 0, calc(100% - 18px) 100%, 0 100%);
+  animation: zoneIn 2.4s ease forwards;
+}
+
+.zone-n {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: var(--zone);
+}
+
+.zone-name {
+  display: block;
+  margin: 4px 0 2px;
+  font-size: clamp(19px, 3.1vw, 32px);
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  color: #fff;
+}
+
+.zone-tag {
+  display: block;
+  font-size: clamp(12px, 1.6vw, 16px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+@keyframes zoneIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.92);
+  }
+  12%,
+  62% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(1.03);
+  }
+}
+
+.chips {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+}
+
+.chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 110px;
+  padding: 8px 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+
+.chip-accent {
+  border-color: var(--amber);
+  background: linear-gradient(160deg, rgba(0, 46, 109, 0.95), rgba(4, 18, 43, 0.95));
+}
+
+.chip-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--neon);
+}
+
+.chip-accent .chip-label {
+  color: var(--amber);
+}
+
+.chip-value {
+  font-size: 22px;
+  font-weight: 800;
+  font-style: italic;
+  line-height: 1;
+}
+
+/* ---------- Racha, casco y record ----------
+   Los tres viven bajo las cifras y NO entre ellas: no son datos que se
+   consulten, son avisos que aparecen cuando hay algo que ganar o que perder.
+   Con la racha a cero y sin casco, el HUD vuelve a estar callado, que es como
+   tiene que estar la mayor parte del tiempo. */
+
+.streak {
+  position: absolute;
+  top: 74px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 14px;
+  background: rgba(4, 18, 43, 0.8);
+  border: 1px solid var(--border);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+/* con multiplicador vivo la pastilla se enciende: es la senal de que hay algo
+   que perder si se toca una roja */
+.streak-on {
+  border-color: var(--amber);
+  background: rgba(255, 198, 39, 0.16);
+  box-shadow: 0 0 18px rgba(255, 198, 39, 0.25);
+}
+
+.streak-mult {
+  font-size: 20px;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1;
+  color: var(--good);
+  /* la key del elemento cambia al subir de escalon, asi que la animacion se
+     dispara sola en cada x2 y x3 sin tocar javascript */
+  animation: multPop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.streak-on .streak-mult {
+  color: var(--amber);
+}
+
+@keyframes multPop {
+  0% {
+    transform: scale(2.1);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.streak-txt {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9fb6d0;
+}
+
+.float-mult {
+  margin-left: 6px;
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--amber);
+}
+
+.shield-tag {
+  position: absolute;
+  top: 74px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--sky);
+  background: rgba(0, 155, 222, 0.14);
+  border: 1px solid rgba(0, 155, 222, 0.55);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+/* el casco dibujado, no un icono generico de escudo: es la misma silueta que
+   se recoge en pista y la que lleva puesta el corredor */
+.shield-ico {
+  width: 15px;
+  height: 11px;
+  border-radius: 8px 8px 2px 2px;
+  background: #f4f6f8;
+  box-shadow: 0 3px 0 -1px rgba(244, 246, 248, 0.85);
+}
+
+.record-tag {
+  position: absolute;
+  top: 74px;
+  right: 16px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #9fb6d0;
+  background: rgba(4, 18, 43, 0.8);
+  border: 1px solid var(--border);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.record-tag b {
+  color: var(--amber);
+  font-weight: 900;
+}
+
+/* El cartel de record batido entra de golpe y se va solo a los dos segundos y
+   medio. Se queria dejar puesto -- en una carrera sin final es el unico momento
+   que hay que celebrar --, pero una carrera sin final puede durar minutos y el
+   cartel acababa tapando la pista el resto de la partida. Que se vaya solo lo
+   deja siendo un momento en vez de un adorno permanente. */
+.record-hit {
+  position: absolute;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 22px;
+  font-size: 19px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  color: #04122b;
+  background: var(--amber);
+  clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+  animation: recordPop 0.6s cubic-bezier(0.2, 1.6, 0.4, 1), recordOut 0.5s 2.4s ease-in forwards;
+}
+
+@keyframes recordPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 16px) scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+@keyframes recordOut {
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -18px) scale(0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .streak-mult {
+    animation: none;
+  }
+  /* el cartel de record conserva SOLO la salida: sin ella se quedaria puesto
+     para siempre, que es peor que una animacion corta */
+  .record-hit {
+    animation: recordOut 0.5s 2.4s ease-in forwards;
+  }
+}
+
+.help-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  pointer-events: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--neon);
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.help-btn:hover {
+  background: rgba(0, 155, 222, 0.25);
+}
+
+.float-msg {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  transform: translateX(-50%);
+  font-size: 22px;
+  font-weight: 800;
+  font-style: italic;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  animation: floatUp 0.9s ease-out forwards;
+  white-space: nowrap;
+}
+
+.float-msg.good {
+  color: var(--good);
+}
+
+.float-msg.bad {
+  color: var(--bad);
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 14px);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -46px);
+  }
+}
+
+.bad-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(255, 71, 87, 0.4));
+  animation: flashOut 0.45s ease-out forwards;
+}
+
+@keyframes flashOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---------- Overlays ---------- */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 8, 20, 0.72);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  padding: 18px;
+}
+
+/* La cuenta atras: transparente y sin capturar el raton, porque debajo esta el
+   juego a punto de arrancar. En columna desde que puede llevar encima el
+   cartel de la revancha; con la fila que hereda de .overlay, el nombre del
+   rival se plantaba AL LADO del numero. */
+.overlay-clear {
+  flex-direction: column;
+  background: transparent;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+
+.panel {
+  width: min(560px, 94vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 30px 34px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--sky);
+  box-shadow: 0 0 60px rgba(0, 155, 222, 0.25);
+  clip-path: polygon(22px 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%, 0 22px);
+  text-align: center;
+}
+
+.kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--neon);
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: 34px;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+}
+
+.title-accent {
+  color: var(--sky);
+}
+
+.title-sm {
+  font-size: 26px;
+  margin-bottom: 14px;
+}
+
+.subtitle {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--amber);
+}
+
+/* INFINITO va debajo del titulo y no dentro: el nombre del juego sigue siendo
+   Terminal Rally y lo que hay que leer aparte es en que se diferencia. */
+.title-sub {
+  margin-top: 2px;
+  font-size: 20px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.28em;
+  color: var(--good);
+}
+
+/* Contra que se acabo la carrera. Va arriba del puntaje porque con una sola
+   vida es lo primero que quiere saber el que acaba de perder. */
+.causa {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #c9d7e8;
+}
+
+.record-final {
+  margin-top: 8px;
+  padding: 6px 16px;
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.1em;
+  color: #04122b;
+  background: var(--amber);
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+
+.causa b {
+  color: var(--bad);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.mission {
+  margin: 14px auto 4px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #cfe0f2;
+  max-width: 44ch;
+}
+
+/* ---------- Instrucciones ----------
+   El briefing se parece al juego: la ficha esta dibujada, los iconos se mueven
+   como el movimiento que piden y cada renglon es una orden corta. Antes era una
+   lista de ocho parrafos que nadie se paraba a leer delante del stand. */
+
+.howto {
+  text-align: left;
+  margin: 14px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Tres carriles con el trazo discontinuo corriendo hacia el jugador. Puro
+   adorno, pero pone al que lee delante de la pista antes de leer nada. Sin
+   perspectiva 3D a proposito: aplastaba las rayas contra el borde de arriba y
+   no se leia ningun carril. */
+.track {
+  position: relative;
+  height: 52px;
+  overflow: hidden;
+  /* asfalto, los dos bordes de la pista y el resplandor del centro: la tira
+     tiene que leerse como pista aunque este quieta */
+  background:
+    linear-gradient(to right, transparent 5%, rgba(255, 255, 255, 0.5) 5%, rgba(255, 255, 255, 0.5) calc(5% + 2px), transparent calc(5% + 2px)),
+    linear-gradient(to right, transparent 95%, rgba(255, 255, 255, 0.5) 95%, rgba(255, 255, 255, 0.5) calc(95% + 2px), transparent calc(95% + 2px)),
+    radial-gradient(ellipse 70% 130% at 50% 50%, rgba(0, 155, 222, 0.3), transparent 72%),
+    linear-gradient(to bottom, rgba(10, 30, 62, 0.95), rgba(0, 46, 109, 0.7));
+  border-top: 1px solid rgba(53, 211, 255, 0.3);
+  border-bottom: 1px solid rgba(53, 211, 255, 0.3);
+  /* los bordes se difuminan para que la pista no arranque de golpe */
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+}
+
+.track-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.8) 0 14px,
+    transparent 14px 26px
+  );
+  animation: dash 0.5s linear infinite;
+}
+
+.track-line:nth-child(1) {
+  left: 33%;
+}
+
+.track-line:nth-child(2) {
+  left: 67%;
+}
+
+@keyframes dash {
+  to {
+    background-position-y: 26px;
+  }
+}
+
+/* Las dos fichas del juego bajando por sus carriles. Es la unica parte de las
+   instrucciones que se mueve como se mueve el juego. */
+.track-chip {
+  position: absolute;
+  top: -14px;
+  width: 13px;
+  height: 15px;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  animation: drop 2.4s linear infinite;
+  /* delay negativo: al abrir el briefing ya hay una ficha en pista en vez de
+     una tira vacia esperando a que entre la primera */
+  animation-delay: -0.9s;
+}
+
+.track-chip-good {
+  left: 16%;
+  background: var(--good);
+  box-shadow: 0 0 12px rgba(46, 224, 111, 0.8);
+}
+
+.track-chip-bad {
+  left: 82%;
+  background: var(--bad);
+  box-shadow: 0 0 12px rgba(255, 71, 87, 0.8);
+  animation-delay: -2.1s;
+}
+
+@keyframes drop {
+  to {
+    transform: translateY(80px);
+  }
+}
+
+.how-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* el titulo hace de separador: linea fina a la derecha para que la vista salte
+   de bloque en bloque sin tener que leer el contenido */
+.how-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--neon);
+}
+
+.how-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+}
+
+.how-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.how-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 14px 8px 10px;
+  text-align: center;
+  background: rgba(0, 46, 109, 0.45);
+  border: 1px solid var(--border);
+  clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px);
+}
+
+/* numero de paso en la esquina: da orden de lectura sin gastar un renglon */
+.how-step {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  font-size: 15px;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1;
+  color: rgba(53, 211, 255, 0.35);
+}
+
+.how-card b {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+}
+
+.how-glyph {
+  width: 28px;
+  height: 24px;
+  color: var(--sky);
+}
+
+/* La flecha de la tarjeta dice el movimiento; el color lo empareja con el
+   boton del mando que hay que apretar, que es lo que se ve en pista. */
+.glyph-jump {
+  color: #6ac72f;
+}
+
+.glyph-roll {
+  color: #e5342b;
+}
+
+/* Cada icono se mueve como el movimiento que pide: la flecha de salto rebota,
+   la de rodar cae y gira, y las de carril van y vienen. Es lo que convierte la
+   tarjeta en una demostracion en vez de una etiqueta. */
+.anim-jump {
+  animation: hop 1.5s ease-in-out infinite;
+}
+
+.anim-roll {
+  animation: tuck 1.7s ease-in-out infinite;
+}
+
+.anim-lane {
+  animation: sway 1.9s ease-in-out infinite;
+}
+
+@keyframes hop {
+  0%,
+  55%,
+  100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-7px);
+  }
+  40% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes tuck {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  30% {
+    transform: translateY(6px) scaleY(0.62);
+  }
+}
+
+@keyframes sway {
+  0%,
+  100% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+}
+
+/* quien pidio menos movimiento no tiene por que aguantar tres bucles a la vez */
+@media (prefers-reduced-motion: reduce) {
+  .anim-jump,
+  .anim-roll,
+  .anim-lane,
+  .track-line,
+  .track-chip {
+    animation: none;
+  }
+}
+
+/* Que recoger: las dos fichas del juego, a tamano de verse, con la orden en
+   grande. La palabra "hexagono" sobra si el hexagono esta ahi dibujado. */
+.loot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.loot-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 2px 10px;
+  padding: 10px 12px;
+  clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px);
+}
+
+.loot-good {
+  background: rgba(46, 224, 111, 0.12);
+  border: 1px solid rgba(46, 224, 111, 0.45);
+}
+
+.loot-bad {
+  background: rgba(255, 71, 87, 0.1);
+  border: 1px solid rgba(255, 71, 87, 0.45);
+}
+
+.chip-ico {
+  grid-row: span 2;
+  width: 34px;
+  height: 38px;
+}
+
+.chip-good {
+  color: var(--good);
+}
+
+.chip-bad {
+  color: var(--bad);
+}
+
+.loot-card b {
+  align-self: end;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.loot-val {
+  align-self: start;
+  font-size: 17px;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1;
+}
+
+.loot-good .loot-val {
+  color: var(--good);
+}
+
+.loot-bad .loot-val {
+  color: var(--bad);
+}
+
+.loot-tags {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+/* Lo que sale al paso: icono, orden y lo que cuesta fallarla, en tres columnas
+   fijas. La columna de la derecha se puede leer sola. */
+.cues {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: #e6eefb;
+}
+
+.cues li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 10px;
+  background: rgba(0, 46, 109, 0.32);
+  clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
+}
+
+.cues li span:nth-child(2) {
+  flex: 1;
+}
+
+.cue-ico {
+  flex: none;
+  width: 18px;
+  height: 16px;
+}
+
+/* lo que cierra el carril no lleva boton: en la lista tampoco, se dibuja como
+   el bloque macizo que es */
+.cue-block {
+  height: 13px;
+  background: repeating-linear-gradient(-45deg, #cfe0f2 0 3px, rgba(207, 224, 242, 0.25) 3px 6px);
+}
+
+.cue-water {
+  height: 12px;
+  background: linear-gradient(to bottom, transparent 45%, rgba(53, 211, 255, 0.85) 45%);
+  border-bottom: 2px solid var(--sky);
+}
+
+.cue-bonus {
+  height: 14px;
+  background: linear-gradient(to bottom, var(--amber) 0 3px, transparent 3px 100%);
+  border-left: 3px solid rgba(255, 198, 39, 0.6);
+  border-right: 3px solid rgba(255, 198, 39, 0.6);
+}
+
+/* El camion se dibuja de perfil y con la rampa: la rampa es la instruccion
+   entera, porque es por donde se sube. */
+.cue-truck {
+  height: 14px;
+  background:
+    linear-gradient(to top right, transparent 48%, var(--amber) 48% 62%, transparent 62%) left / 40% 100% no-repeat,
+    linear-gradient(#cfe0f2, #cfe0f2) right / 58% 72% no-repeat;
+  background-position: left bottom, right top;
+}
+
+/* El casco: la misma silueta que se recoge en pista */
+.cue-shield {
+  height: 12px;
+  border-radius: 9px 9px 2px 2px;
+  background: #f4f6f8;
+  box-shadow: 0 3px 0 -1px rgba(244, 246, 248, 0.8);
+}
+
+/* El record: la raya del suelo con sus dos postes */
+.cue-record {
+  height: 14px;
+  background:
+    linear-gradient(var(--amber), var(--amber)) center bottom / 100% 4px no-repeat,
+    linear-gradient(#dfe6ec, #dfe6ec) left top / 3px 100% no-repeat,
+    linear-gradient(#dfe6ec, #dfe6ec) right top / 3px 100% no-repeat;
+}
+
+/* El gancho: un cable que baja y termina en curva */
+.cue-hook {
+  height: 16px;
+  background:
+    linear-gradient(#8fa9c8, #8fa9c8) center top / 2px 60% no-repeat,
+    radial-gradient(circle at 50% 100%, transparent 38%, var(--amber) 38% 58%, transparent 58%) center bottom /
+      14px 9px no-repeat;
+}
+
+.cue-cost {
+  flex: none;
+  font-size: 11px;
+  font-weight: 900;
+  font-style: italic;
+  color: var(--bad);
+}
+
+.cost-good {
+  color: var(--amber);
+}
+
+.how-foot {
+  font-size: 11px;
+  color: #8fa9c8;
+  font-style: italic;
+}
+
+.how-goal {
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 13px;
+  color: #e6eefb;
+  background: rgba(0, 155, 222, 0.12);
+  border-left: 2px solid var(--sky);
+}
+
+.how-goal b {
+  color: var(--amber);
+}
+
+/* La regla de la vida unica no es un renglon mas: es la que cambia como se
+   juega respecto al Terminal Rally por tiempo, asi que se pinta en rojo. */
+.how-goal-life {
+  background: rgba(255, 71, 87, 0.12);
+  border-left-color: var(--bad);
+}
+
+.how-goal-life b:first-child {
+  color: var(--bad);
+}
+
+/* ---------- Piezas del mando ----------
+   En el congreso se juega con mando casi siempre, asi que las instrucciones
+   enseñan el boton con su color de verdad y el teclado queda de pie de linea. */
+
+.pad-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.pad-face {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+  /* el circulo tiene que verse como una tecla fisica, no como una pegatina */
+  box-shadow:
+    inset 0 -2px 0 rgba(0, 0, 0, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+/* En la lista de "lo que te sale al paso" el boton ocupa el sitio del icono,
+   asi que va al tamano del icono y no al de las tarjetas. */
+.pad-face-sm {
+  flex: none;
+  width: 19px;
+  height: 19px;
+  font-size: 11px;
+}
+
+/* Cruceta dibujada entera con los brazos que valen encendidos: medio jugador
+   busca la cruz en el mando, no la palabra "cruceta". */
+.dpad {
+  position: relative;
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+}
+
+.dpad-arm {
+  position: absolute;
+  background: rgba(207, 224, 242, 0.28);
+}
+
+.dpad-arm[data-d='up'],
+.dpad-arm[data-d='down'] {
+  left: 9px;
+  width: 8px;
+  height: 10px;
+}
+
+.dpad-arm[data-d='up'] {
+  top: 0;
+}
+
+.dpad-arm[data-d='down'] {
+  bottom: 0;
+}
+
+.dpad-arm[data-d='left'],
+.dpad-arm[data-d='right'] {
+  top: 9px;
+  width: 10px;
+  height: 8px;
+}
+
+.dpad-arm[data-d='left'] {
+  left: 0;
+}
+
+.dpad-arm[data-d='right'] {
+  right: 0;
+}
+
+.dpad-on {
+  background: var(--neon);
+  box-shadow: 0 0 8px rgba(53, 211, 255, 0.7);
+}
+
+.dpad-hub {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  background: rgba(207, 224, 242, 0.28);
+}
+
+.bumper {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 9px;
+  background: rgba(207, 224, 242, 0.18);
+  border: 1px solid rgba(207, 224, 242, 0.4);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #eaf2ff;
+}
+
+/* el teclado no desaparece, pero pasa a ser la alternativa */
+.alt-keys {
+  font-size: 10px;
+  font-style: italic;
+  color: #8fa9c8;
+}
+
+.how-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.how-keys i {
+  padding: 1px 6px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  color: #cfe0f2;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: rgba(0, 155, 222, 0.15);
+  white-space: nowrap;
+}
+
+.key-hint {
+  display: inline-block;
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: rgba(0, 155, 222, 0.15);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.txt-good {
+  color: var(--good);
+}
+
+.txt-bad {
+  color: var(--bad);
+}
+
+.txt-amber {
+  color: var(--amber);
+}
+
+.tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 4px 9px;
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+.tag-good {
+  background: rgba(46, 224, 111, 0.16);
+  color: var(--good);
+  border: 1px solid rgba(46, 224, 111, 0.5);
+}
+
+.tag-bad {
+  background: rgba(255, 71, 87, 0.14);
+  color: var(--bad);
+  border: 1px solid rgba(255, 71, 87, 0.5);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-ghost {
+  font-family: inherit;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  border: none;
+  clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+}
+
+.btn-primary {
+  padding: 14px 46px;
+  font-size: 17px;
+  color: #fff;
+  background: linear-gradient(120deg, var(--sky), #006bb8);
+  box-shadow: 0 0 24px rgba(0, 155, 222, 0.5);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.15);
+}
+
+.btn-secondary {
+  padding: 10px 22px;
+  font-size: 14px;
+  color: #04122b;
+  background: var(--amber);
+}
+
+/* deshabilitado: navy apagado en vez de ambar translucido, que sobre el panel
+   daba un verde oliva que no se parece a nada del juego */
+.btn-secondary:disabled {
+  color: #6f86a3;
+  background: rgba(0, 46, 109, 0.7);
+  cursor: default;
+}
+
+/* sin borde a proposito: clip-path recorta el trazo y dejaba una linea suelta
+   por encima del texto. El fondo si sigue la silueta biselada. */
+.btn-ghost {
+  padding: 12px 18px;
+  font-size: 14px;
+  color: var(--neon);
+  background: rgba(0, 46, 109, 0.75);
+}
+
+.btn-ghost:hover {
+  background: rgba(0, 155, 222, 0.32);
+}
+
+/* en la fila de acciones el principal se mide para que los tres botones del
+   final de partida quepan en un renglon */
+.btn-row .btn-primary {
+  padding: 12px 22px;
+  font-size: 15px;
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* JUGAR de la portada: es la unica accion que hace falta entender para empezar,
+   asi que va sola y en grande, y lo demas queda como accion secundaria. */
+.btn-hero {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 4px auto 0;
+  padding: 16px 0;
+  font-size: 20px;
+}
+
+/* Rotulo del briefing: las instrucciones no son una pantalla del menu, son el
+   paso previo a la carrera, y esto es lo que lo dice. */
+.brief-kicker {
+  margin-top: 14px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+/* Los datos de la carrera de un vistazo, en lugar de escondidos en la ultima
+   linea de las instrucciones. */
+.facts {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 16px 0 18px;
+}
+
+.fact {
+  flex: 1;
+  max-width: 120px;
+  padding: 8px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8fa9c8;
+  background: rgba(0, 46, 109, 0.45);
+  border: 1px solid var(--border);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.fact b {
+  display: block;
+  font-size: 22px;
+  font-style: italic;
+  letter-spacing: 0;
+  color: var(--amber);
+}
+
+.count {
+  font-size: clamp(90px, 22vw, 190px);
+  font-weight: 900;
+  font-style: italic;
+  color: var(--neon);
+  text-shadow: 0 0 50px rgba(53, 211, 255, 0.8);
+  animation: countPop 0.7s ease-out;
+}
+
+@keyframes countPop {
+  0% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ---------- Game over ---------- */
+
+.score-big {
+  font-size: 72px;
+  font-weight: 900;
+  font-style: italic;
+  color: var(--amber);
+  line-height: 1;
+  margin: 8px 0 2px;
+  text-shadow: 0 0 40px rgba(255, 198, 39, 0.4);
+}
+
+.score-unit {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  color: #cfe0f2;
+  margin-top: 4px;
+}
+
+.rank {
+  font-size: 18px;
+  font-weight: 800;
+  font-style: italic;
+  color: var(--good);
+  margin: 10px 0 4px;
+}
+
+.rank-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: #8fa9c8;
+  margin-top: 12px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 14px 0 16px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 4px;
+  background: rgba(0, 46, 109, 0.4);
+  border: 1px solid var(--border);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.stat b {
+  font-size: 20px;
+  font-weight: 800;
+  font-style: italic;
+  line-height: 1;
+}
+
+.stat i {
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8fa9c8;
+}
+
+/* ---------- Mando ---------- */
+
+/* Cursor de la rejilla de menus. Casi todos los botones del juego llevan
+   clip-path y clip-path recorta outline y box-shadow, asi que la senal fuerte
+   la dan el brillo, la escala y un drop-shadow: filter se aplica DESPUES del
+   recorte, asi que el halo sigue la silueta biselada en vez de un rectangulo. */
+.gp-cursor {
+  outline: 2px solid var(--neon);
+  outline-offset: 2px;
+  filter: brightness(1.22) drop-shadow(0 0 10px rgba(53, 211, 255, 0.8));
+  transform: scale(1.05);
+  position: relative;
+  z-index: 2;
+  transition:
+    transform 0.08s ease,
+    filter 0.08s ease;
+}
+
+.pad-badge {
+  margin-top: 9px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--good);
+}
+
+.pad-badge b {
+  display: inline-block;
+  min-width: 18px;
+  padding: 1px 5px;
+  border: 1px solid rgba(46, 224, 111, 0.6);
+  border-radius: 4px;
+  background: rgba(46, 224, 111, 0.15);
+}
+
+/* ---------- Panel de diagnostico (?gamepad=debug) ---------- */
+
+.gp-debug {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 50;
+  width: 300px;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 12px 14px;
+  background: rgba(2, 8, 20, 0.94);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.gp-debug h4 {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--neon);
+  margin-bottom: 8px;
+}
+
+.gp-debug dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+}
+
+.gp-debug dt {
+  color: #8fa9c8;
+}
+
+.gp-debug dd {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.gp-debug .mono {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-weight: 500;
+}
+
+.gp-debug .ok {
+  color: var(--good);
+}
+
+.gp-debug .ko {
+  color: var(--bad);
+}
+
+.gp-debug .warn {
+  color: var(--amber);
+}
+
+.gp-note {
+  margin-top: 8px;
+  padding: 7px 9px;
+  background: rgba(255, 71, 87, 0.12);
+  border-left: 2px solid var(--bad);
+  line-height: 1.45;
+}
+
+.gp-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 10px;
+}
+
+.gp-b {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 34px;
+  padding: 3px 4px;
+  font-size: 9px;
+  line-height: 1.25;
+  color: #8fa9c8;
+  background: rgba(0, 46, 109, 0.45);
+  border: 1px solid transparent;
+}
+
+.gp-b b {
+  font-size: 11px;
+  color: #fff;
+}
+
+.gp-b.on {
+  color: #04122b;
+  background: var(--neon);
+  border-color: #fff;
+}
+
+.gp-b.on b {
+  color: #04122b;
+}
+
+.gp-axes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 8px;
+  font-size: 10px;
+  color: #8fa9c8;
+}
+
+@media (max-width: 640px) {
+  .key {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .key-wide {
+    padding: 0 9px;
+    font-size: 10px;
+  }
+
+  .unit {
+    min-width: 54px;
+    padding: 7px 8px;
+    font-size: 11px;
+  }
+
+  .gp-debug {
+    width: min(300px, 92vw);
+  }
+
+  .chip {
+    min-width: 84px;
+    padding: 6px 12px;
+  }
+
+  .chip-value {
+    font-size: 17px;
+  }
+
+  .panel {
+    padding: 22px 18px;
+  }
+
+  .how-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .how-card {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 9px 12px;
+  }
+
+  .how-card b {
+    flex: 1;
+  }
+
+  .facts {
+    gap: 6px;
+  }
+
+  .stat b {
+    font-size: 17px;
+  }
+
+  .title {
+    font-size: 26px;
+  }
+
+  .score-big {
+    font-size: 56px;
+  }
+}
+
+/* Codigo de color de las senales de obstaculo: el mismo de los botones que
+   flotan en pista, para que la instruccion y el juego digan lo mismo. */
+.txt-cue-jump {
+  color: #6ac72f;
+}
+.txt-cue-roll {
+  color: #e5342b;
+}
+
+/* Panel de rendimiento (?perf). Fuera del flujo del HUD y sin transiciones:
+   tiene que costar cero en lo que esta midiendo. */
+.perf {
+  position: fixed;
+  left: 10px;
+  bottom: 10px;
+  z-index: 40;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(4, 18, 43, 0.82);
+  border: 1px solid rgba(53, 211, 255, 0.35);
+  color: #cfe8ff;
+  font: 12px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre;
+  pointer-events: none;
+}
+
+/* ---------- Reseñas ---------- */
+
+/* El modal va POR ENCIMA de la tarjeta final, que ya es un `.overlay` con
+   z-index 10. Se oscurece un poco más que aquel: si los dos velos pesaran lo
+   mismo, el de arriba no se distinguiría del de abajo y el modal parecería
+   pegado a la tarjeta en vez de estar delante. */
+.overlay-modal {
+  z-index: 20;
+  background: rgba(2, 8, 20, 0.82);
+}
+
+/* Más estrecho que el panel normal: aquí solo se piden dos cosas, y un panel
+   de 560 px con cinco estrellas dentro se lee como una pantalla a medio
+   llenar. */
+.panel-modal {
+  width: min(420px, 94vw);
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+.modal-sub {
+  margin: 6px 0 4px;
+  font-size: 12.5px;
+  color: #8fa9c8;
+}
+
+/* La estrella hereda el color del contorno; la encendida lo pisa. Así el mismo
+   dibujo sirve para leer y para pulsar sin dos svg distintos. */
+.star {
+  width: 100%;
+  height: 100%;
+  display: block;
+  color: rgba(53, 211, 255, 0.22);
+}
+
+.star-on {
+  color: var(--amber);
+}
+
+/* Estrellas de LECTURA, dentro de la lista: pequeñas y en línea con el nombre */
+.stars {
+  display: inline-flex;
+  gap: 2px;
+  flex: none;
+}
+
+.stars .star {
+  width: 13px;
+  height: 13px;
+}
+
+/* Estrellas de PULSAR. Grandes a propósito: es un objetivo táctil en un kiosco
+   y el que las toca lleva prisa. 44 px es el mínimo con el que un dedo acierta
+   sin mirar. */
+.stars-pick {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 14px 0 10px;
+}
+
+.star-btn {
+  width: 46px;
+  height: 46px;
+  padding: 6px;
+  background: rgba(0, 46, 109, 0.4);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    transform 0.1s ease;
+}
+
+.star-btn:hover {
+  background: rgba(0, 155, 222, 0.3);
+  transform: translateY(-2px);
+}
+
+.star-btn-on {
+  background: rgba(255, 198, 39, 0.14);
+  border-color: var(--amber);
+}
+
+.resena-texto {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #fff;
+  background: rgba(0, 46, 109, 0.4);
+  border: 1px solid var(--border);
+  outline: none;
+  resize: none;
+  /* El campo es opcional y se escribe con el dedo o con teclado físico, así que
+     se le devuelve la selección que el `body` le quita a todo el juego. */
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.resena-texto:focus {
+  border-color: var(--sky);
+}
+
+.resena-cuenta {
+  margin: 4px 0 10px;
+  text-align: right;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  color: #8fa9c8;
+}
+
+/* La llamada a opinar, entre la tabla de puntos y la de reseñas */
+.resena-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0 4px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(53, 211, 255, 0.18);
+}
+
+.resena-gracias {
+  margin: 20px 0 4px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(53, 211, 255, 0.18);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--good);
+}
+
+/* La tabla de reseñas reaprovecha `.board` (misma cabecera, mismo ancho) y solo
+   cambia la lista: una reseña es una tarjeta de dos renglones, no una fila. */
+.resenas {
+  margin-top: 18px;
+}
+
+.resenas-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 34vh;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(53, 211, 255, 0.45) transparent;
+}
+
+.resenas-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.resenas-list::-webkit-scrollbar-thumb {
+  background: rgba(53, 211, 255, 0.45);
+}
+
+/* VA CALIFICADA CON `.resenas` Y NO SUELTA COMO `.resena`, y no es manía: la
+   reseña es un <li> dentro de un `.board`, y `.board li` —escrito para las
+   filas del marcador, que son cuatro celdas en línea— pesa más que una clase a
+   secas por llevar además el tipo de elemento. Suelta, la regla perdía y el
+   <li> seguía siendo un flex en fila: el comentario se pintaba AL LADO de las
+   estrellas, en una columna de cuatro caracteres, con el texto cayendo en
+   vertical. Aquí la reseña son dos renglones apilados. */
+.resenas .resena {
+  display: block;
+  padding: 8px 12px;
+  background: rgba(0, 46, 109, 0.35);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.resena-cab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resena-quien {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Sin nombre, la unidad se iría contra las estrellas: el hueco lo empuja el
+   propio renglón para que las etiquetas queden siempre a la derecha. */
+.resena-cab .punit {
+  margin-left: auto;
+}
+
+.resena-quien + .punit {
+  margin-left: 0;
+}
+
+/* El comentario en redonda y a la izquierda: es la única prosa de toda la
+   pantalla y centrarla la volvería un eslogan. */
+.resena-dice {
+  margin-top: 5px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  text-align: left;
+  color: #cfe0f2;
+  /* Una palabra de 140 caracteres sin espacios existe y rompe la tarjeta */
+  overflow-wrap: anywhere;
+}
