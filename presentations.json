@@ -1,6 +1,24 @@
 {
   "presentations": [
     {
+      "slug": "cierre-sap-s4hana",
+      "title": "Cierre del proyecto SAP S/4HANA",
+      "subtitle": "Meridian Motors Group — Unidad 5, UCC",
+      "description": "Presentación de cierre del proyecto ERP de la materia Evaluación y gestión de proyectos tecnológicos (Universidad Cristóbal Colón): implementación de SAP S/4HANA en 20 localidades de 3 continentes en 3 olas durante 2027. Recorre contexto, arquitectura en lenguaje de negocio, carta de autorización, olas de puesta en marcha, cronograma con costos, presupuesto final, matriz de viabilidad, resultados antes y después, riesgos gestionados, cierre administrativo y técnico, aprobación, lecciones aprendidas, creación de valor y reflexión final, con anexo de preguntas probables. 25 diapositivas en React + framer-motion con sistema de diseño IBM Carbon (IBM Plex, esquinas rectas, escala azul), tarjetas de capítulo por sección y transiciones de persiana, barrido, diagonal, empuje y zoom. Build de un solo HTML autocontenido.",
+      "date": "2026-11",
+      "tags": [
+        "UCC",
+        "SAP S/4HANA",
+        "ERP",
+        "Cierre de proyecto",
+        "IBM Carbon",
+        "React"
+      ],
+      "accent": "#0f62fe",
+      "theme": "cierre-sap-s4hana",
+      "path": "presentations/cierre-sap-s4hana/index.html"
+    },
+    {
       "slug": "filosofia-hp",
       "title": "Introducción a la Filosofía Hutchison Ports",
       "subtitle": "Módulo 1 — Fundamentos de la cultura organizacional",

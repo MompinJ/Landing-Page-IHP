@@ -2319,3 +2319,52 @@ code {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation: none !important; }
   .hub-grid > .hub-card { transform: none; }
 }
+
+/* ============================================================
+   TEMA: cierre-sap-s4hana — IBM CARBON CORPORATIVO
+   azul 100 de fondo, Plex light, esquinas rectas, rejilla 2x
+   ============================================================ */
+.hub-card[data-theme="cierre-sap-s4hana"] {
+  --card-accent: #0f62fe;
+  border: none;
+  border-radius: 0;
+  box-shadow: 9px 9px 0 #0f62fe;
+  color: #ffffff;
+  background-color: #001141;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 32px 32px, 32px 32px;
+}
+.hub-card[data-theme="cierre-sap-s4hana"]:hover { box-shadow: 16px 16px 0 #4589ff; }
+.hub-card[data-theme="cierre-sap-s4hana"] .hub-card__title {
+  font-family: 'IBM Plex Sans', 'Inter', sans-serif;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+.hub-card[data-theme="cierre-sap-s4hana"] .hub-card__date,
+.hub-card[data-theme="cierre-sap-s4hana"] .hub-card__kind { font-family: 'IBM Plex Mono', monospace; color: #78a9ff; }
+.hub-card[data-theme="cierre-sap-s4hana"] .hub-card__kind::before { content: "CARBON // CIERRE ERP"; }
+.hub-card[data-theme="cierre-sap-s4hana"] .hub-card__subtitle { font-family: 'IBM Plex Sans', sans-serif; color: #a6c8ff; }
+.hub-card[data-theme="cierre-sap-s4hana"] .hub-card__desc { font-family: 'IBM Plex Sans', sans-serif; color: rgba(208,226,255,0.78); }
+.hub-card[data-theme="cierre-sap-s4hana"] .hub-card__tag {
+  font-family: 'IBM Plex Mono', monospace;
+  border: none;
+  border-radius: 0;
+  background: #0f62fe;
+  color: #ffffff;
+}
+.hub-card[data-theme="cierre-sap-s4hana"] .hub-card__arrow { color: #4589ff; }
+/* barra azul vertical, como la portada del deck */
+.hub-card[data-theme="cierre-sap-s4hana"] .hub-card__chrome {
+  top: 0; bottom: 0; left: 0;
+  width: 6px;
+  background: #0f62fe;
+}
+/* cuadro de marca inferior-derecho */
+.hub-card[data-theme="cierre-sap-s4hana"] .hub-card__deco {
+  bottom: 1.3rem; right: 1.3rem;
+  width: 14px; height: 14px;
+  background: #4589ff;
+}
