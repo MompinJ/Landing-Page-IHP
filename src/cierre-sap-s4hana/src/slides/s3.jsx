@@ -2,7 +2,9 @@ import { motion } from "framer-motion";
 import { FileCheck, Wrench, GraduationCap, BookOpen, LifeBuoy, Megaphone, ArrowRight, MessagesSquare } from "lucide-react";
 import { Slide, Item, Group, Counter, Bar, Draw, Meter, CheckBox, Icon, v, at, ease, easeInOut, SplitText } from "../ui.jsx";
 import * as D from "../data.js";
+import { Logo } from "../logo.jsx";
 import cierreImg from "../assets/cierre.jpg";
+import portadaImg from "../assets/portada.jpg";
 
 /* ================================================================ Cierre administrativo y tecnico */
 function CheckCard({ title, icon, items, dark, delay }) {
@@ -38,11 +40,11 @@ export function CierreAdminTec() {
 /* ================================================================ Aprobacion e informe final */
 export function Aprobacion() {
   return (
-    <Slide kicker="Cierre formal" title="Aprobación e informe final" subtitle="La firma del patrocinador cierra formalmente el proyecto">
+    <Slide kicker="Cierre formal" title="Cierre formal autorizado" subtitle={<>Se nos autorizó <b>el cierre formal del proyecto</b> y la entrega del informe final</>}>
       <Group stagger={0} style={{ position: "absolute", left: 120, top: 350, width: 660, height: 610 }}>
         <motion.div className="tile" variants={{ hidden: { opacity: 0, y: 70 }, show: { opacity: 1, y: 0, transition: { duration: 0.8, ease } } }} style={{ position: "absolute", inset: 0, padding: "48px 54px", borderTop: "8px solid var(--blue-60)" }}>
-          <div className="label">Meridian Motors Group</div>
-          <div style={{ font: "400 34px/1.2 var(--sans)", marginTop: 16 }}>Acta de aceptación final del proyecto</div>
+          <Logo width={150} tone="light" />
+          <div style={{ font: "400 34px/1.2 var(--sans)", marginTop: 22 }}>Autorización de cierre formal del proyecto</div>
           <div style={{ font: "400 17px/1 var(--mono)", color: "var(--gray-60)", marginTop: 14 }}>SAP S/4HANA · 17 dic 2027</div>
           <div style={{ marginTop: 40, display: "flex", flexDirection: "column", gap: 16 }}>
             {[92, 80, 88, 60, 84, 72, 50].map((w, i) => (
@@ -60,21 +62,24 @@ export function Aprobacion() {
           variants={{ hidden: { opacity: 0, scale: 2.6, rotate: -24 }, show: { opacity: 1, scale: 1, rotate: -10, transition: { delay: 2.5, type: "spring", stiffness: 420, damping: 20 } } }}
           style={{ position: "absolute", right: 40, bottom: 76, padding: "14px 30px", border: "5px solid var(--blue-60)", color: "var(--blue-60)", font: "600 50px/1 var(--sans)", letterSpacing: ".1em", background: "rgba(255,255,255,.85)" }}
         >
-          APROBADO
+          AUTORIZADO
         </motion.div>
       </Group>
 
       <Group stagger={0.15} delay={0.5} style={{ position: "absolute", left: 820, right: 120, top: 350, display: "flex", flexDirection: "column", gap: 2 }}>
-        <Item variants={v.right} className="tile" style={{ padding: "34px 44px" }}>
-          <div className="h3" style={{ marginBottom: 20 }}>Aprobación final del cliente</div>
-          <ul className="list">
+        <Item variants={v.right} className="tile" style={{ padding: "30px 44px" }}>
+          <div className="h3" style={{ marginBottom: 20 }}>Autorizaciones recibidas</div>
+          <Group stagger={0.15} delay={0.9} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {D.aprobacion.map((t) => (
-              <li key={t}>{t}</li>
+              <Item key={t} variants={v.left} style={{ display: "flex", alignItems: "center", gap: 16, font: "400 22px/1.3 var(--sans)" }}>
+                <CheckBox size={28} />
+                {t}
+              </Item>
             ))}
-          </ul>
+          </Group>
         </Item>
-        <Item variants={v.right} style={{ padding: "34px 44px", background: "var(--blue-100)", color: "#fff" }}>
-          <div className="h3" style={{ color: "#fff", marginBottom: 22 }}>Informe final: contenido</div>
+        <Item variants={v.right} style={{ padding: "30px 44px", background: "var(--blue-100)", color: "#fff" }}>
+          <div className="h3" style={{ color: "#fff", marginBottom: 20 }}>Informe final: contenido</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
             {D.informe.map(([k, d], i) => (
               <motion.div key={k} variants={at(1.0 + i * 0.12, "pop")} style={{ padding: "20px 24px", background: "rgba(255,255,255,.08)" }}>
@@ -82,6 +87,13 @@ export function Aprobacion() {
                 <div style={{ font: "400 18px/1.3 var(--sans)", color: "var(--blue-30)", marginTop: 6 }}>{d}</div>
               </motion.div>
             ))}
+          </div>
+        </Item>
+        <Item variants={v.right} className="tile" style={{ padding: "26px 44px", display: "flex", gap: 24, alignItems: "flex-start", borderLeft: "6px solid var(--gray-30)" }}>
+          <span className="tag light" style={{ flex: "none", marginTop: 2 }}>Siguiente paso</span>
+          <div>
+            <div style={{ font: "600 22px/1.2 var(--sans)" }}>Aprobación final del cliente</div>
+            <div style={{ font: "400 18px/1.4 var(--sans)", color: "var(--gray-70)", marginTop: 6 }}>{D.aprobacionCliente}</div>
           </div>
         </Item>
       </Group>
@@ -267,6 +279,40 @@ export function Compromisos() {
   );
 }
 
+/* ================================================================ Retroalimentacion del cierre */
+export function Retroalimentacion() {
+  return (
+    <Slide kicker="Retroalimentación" title="Lo que salió bien" subtitle="Retroalimentación del cierre para la compañía y el equipo">
+      <Group stagger={0.1} delay={0.4} style={{ position: "absolute", left: 120, top: 350, width: 1090, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2 }}>
+        {D.retroBien.map(([n, t], i) => (
+          <Item key={t} variants={v.up} className="tile" style={{ height: 250, padding: "30px 32px", display: "flex", flexDirection: "column", borderTop: "4px solid var(--blue-60)" }}>
+            <CheckBox size={30} delay={0.6 + i * 0.1} />
+            <div style={{ font: `300 ${n.length > 8 ? 46 : 58}px/1 var(--sans)`, letterSpacing: "-.02em", color: "var(--blue-80)", marginTop: "auto" }}>{n}</div>
+            <div style={{ font: "400 19px/1.35 var(--sans)", color: "var(--gray-80)", marginTop: 12 }}>{t}</div>
+          </Item>
+        ))}
+      </Group>
+      <Item variants={v.right} style={{ position: "absolute", left: 1250, right: 120, top: 350, height: 502, background: "var(--blue-100)", color: "#fff", overflow: "hidden" }}>
+        <div style={{ height: 170, position: "relative" }}>
+          <img src={portadaImg} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 35%" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,17,65,0) 40%, rgba(0,17,65,1) 100%)" }} />
+        </div>
+        <div style={{ padding: "6px 36px 30px" }}>
+          <div className="h3" style={{ color: "#fff", fontSize: 25 }}>Para mantener</div>
+          <ul className="list" style={{ marginTop: 16, gap: 12 }}>
+            {D.retroMantener.map((t) => (
+              <li key={t} style={{ fontSize: 19, color: "var(--blue-10)" }}>{t}</li>
+            ))}
+          </ul>
+        </div>
+      </Item>
+      <Item variants={v.fade} style={{ position: "absolute", left: 120, right: 120, top: 880, font: "300 25px/1.4 var(--sans)", color: "var(--gray-70)" }}>
+        Reconocimiento al equipo del proyecto, a los usuarios clave, a Infraestructura y Redes, y al patrocinador: <b style={{ color: "var(--ink)", fontWeight: 600 }}>el resultado es de todos.</b>
+      </Item>
+    </Slide>
+  );
+}
+
 /* ================================================================ USD 79 M */
 export function Ahorro() {
   const meses = (34.2 / 79) * 12; // 5.2
@@ -343,7 +389,7 @@ export function Gracias() {
       <motion.div style={{ position: "absolute", left: 1044, top: 0, width: 16, height: 1080, background: "var(--blue-60)", transformOrigin: "bottom" }} variants={{ hidden: { scaleY: 0 }, show: { scaleY: 1, transition: { duration: 1, ease: easeInOut, delay: 0.5 } } }} />
       <div style={{ position: "absolute", left: 120, top: 150, width: 900 }}>
         <Item variants={v.left}>
-          <span className="tag blue">Misión cumplida</span>
+          <Logo width={220} tone="dark" />
         </Item>
         <h1 style={{ font: "300 76px/1.1 var(--sans)", letterSpacing: "-.02em", marginTop: 50 }}>
           <SplitText text="Proyecto cerrado en" />

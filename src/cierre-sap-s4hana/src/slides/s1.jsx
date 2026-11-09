@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
-import { Users, Globe, MapPin, CalendarDays, Flag, Rocket, CalendarCheck } from "lucide-react";
+import { Users, Globe, MapPin, CalendarDays, Flag, Rocket, CalendarCheck, HardHat, Briefcase, UserCheck, Clock } from "lucide-react";
 import { Slide, Item, Group, Counter, Draw, v, at, ease, easeInOut, SplitText } from "../ui.jsx";
 import * as D from "../data.js";
+import { Logo } from "../logo.jsx";
 import portada from "../assets/portada.jpg";
+import logoRender from "../assets/logo-render.jpg";
 
 /* ================================================================ Portada */
 export function Portada() {
@@ -25,34 +27,28 @@ export function Portada() {
         variants={{ hidden: { scaleY: 0 }, show: { scaleY: 1, transition: { duration: 1, ease: easeInOut, delay: 0.6 } } }}
       />
 
-      <div style={{ position: "absolute", left: 120, top: 120, width: 880 }}>
-        <Item variants={v.left} style={{ display: "flex", gap: 2 }}>
-          <span className="tag blue">MMG</span>
-          <span className="tag ghost">Proyecto ERP · Unidad 5</span>
+      <div style={{ position: "absolute", left: 120, top: 96, width: 880 }}>
+        <Item variants={v.left}>
+          <Logo width={250} tone="dark" />
         </Item>
-        <h1 style={{ font: "300 80px/1.08 var(--sans)", letterSpacing: "-.02em", marginTop: 64 }}>
+        <h1 style={{ font: "300 76px/1.08 var(--sans)", letterSpacing: "-.02em", marginTop: 64 }}>
           <SplitText text="Implementación de" />
           <SplitText text="SAP S/4HANA" style={{ fontWeight: 600, color: "var(--blue-40)" }} />
           <SplitText text="en Meridian Motors Group" />
         </h1>
-        <Item variants={v.fade} style={{ font: "300 28px/1.4 var(--sans)", color: "var(--blue-20)", marginTop: 36, maxWidth: 700 }}>
-          Resumen general, resultados, lecciones aprendidas y reflexión final
+        <Item variants={v.fade} style={{ font: "300 30px/1.4 var(--sans)", color: "var(--blue-20)", marginTop: 30, maxWidth: 760 }}>
+          Informe de cierre del proyecto · 2027
         </Item>
       </div>
 
-      <Group stagger={0.08} delay={0.6} style={{ position: "absolute", left: 120, bottom: 190, display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px 40px", width: 820 }}>
-        {D.equipo.map((n) => (
-          <Item key={n} variants={v.up} style={{ display: "flex", alignItems: "center", gap: 14, font: "400 20px/1.3 var(--sans)", color: "#fff" }}>
-            <span style={{ width: 8, height: 8, background: "var(--blue-40)" }} />
-            {n}
+      <Group stagger={0.08} delay={0.6} style={{ position: "absolute", left: 120, bottom: 84, display: "grid", gridTemplateColumns: "1fr 1fr", gap: "26px 40px", width: 860 }}>
+        {D.equipoRoles.map(([n, r]) => (
+          <Item key={n} variants={v.up} style={{ borderLeft: "3px solid var(--blue-50)", paddingLeft: 18 }}>
+            <div style={{ font: "400 21px/1.25 var(--sans)", color: "#fff" }}>{n}</div>
+            <div style={{ font: "400 16px/1.3 var(--mono)", color: "var(--blue-30)", marginTop: 6 }}>{r}</div>
           </Item>
         ))}
       </Group>
-      <Item variants={v.fade} style={{ position: "absolute", left: 120, bottom: 90, font: "400 17px/1.7 var(--mono)", color: "var(--blue-30)" }}>
-        {D.materia}
-        <br />
-        {D.uni}
-      </Item>
     </Slide>
   );
 }
@@ -61,17 +57,23 @@ export function Portada() {
 export function Agenda() {
   return (
     <Slide title="Agenda" subtitle="Del acta de autorización al cierre formal">
-      <Group stagger={0.1} delay={0.3} style={{ position: "absolute", left: 120, right: 120, top: 350, display: "flex", flexDirection: "column", gap: 2 }}>
+      <Group stagger={0.1} delay={0.3} style={{ position: "absolute", left: 120, width: 1130, top: 350, display: "flex", flexDirection: "column", gap: 2 }}>
         {D.secciones.map((s, i) => (
           <Item key={s.num} variants={v.left} className="tile" style={{ display: "flex", alignItems: "stretch", height: 108 }}>
-            <div style={{ width: 150, background: i === 0 ? "var(--blue-60)" : "var(--blue-90)", color: "#fff", display: "flex", alignItems: "center", paddingLeft: 30, font: "300 52px/1 var(--sans)" }}>{s.num}</div>
-            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 40px" }}>
-              <div style={{ font: "400 34px/1 var(--sans)" }}>{s.name}</div>
-              <div style={{ font: "400 19px/1 var(--mono)", color: "var(--gray-60)" }}>{s.sub}</div>
+            <div style={{ width: 130, background: i === 0 ? "var(--blue-60)" : "var(--blue-90)", color: "#fff", display: "flex", alignItems: "center", paddingLeft: 28, font: "300 50px/1 var(--sans)" }}>{s.num}</div>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 10, padding: "0 34px" }}>
+              <div style={{ font: "400 32px/1 var(--sans)" }}>{s.name}</div>
+              <div style={{ font: "400 17px/1 var(--mono)", color: "var(--gray-60)" }}>{s.sub}</div>
             </div>
           </Item>
         ))}
       </Group>
+      <motion.div
+        variants={{ hidden: { clipPath: "inset(0% 0% 100% 0%)" }, show: { clipPath: "inset(0% 0% 0% 0%)", transition: { duration: 1.1, ease: easeInOut, delay: 0.5 } } }}
+        style={{ position: "absolute", left: 1290, right: 120, top: 350, height: 548, overflow: "hidden", background: "#000" }}
+      >
+        <motion.img src={logoRender} alt="Meridian Motors Group" style={{ width: "100%", height: "100%", objectFit: "contain" }} variants={{ hidden: { scale: 1.15 }, show: { scale: 1, transition: { duration: 6, ease: "easeOut" } } }} />
+      </motion.div>
     </Slide>
   );
 }
@@ -251,19 +253,16 @@ export function Carta() {
             <Counter to={total} decimals={1} delay={0.8} />
             <span style={{ font: "400 34px/1 var(--sans)", color: "var(--blue-30)", marginLeft: 14 }}>M USD</span>
           </div>
-          <div style={{ display: "flex", height: 20, marginTop: 30, gap: 2 }}>
-            {C.presupuesto.map(([k, n, c], i) => (
-              <motion.div key={k} style={{ width: `${(n / total) * 100}%`, background: c, transformOrigin: "left" }} variants={{ hidden: { scaleX: 0 }, show: { scaleX: 1, transition: { duration: 0.7, ease: easeInOut, delay: 1.0 + i * 0.3 } } }} />
-            ))}
-          </div>
+          <div style={{ font: "400 17px/1.4 var(--sans)", color: "var(--blue-30)", marginTop: 22 }}>Incluye un margen para imprevistos</div>
         </Item>
-        {C.presupuesto.map(([k, n, c]) => (
-          <Item key={k} variants={v.right} className="tile" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "26px 40px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 16, font: "400 22px/1 var(--sans)" }}>
-              <span style={{ width: 16, height: 16, background: c }} />
-              {k}
-            </div>
-            <div style={{ font: "300 38px/1 var(--sans)" }}>{n.toFixed(1)}</div>
+        {[
+          ["Inicio", "4 de enero de 2027"],
+          ["Duración", "12 meses · enero a diciembre de 2027"],
+          ["Alcance", "20 localidades · 5 módulos · 3 olas"],
+        ].map(([k, d]) => (
+          <Item key={k} variants={v.right} className="tile" style={{ padding: "28px 40px" }}>
+            <div className="label">{k}</div>
+            <div style={{ font: "400 25px/1.3 var(--sans)", marginTop: 12 }}>{d}</div>
           </Item>
         ))}
       </Group>
@@ -406,6 +405,153 @@ export function Gantt() {
           </Group>
         </div>
       </div>
+    </Slide>
+  );
+}
+
+/* ================================================================ Cronograma detallado (ProjectLibre) */
+const MES3 = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+const fecha = ([m, d]) => `${d} ${MES3[m - 1]}`;
+const cronoColor = { g: "var(--blue-100)", f: "var(--blue-60)", o: "var(--blue-80)" };
+
+export function CronogramaPL() {
+  const NW = 520;
+  const W = 880;
+  const x = ([m, d]) => (D.doyOf(m, d) / 365) * W;
+  const rowH = 46;
+  return (
+    <Slide kicker="Planeación" title="Cronograma detallado en ProjectLibre" subtitle={<>Del plan del proyecto: <b>292 tareas, 51 hitos y 23 recursos</b> en 50 semanas</>}>
+      <div className="tile" style={{ position: "absolute", left: 120, right: 120, top: 318, padding: "20px 40px 14px" }}>
+        <div style={{ display: "flex", alignItems: "flex-end", font: "400 15px/1 var(--mono)", color: "var(--gray-60)", paddingBottom: 10, borderBottom: "1px solid var(--gray-20)" }}>
+          <div style={{ width: NW }}>FASE · ACTIVIDADES</div>
+          <div style={{ width: W, display: "flex" }}>
+            {MESES.map((m) => (
+              <div key={m} style={{ flex: 1, paddingLeft: 6 }}>{m}</div>
+            ))}
+          </div>
+          <div style={{ flex: 1, textAlign: "right" }}>FECHAS</div>
+        </div>
+        <div style={{ position: "relative" }}>
+          <div style={{ position: "absolute", left: NW, top: 0, bottom: 0, width: W, display: "flex", pointerEvents: "none" }}>
+            {MESES.map((m, i) => (
+              <div key={m} style={{ flex: 1, borderLeft: i ? "1px solid var(--gray-10)" : "none" }} />
+            ))}
+          </div>
+          <Group stagger={0.07} delay={0.4}>
+            {D.cronoPL.map(([n, a, b, k, t], i) => (
+              <Item key={n} variants={v.fade} style={{ display: "flex", alignItems: "center", height: rowH, borderBottom: "1px solid var(--gray-10)" }}>
+                <div style={{ width: NW, paddingRight: 16, display: "flex", alignItems: "baseline", gap: 12 }}>
+                  <span style={{ font: `${t === "o" ? 600 : 400} 19px/1.1 var(--sans)`, color: t === "x" ? "var(--gray-70)" : "var(--ink)" }}>{n}</span>
+                  <span style={{ font: "400 14px/1 var(--mono)", color: "var(--gray-60)", whiteSpace: "nowrap" }}>{k}</span>
+                </div>
+                <div style={{ width: W, position: "relative", height: 20 }}>
+                  <motion.div
+                    variants={{ hidden: { scaleX: 0 }, show: { scaleX: 1, transition: { duration: 0.8, ease: easeInOut, delay: 0.3 + i * 0.05 } } }}
+                    style={{
+                      position: "absolute",
+                      left: x(a),
+                      width: Math.max(6, x(b) - x(a)),
+                      height: 20,
+                      transformOrigin: "left",
+                      background: t === "x" ? "repeating-linear-gradient(135deg, var(--gray-30) 0 6px, var(--gray-10) 6px 12px)" : cronoColor[t],
+                    }}
+                  />
+                </div>
+                <div style={{ flex: 1, textAlign: "right", font: "400 16px/1 var(--mono)", color: "var(--gray-70)", whiteSpace: "nowrap" }}>
+                  {fecha(a)} – {fecha(b)}
+                </div>
+              </Item>
+            ))}
+          </Group>
+          <div style={{ display: "flex", alignItems: "center", height: 66 }}>
+            <div style={{ width: NW, font: "600 17px/1 var(--sans)", color: "var(--blue-70)" }}>Hitos principales</div>
+            <div style={{ width: W, position: "relative", height: 66 }}>
+              {D.cronoHitos.map(([d, label], i) => {
+                const last = i === 0 || i === D.cronoHitos.length - 1;
+                return (
+                  <motion.div key={label} variants={at(1.4 + i * 0.15, "pop")} style={{ position: "absolute", left: x(d) - 9, top: 10 }}>
+                    <div style={{ width: 18, height: 18, transform: "rotate(45deg)", background: "var(--blue-60)" }} />
+                    <div style={{ position: "absolute", top: -2, [last ? "right" : "left"]: 28, whiteSpace: "nowrap", font: "600 15px/1.25 var(--sans)", textAlign: last ? "right" : "left" }}>
+                      {label}
+                      <div style={{ font: "400 14px/1.2 var(--mono)", color: "var(--gray-60)" }}>{fecha(d)}</div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Slide>
+  );
+}
+
+/* ================================================================ Recursos */
+const perfilIcons = [HardHat, Briefcase, UserCheck];
+
+export function Recursos() {
+  const totalP = D.recursos.reduce((s, r) => s + r.personas, 0);
+  const totalH = D.recursos.reduce((s, r) => s + r.horas, 0);
+  const maxH = Math.max(...D.recursos.map((r) => r.horas));
+  return (
+    <Slide kicker="Planeación" title="Recursos necesarios" subtitle={<>Personas y horas de trabajo asignadas en el plan de <b>ProjectLibre</b></>}>
+      <Group stagger={0.12} delay={0.3} style={{ position: "absolute", left: 120, top: 350, width: 600, display: "flex", flexDirection: "column", gap: 2 }}>
+        <Item variants={v.left} style={{ background: "var(--blue-100)", color: "#fff", padding: "30px 36px", display: "flex", gap: 20 }}>
+          <div style={{ flex: 1 }}>
+            <Users size={26} color="var(--blue-40)" strokeWidth={1.75} />
+            <div style={{ font: "300 76px/1 var(--sans)", marginTop: 16 }}>
+              <Counter to={totalP} delay={0.6} />
+            </div>
+            <div style={{ font: "400 19px/1.3 var(--sans)", color: "var(--blue-20)", marginTop: 8 }}>personas en el proyecto</div>
+          </div>
+          <div style={{ flex: 1.3 }}>
+            <Clock size={26} color="var(--blue-40)" strokeWidth={1.75} />
+            <div style={{ font: "300 76px/1 var(--sans)", marginTop: 16 }}>
+              <Counter to={totalH} delay={0.8} />
+            </div>
+            <div style={{ font: "400 19px/1.3 var(--sans)", color: "var(--blue-20)", marginTop: 8 }}>horas de trabajo estimadas</div>
+          </div>
+        </Item>
+        {D.perfiles.map((p, i) => {
+          const I = perfilIcons[i];
+          return (
+            <Item key={p.label} variants={v.left} className="tile" style={{ padding: "22px 30px", display: "flex", alignItems: "center", gap: 24 }}>
+              <I size={30} color="var(--blue-60)" strokeWidth={1.75} style={{ flex: "none" }} />
+              <div style={{ font: "300 56px/1 var(--sans)", color: "var(--blue-80)", width: 74, flex: "none" }}>{p.n}</div>
+              <div>
+                <div style={{ font: "600 21px/1.2 var(--sans)" }}>{p.label}</div>
+                <div style={{ font: "400 16px/1.35 var(--sans)", color: "var(--gray-60)", marginTop: 4 }}>{p.note}</div>
+              </div>
+            </Item>
+          );
+        })}
+      </Group>
+
+      <Group stagger={0.1} delay={0.6} className="tile" style={{ position: "absolute", left: 760, right: 120, top: 350, padding: "24px 36px 10px" }}>
+        <div style={{ display: "flex", font: "400 15px/1 var(--mono)", color: "var(--gray-60)", paddingBottom: 12, borderBottom: "1px solid var(--gray-20)" }}>
+          <div style={{ width: 470 }}>GRUPO</div>
+          <div style={{ width: 110, textAlign: "right" }}>PERSONAS</div>
+          <div style={{ flex: 1, paddingLeft: 36 }}>HORAS DE TRABAJO</div>
+        </div>
+        {D.recursos.map((r, i) => (
+          <Item key={r.grupo} variants={v.fade} style={{ display: "flex", alignItems: "center", height: 104, borderBottom: i < D.recursos.length - 1 ? "1px solid var(--gray-10)" : "none" }}>
+            <div style={{ width: 470, paddingRight: 24 }}>
+              <div style={{ font: "600 21px/1.2 var(--sans)" }}>{r.grupo}</div>
+              <div style={{ font: "400 16px/1.35 var(--sans)", color: "var(--gray-60)", marginTop: 4 }}>{r.detalle}</div>
+            </div>
+            <div style={{ width: 110, textAlign: "right", font: "300 44px/1 var(--sans)", color: "var(--blue-80)" }}>{r.personas}</div>
+            <div style={{ flex: 1, paddingLeft: 36, display: "flex", alignItems: "center", gap: 16 }}>
+              <div style={{ flex: 1, height: 18, background: "var(--blue-10)" }}>
+                <motion.div
+                  variants={{ hidden: { scaleX: 0 }, show: { scaleX: 1, transition: { duration: 0.9, ease: easeInOut, delay: 0.9 + i * 0.1 } } }}
+                  style={{ width: `${(r.horas / maxH) * 100}%`, height: 18, background: i === 4 ? "var(--blue-40)" : "var(--blue-60)", transformOrigin: "left" }}
+                />
+              </div>
+              <div style={{ width: 80, textAlign: "right", font: "600 20px/1 var(--sans)" }}>{r.horas.toLocaleString("en-US")}</div>
+            </div>
+          </Item>
+        ))}
+      </Group>
     </Slide>
   );
 }

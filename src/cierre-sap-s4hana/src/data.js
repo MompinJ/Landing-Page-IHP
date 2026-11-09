@@ -8,15 +8,20 @@ export const equipo = [
   "Jorge Alberto Mompin Gonzalez",
   "Gibran de Jesus Razo Toledo",
 ];
-export const materia = "Evaluación y gestión de proyectos tecnológicos";
-export const uni = "Universidad Cristóbal Colón · Veracruz, Ver.";
+// Rol de cada integrante en el plan de ProjectLibre
+export const equipoRoles = [
+  ["Jorge Alberto Mompin Gonzalez", "Director del proyecto"],
+  ["Maximiliano Dector Valles", "Arquitectura de solución e integraciones"],
+  ["Gibran de Jesus Razo Toledo", "Datos y migración"],
+  ["Genesis Mariana Aguilar Teran", "Gestión del cambio y capacitación"],
+];
 
 export const secciones = [
-  { num: "01", name: "Contexto y planeación", sub: "Plataforma, alcance, acta, olas y cronograma" },
+  { num: "01", name: "Contexto y planeación", sub: "Plataforma, acta, olas, cronograma y recursos" },
   { num: "02", name: "Costos y decisiones", sub: "Presupuesto y viabilidad" },
-  { num: "03", name: "Resultados y riesgos", sub: "Antes y después, riesgos gestionados" },
-  { num: "04", name: "Cierre formal", sub: "Cierre, aprobación y lecciones aprendidas" },
-  { num: "05", name: "Valor y reflexión", sub: "Lo que gana la compañía y lo que aprendimos" },
+  { num: "03", name: "Resultados y riesgos", sub: "Antes y después, riesgos y plan de contingencia" },
+  { num: "04", name: "Cierre formal", sub: "Cierre, autorización y lecciones aprendidas" },
+  { num: "05", name: "Valor y retroalimentación", sub: "Lo que gana la compañía y lo que salió bien" },
 ];
 
 export const contexto = [
@@ -46,7 +51,7 @@ export const arquitectura = [
   { capa: "Módulos", items: [["Finanzas", "FI/CO"], ["Producción", "PP"], ["Ventas", "SD"], ["Compras", "MM"], ["Nómina", "HCM"]] },
   { capa: "Conexiones", items: [["Plantas", "sistemas de piso"], ["Clientes y proveedores", "intercambio electrónico"], ["Bancos", "pagos"], ["Facturación electrónica", "por país"]] },
   { capa: "Ambientes", items: [["Desarrollo", ""], ["Pruebas", ""], ["Capacitación", ""], ["Producción", ""], ["Histórico", "sistema anterior en consulta"]] },
-  { capa: "Base", items: [["Nube AWS", "infraestructura (equipos 1 y 3)"], ["Seguridad", "accesos por rol, norma ISO 27001"]] },
+  { capa: "Base", items: [["Nube AWS", "infraestructura de la compañía"], ["Seguridad", "accesos por rol, norma ISO 27001"]] },
 ];
 
 export const carta = {
@@ -72,7 +77,7 @@ const doy = (m, d) => (new Date(Date.UTC(2027, m - 1, d)) - new Date(Date.UTC(20
 export const doyOf = doy;
 export const olas = [
   { n: 1, name: "Norteamérica", detail: "9 localidades, piloto Guatemala", prep: doy(6, 28), start: doy(8, 2), end: doy(9, 15), startL: "2 ago", endL: "15 sep", color: "var(--blue-60)" },
-  { n: 2, name: "Sudamérica", detail: "6 localidades", prep: doy(7, 6), start: doy(10, 4), end: doy(11, 12), startL: "4 oct", endL: "12 nov", color: "var(--blue-70)" },
+  { n: 2, name: "Sudamérica", detail: "6 localidades", prep: doy(7, 6), start: doy(10, 4), end: doy(11, 9), startL: "4 oct", endL: "9 nov", color: "var(--blue-70)" },
   { n: 3, name: "Europa", detail: "5 localidades", prep: doy(9, 13), start: doy(11, 1), end: doy(12, 10), startL: "1 nov", endL: "10 dic", color: "var(--blue-90)" },
 ];
 export const fin = doy(12, 17);
@@ -90,8 +95,79 @@ export const gantt = [
   ["Construcción y pruebas", [3, 24], [7, 21], "Consultores técnicos y calidad", 15.5, 16.6],
   ["Capacitación y gestión del cambio", [2, 2], [6, 24], "Líder de cambio y capacitadores", 4.0, 3.9],
   ["Ola 1 · Norteamérica", [6, 28], [9, 15], "Equipo de arranque NA", 2.7, 2.9],
-  ["Ola 2 · Sudamérica", [7, 6], [11, 12], "Equipo de arranque SA", 2.6, 3.3],
+  ["Ola 2 · Sudamérica", [7, 6], [11, 9], "Equipo de arranque SA", 2.6, 3.3],
   ["Ola 3 · Europa", [9, 13], [12, 10], "Equipo de arranque EU", 2.7, 3.3],
+];
+
+// Cronograma detallado tomado del plan en ProjectLibre (XML v5).
+// [fase, inicio [mes, dia], fin [mes, dia], actividades, tipo]
+export const cronoPL = [
+  ["Gestión del proyecto", [1, 4], [12, 17], 2, "g"],
+  ["Preparación y aprobación del plan", [1, 4], [1, 29], 11, "f"],
+  ["Análisis", [2, 2], [2, 16], 13, "f"],
+  ["Diseño por módulo (FI/CO, PP, SD, MM, HCM)", [2, 15], [3, 23], 51, "f"],
+  ["Construcción y pruebas", [3, 24], [7, 21], 25, "f"],
+  ["Gestión del cambio y capacitación", [2, 2], [6, 24], 7, "f"],
+  ["Ola 1 · Norteamérica (9 sedes)", [6, 28], [9, 15], 39, "o"],
+  ["Ola 2 · Sudamérica (6 sedes)", [7, 6], [11, 9], 34, "o"],
+  ["Ola 3 · Europa (5 sedes)", [9, 13], [12, 10], 37, "o"],
+  ["Cierre", [12, 1], [12, 17], 6, "f"],
+  ["Entregas de Infraestructura y Redes", [3, 18], [11, 30], 20, "x"],
+];
+export const cronoHitos = [
+  [[1, 29], "Plan aprobado"],
+  [[3, 23], "Diseño aprobado"],
+  [[7, 21], "Sistema aprobado"],
+  [[12, 17], "Fin"],
+];
+export const cronoResumen = [
+  ["292", "tareas"],
+  ["51", "hitos"],
+  ["23", "recursos"],
+  ["50", "semanas"],
+];
+
+// Recursos del plan en ProjectLibre: personas (unidades) y horas de trabajo asignadas
+export const recursos = [
+  { grupo: "Equipo directivo", detalle: "Dirección, arquitectura, datos y gestión del cambio", personas: 4, horas: 2052 },
+  { grupo: "Nuevas contrataciones", detalle: "Líderes funcionales, pruebas, migración, calidad de datos, seguridad, capacitación y PMO", personas: 16, horas: 7908 },
+  { grupo: "Consultores SAP", detalle: "Uno o dos por módulo, más técnicos Basis y ABAP", personas: 8, horas: 6064 },
+  { grupo: "Infraestructura", detalle: "Apoyo en ambientes, cortes y respaldos", personas: 2, horas: 658 },
+  { grupo: "Usuarios clave y dueños de datos", detalle: "Personal de la compañía en pruebas, datos y capacitación", personas: 10, horas: 7432 },
+];
+export const perfiles = [
+  { n: 18, label: "ingenieros y especialistas técnicos", note: "arquitectura, consultores SAP, datos, pruebas, seguridad e infraestructura" },
+  { n: 12, label: "gestión y negocio", note: "dirección, PMO, líderes funcionales, analistas y capacitadores" },
+  { n: 10, label: "usuarios clave", note: "de las áreas de la compañía" },
+];
+
+// Plan de contingencia: lo que se repetia en cada ola antes y despues del arranque
+export const contingencia = [
+  { paso: "Ensayos de corte", que: "Se ensaya cada corte con Infraestructura antes de arrancar", cuando: "jul · sep · oct-nov" },
+  { paso: "Simulacro de incidentes", que: "Se practica la respuesta a fallas con Infraestructura en cada ola", cuando: "22 jul · 24 sep · 15 oct" },
+  { paso: "Decisión de arranque", que: "Si no se cumplen los criterios de datos, pruebas y personas, la ola se pospone", cuando: "30 jul · 1 oct · 28 oct" },
+  { paso: "Sistema anterior de respaldo", que: "Queda en consulta, con respaldo, mientras cada sede se estabiliza", cuando: "durante cada corte" },
+  { paso: "Acompañamiento", que: "Mesa de ayuda reforzada y consultores hasta la salida formal de cada ola", cuando: "15 sep · 9 nov · 10 dic" },
+];
+export const contingenciaExtra = [
+  ["Piloto primero", "Guatemala arranca antes que el resto de Norteamérica"],
+  ["Congelamiento de cambios", "Sin cambios en producción del 16 al 24 de septiembre"],
+  ["Una sede a la vez", "20 cortes escalonados, nunca dos sedes el mismo día"],
+];
+
+// Retroalimentacion del cierre: lo que salio bien
+export const retroBien = [
+  ["17 dic", "Cierre en la fecha planeada desde el inicio"],
+  ["20 de 20", "Localidades operando en una sola plataforma"],
+  ["0", "Errores de nómina en los arranques"],
+  ["16 de 16", "Plazas cubiertas, ninguna ola retrasada"],
+  ["USD 34.2 M", "Costo final, debajo de los USD 39.7 M autorizados"],
+  ["92%", "De los usuarios activos en el sistema"],
+];
+export const retroMantener = [
+  "Un solo calendario con Infraestructura y Redes, revisado cada semana",
+  "Usuarios clave como embajadores en cada planta",
+  "Revisar los datos con anticipación, con un responsable por localidad",
 ];
 
 // Investigacion libre: usos de IA como herramienta del equipo (costo en USD)
@@ -185,7 +261,7 @@ export const riesgos = {
 };
 
 export const cierreAdmin = [
-  "Entregables verificados y aceptados",
+  "Entregables verificados contra lo acordado",
   "Contratos cerrados y pagos finales emitidos",
   "Conciliación del presupuesto: plan contra real",
   "Documentación archivada",
@@ -198,10 +274,11 @@ export const cierreTec = [
 ];
 
 export const aprobacion = [
-  "Documento formal firmado por el patrocinador",
-  "Confirma que los entregables cumplen lo acordado",
-  "Protege al equipo de cambios fuera del alcance",
+  "Se nos autorizó el cierre formal del proyecto",
+  "Se aprobó la entrega del informe final",
+  "Entregables verificados contra lo acordado",
 ];
+export const aprobacionCliente = "Se solicita con la entrega del informe final; el cliente la emite después de revisarlo.";
 export const informe = [
   ["Desempeño", "plan contra real"],
   ["Entregables", "aceptados"],
@@ -209,11 +286,12 @@ export const informe = [
   ["Lecciones", "aprendidas"],
 ];
 
+// Lo que se destaca: fecha y nomina. La contingencia va en segundo plano.
 export const control = [
-  { to: 2.7, decimals: 1, prefix: "USD ", suffix: " M", label: "de contingencia utilizada", note: "de USD 6.3 M disponibles" },
   { text: "17 dic", label: "fecha de cierre cumplida", note: "la planeada desde el inicio" },
   { to: 0, label: "errores de nómina", note: "en los arranques de las tres olas" },
 ];
+export const controlNota = "Los gastos no previstos (USD 2.7 M) se cubrieron con la contingencia del plan; el costo final quedó debajo de lo autorizado.";
 
 export const lecciones = [
   { tema: "Datos", rec: "Revisar y limpiar los datos con anticipación, con un responsable por localidad." },
@@ -237,7 +315,7 @@ export const resistencia = [
 export const valor = [
   { big: "20 → 1", sub: "20 localidades con procesos distintos, ahora una sola operación" },
   { big: "Best Practices", sub: "Procesos probados de SAP adoptados en lugar de personalizar" },
-  { big: "USD 79 M", sub: "ahorro anual esperado a régimen", accent: true },
+  { big: "Tiempo real", sub: "inventario y finanzas visibles al momento en las 20 localidades", accent: true },
   { big: "Plantilla", sub: "global y repetible para crecer a nuevos países" },
 ];
 

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useRef } from "react";
 import { motion, animate } from "framer-motion";
+import { Logo } from "./logo.jsx";
 
 // Retraso extra de entrada (cuando hay tarjeta de capitulo) y modo estatico (miniaturas).
 export const DelayCtx = createContext(0);
@@ -178,7 +179,7 @@ export function Slide({ dark, kicker, title, subtitle, children, className = "",
       {footer && (
         <div className="slide-footer">
           <div className="brand">
-            <span className="sq" />
+            <Logo mark width={30} tone={dark ? "dark" : "light"} style={{ marginRight: 4 }} />
             Meridian Motors Group · SAP S/4HANA · Cierre del proyecto
           </div>
           <div>

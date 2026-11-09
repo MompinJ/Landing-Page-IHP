@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Bot, ShieldCheck, Search, Check, ArrowRight, Award, Wallet, CalendarCheck, BadgeCheck } from "lucide-react";
+import { Bot, ShieldCheck, Search, Check, ArrowRight, Award, Wallet, CalendarCheck, BadgeCheck, ChevronRight } from "lucide-react";
 import { Slide, Item, Group, Counter, Bar, CheckBox, v, at, ease, easeInOut } from "../ui.jsx";
 import * as D from "../data.js";
 
@@ -330,37 +330,65 @@ export const RiesgoR1 = () => <Riesgo r={D.riesgos.r1} n={1} />;
 export const RiesgoR13 = () => <Riesgo r={D.riesgos.r13} n={2} />;
 
 /* ================================================================ Desviaciones bajo control */
-const ctlIcons = [Wallet, CalendarCheck, BadgeCheck];
+const ctlIcons = [CalendarCheck, BadgeCheck];
 
 export function Control() {
   return (
     <Slide kicker="Cierre formal" title="Desviaciones bajo control" subtitle="Lo imprevisto se absorbió con lo que el plan ya tenía previsto">
-      <Group stagger={0.16} delay={0.4} style={{ position: "absolute", left: 120, right: 120, top: 360, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2 }}>
+      <Group stagger={0.16} delay={0.4} style={{ position: "absolute", left: 120, right: 120, top: 360, display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2 }}>
         {D.control.map((m, i) => {
           const I = ctlIcons[i];
           return (
-            <Item key={m.label} variants={v.up} className="tile top" style={{ padding: "40px 44px", height: 400 }}>
-              <I size={36} color="var(--blue-60)" strokeWidth={1.75} />
-              <div style={{ font: "300 96px/1 var(--sans)", letterSpacing: "-.03em", marginTop: 60, color: "var(--blue-80)" }}>
-                {m.text ? <motion.span variants={v.blur} style={{ display: "inline-block" }}>{m.text}</motion.span> : <Counter to={m.to} decimals={m.decimals || 0} prefix={m.prefix || ""} suffix={m.suffix || ""} delay={0.7} />}
+            <Item key={m.label} variants={v.up} className="tile top" style={{ padding: "44px 56px", height: 430 }}>
+              <I size={40} color="var(--blue-60)" strokeWidth={1.75} />
+              <div style={{ font: "300 150px/1 var(--sans)", letterSpacing: "-.03em", marginTop: 48, color: "var(--blue-80)" }}>
+                {m.text ? <motion.span variants={v.blur} style={{ display: "inline-block" }}>{m.text}</motion.span> : <Counter to={m.to} delay={0.7} />}
               </div>
-              <div style={{ font: "600 24px/1.25 var(--sans)", marginTop: 26 }}>{m.label}</div>
-              <div style={{ font: "400 19px/1.35 var(--sans)", color: "var(--gray-60)", marginTop: 8 }}>{m.note}</div>
+              <div style={{ font: "600 32px/1.25 var(--sans)", marginTop: 30 }}>{m.label}</div>
+              <div style={{ font: "400 23px/1.35 var(--sans)", color: "var(--gray-60)", marginTop: 8 }}>{m.note}</div>
             </Item>
           );
         })}
       </Group>
-      <Item variants={v.up} className="tile" style={{ position: "absolute", left: 120, right: 120, top: 800, padding: "30px 44px", display: "flex", alignItems: "center", gap: 40 }}>
-        <div style={{ width: 360 }}>
-          <div className="label">Contingencia</div>
-          <div style={{ font: "400 24px/1.2 var(--sans)", marginTop: 10 }}>
-            Usada <b>43%</b> · disponible <b>57%</b>
-          </div>
-        </div>
-        <div style={{ flex: 1, height: 26, background: "var(--blue-10)" }}>
-          <Bar pct={(2.7 / 6.3) * 100} height={26} delay={1.4} />
-        </div>
+      <Item variants={v.up} style={{ position: "absolute", left: 120, right: 120, top: 830, padding: "22px 0", display: "flex", alignItems: "center", gap: 18, borderTop: "1px solid var(--gray-30)" }}>
+        <Wallet size={22} color="var(--gray-60)" strokeWidth={1.75} style={{ flex: "none" }} />
+        <div style={{ font: "400 19px/1.4 var(--sans)", color: "var(--gray-70)" }}>{D.controlNota}</div>
       </Item>
+    </Slide>
+  );
+}
+
+/* ================================================================ Plan de contingencia */
+export function Contingencia() {
+  return (
+    <Slide kicker="Riesgos · plan de contingencia" title="Plan de contingencia por ola" subtitle={<>Cada arranque tenía <b>una salida segura</b> si algo no estaba listo</>}>
+      <Group stagger={0.12} delay={0.4} style={{ position: "absolute", left: 120, right: 120, top: 350, display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 2 }}>
+        {D.contingencia.map((c, i) => (
+          <Item
+            key={c.paso}
+            variants={{ hidden: { opacity: 0, y: 50 }, show: { opacity: 1, y: 0, transition: { duration: 0.7, ease } } }}
+            style={{ height: 380, padding: "34px 30px", display: "flex", flexDirection: "column", background: i === 2 ? "var(--blue-100)" : "#fff", color: i === 2 ? "#fff" : "var(--ink)", position: "relative" }}
+          >
+            <div style={{ font: "300 56px/1 var(--sans)", color: i === 2 ? "var(--blue-40)" : "var(--blue-60)" }}>{String(i + 1).padStart(2, "0")}</div>
+            <div style={{ font: "600 25px/1.15 var(--sans)", marginTop: 26 }}>{c.paso}</div>
+            <div style={{ font: "400 19px/1.45 var(--sans)", marginTop: 14, color: i === 2 ? "var(--blue-10)" : "var(--gray-80)" }}>{c.que}</div>
+            <div style={{ marginTop: "auto", font: "400 15px/1.3 var(--mono)", color: i === 2 ? "var(--blue-30)" : "var(--blue-70)" }}>{c.cuando}</div>
+            {i < 4 && (
+              <div style={{ position: "absolute", right: -15, top: 176, width: 28, height: 28, background: "var(--blue-60)", display: "grid", placeItems: "center", zIndex: 2 }}>
+                <ChevronRight size={20} color="#fff" strokeWidth={2.5} />
+              </div>
+            )}
+          </Item>
+        ))}
+      </Group>
+      <Group stagger={0.1} delay={1.2} style={{ position: "absolute", left: 120, right: 120, top: 752, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2 }}>
+        {D.contingenciaExtra.map(([k, d]) => (
+          <Item key={k} variants={v.up} className="tile" style={{ padding: "24px 30px", borderLeft: "6px solid var(--blue-60)" }}>
+            <div style={{ font: "600 21px/1.2 var(--sans)" }}>{k}</div>
+            <div style={{ font: "400 18px/1.4 var(--sans)", color: "var(--gray-70)", marginTop: 6 }}>{d}</div>
+          </Item>
+        ))}
+      </Group>
     </Slide>
   );
 }

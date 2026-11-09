@@ -139,7 +139,7 @@ Campos `subtitle`, `description`, `date`, `tags`, `accent`, `theme` son opcional
 
 | Slug | Titulo |
 |---|---|
-| `cierre-sap-s4hana` | Cierre del proyecto SAP S/4HANA — Meridian Motors Group, Unidad 5 de Evaluacion y gestion de proyectos tecnologicos (UCC), sistema de diseño IBM Carbon (25 slides, React). Fuente en `src/cierre-sap-s4hana` (compilar y copiar `dist/index.html`) |
+| `cierre-sap-s4hana` | Cierre del proyecto SAP S/4HANA — Meridian Motors Group, Unidad 5 de Evaluacion y gestion de proyectos tecnologicos (UCC), sistema de diseño IBM Carbon (26 slides, React). Fuente en `src/cierre-sap-s4hana` (compilar y copiar `dist/index.html`) |
 | `gateway-tecnica` | Gateway — Arquitectura Tecnica, HUB Digital IHP para el area de TI (microservicios tras el API Gateway + capitulo tecnico), identidad Hutchison Ports (13 slides, React) |
 | `gateway-react` | Gateway by Hutchison Ports — version React de la ejecutiva (25 slides con recorrido en video modulo por modulo), sucesora de la vanilla `gateway` |
 | `gateway-navy` | Gateway — Navy Edition: espejo oscuro de `gateway-react` (mismo contenido, transiciones y videos; rediseño navy/glass para salas oscuras). Misma app Vite, pagina `dark.html` |
