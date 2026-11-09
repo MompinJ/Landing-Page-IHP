@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Bot, ShieldCheck, Search, Check, ArrowRight, Award, Wallet, CalendarCheck, BadgeCheck, ChevronRight } from "lucide-react";
+import { Bot, ShieldCheck, Search, Check, ArrowRight, Award, Wallet, CalendarCheck, BadgeCheck, ChevronRight, PiggyBank } from "lucide-react";
 import { Slide, Item, Group, Counter, Bar, CheckBox, v, at, ease, easeInOut } from "../ui.jsx";
 import * as D from "../data.js";
 
@@ -330,27 +330,32 @@ export const RiesgoR1 = () => <Riesgo r={D.riesgos.r1} n={1} />;
 export const RiesgoR13 = () => <Riesgo r={D.riesgos.r13} n={2} />;
 
 /* ================================================================ Desviaciones bajo control */
-const ctlIcons = [CalendarCheck, BadgeCheck];
+const ctlIcons = [CalendarCheck, BadgeCheck, PiggyBank];
 
 export function Control() {
   return (
     <Slide kicker="Cierre formal" title="Desviaciones bajo control" subtitle="Lo imprevisto se absorbió con lo que el plan ya tenía previsto">
-      <Group stagger={0.16} delay={0.4} style={{ position: "absolute", left: 120, right: 120, top: 360, display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2 }}>
+      <Group stagger={0.16} delay={0.4} style={{ position: "absolute", left: 120, right: 120, top: 360, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2 }}>
         {D.control.map((m, i) => {
           const I = ctlIcons[i];
           return (
-            <Item key={m.label} variants={v.up} className="tile top" style={{ padding: "44px 56px", height: 430 }}>
+            <Item key={m.label} variants={v.up} className="tile top" style={{ padding: "44px 56px", height: 470 }}>
               <I size={40} color="var(--blue-60)" strokeWidth={1.75} />
               <div style={{ font: "300 150px/1 var(--sans)", letterSpacing: "-.03em", marginTop: 48, color: "var(--blue-80)" }}>
-                {m.text ? <motion.span variants={v.blur} style={{ display: "inline-block" }}>{m.text}</motion.span> : <Counter to={m.to} delay={0.7} />}
+                {m.text ? <motion.span variants={v.blur} style={{ display: "inline-block" }}>{m.text}</motion.span> : <Counter to={m.to} suffix={m.suffix || ""} delay={0.7} />}
               </div>
               <div style={{ font: "600 32px/1.25 var(--sans)", marginTop: 30 }}>{m.label}</div>
               <div style={{ font: "400 23px/1.35 var(--sans)", color: "var(--gray-60)", marginTop: 8 }}>{m.note}</div>
+              {m.bar != null && (
+                <div style={{ marginTop: 26, height: 14, background: "var(--gray-20)" }}>
+                  <Bar pct={m.bar} height={14} delay={0.9} />
+                </div>
+              )}
             </Item>
           );
         })}
       </Group>
-      <Item variants={v.up} style={{ position: "absolute", left: 120, right: 120, top: 830, padding: "22px 0", display: "flex", alignItems: "center", gap: 18, borderTop: "1px solid var(--gray-30)" }}>
+      <Item variants={v.up} style={{ position: "absolute", left: 120, right: 120, top: 860, padding: "22px 0", display: "flex", alignItems: "center", gap: 18, borderTop: "1px solid var(--gray-30)" }}>
         <Wallet size={22} color="var(--gray-60)" strokeWidth={1.75} style={{ flex: "none" }} />
         <div style={{ font: "400 19px/1.4 var(--sans)", color: "var(--gray-70)" }}>{D.controlNota}</div>
       </Item>

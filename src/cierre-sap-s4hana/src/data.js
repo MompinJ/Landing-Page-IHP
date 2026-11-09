@@ -290,6 +290,7 @@ export const informe = [
 export const control = [
   { text: "17 dic", label: "fecha de cierre cumplida", note: "la planeada desde el inicio" },
   { to: 0, label: "errores de nómina", note: "en los arranques de las tres olas" },
+  { to: 43, suffix: "%", bar: 43, label: "de la contingencia usada", note: "USD 2.7 M de los 6.3 M previstos" },
 ];
 export const controlNota = "Los gastos no previstos (USD 2.7 M) se cubrieron con la contingencia del plan; el costo final quedó debajo de lo autorizado.";
 
