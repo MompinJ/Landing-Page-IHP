@@ -1,4 +1,4 @@
-# Cierre del proyecto SAP S/4HANA (Meridian Motors Group)
+# Meridian One (Project One) - Cierre del proyecto SAP S/4HANA (Meridian Motors Group)
 
 Presentacion de cierre de la Unidad 5 de "Evaluacion y gestion de proyectos tecnologicos" (UCC).
 React 19 + Vite + framer-motion, sistema de diseño IBM Carbon (IBM Plex, esquinas rectas, escala azul).

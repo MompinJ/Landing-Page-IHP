@@ -31,12 +31,16 @@ export function Portada() {
         <Item variants={v.left}>
           <Logo width={250} tone="dark" />
         </Item>
-        <h1 style={{ font: "300 76px/1.08 var(--sans)", letterSpacing: "-.02em", marginTop: 64 }}>
-          <SplitText text="Implementación de" />
-          <SplitText text="SAP S/4HANA" style={{ fontWeight: 600, color: "var(--blue-40)" }} />
-          <SplitText text="en Meridian Motors Group" />
+        <h1 style={{ font: "300 76px/1.08 var(--sans)", letterSpacing: "-.02em", marginTop: 56 }}>
+          <SplitText text="Meridian One" style={{ fontWeight: 600, color: "var(--blue-40)" }} />
         </h1>
-        <Item variants={v.fade} style={{ font: "300 30px/1.4 var(--sans)", color: "var(--blue-20)", marginTop: 30, maxWidth: 760 }}>
+        <Item variants={v.fade} style={{ font: "300 38px/1.3 var(--sans)", color: "#fff", marginTop: 22, maxWidth: 780 }}>
+          Implementación de SAP S/4HANA en Meridian Motors Group
+        </Item>
+        <Item variants={v.fade} style={{ font: "400 20px/1.4 var(--mono)", color: "var(--blue-30)", marginTop: 26, maxWidth: 760 }}>
+          Nombre en clave: Project One
+        </Item>
+        <Item variants={v.fade} style={{ font: "300 26px/1.4 var(--sans)", color: "var(--blue-20)", marginTop: 14, maxWidth: 760 }}>
           Informe de cierre del proyecto · 2027
         </Item>
       </div>
